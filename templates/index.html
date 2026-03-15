@@ -289,7 +289,17 @@
     .signal:nth-child(2) .signal-dot { animation-delay: 0.8s; }
     .signal:nth-child(3) .signal-dot { animation-delay: 1.6s; }
 
+    .signal-dot-green {
+      background: #22c55e;
+      animation-name: signalBlinkGreen;
+    }
+
     @keyframes signalBlink {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes signalBlinkGreen {
       0%, 100% { opacity: 0.4; }
       50% { opacity: 1; }
     }
@@ -359,7 +369,8 @@
 
       .signals {
         flex-direction: column;
-        gap: 12px;
+        align-items: flex-end;
+        gap: 10px;
       }
 
       .brand { margin-bottom: 48px; }
@@ -399,7 +410,7 @@
     <div class="signals">
       <div class="signal"><span class="signal-dot"></span> AI-Powered</div>
       <div class="signal"><span class="signal-dot"></span> Full-Stack Marketing</div>
-      <div class="signal"><span class="signal-dot"></span> By Invitation</div>
+      <div class="signal"><span class="signal-dot signal-dot-green"></span> Applications Open</div>
     </div>
   </div>
 
