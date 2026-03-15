@@ -134,6 +134,46 @@
       text-align:center; padding:36px 0;
       font-size:13px; color:#44445a;
     }
+
+    /* Visitor data */
+    .data-section { margin-top:32px; }
+    .data-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+    .data-card {
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:12px; padding:16px;
+    }
+    .data-card-title {
+      font-size:11px; font-weight:600; letter-spacing:1px;
+      text-transform:uppercase; color:#6b6b80; margin-bottom:12px;
+    }
+    .data-row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:6px 0; border-bottom:1px solid #1a1a25;
+    }
+    .data-row:last-child { border-bottom:none; }
+    .data-label { font-size:12px; color:#e8e8f0; }
+    .data-val { font-size:12px; font-weight:600; color:#7c4dff; }
+    .visitor-log { margin-top:16px; }
+    .visitor-item {
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:10px; padding:14px 16px; margin-bottom:8px;
+    }
+    .visitor-top {
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:6px;
+    }
+    .visitor-ip { font-size:13px; font-weight:600; color:#e8e8f0; }
+    .visitor-time { font-size:11px; color:#6b6b80; }
+    .visitor-meta { font-size:11px; color:#44445a; line-height:1.6; }
+    .visitor-meta span { color:#6b6b80; }
+    .visitor-badge {
+      display:inline-block; font-size:10px; font-weight:600;
+      padding:2px 8px; border-radius:4px; margin-right:4px;
+      background:rgba(97,40,219,0.12); color:#7c4dff;
+    }
+    .visitor-badge.green {
+      background:rgba(34,197,94,0.12); color:#22c55e;
+    }
   </style>
 </head>
 <body>
@@ -210,6 +250,27 @@
       {% endif %}
     </div>
 
+    <!-- Device & Source Breakdown -->
+    <div class="data-section">
+      <p class="section-label">Visitor Breakdown</p>
+      <div class="data-grid">
+        <div class="data-card">
+          <p class="data-card-title">Devices</p>
+          <div id="device-breakdown"></div>
+        </div>
+        <div class="data-card">
+          <p class="data-card-title">Sources</p>
+          <div id="source-breakdown"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Visitor Log -->
+    <div class="data-section">
+      <p class="section-label">Recent Visitors</p>
+      <div class="visitor-log" id="visitor-log"></div>
+    </div>
+
     <script>
       var signupCount = {{ entries|length }};
       var currentFilter = 'max';
@@ -256,8 +317,61 @@
           });
       }
 
+      function loadVisitors() {
+        fetch('/t/visitors')
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            // Device breakdown
+            var devEl = document.getElementById('device-breakdown');
+            var devHtml = '';
+            for (var dev in d.devices) {
+              devHtml += '<div class="data-row"><span class="data-label">' + dev + '</span><span class="data-val">' + d.devices[dev] + '</span></div>';
+            }
+            devEl.innerHTML = devHtml || '<div class="data-row"><span class="data-label" style="color:#44445a">No data yet</span></div>';
+
+            // Source breakdown
+            var srcEl = document.getElementById('source-breakdown');
+            var srcHtml = '';
+            for (var src in d.sources) {
+              srcHtml += '<div class="data-row"><span class="data-label">' + src + '</span><span class="data-val">' + d.sources[src] + '</span></div>';
+            }
+            srcEl.innerHTML = srcHtml || '<div class="data-row"><span class="data-label" style="color:#44445a">No data yet</span></div>';
+
+            // Visitor log
+            var logEl = document.getElementById('visitor-log');
+            var logHtml = '';
+            d.visitors.slice(0, 50).forEach(function(v) {
+              var ts = v.timestamp.slice(0, 16).replace('T', ' ');
+              var badges = '<span class="visitor-badge">' + v.device + '</span>' +
+                '<span class="visitor-badge">' + v.browser + '</span>';
+              if (v.time_on_page > 0) {
+                badges += '<span class="visitor-badge green">' + formatTime(v.time_on_page) + '</span>';
+              }
+              if (v.utm_source) {
+                badges += '<span class="visitor-badge">' + v.utm_source + '</span>';
+              }
+              var meta = '';
+              if (v.screen) meta += v.screen;
+              if (v.timezone) meta += (meta ? ' · ' : '') + v.timezone;
+              if (v.language) meta += (meta ? ' · ' : '') + v.language;
+
+              logHtml += '<div class="visitor-item">' +
+                '<div class="visitor-top">' +
+                  '<span class="visitor-ip">' + (v.ip || 'Unknown') + '</span>' +
+                  '<span class="visitor-time">' + ts + '</span>' +
+                '</div>' +
+                '<div style="margin-bottom:4px">' + badges + '</div>' +
+                (meta ? '<div class="visitor-meta">' + meta + '</div>' : '') +
+              '</div>';
+            });
+            logEl.innerHTML = logHtml || '<p class="wl-empty">No visitors yet.</p>';
+          });
+      }
+
       loadStats();
+      loadVisitors();
       setInterval(loadStats, 10000);
+      setInterval(loadVisitors, 15000);
     </script>
     {% endif %}
   </div>

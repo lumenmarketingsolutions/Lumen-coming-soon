@@ -560,7 +560,21 @@
     (function() {
       var sid = null;
       var start = Date.now();
-      fetch('/t/view', { method: 'POST' })
+      var params = new URLSearchParams(window.location.search);
+      fetch('/t/view', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          screen: screen.width + 'x' + screen.height,
+          language: navigator.language || '',
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+          platform: navigator.platform || '',
+          utm_source: params.get('utm_source') || '',
+          utm_medium: params.get('utm_medium') || '',
+          utm_campaign: params.get('utm_campaign') || '',
+          utm_content: params.get('utm_content') || ''
+        })
+      })
         .then(function(r) { return r.json(); })
         .then(function(d) { sid = d.sid; });
 

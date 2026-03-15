@@ -47,9 +47,39 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             session_id TEXT NOT NULL,
             timestamp TEXT NOT NULL,
-            time_on_page REAL DEFAULT 0
+            time_on_page REAL DEFAULT 0,
+            ip TEXT DEFAULT '',
+            user_agent TEXT DEFAULT '',
+            referrer TEXT DEFAULT '',
+            screen TEXT DEFAULT '',
+            language TEXT DEFAULT '',
+            timezone TEXT DEFAULT '',
+            platform TEXT DEFAULT '',
+            utm_source TEXT DEFAULT '',
+            utm_medium TEXT DEFAULT '',
+            utm_campaign TEXT DEFAULT '',
+            utm_content TEXT DEFAULT '',
+            city TEXT DEFAULT '',
+            region TEXT DEFAULT '',
+            country TEXT DEFAULT ''
         )
     """)
+    con.commit()
+
+    # Migrate: add new columns if they don't exist
+    existing = [r[1] for r in con.execute("PRAGMA table_info(page_views)").fetchall()]
+    new_cols = {
+        "ip": "TEXT DEFAULT ''", "user_agent": "TEXT DEFAULT ''",
+        "referrer": "TEXT DEFAULT ''", "screen": "TEXT DEFAULT ''",
+        "language": "TEXT DEFAULT ''", "timezone": "TEXT DEFAULT ''",
+        "platform": "TEXT DEFAULT ''", "utm_source": "TEXT DEFAULT ''",
+        "utm_medium": "TEXT DEFAULT ''", "utm_campaign": "TEXT DEFAULT ''",
+        "utm_content": "TEXT DEFAULT ''", "city": "TEXT DEFAULT ''",
+        "region": "TEXT DEFAULT ''", "country": "TEXT DEFAULT ''",
+    }
+    for col, dtype in new_cols.items():
+        if col not in existing:
+            con.execute(f"ALTER TABLE page_views ADD COLUMN {col} {dtype}")
     con.commit()
     con.close()
 
@@ -91,10 +121,33 @@ def join_waitlist():
 @app.route("/t/view", methods=["POST"])
 def track_view():
     sid = str(uuid.uuid4())
+    data = request.get_json() or {}
+
+    # Server-side data
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    if "," in ip:
+        ip = ip.split(",")[0].strip()
+    user_agent = request.headers.get("User-Agent", "")
+    referrer = request.headers.get("Referer", "")
+
+    # Client-side data
+    screen = data.get("screen", "")
+    language = data.get("language", "")
+    timezone = data.get("timezone", "")
+    platform = data.get("platform", "")
+    utm_source = data.get("utm_source", "")
+    utm_medium = data.get("utm_medium", "")
+    utm_campaign = data.get("utm_campaign", "")
+    utm_content = data.get("utm_content", "")
+
     con = sqlite3.connect(DB_PATH)
     con.execute(
-        "INSERT INTO page_views (session_id, timestamp, time_on_page) VALUES (?, ?, 0)",
-        (sid, datetime.datetime.utcnow().isoformat()),
+        """INSERT INTO page_views
+        (session_id, timestamp, time_on_page, ip, user_agent, referrer,
+         screen, language, timezone, platform, utm_source, utm_medium, utm_campaign, utm_content)
+        VALUES (?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (sid, datetime.datetime.utcnow().isoformat(), ip, user_agent, referrer,
+         screen, language, timezone, platform, utm_source, utm_medium, utm_campaign, utm_content),
     )
     con.commit()
     con.close()
@@ -184,6 +237,47 @@ def waitlist_admin():
     con.close()
     entries = [{"email": r[0], "date": r[1][:10]} for r in rows]
     return render_template("waitlist.html", authed=True, entries=entries, error=False)
+
+@app.route("/t/visitors")
+def track_visitors():
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    con = sqlite3.connect(DB_PATH)
+    rows = con.execute(
+        """SELECT ip, user_agent, referrer, screen, language, timezone, platform,
+                  utm_source, utm_medium, utm_campaign, timestamp, time_on_page
+           FROM page_views ORDER BY id DESC LIMIT 200"""
+    ).fetchall()
+    con.close()
+    visitors = []
+    for r in rows:
+        ua = r[1]
+        device = "Mobile" if any(m in ua for m in ["iPhone", "Android", "Mobile"]) else "Desktop"
+        browser = "Safari" if "Safari" in ua and "Chrome" not in ua else "Chrome" if "Chrome" in ua else "Firefox" if "Firefox" in ua else "Other"
+        visitors.append({
+            "ip": r[0], "device": device, "browser": browser,
+            "referrer": r[2], "screen": r[3], "language": r[4],
+            "timezone": r[5], "platform": r[6], "utm_source": r[7],
+            "utm_medium": r[8], "utm_campaign": r[9],
+            "timestamp": r[10], "time_on_page": round(r[11], 1),
+        })
+
+    # Device breakdown
+    devices = {}
+    sources = {}
+    for v in visitors:
+        devices[v["device"]] = devices.get(v["device"], 0) + 1
+        src = v["utm_source"] or v["referrer"] or "Direct"
+        if len(src) > 30:
+            src = src[:30] + "..."
+        sources[src] = sources.get(src, 0) + 1
+
+    return jsonify({
+        "visitors": visitors,
+        "devices": devices,
+        "sources": sources,
+    })
+
 
 @app.route("/t/reset", methods=["POST"])
 def reset_stats():
