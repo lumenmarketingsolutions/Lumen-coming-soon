@@ -1,10 +1,37 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-import os, sqlite3, datetime, uuid
+import os, sqlite3, datetime, uuid, json, urllib.request, threading
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "lumen-wl-key-2026")
 
 ADMIN_PIN = "112501"
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+NOTIFY_EMAIL = "kendall@lumenmarketing.co"
+
+
+def send_email(to, subject, html_body):
+    """Send an email via Resend API in a background thread."""
+    def _send():
+        try:
+            data = json.dumps({
+                "from": "Lumen <kendall@lumenmarketing.co>",
+                "to": [to],
+                "subject": subject,
+                "html": html_body,
+            }).encode()
+            req = urllib.request.Request(
+                "https://api.resend.com/emails",
+                data=data,
+                headers={
+                    "Authorization": f"Bearer {RESEND_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                method="POST",
+            )
+            urllib.request.urlopen(req)
+        except Exception as e:
+            print(f"Email send error: {e}")
+    threading.Thread(target=_send).start()
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "waitlist.db")
 
@@ -48,6 +75,16 @@ def join_waitlist():
         )
         con.commit()
         con.close()
+
+        if RESEND_API_KEY:
+            # Send welcome email to the signup
+            welcome_html = render_template("welcome_email.html")
+            send_email(email, "You're in.", welcome_html)
+
+            # Send notification to Kendall
+            notify_html = render_template("notify_email.html", email=email)
+            send_email(NOTIFY_EMAIL, f"New signup: {email}", notify_html)
+
         return jsonify({"ok": True})
     except sqlite3.IntegrityError:
         return jsonify({"ok": True})
