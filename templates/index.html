@@ -540,6 +540,37 @@
 
       return false;
     }
+
+    // ── Page analytics ──
+    (function() {
+      var sid = null;
+      var start = Date.now();
+      fetch('/t/view', { method: 'POST' })
+        .then(function(r) { return r.json(); })
+        .then(function(d) { sid = d.sid; });
+
+      function ping() {
+        if (!sid) return;
+        var t = Math.round((Date.now() - start) / 1000);
+        navigator.sendBeacon('/t/ping', JSON.stringify({ sid: sid, t: t }));
+      }
+
+      setInterval(function() {
+        if (sid) {
+          var t = Math.round((Date.now() - start) / 1000);
+          fetch('/t/ping', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sid: sid, t: t })
+          });
+        }
+      }, 5000);
+
+      document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'hidden') ping();
+      });
+      window.addEventListener('beforeunload', ping);
+    })();
   </script>
 </body>
 </html>

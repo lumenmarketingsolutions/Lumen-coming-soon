@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-import os, sqlite3, datetime
+import os, sqlite3, datetime, uuid
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "lumen-wl-key-2026")
@@ -15,6 +15,14 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT UNIQUE NOT NULL,
             created_at TEXT NOT NULL
+        )
+    """)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS page_views (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            time_on_page REAL DEFAULT 0
         )
     """)
     con.commit()
@@ -42,8 +50,72 @@ def join_waitlist():
         con.close()
         return jsonify({"ok": True})
     except sqlite3.IntegrityError:
-        return jsonify({"ok": True})  # already on list, don't reveal
+        return jsonify({"ok": True})
 
+# ── Analytics endpoints ──────────────────────────────────────
+@app.route("/t/view", methods=["POST"])
+def track_view():
+    sid = str(uuid.uuid4())
+    con = sqlite3.connect(DB_PATH)
+    con.execute(
+        "INSERT INTO page_views (session_id, timestamp, time_on_page) VALUES (?, ?, 0)",
+        (sid, datetime.datetime.utcnow().isoformat()),
+    )
+    con.commit()
+    con.close()
+    return jsonify({"sid": sid})
+
+@app.route("/t/ping", methods=["POST"])
+def track_ping():
+    data = request.get_json()
+    sid = data.get("sid", "")
+    seconds = data.get("t", 0)
+    if sid and isinstance(seconds, (int, float)) and seconds > 0:
+        con = sqlite3.connect(DB_PATH)
+        con.execute(
+            "UPDATE page_views SET time_on_page = ? WHERE session_id = ?",
+            (min(seconds, 1800), sid),  # cap at 30 min
+        )
+        con.commit()
+        con.close()
+    return jsonify({"ok": True})
+
+@app.route("/t/stats")
+def track_stats():
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    con = sqlite3.connect(DB_PATH)
+    total = con.execute("SELECT COUNT(*) FROM page_views").fetchone()[0]
+    today = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+    today_count = con.execute(
+        "SELECT COUNT(*) FROM page_views WHERE timestamp LIKE ?", (today + "%",)
+    ).fetchone()[0]
+    avg_time = con.execute(
+        "SELECT AVG(time_on_page) FROM page_views WHERE time_on_page > 0"
+    ).fetchone()[0] or 0
+    # Last 7 days breakdown
+    daily = []
+    for i in range(6, -1, -1):
+        d = (datetime.datetime.utcnow() - datetime.timedelta(days=i)).strftime("%Y-%m-%d")
+        cnt = con.execute(
+            "SELECT COUNT(*) FROM page_views WHERE timestamp LIKE ?", (d + "%",)
+        ).fetchone()[0]
+        daily.append({"date": d, "views": cnt})
+    # Active now (views in last 2 minutes)
+    two_min_ago = (datetime.datetime.utcnow() - datetime.timedelta(minutes=2)).isoformat()
+    active = con.execute(
+        "SELECT COUNT(*) FROM page_views WHERE timestamp > ?", (two_min_ago,)
+    ).fetchone()[0]
+    con.close()
+    return jsonify({
+        "total": total,
+        "today": today_count,
+        "avg_time": round(avg_time, 1),
+        "active": active,
+        "daily": daily,
+    })
+
+# ── Admin ─────────────────────────────────────────────────────
 @app.route("/waitlist", methods=["GET", "POST"])
 def waitlist_admin():
     if request.method == "POST":

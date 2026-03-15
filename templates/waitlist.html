@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Waitlist — Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
@@ -12,98 +12,111 @@
       background:#0a0a0f;
       color:#e8e8f0;
       min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
       -webkit-font-smoothing:antialiased;
     }
 
-    .container { width:100%; max-width:480px; padding:24px; }
+    .container { width:100%; max-width:520px; margin:0 auto; padding:48px 24px; }
 
     /* ── PIN screen ── */
-    .pin-card {
-      text-align:center;
-    }
-    .pin-card h1 {
-      font-size:20px;
-      font-weight:700;
-      margin-bottom:8px;
-    }
-    .pin-card p {
-      font-size:13px;
-      color:#6b6b80;
-      margin-bottom:32px;
-    }
-    .pin-form {
-      display:flex;
-      gap:0;
-      max-width:320px;
-      margin:0 auto;
-    }
+    .pin-card { text-align:center; padding-top:30vh; }
+    .pin-card h1 { font-size:20px; font-weight:700; margin-bottom:8px; }
+    .pin-card p { font-size:13px; color:#6b6b80; margin-bottom:32px; }
+    .pin-form { display:flex; gap:0; max-width:320px; margin:0 auto; }
     .pin-form input {
-      flex:1;
-      padding:14px 16px;
-      background:#111118;
-      border:1px solid #1a1a25;
-      border-right:none;
-      border-radius:10px 0 0 10px;
-      color:#e8e8f0;
-      font-size:16px;
-      font-family:inherit;
-      letter-spacing:6px;
-      text-align:center;
-      outline:none;
+      flex:1; padding:14px 16px; background:#111118;
+      border:1px solid #1a1a25; border-right:none;
+      border-radius:10px 0 0 10px; color:#e8e8f0;
+      font-size:16px; font-family:inherit;
+      letter-spacing:6px; text-align:center; outline:none;
     }
     .pin-form input:focus { border-color:#6128DB; }
     .pin-form button {
       padding:14px 20px;
       background:linear-gradient(135deg,#6128DB,#7c4dff);
-      border:none;
-      border-radius:0 10px 10px 0;
-      color:white;
-      font-size:13px;
-      font-weight:600;
-      font-family:inherit;
-      cursor:pointer;
+      border:none; border-radius:0 10px 10px 0;
+      color:white; font-size:13px; font-weight:600;
+      font-family:inherit; cursor:pointer;
     }
-    .pin-error {
-      margin-top:16px;
-      font-size:13px;
-      color:#ef4444;
-    }
+    .pin-error { margin-top:16px; font-size:13px; color:#ef4444; }
 
-    /* ── Waitlist view ── */
-    .wl-header {
-      display:flex;
-      align-items:baseline;
-      justify-content:space-between;
-      margin-bottom:24px;
+    /* ── Insights ── */
+    .section-label {
+      font-size:11px; font-weight:600; letter-spacing:2px;
+      text-transform:uppercase; color:#6b6b80; margin-bottom:16px;
     }
-    .wl-header h1 { font-size:22px; font-weight:700; }
+    .insights { margin-bottom:40px; }
+    .insight-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;
+    }
+    .insight-card {
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:12px; padding:18px 16px;
+    }
+    .insight-val {
+      font-size:28px; font-weight:800; line-height:1;
+      margin-bottom:4px;
+    }
+    .insight-val.purple { color:#7c4dff; }
+    .insight-val.green { color:#22c55e; }
+    .insight-label { font-size:11px; color:#6b6b80; font-weight:500; }
+
+    /* Mini chart */
+    .chart-wrap {
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:12px; padding:16px;
+    }
+    .chart-title {
+      font-size:12px; font-weight:600; color:#6b6b80; margin-bottom:12px;
+    }
+    .chart-bars { display:flex; align-items:flex-end; gap:6px; height:60px; }
+    .chart-col { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; height:100%; justify-content:flex-end; }
+    .chart-bar {
+      width:100%; border-radius:4px 4px 0 0; min-height:2px;
+      background:linear-gradient(180deg,#7c4dff,#6128DB);
+      transition:height 0.3s;
+    }
+    .chart-day { font-size:9px; color:#44445a; font-weight:500; }
+
+    /* Live dot */
+    .live-row {
+      display:flex; align-items:center; gap:8px;
+      margin-top:12px; padding:0 2px;
+    }
+    .live-dot {
+      width:6px; height:6px; border-radius:50%; background:#22c55e;
+      animation:livePulse 2s ease-in-out infinite;
+    }
+    @keyframes livePulse {
+      0%,100% { box-shadow:0 0 0 0 rgba(34,197,94,0.4); }
+      50% { box-shadow:0 0 0 4px rgba(34,197,94,0); }
+    }
+    .live-text { font-size:12px; color:#6b6b80; }
+    .live-text span { color:#22c55e; font-weight:600; }
+
+    /* ── Waitlist list ── */
+    .wl-section { margin-top:8px; }
+    .wl-header {
+      display:flex; align-items:baseline;
+      justify-content:space-between; margin-bottom:16px;
+    }
+    .wl-header h2 { font-size:11px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:#6b6b80; }
     .wl-count {
-      font-size:13px;
-      font-weight:600;
-      color:#6128DB;
+      font-size:12px; font-weight:600; color:#6128DB;
       background:rgba(97,40,219,0.12);
-      padding:4px 12px;
-      border-radius:999px;
+      padding:3px 10px; border-radius:999px;
     }
     .wl-list { list-style:none; }
     .wl-item {
-      display:flex;
-      align-items:center;
+      display:flex; align-items:center;
       justify-content:space-between;
-      padding:14px 0;
-      border-bottom:1px solid #1a1a25;
+      padding:13px 0; border-bottom:1px solid #1a1a25;
     }
     .wl-item:last-child { border-bottom:none; }
     .wl-email { font-size:14px; font-weight:500; }
     .wl-date { font-size:12px; color:#6b6b80; }
     .wl-empty {
-      text-align:center;
-      padding:48px 0;
-      font-size:14px;
-      color:#44445a;
+      text-align:center; padding:36px 0;
+      font-size:13px; color:#44445a;
     }
   </style>
 </head>
@@ -122,22 +135,98 @@
       {% endif %}
     </div>
     {% else %}
-    <div class="wl-header">
-      <h1>Waitlist</h1>
-      <span class="wl-count">{{ entries|length }}</span>
+
+    <!-- Insights -->
+    <div class="insights">
+      <p class="section-label">Insights</p>
+      <div class="insight-grid">
+        <div class="insight-card">
+          <p class="insight-val purple" id="stat-total">—</p>
+          <p class="insight-label">Total Page Views</p>
+        </div>
+        <div class="insight-card">
+          <p class="insight-val purple" id="stat-today">—</p>
+          <p class="insight-label">Views Today</p>
+        </div>
+        <div class="insight-card">
+          <p class="insight-val green" id="stat-time">—</p>
+          <p class="insight-label">Avg. Time on Page</p>
+        </div>
+        <div class="insight-card">
+          <p class="insight-val green" id="stat-rate">—</p>
+          <p class="insight-label">Signup Rate</p>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <p class="chart-title">Views — Last 7 Days</p>
+        <div class="chart-bars" id="chart-bars"></div>
+      </div>
+      <div class="live-row">
+        <span class="live-dot"></span>
+        <span class="live-text"><span id="stat-active">0</span> on page now</span>
+      </div>
     </div>
-    {% if entries %}
-    <ul class="wl-list">
-      {% for e in entries %}
-      <li class="wl-item">
-        <span class="wl-email">{{ e.email }}</span>
-        <span class="wl-date">{{ e.date }}</span>
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p class="wl-empty">No signups yet. They're coming.</p>
-    {% endif %}
+
+    <!-- Waitlist -->
+    <div class="wl-section">
+      <div class="wl-header">
+        <h2>Waitlist</h2>
+        <span class="wl-count">{{ entries|length }}</span>
+      </div>
+      {% if entries %}
+      <ul class="wl-list">
+        {% for e in entries %}
+        <li class="wl-item">
+          <span class="wl-email">{{ e.email }}</span>
+          <span class="wl-date">{{ e.date }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="wl-empty">No signups yet. They're coming.</p>
+      {% endif %}
+    </div>
+
+    <script>
+      var signupCount = {{ entries|length }};
+
+      function formatTime(s) {
+        if (s < 60) return Math.round(s) + 's';
+        var m = Math.floor(s / 60);
+        var sec = Math.round(s % 60);
+        return m + 'm ' + (sec < 10 ? '0' : '') + sec + 's';
+      }
+
+      function loadStats() {
+        fetch('/t/stats')
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            document.getElementById('stat-total').textContent = d.total.toLocaleString();
+            document.getElementById('stat-today').textContent = d.today.toLocaleString();
+            document.getElementById('stat-time').textContent = formatTime(d.avg_time);
+            document.getElementById('stat-active').textContent = d.active;
+
+            // Signup rate
+            var rate = d.total > 0 ? ((signupCount / d.total) * 100).toFixed(1) + '%' : '—';
+            document.getElementById('stat-rate').textContent = rate;
+
+            // Chart
+            var bars = document.getElementById('chart-bars');
+            var max = Math.max.apply(null, d.daily.map(function(x) { return x.views; })) || 1;
+            bars.innerHTML = d.daily.map(function(day) {
+              var h = Math.max((day.views / max) * 100, 3);
+              var label = day.date.slice(5).replace('-', '/');
+              return '<div class="chart-col">' +
+                '<div class="chart-bar" style="height:' + h + '%"></div>' +
+                '<span class="chart-day">' + label + '</span>' +
+              '</div>';
+            }).join('');
+          });
+      }
+
+      loadStats();
+      setInterval(loadStats, 10000);
+    </script>
     {% endif %}
   </div>
 </body>
