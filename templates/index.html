@@ -226,6 +226,16 @@
       color: var(--text-muted);
     }
 
+    .waitlist input:-webkit-autofill,
+    .waitlist input:-webkit-autofill:hover,
+    .waitlist input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 1000px var(--dark-card) inset;
+      -webkit-text-fill-color: var(--text);
+      -webkit-text-decoration: none;
+      text-decoration: none;
+      caret-color: var(--text);
+    }
+
     .waitlist input:focus {
       border-color: var(--purple);
       box-shadow: 0 0 0 3px rgba(97,40,219,0.15);
