@@ -521,6 +521,9 @@
           msg.className = 'waitlist-msg show ok';
           btn.textContent = '\u2713';
           form.classList.add('success');
+          document.getElementById('waitlist-email').disabled = true;
+          document.getElementById('waitlist-email').blur();
+          window.scrollTo(0, 0);
         } else {
           msg.textContent = data.error || 'Something went wrong';
           msg.className = 'waitlist-msg show err';
