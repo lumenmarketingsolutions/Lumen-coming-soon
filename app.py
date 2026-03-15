@@ -167,6 +167,22 @@ def waitlist_admin():
     entries = [{"email": r[0], "date": r[1][:10]} for r in rows]
     return render_template("waitlist.html", authed=True, entries=entries, error=False)
 
+@app.route("/t/reset", methods=["POST"])
+def reset_stats():
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    data = request.get_json() or {}
+    pin = data.get("pin", "")
+    if pin != ADMIN_PIN:
+        return jsonify({"ok": False}), 403
+    con = sqlite3.connect(DB_PATH)
+    con.execute("DELETE FROM page_views")
+    con.execute("DELETE FROM waitlist")
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
