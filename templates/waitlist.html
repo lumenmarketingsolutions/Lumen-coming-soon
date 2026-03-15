@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Waitlist — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter',-apple-system,sans-serif;
+      background:#0a0a0f;
+      color:#e8e8f0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .container { width:100%; max-width:480px; padding:24px; }
+
+    /* ── PIN screen ── */
+    .pin-card {
+      text-align:center;
+    }
+    .pin-card h1 {
+      font-size:20px;
+      font-weight:700;
+      margin-bottom:8px;
+    }
+    .pin-card p {
+      font-size:13px;
+      color:#6b6b80;
+      margin-bottom:32px;
+    }
+    .pin-form {
+      display:flex;
+      gap:0;
+      max-width:320px;
+      margin:0 auto;
+    }
+    .pin-form input {
+      flex:1;
+      padding:14px 16px;
+      background:#111118;
+      border:1px solid #1a1a25;
+      border-right:none;
+      border-radius:10px 0 0 10px;
+      color:#e8e8f0;
+      font-size:16px;
+      font-family:inherit;
+      letter-spacing:6px;
+      text-align:center;
+      outline:none;
+    }
+    .pin-form input:focus { border-color:#6128DB; }
+    .pin-form button {
+      padding:14px 20px;
+      background:linear-gradient(135deg,#6128DB,#7c4dff);
+      border:none;
+      border-radius:0 10px 10px 0;
+      color:white;
+      font-size:13px;
+      font-weight:600;
+      font-family:inherit;
+      cursor:pointer;
+    }
+    .pin-error {
+      margin-top:16px;
+      font-size:13px;
+      color:#ef4444;
+    }
+
+    /* ── Waitlist view ── */
+    .wl-header {
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      margin-bottom:24px;
+    }
+    .wl-header h1 { font-size:22px; font-weight:700; }
+    .wl-count {
+      font-size:13px;
+      font-weight:600;
+      color:#6128DB;
+      background:rgba(97,40,219,0.12);
+      padding:4px 12px;
+      border-radius:999px;
+    }
+    .wl-list { list-style:none; }
+    .wl-item {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 0;
+      border-bottom:1px solid #1a1a25;
+    }
+    .wl-item:last-child { border-bottom:none; }
+    .wl-email { font-size:14px; font-weight:500; }
+    .wl-date { font-size:12px; color:#6b6b80; }
+    .wl-empty {
+      text-align:center;
+      padding:48px 0;
+      font-size:14px;
+      color:#44445a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    {% if not authed %}
+    <div class="pin-card">
+      <h1>Admin Access</h1>
+      <p>Enter your PIN to view the waitlist.</p>
+      <form class="pin-form" method="POST">
+        <input type="password" name="pin" placeholder="------" maxlength="6" autofocus required>
+        <button type="submit">Unlock</button>
+      </form>
+      {% if error %}
+      <p class="pin-error">Incorrect PIN</p>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="wl-header">
+      <h1>Waitlist</h1>
+      <span class="wl-count">{{ entries|length }}</span>
+    </div>
+    {% if entries %}
+    <ul class="wl-list">
+      {% for e in entries %}
+      <li class="wl-item">
+        <span class="wl-email">{{ e.email }}</span>
+        <span class="wl-date">{{ e.date }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="wl-empty">No signups yet. They're coming.</p>
+    {% endif %}
+    {% endif %}
+  </div>
+</body>
+</html>

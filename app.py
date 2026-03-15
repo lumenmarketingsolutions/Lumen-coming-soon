@@ -1,7 +1,10 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import os, sqlite3, datetime
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "lumen-wl-key-2026")
+
+ADMIN_PIN = "112501"
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "waitlist.db")
 
@@ -40,6 +43,22 @@ def join_waitlist():
         return jsonify({"ok": True})
     except sqlite3.IntegrityError:
         return jsonify({"ok": True})  # already on list, don't reveal
+
+@app.route("/waitlist", methods=["GET", "POST"])
+def waitlist_admin():
+    if request.method == "POST":
+        pin = (request.form.get("pin") or "").strip()
+        if pin == ADMIN_PIN:
+            session["wl_auth"] = True
+            return redirect(url_for("waitlist_admin"))
+        return render_template("waitlist.html", error=True, authed=False, entries=[])
+    if not session.get("wl_auth"):
+        return render_template("waitlist.html", authed=False, entries=[], error=False)
+    con = sqlite3.connect(DB_PATH)
+    rows = con.execute("SELECT email, created_at FROM waitlist ORDER BY id DESC").fetchall()
+    con.close()
+    entries = [{"email": r[0], "date": r[1][:10]} for r in rows]
+    return render_template("waitlist.html", authed=True, entries=entries, error=False)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
