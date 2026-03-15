@@ -77,7 +77,7 @@ def join_waitlist():
         if RESEND_API_KEY:
             # Send welcome email to the signup
             welcome_html = render_template("welcome_email.html")
-            send_email(email, "You're in.", welcome_html)
+            send_email(email, "03.23.2026", welcome_html)
 
             # Send notification to Kendall
             notify_html = render_template("notify_email.html", email=email)
