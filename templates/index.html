@@ -33,14 +33,15 @@
       --text-muted: #44445a;
     }
 
-    html { scroll-behavior: smooth; }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--dark);
       color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -124,8 +125,8 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      padding: 40px 24px;
+      height: 100%;
+      padding: 24px;
     }
 
     /* Logo / brand */
