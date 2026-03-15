@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-import os, sqlite3, datetime, uuid, json, urllib.request, threading
+import os, sqlite3, datetime, uuid, json, threading, requests
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "lumen-wl-key-2026")
@@ -13,22 +13,20 @@ def send_email(to, subject, html_body):
     """Send an email via Resend API in a background thread."""
     def _send():
         try:
-            data = json.dumps({
-                "from": "Lumen <kendall@lumenmarketing.co>",
-                "to": [to],
-                "subject": subject,
-                "html": html_body,
-            }).encode()
-            req = urllib.request.Request(
+            resp = requests.post(
                 "https://api.resend.com/emails",
-                data=data,
                 headers={
                     "Authorization": f"Bearer {RESEND_API_KEY}",
                     "Content-Type": "application/json",
                 },
-                method="POST",
+                json={
+                    "from": "Lumen <kendall@lumenmarketing.co>",
+                    "to": [to],
+                    "subject": subject,
+                    "html": html_body,
+                },
             )
-            urllib.request.urlopen(req)
+            print(f"Email to {to}: {resp.status_code} {resp.text}")
         except Exception as e:
             print(f"Email send error: {e}")
     threading.Thread(target=_send).start()
