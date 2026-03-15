@@ -93,6 +93,22 @@
     .live-text { font-size:12px; color:#6b6b80; }
     .live-text span { color:#22c55e; font-weight:600; }
 
+    /* Time filter */
+    .time-filter {
+      display:flex; gap:6px; margin-bottom:16px;
+    }
+    .time-btn {
+      padding:6px 12px; font-size:11px; font-weight:600;
+      font-family:inherit; letter-spacing:0.5px;
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:8px; color:#6b6b80; cursor:pointer;
+      transition:all 0.2s;
+    }
+    .time-btn:hover { border-color:#6128DB; color:#e8e8f0; }
+    .time-btn.active {
+      background:rgba(97,40,219,0.15); border-color:#6128DB; color:#7c4dff;
+    }
+
     /* ── Waitlist list ── */
     .wl-section { margin-top:8px; }
     .wl-header {
@@ -139,6 +155,13 @@
     <!-- Insights -->
     <div class="insights">
       <p class="section-label">Insights</p>
+      <div class="time-filter">
+        <button class="time-btn" data-hours="1" onclick="setFilter(this)">1hr</button>
+        <button class="time-btn" data-hours="3" onclick="setFilter(this)">3hr</button>
+        <button class="time-btn" data-hours="12" onclick="setFilter(this)">12hr</button>
+        <button class="time-btn" data-hours="24" onclick="setFilter(this)">24hr</button>
+        <button class="time-btn active" data-hours="max" onclick="setFilter(this)">Max</button>
+      </div>
       <div class="insight-grid">
         <div class="insight-card">
           <p class="insight-val purple" id="stat-total">—</p>
@@ -189,6 +212,14 @@
 
     <script>
       var signupCount = {{ entries|length }};
+      var currentFilter = 'max';
+
+      function setFilter(btn) {
+        document.querySelectorAll('.time-btn').forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        currentFilter = btn.getAttribute('data-hours');
+        loadStats();
+      }
 
       function formatTime(s) {
         if (s < 60) return Math.round(s) + 's';
@@ -198,7 +229,8 @@
       }
 
       function loadStats() {
-        fetch('/t/stats')
+        var url = '/t/stats' + (currentFilter !== 'max' ? '?hours=' + currentFilter : '');
+        fetch(url)
           .then(function(r) { return r.json(); })
           .then(function(d) {
             document.getElementById('stat-total').textContent = d.total.toLocaleString();

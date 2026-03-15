@@ -119,15 +119,33 @@ def track_ping():
 def track_stats():
     if not session.get("wl_auth"):
         return jsonify({"ok": False}), 401
+
+    hours = request.args.get("hours", None)
     con = sqlite3.connect(DB_PATH)
-    total = con.execute("SELECT COUNT(*) FROM page_views").fetchone()[0]
+
+    if hours and hours != "max":
+        cutoff = (datetime.datetime.utcnow() - datetime.timedelta(hours=int(hours))).isoformat()
+        time_filter = " WHERE timestamp > ?"
+        time_params = (cutoff,)
+    else:
+        time_filter = ""
+        time_params = ()
+
+    total = con.execute(f"SELECT COUNT(*) FROM page_views{time_filter}", time_params).fetchone()[0]
     today = datetime.datetime.utcnow().strftime("%Y-%m-%d")
     today_count = con.execute(
         "SELECT COUNT(*) FROM page_views WHERE timestamp LIKE ?", (today + "%",)
     ).fetchone()[0]
-    avg_time = con.execute(
-        "SELECT AVG(time_on_page) FROM page_views WHERE time_on_page > 0"
-    ).fetchone()[0] or 0
+
+    if time_filter:
+        avg_time = con.execute(
+            f"SELECT AVG(time_on_page) FROM page_views WHERE time_on_page > 0 AND timestamp > ?", time_params
+        ).fetchone()[0] or 0
+    else:
+        avg_time = con.execute(
+            "SELECT AVG(time_on_page) FROM page_views WHERE time_on_page > 0"
+        ).fetchone()[0] or 0
+
     # Last 7 days breakdown
     daily = []
     for i in range(6, -1, -1):
