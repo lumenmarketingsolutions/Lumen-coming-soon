@@ -25,7 +25,6 @@
 
     html {
       scroll-behavior: smooth;
-      scroll-snap-type: y proximity;
     }
 
     body {
@@ -48,9 +47,8 @@
       justify-content: center;
       padding: 24px;
       padding-top: 0;
-      padding-bottom: 24px;
+      padding-bottom: 80px;
       overflow: hidden;
-      scroll-snap-align: start;
     }
 
     /* Animated background — inherited from coming soon */
@@ -167,6 +165,16 @@
       50% { box-shadow: 0 0 0 8px rgba(97,40,219,0); }
     }
 
+    .scroll-indicator {
+      position: absolute;
+      bottom: 32px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      z-index: 1;
+    }
+
     .scroll-chevron {
       width: 0;
       height: 0;
@@ -240,10 +248,9 @@
        SECTION: THE PROBLEM
     ══════════════════════════════════════════ */
     .problem {
-      min-height: 100dvh;
+      min-height: 80vh;
       display: flex;
       align-items: center;
-      scroll-snap-align: start;
     }
 
     .problem-lines {
@@ -278,7 +285,6 @@
     ══════════════════════════════════════════ */
     .system {
       padding-bottom: 80px;
-      scroll-snap-align: start;
     }
 
     .system-headline {
@@ -1279,9 +1285,9 @@
       <h1 class="hero-headline">
         Your marketing should make money while you sleep<span class="dot"></span>
       </h1>
-      <div style="margin-top:48px;">
-        <div class="scroll-chevron"></div>
-      </div>
+    </div>
+    <div class="scroll-indicator">
+      <div class="scroll-chevron"></div>
     </div>
   </section>
 
@@ -1909,19 +1915,6 @@
         document.querySelector('.quiz-progress').style.display = 'none';
       });
     }
-
-    // ── Disable scroll snap after passing the system section ──
-    (function() {
-      var systemSection = document.querySelector('.system');
-      var snapDisabled = false;
-      var snapObserver = new IntersectionObserver(function(entries) {
-        if (!entries[0].isIntersecting && entries[0].boundingClientRect.top < 0 && !snapDisabled) {
-          snapDisabled = true;
-          document.documentElement.style.scrollSnapType = 'none';
-        }
-      }, { threshold: 0 });
-      snapObserver.observe(systemSection);
-    })();
 
     // ── Funnel bar animation ──
     (function() {
