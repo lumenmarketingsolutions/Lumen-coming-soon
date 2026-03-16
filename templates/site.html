@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumen — AI Marketing System</title>
+  <meta name="description" content="A complete AI marketing system, managed by humans, built entirely around how your customers think.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+
+    :root {
+      --purple: #6128DB;
+      --purple-light: #7c4dff;
+      --purple-glow: rgba(97,40,219,0.35);
+      --dark: #0a0a0f;
+      --dark-card: #111118;
+      --dark-border: #1a1a25;
+      --text: #e8e8f0;
+      --text-dim: #6b6b80;
+      --text-muted: #44445a;
+      --green: #22c55e;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ══════════════════════════════════════════
+       SECTION: HERO
+    ══════════════════════════════════════════ */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      overflow: hidden;
+    }
+
+    /* Animated background — inherited from coming soon */
+    .bg-grid {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .bg-grid::before {
+      content: '';
+      position: absolute;
+      inset: -50%;
+      background-image:
+        linear-gradient(rgba(97,40,219,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(97,40,219,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridDrift 20s linear infinite;
+    }
+
+    @keyframes gridDrift {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      100% { transform: translate(30px, 60px) rotate(0.5deg); }
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      opacity: 0.4;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, var(--purple-glow), transparent 70%);
+      top: -10%; left: -10%;
+      animation: orbFloat1 12s ease-in-out infinite;
+    }
+
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(124,77,255,0.2), transparent 70%);
+      bottom: -5%; right: -8%;
+      animation: orbFloat2 15s ease-in-out infinite;
+    }
+
+    @keyframes orbFloat1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(40px, 30px) scale(1.1); }
+      66% { transform: translate(-20px, 50px) scale(0.95); }
+    }
+
+    @keyframes orbFloat2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(-30px, -40px) scale(1.05); }
+      66% { transform: translate(20px, -20px) scale(0.9); }
+    }
+
+    canvas#particles {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 800px;
+    }
+
+    .hero-logo {
+      height: 48px;
+      margin-bottom: 80px;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.2s forwards;
+    }
+
+    .hero-headline {
+      font-size: clamp(42px, 7vw, 76px);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -2.5px;
+      background: linear-gradient(135deg, #ffffff 0%, #c0c0d0 50%, var(--purple-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0;
+      opacity: 0;
+      animation: fadeUp 1s ease 0.5s forwards;
+    }
+
+    .hero-headline .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      background: var(--purple);
+      border-radius: 50%;
+      margin-left: 4px;
+      vertical-align: baseline;
+      position: relative;
+      top: -8px;
+      -webkit-text-fill-color: initial;
+      animation: dotPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes dotPulse {
+      0%, 100% { box-shadow: 0 0 0 0 var(--purple-glow); }
+      50% { box-shadow: 0 0 0 8px rgba(97,40,219,0); }
+    }
+
+    .scroll-indicator {
+      position: absolute;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      opacity: 0;
+      animation: fadeUp 1s ease 1.2s forwards;
+    }
+
+    .scroll-line {
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, var(--purple), transparent);
+      margin: 0 auto;
+      animation: scrollPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes scrollPulse {
+      0%, 100% { opacity: 0.3; transform: scaleY(1); }
+      50% { opacity: 0.8; transform: scaleY(1.2); }
+    }
+
+    /* ══════════════════════════════════════════
+       GLOBAL SECTION STYLING
+    ══════════════════════════════════════════ */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 120px 24px;
+    }
+
+    .section-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--purple-light);
+      margin-bottom: 24px;
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal-line {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal-line.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ══════════════════════════════════════════
+       SECTION: THE PROBLEM
+    ══════════════════════════════════════════ */
+    .problem {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+    }
+
+    .problem-lines {
+      max-width: 700px;
+    }
+
+    .problem-line {
+      font-size: clamp(24px, 4vw, 40px);
+      font-weight: 700;
+      line-height: 1.3;
+      letter-spacing: -1px;
+      color: var(--text-dim);
+      margin-bottom: 32px;
+      transition: color 0.6s ease;
+    }
+
+    .problem-line.visible {
+      color: var(--text);
+    }
+
+    .problem-line:last-child {
+      color: var(--purple-light);
+      font-weight: 800;
+    }
+
+    .problem-line:last-child.visible {
+      color: var(--purple-light);
+    }
+
+    /* ══════════════════════════════════════════
+       SECTION: THE SYSTEM
+    ══════════════════════════════════════════ */
+    .system {
+      padding-bottom: 80px;
+    }
+
+    .system-headline {
+      font-size: clamp(32px, 5vw, 52px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .system-sub {
+      font-size: 17px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      margin-bottom: 64px;
+      max-width: 560px;
+    }
+
+    .system-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .system-card {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 16px;
+      padding: 32px 28px;
+      transition: border-color 0.3s, transform 0.3s, box-shadow 0.3s;
+      cursor: default;
+    }
+
+    .system-card:hover {
+      border-color: var(--purple);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(97,40,219,0.12);
+    }
+
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(97,40,219,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 18px;
+    }
+
+    .card-icon svg {
+      width: 20px;
+      height: 20px;
+      stroke: var(--purple-light);
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .card-stat {
+      margin-top: 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--purple-light);
+    }
+
+    /* Full-width card (dashboard) */
+    .system-card.full {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, var(--dark-card), rgba(97,40,219,0.06));
+      border-color: rgba(97,40,219,0.2);
+    }
+
+    .system-card.full .card-title {
+      font-size: 20px;
+    }
+
+    /* ══════════════════════════════════════════
+       SECTION: DASHBOARD DEMO
+    ══════════════════════════════════════════ */
+    .dashboard-section {
+      padding: 80px 24px 120px;
+    }
+
+    .dash-headline {
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+
+    .dash-sub {
+      font-size: 16px;
+      color: var(--text-dim);
+      margin-bottom: 48px;
+      max-width: 500px;
+    }
+
+    .dashboard {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 24px 80px rgba(0,0,0,0.4), 0 0 60px rgba(97,40,219,0.08);
+    }
+
+    .dash-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--dark-border);
+    }
+
+    .dash-brand {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--purple-light);
+      letter-spacing: 1px;
+    }
+
+    .dash-tabs {
+      display: flex;
+      gap: 4px;
+    }
+
+    .dash-tab {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dash-tab:hover { color: var(--text); }
+
+    .dash-tab.active {
+      background: rgba(97,40,219,0.12);
+      border-color: rgba(97,40,219,0.3);
+      color: var(--purple-light);
+    }
+
+    .dash-body {
+      padding: 24px;
+    }
+
+    /* KPI row */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .kpi-card {
+      background: var(--dark);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      padding: 16px;
+      transition: border-color 0.3s;
+    }
+
+    .kpi-card:hover {
+      border-color: rgba(97,40,219,0.3);
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .kpi-value {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .kpi-value.purple { color: var(--purple-light); }
+    .kpi-value.green { color: var(--green); }
+    .kpi-value.white { color: var(--text); }
+
+    .kpi-change {
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .kpi-change.up { color: var(--green); }
+    .kpi-change.down { color: #ef4444; }
+
+    /* Chart area */
+    .dash-chart-area {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .dash-chart {
+      background: var(--dark);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .chart-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-dim);
+    }
+
+    .chart-period {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* Revenue chart (bars) */
+    .revenue-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      height: 120px;
+      padding-top: 8px;
+    }
+
+    .rev-bar-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      justify-content: flex-end;
+      gap: 6px;
+      position: relative;
+    }
+
+    .rev-bar {
+      width: 100%;
+      border-radius: 4px 4px 0 0;
+      background: linear-gradient(180deg, var(--purple-light), var(--purple));
+      transition: height 0.6s ease, opacity 0.3s;
+      min-height: 4px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .rev-bar:hover {
+      opacity: 0.8;
+    }
+
+    .rev-bar-tooltip {
+      display: none;
+      position: absolute;
+      top: -28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text);
+      color: var(--dark);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+
+    .rev-bar:hover .rev-bar-tooltip {
+      display: block;
+    }
+
+    .rev-label {
+      font-size: 9px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* Donut chart */
+    .donut-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .donut-svg {
+      width: 100px;
+      height: 100px;
+      transform: rotate(-90deg);
+    }
+
+    .donut-track {
+      fill: none;
+      stroke: var(--dark-border);
+      stroke-width: 8;
+    }
+
+    .donut-fill {
+      fill: none;
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 1.5s ease;
+    }
+
+    .donut-legend {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* AI insight */
+    .ai-insight {
+      background: linear-gradient(135deg, rgba(97,40,219,0.08), rgba(97,40,219,0.03));
+      border: 1px solid rgba(97,40,219,0.2);
+      border-radius: 12px;
+      padding: 16px 20px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .ai-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(97,40,219,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 14px;
+    }
+
+    .ai-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-dim);
+    }
+
+    .ai-text strong {
+      color: var(--text);
+    }
+
+    .ai-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--purple-light);
+      margin-bottom: 4px;
+    }
+
+    /* ══════════════════════════════════════════
+       SECTION: TIMELINE
+    ══════════════════════════════════════════ */
+    .timeline-section {
+      padding: 120px 24px;
+    }
+
+    .timeline-headline {
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      margin-bottom: 12px;
+    }
+
+    .timeline-sub {
+      font-size: 16px;
+      color: var(--text-dim);
+      margin-bottom: 64px;
+      max-width: 480px;
+    }
+
+    .timeline {
+      position: relative;
+      padding-left: 48px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(to bottom, var(--purple), var(--dark-border) 80%, transparent);
+    }
+
+    .tl-item {
+      position: relative;
+      margin-bottom: 56px;
+    }
+
+    .tl-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .tl-dot {
+      position: absolute;
+      left: -41px;
+      top: 4px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--purple);
+      border: 3px solid var(--dark);
+      box-shadow: 0 0 0 1px var(--purple);
+      transition: box-shadow 0.3s;
+    }
+
+    .tl-item.visible .tl-dot {
+      box-shadow: 0 0 0 1px var(--purple), 0 0 12px var(--purple-glow);
+    }
+
+    .tl-days {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--purple-light);
+      margin-bottom: 8px;
+    }
+
+    .tl-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .tl-desc {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      max-width: 420px;
+    }
+
+    /* ══════════════════════════════════════════
+       SECTION: APPLY
+    ══════════════════════════════════════════ */
+    .apply-section {
+      min-height: 80vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 120px 24px;
+    }
+
+    .apply-inner {
+      text-align: center;
+      max-width: 520px;
+    }
+
+    .apply-headline {
+      font-size: clamp(36px, 6vw, 56px);
+      font-weight: 800;
+      letter-spacing: -2px;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+
+    .apply-sub {
+      font-size: 16px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      margin-bottom: 48px;
+    }
+
+    .apply-btn {
+      display: inline-block;
+      padding: 18px 56px;
+      background: linear-gradient(135deg, var(--purple), var(--purple-light));
+      border: none;
+      border-radius: 14px;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      font-family: inherit;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.3s;
+    }
+
+    .apply-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px var(--purple-glow);
+    }
+
+    /* ── Quiz overlay ── */
+    .quiz-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      background: rgba(10,10,15,0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    .quiz-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .quiz-card {
+      width: 100%;
+      max-width: 480px;
+      padding: 40px 32px;
+      position: relative;
+    }
+
+    .quiz-close {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 24px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .quiz-close:hover { color: var(--text); }
+
+    .quiz-progress {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 40px;
+    }
+
+    .quiz-progress-bar {
+      flex: 1;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--dark-border);
+      transition: background 0.3s;
+    }
+
+    .quiz-progress-bar.filled {
+      background: var(--purple);
+    }
+
+    .quiz-step {
+      display: none;
+    }
+
+    .quiz-step.active {
+      display: block;
+      animation: fadeUp 0.4s ease;
+    }
+
+    .quiz-question {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 32px;
+      line-height: 1.3;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .quiz-option {
+      display: block;
+      width: 100%;
+      padding: 16px 20px;
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 500;
+      font-family: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+    }
+
+    .quiz-option:hover {
+      border-color: var(--purple);
+      background: rgba(97,40,219,0.06);
+      transform: translateX(4px);
+    }
+
+    .quiz-option.selected {
+      border-color: var(--purple);
+      background: rgba(97,40,219,0.1);
+    }
+
+    /* Email step */
+    .quiz-email-wrap {
+      display: flex;
+      gap: 0;
+    }
+
+    .quiz-email-wrap input {
+      flex: 1;
+      padding: 16px 20px;
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-right: none;
+      border-radius: 12px 0 0 12px;
+      color: var(--text);
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .quiz-email-wrap input:focus {
+      border-color: var(--purple);
+    }
+
+    .quiz-email-wrap input:-webkit-autofill {
+      -webkit-box-shadow: 0 0 0 1000px var(--dark-card) inset;
+      -webkit-text-fill-color: var(--text);
+    }
+
+    .quiz-submit-btn {
+      padding: 16px 28px;
+      background: linear-gradient(135deg, var(--purple), var(--purple-light));
+      border: none;
+      border-radius: 0 12px 12px 0;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.3s;
+      white-space: nowrap;
+    }
+
+    .quiz-submit-btn:hover {
+      box-shadow: 0 8px 30px var(--purple-glow);
+    }
+
+    .quiz-done {
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    .quiz-done h2 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .quiz-done p {
+      font-size: 15px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* ══════════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════════ */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 40px 24px 48px;
+      border-top: 1px solid var(--dark-border);
+    }
+
+    .footer-logo {
+      height: 24px;
+      margin-bottom: 12px;
+      opacity: 0.5;
+    }
+
+    .footer-text {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ══════════════════════════════════════════
+       ANIMATIONS
+    ══════════════════════════════════════════ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes countUp {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ══════════════════════════════════════════
+       RESPONSIVE
+    ══════════════════════════════════════════ */
+    @media (max-width: 768px) {
+      .hero-headline {
+        letter-spacing: -1.5px;
+      }
+
+      .system-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .kpi-row {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .dash-chart-area {
+        grid-template-columns: 1fr;
+      }
+
+      .dash-tabs {
+        gap: 2px;
+      }
+
+      .dash-tab {
+        padding: 6px 10px;
+        font-size: 11px;
+      }
+
+      .timeline {
+        padding-left: 36px;
+      }
+
+      .tl-dot {
+        left: -29px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      section {
+        padding: 80px 20px;
+      }
+
+      .kpi-row {
+        grid-template-columns: 1fr;
+      }
+
+      .dash-topbar {
+        flex-direction: column;
+        gap: 12px;
+        align-items: flex-start;
+      }
+
+      .quiz-card {
+        padding: 32px 20px;
+      }
+
+      .quiz-email-wrap {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .quiz-email-wrap input {
+        border-right: 1px solid var(--dark-border);
+        border-radius: 12px;
+      }
+
+      .quiz-submit-btn {
+        border-radius: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background effects -->
+  <div class="bg-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <canvas id="particles"></canvas>
+
+  <!-- ════════════════════════════════════════
+       HERO
+  ════════════════════════════════════════ -->
+  <section class="hero">
+    <div class="hero-content">
+      <img src="{{ url_for('static', filename='logo-white.png') }}" alt="Lumen" class="hero-logo">
+      <h1 class="hero-headline">
+        Your marketing should make money while you sleep<span class="dot"></span>
+      </h1>
+    </div>
+    <div class="scroll-indicator">
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       THE PROBLEM
+  ════════════════════════════════════════ -->
+  <section class="problem">
+    <div class="section-inner">
+      <div class="problem-lines">
+        <p class="problem-line reveal-line">You've tried agencies that send reports you don't understand.</p>
+        <p class="problem-line reveal-line">You've tried doing it yourself and watched money disappear.</p>
+        <p class="problem-line reveal-line">You've blamed the platform. The algorithm. The timing.</p>
+        <p class="problem-line reveal-line">The platform was never the problem.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       THE SYSTEM
+  ════════════════════════════════════════ -->
+  <section class="system">
+    <div class="section-inner">
+      <p class="section-label reveal">What You Get</p>
+      <h2 class="system-headline reveal">A complete AI marketing system.<br>Managed by humans.</h2>
+      <p class="system-sub reveal">Built entirely around how your customers think. Delivered in 14 days. Everything working together — not pieced apart.</p>
+
+      <div class="system-grid">
+        <div class="system-card reveal">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+          </div>
+          <h3 class="card-title">Deep Dive Audit</h3>
+          <p class="card-desc">Complete business analysis. We study your market, your competitors, your customers — and the friction points killing your growth.</p>
+        </div>
+
+        <div class="system-card reveal">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          </div>
+          <h3 class="card-title">Meta Ad Campaigns</h3>
+          <p class="card-desc">Built by a Certified Meta Performance Marketer. Not the surface-level settings. The ones Meta built for people who understand the platform.</p>
+          <p class="card-stat">4,000+ hours in Ads Manager</p>
+        </div>
+
+        <div class="system-card reveal">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <h3 class="card-title">Landing Pages</h3>
+          <p class="card-desc">Engineered line by line for psychological conversion. Every word, every color, every button placement — intentional.</p>
+          <p class="card-stat">4%+ conversion rate baseline</p>
+        </div>
+
+        <div class="system-card reveal">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
+          </div>
+          <h3 class="card-title">Email Nurture Sequences</h3>
+          <p class="card-desc">Automated follow-up designed for your funnel flow. Turn cold leads warm. Turn warm leads into customers.</p>
+        </div>
+
+        <div class="system-card reveal">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <h3 class="card-title">Full Automations</h3>
+          <p class="card-desc">Custom webhooks bridging any app to any app. CRM, payment processor, database — regardless of auth walls or compliance requirements.</p>
+        </div>
+
+        <div class="system-card reveal">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+          </div>
+          <h3 class="card-title">Ongoing Management</h3>
+          <p class="card-desc">We watch the data. We optimize the campaigns. We scale what's winning. You get your time back.</p>
+          <p class="card-stat">15+ hours/week saved</p>
+        </div>
+
+        <div class="system-card full reveal">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+          </div>
+          <h3 class="card-title">Real-Time AI Dashboard</h3>
+          <p class="card-desc">Every click from ad to conversion, tracked. Real-time ROAS with zero manual work. An AI layer that reads your data and tells you — in plain English — what's working, what's not, and why. Nothing on the market does this.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       DASHBOARD DEMO
+  ════════════════════════════════════════ -->
+  <section class="dashboard-section">
+    <div class="section-inner">
+      <p class="section-label reveal">Live Preview</p>
+      <h2 class="dash-headline reveal">See your results. In real time.<br>In plain English.</h2>
+      <p class="dash-sub reveal">This is what your first 30 days look like.</p>
+
+      <div class="dashboard reveal" id="dashboard-demo">
+        <div class="dash-topbar">
+          <span class="dash-brand">LUMEN DASHBOARD</span>
+          <div class="dash-tabs">
+            <button class="dash-tab active" onclick="switchTab(this, 'overview')">Overview</button>
+            <button class="dash-tab" onclick="switchTab(this, 'ads')">Ads</button>
+            <button class="dash-tab" onclick="switchTab(this, 'leads')">Leads</button>
+          </div>
+        </div>
+
+        <div class="dash-body" id="dash-content">
+          <!-- Overview tab (default) -->
+          <div class="kpi-row">
+            <div class="kpi-card">
+              <p class="kpi-label">Revenue</p>
+              <p class="kpi-value purple" data-count="16847" data-prefix="$" data-comma="true">$0</p>
+              <p class="kpi-change up">+23.4% vs last period</p>
+            </div>
+            <div class="kpi-card">
+              <p class="kpi-label">ROAS</p>
+              <p class="kpi-value green" data-count="4.8" data-suffix="x" data-decimal="true">0x</p>
+              <p class="kpi-change up">+0.6x vs last period</p>
+            </div>
+            <div class="kpi-card">
+              <p class="kpi-label">Total Leads</p>
+              <p class="kpi-value white" data-count="127">0</p>
+              <p class="kpi-change up">+34 this week</p>
+            </div>
+            <div class="kpi-card">
+              <p class="kpi-label">Ad Spend</p>
+              <p class="kpi-value white" data-count="3510" data-prefix="$" data-comma="true">$0</p>
+              <p class="kpi-change">This period</p>
+            </div>
+          </div>
+
+          <div class="dash-chart-area">
+            <div class="dash-chart">
+              <div class="chart-header">
+                <span class="chart-title">Revenue — Last 7 Days</span>
+                <span class="chart-period">Mar 1 — Mar 7</span>
+              </div>
+              <div class="revenue-bars" id="rev-chart">
+                <!-- Filled by JS -->
+              </div>
+            </div>
+            <div class="dash-chart">
+              <div class="chart-header">
+                <span class="chart-title">Lead Sources</span>
+              </div>
+              <div class="donut-wrap">
+                <svg class="donut-svg" viewBox="0 0 42 42">
+                  <circle class="donut-track" cx="21" cy="21" r="16"/>
+                  <circle class="donut-fill" cx="21" cy="21" r="16" stroke="#7c4dff" stroke-dasharray="62 100.5" stroke-dashoffset="0"/>
+                  <circle class="donut-fill" cx="21" cy="21" r="16" stroke="#22c55e" stroke-dasharray="25 100.5" stroke-dashoffset="-62"/>
+                  <circle class="donut-fill" cx="21" cy="21" r="16" stroke="#6b6b80" stroke-dasharray="13.5 100.5" stroke-dashoffset="-87"/>
+                </svg>
+                <div class="donut-legend">
+                  <div class="legend-item"><span class="legend-dot" style="background:#7c4dff"></span> Meta Ads (62%)</div>
+                  <div class="legend-item"><span class="legend-dot" style="background:#22c55e"></span> Organic (25%)</div>
+                  <div class="legend-item"><span class="legend-dot" style="background:#6b6b80"></span> Direct (13%)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ai-insight">
+            <div class="ai-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c4dff" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 14v4"/></svg>
+            </div>
+            <div>
+              <p class="ai-label">AI Insight</p>
+              <p class="ai-text"><strong>Ad 3 is outperforming Ad 1 by 62%.</strong> The lifestyle image resonated more with your 25-34 segment. Consider increasing budget allocation here — projected ROAS at higher spend is 5.2x based on current conversion patterns.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       TIMELINE
+  ════════════════════════════════════════ -->
+  <section class="timeline-section">
+    <div class="section-inner">
+      <p class="section-label reveal">How It Works</p>
+      <h2 class="timeline-headline reveal">14 days. Fully operational.</h2>
+      <p class="timeline-sub reveal">From onboarding to live campaigns generating revenue. Here's how it unfolds.</p>
+
+      <div class="timeline">
+        <div class="tl-item reveal">
+          <div class="tl-dot"></div>
+          <p class="tl-days">Days 1 — 2</p>
+          <h3 class="tl-title">The Deep Dive</h3>
+          <p class="tl-desc">We learn everything. Your business, your customers, your competitors, what you've tried, what failed. We look at your entire operation — not just marketing.</p>
+        </div>
+
+        <div class="tl-item reveal">
+          <div class="tl-dot"></div>
+          <p class="tl-days">Days 3 — 5</p>
+          <h3 class="tl-title">The Build</h3>
+          <p class="tl-desc">Ads, landing pages, email sequences, automations — every piece engineered around how your customer thinks. Not templates. Custom.</p>
+        </div>
+
+        <div class="tl-item reveal">
+          <div class="tl-dot"></div>
+          <p class="tl-days">Days 6 — 8</p>
+          <h3 class="tl-title">Launch</h3>
+          <p class="tl-desc">Everything goes live. Your system starts working. Ads running, leads flowing, dashboard tracking every dollar from click to conversion.</p>
+        </div>
+
+        <div class="tl-item reveal">
+          <div class="tl-dot"></div>
+          <p class="tl-days">Days 9 — 11</p>
+          <h3 class="tl-title">Optimize</h3>
+          <p class="tl-desc">Real data, real adjustments. We watch what's converting, kill what's not, and refine the system based on what your actual customers are telling us.</p>
+        </div>
+
+        <div class="tl-item reveal">
+          <div class="tl-dot"></div>
+          <p class="tl-days">Days 12 — 14</p>
+          <h3 class="tl-title">Scale</h3>
+          <p class="tl-desc">We find the winners and pour fuel on them. Your system is now a machine — generating customers while you focus on running your business.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       APPLY
+  ════════════════════════════════════════ -->
+  <section class="apply-section">
+    <div class="apply-inner reveal">
+      <h2 class="apply-headline">This isn't for everyone<span class="dot"></span></h2>
+      <p class="apply-sub">We hand-pick the businesses we work with. If your business is ready for a system that actually works — we'd like to hear from you.</p>
+      <button class="apply-btn" onclick="openQuiz()">Apply</button>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       QUIZ OVERLAY
+  ════════════════════════════════════════ -->
+  <div class="quiz-overlay" id="quiz-overlay">
+    <div class="quiz-card">
+      <button class="quiz-close" onclick="closeQuiz()">&times;</button>
+
+      <div class="quiz-progress">
+        <div class="quiz-progress-bar filled" id="qp-1"></div>
+        <div class="quiz-progress-bar" id="qp-2"></div>
+        <div class="quiz-progress-bar" id="qp-3"></div>
+        <div class="quiz-progress-bar" id="qp-4"></div>
+        <div class="quiz-progress-bar" id="qp-5"></div>
+      </div>
+
+      <!-- Step 1: Business type -->
+      <div class="quiz-step active" id="qs-1">
+        <h3 class="quiz-question">What type of business do you run?</h3>
+        <div class="quiz-options">
+          <button class="quiz-option" onclick="quizSelect(1, this)">Local service business</button>
+          <button class="quiz-option" onclick="quizSelect(1, this)">E-commerce / online store</button>
+          <button class="quiz-option" onclick="quizSelect(1, this)">Medical / health practice</button>
+          <button class="quiz-option" onclick="quizSelect(1, this)">Real estate / property</button>
+          <button class="quiz-option" onclick="quizSelect(1, this)">Other</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Revenue -->
+      <div class="quiz-step" id="qs-2">
+        <h3 class="quiz-question">What's your current monthly revenue?</h3>
+        <div class="quiz-options">
+          <button class="quiz-option" onclick="quizSelect(2, this)">Under $10k/mo</button>
+          <button class="quiz-option" onclick="quizSelect(2, this)">$10k — $50k/mo</button>
+          <button class="quiz-option" onclick="quizSelect(2, this)">$50k — $200k/mo</button>
+          <button class="quiz-option" onclick="quizSelect(2, this)">$200k+/mo</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Current marketing -->
+      <div class="quiz-step" id="qs-3">
+        <h3 class="quiz-question">How are you handling marketing right now?</h3>
+        <div class="quiz-options">
+          <button class="quiz-option" onclick="quizSelect(3, this)">Doing it myself</button>
+          <button class="quiz-option" onclick="quizSelect(3, this)">Hired an agency (not happy)</button>
+          <button class="quiz-option" onclick="quizSelect(3, this)">Have an in-house team</button>
+          <button class="quiz-option" onclick="quizSelect(3, this)">Not doing any paid marketing</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Challenge -->
+      <div class="quiz-step" id="qs-4">
+        <h3 class="quiz-question">What's your biggest challenge?</h3>
+        <div class="quiz-options">
+          <button class="quiz-option" onclick="quizSelect(4, this)">I can't get consistent leads</button>
+          <button class="quiz-option" onclick="quizSelect(4, this)">I don't know what's actually working</button>
+          <button class="quiz-option" onclick="quizSelect(4, this)">Marketing takes too much of my time</button>
+          <button class="quiz-option" onclick="quizSelect(4, this)">I've wasted money on ads before</button>
+        </div>
+      </div>
+
+      <!-- Step 5: Email -->
+      <div class="quiz-step" id="qs-5">
+        <h3 class="quiz-question">Where should we reach you?</h3>
+        <div class="quiz-email-wrap">
+          <input type="email" id="quiz-email" placeholder="Your email" required>
+          <button class="quiz-submit-btn" onclick="submitQuiz()">Submit</button>
+        </div>
+      </div>
+
+      <!-- Done -->
+      <div class="quiz-step" id="qs-done">
+        <div class="quiz-done">
+          <h2>We'll be in touch.</h2>
+          <p>If your business is a fit, you'll hear from us within 24 hours.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════ -->
+  <footer>
+    <img src="{{ url_for('static', filename='logo-white.png') }}" alt="Lumen" class="footer-logo">
+    <p class="footer-text">&copy; 2026 Lumen Marketing Solutions</p>
+  </footer>
+
+  <!-- ════════════════════════════════════════
+       SCRIPTS
+  ════════════════════════════════════════ -->
+  <script>
+    // ── Particle system (same as coming soon) ──
+    (function() {
+      var canvas = document.getElementById('particles');
+      var ctx = canvas.getContext('2d');
+      var particles = [];
+      var COUNT = 30;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
+
+      function Particle() { this.reset(); }
+      Particle.prototype.reset = function() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.vx = (Math.random() - 0.5) * 0.2;
+        this.vy = -Math.random() * 0.3 - 0.05;
+        this.size = Math.random() * 1.5 + 0.5;
+        this.opacity = Math.random() * 0.3 + 0.05;
+        this.life = Math.random() * 300 + 100;
+        this.maxLife = this.life;
+      };
+      Particle.prototype.update = function() {
+        this.x += this.vx;
+        this.y += this.vy;
+        this.life--;
+        if (this.life <= 0 || this.y < -10) { this.reset(); this.y = canvas.height + 10; }
+      };
+      Particle.prototype.draw = function() {
+        var fade = Math.min(this.life / 30, (this.maxLife - this.life) / 30, 1);
+        ctx.globalAlpha = this.opacity * fade;
+        ctx.fillStyle = '#6128DB';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+      };
+
+      for (var i = 0; i < COUNT; i++) particles.push(new Particle());
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (var i = 0; i < particles.length; i++) { particles[i].update(); particles[i].draw(); }
+
+        ctx.strokeStyle = '#6128DB';
+        ctx.lineWidth = 0.5;
+        for (var i = 0; i < particles.length; i++) {
+          for (var j = i + 1; j < particles.length; j++) {
+            var dx = particles[i].x - particles[j].x;
+            var dy = particles[i].y - particles[j].y;
+            var dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < 100) {
+              ctx.globalAlpha = (1 - dist / 100) * 0.06;
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(animate);
+      }
+      animate();
+    })();
+
+    // ── Scroll reveal ──
+    (function() {
+      var reveals = document.querySelectorAll('.reveal, .reveal-line');
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+          }
+        });
+      }, {
+        threshold: 0.15,
+        rootMargin: '0px 0px -40px 0px'
+      });
+
+      reveals.forEach(function(el) { observer.observe(el); });
+
+      // Stagger reveal-line elements
+      var lines = document.querySelectorAll('.reveal-line');
+      var lineObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            // Find index among siblings
+            var siblings = entry.target.parentElement.querySelectorAll('.reveal-line');
+            var idx = Array.prototype.indexOf.call(siblings, entry.target);
+            entry.target.style.transitionDelay = (idx * 0.2) + 's';
+            entry.target.classList.add('visible');
+          }
+        });
+      }, { threshold: 0.1 });
+
+      lines.forEach(function(el) { lineObserver.observe(el); });
+    })();
+
+    // ── Count-up animation for KPIs ──
+    (function() {
+      var counted = false;
+      var dashEl = document.getElementById('dashboard-demo');
+
+      var observer = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting && !counted) {
+          counted = true;
+          animateCounters();
+        }
+      }, { threshold: 0.3 });
+
+      observer.observe(dashEl);
+
+      function animateCounters() {
+        var els = dashEl.querySelectorAll('[data-count]');
+        els.forEach(function(el) {
+          var target = parseFloat(el.getAttribute('data-count'));
+          var prefix = el.getAttribute('data-prefix') || '';
+          var suffix = el.getAttribute('data-suffix') || '';
+          var isDecimal = el.getAttribute('data-decimal') === 'true';
+          var useComma = el.getAttribute('data-comma') === 'true';
+          var duration = 1500;
+          var start = performance.now();
+
+          function tick(now) {
+            var elapsed = now - start;
+            var progress = Math.min(elapsed / duration, 1);
+            // Ease out
+            progress = 1 - Math.pow(1 - progress, 3);
+            var current = progress * target;
+
+            var display;
+            if (isDecimal) {
+              display = current.toFixed(1);
+            } else {
+              display = Math.round(current);
+              if (useComma) {
+                display = display.toLocaleString();
+              }
+            }
+
+            el.textContent = prefix + display + suffix;
+
+            if (progress < 1) requestAnimationFrame(tick);
+          }
+          requestAnimationFrame(tick);
+        });
+      }
+    })();
+
+    // ── Revenue chart bars ──
+    (function() {
+      var data = [
+        { day: 'Mon', value: 1840 },
+        { day: 'Tue', value: 2210 },
+        { day: 'Wed', value: 1950 },
+        { day: 'Thu', value: 3120 },
+        { day: 'Fri', value: 2780 },
+        { day: 'Sat', value: 2640 },
+        { day: 'Sun', value: 2307 }
+      ];
+
+      var max = Math.max.apply(null, data.map(function(d) { return d.value; }));
+      var chart = document.getElementById('rev-chart');
+
+      data.forEach(function(d) {
+        var pct = (d.value / max) * 100;
+        var col = document.createElement('div');
+        col.className = 'rev-bar-col';
+        col.innerHTML =
+          '<div class="rev-bar" style="height:' + pct + '%">' +
+            '<span class="rev-bar-tooltip">$' + d.value.toLocaleString() + '</span>' +
+          '</div>' +
+          '<span class="rev-label">' + d.day + '</span>';
+        chart.appendChild(col);
+      });
+    })();
+
+    // ── Dashboard tab switching ──
+    function switchTab(btn, tab) {
+      document.querySelectorAll('.dash-tab').forEach(function(t) { t.classList.remove('active'); });
+      btn.classList.add('active');
+
+      var content = document.getElementById('dash-content');
+      var insights = [
+        {
+          label: 'AI Insight',
+          text: '<strong>Ad 3 is outperforming Ad 1 by 62%.</strong> The lifestyle image resonated more with your 25-34 segment. Consider increasing budget allocation here \u2014 projected ROAS at higher spend is 5.2x based on current conversion patterns.'
+        },
+        {
+          label: 'AI Insight \u2014 Ads',
+          text: '<strong>Your video ads have a 3.2x higher click-through rate than static images.</strong> The first 3 seconds are key \u2014 leads who watch past the hook convert at 8.4%. Consider leading with the customer result, not the product.'
+        },
+        {
+          label: 'AI Insight \u2014 Leads',
+          text: '<strong>73% of your conversions happen within 48 hours of first click.</strong> Your email sequence is recovering 12 leads/week that would have been lost. The Day 2 follow-up has the highest open rate at 64%.'
+        }
+      ];
+
+      var idx = tab === 'overview' ? 0 : tab === 'ads' ? 1 : 2;
+      var insight = insights[idx];
+
+      // Update AI insight
+      var aiEl = content.querySelector('.ai-insight');
+      aiEl.querySelector('.ai-label').textContent = insight.label;
+      aiEl.querySelector('.ai-text').innerHTML = insight.text;
+    }
+
+    // ── Quiz ──
+    var quizData = { business: '', revenue: '', marketing: '', challenge: '' };
+    var quizStep = 1;
+    var quizFields = ['business', 'revenue', 'marketing', 'challenge'];
+
+    function openQuiz() {
+      document.getElementById('quiz-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeQuiz() {
+      document.getElementById('quiz-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function quizSelect(step, btn) {
+      // Mark selected
+      btn.parentElement.querySelectorAll('.quiz-option').forEach(function(o) { o.classList.remove('selected'); });
+      btn.classList.add('selected');
+
+      // Store answer
+      if (step <= 4) {
+        quizData[quizFields[step - 1]] = btn.textContent;
+      }
+
+      // Advance after short delay
+      setTimeout(function() {
+        document.getElementById('qs-' + step).classList.remove('active');
+        var next = step + 1;
+        document.getElementById('qs-' + next).classList.add('active');
+        // Update progress
+        document.getElementById('qp-' + next).classList.add('filled');
+        quizStep = next;
+      }, 300);
+    }
+
+    function submitQuiz() {
+      var email = document.getElementById('quiz-email').value.trim();
+      if (!email || email.indexOf('@') === -1) return;
+
+      quizData.email = email;
+
+      fetch('/apply', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(quizData)
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        document.getElementById('qs-5').classList.remove('active');
+        document.getElementById('qs-done').classList.add('active');
+        // Hide progress bar
+        document.querySelector('.quiz-progress').style.display = 'none';
+      });
+    }
+
+    // Close quiz on escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeQuiz();
+    });
+
+    // Close quiz on overlay click
+    document.getElementById('quiz-overlay').addEventListener('click', function(e) {
+      if (e.target === this) closeQuiz();
+    });
+  </script>
+</body>
+</html>

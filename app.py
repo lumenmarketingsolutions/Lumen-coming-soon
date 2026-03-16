@@ -279,6 +279,61 @@ def track_visitors():
     })
 
 
+# ── Preview route (secret, isolated from live site) ──────────
+PREVIEW_TOKEN = "lumen2026"
+
+@app.route(f"/preview/{PREVIEW_TOKEN}")
+def preview_site():
+    return render_template("site.html")
+
+@app.route("/apply", methods=["POST"])
+def apply_submit():
+    data = request.get_json() or {}
+    business = data.get("business", "")
+    revenue = data.get("revenue", "")
+    marketing = data.get("marketing", "")
+    challenge = data.get("challenge", "")
+    email = (data.get("email") or "").strip().lower()
+    if not email or "@" not in email:
+        return jsonify({"ok": False, "error": "Valid email required"})
+
+    # Store application
+    con = sqlite3.connect(DB_PATH)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS applications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL,
+            business TEXT DEFAULT '',
+            revenue TEXT DEFAULT '',
+            marketing TEXT DEFAULT '',
+            challenge TEXT DEFAULT '',
+            created_at TEXT NOT NULL
+        )
+    """)
+    con.execute(
+        "INSERT INTO applications (email, business, revenue, marketing, challenge, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+        (email, business, revenue, marketing, challenge, datetime.datetime.utcnow().isoformat()),
+    )
+    con.commit()
+    con.close()
+
+    # Notify Kendall
+    if RESEND_API_KEY:
+        notify_html = f"""
+        <div style="font-family:Inter,sans-serif;background:#0a0a0f;color:#e8e8f0;padding:40px;">
+            <h2 style="color:#7c4dff;">New Application</h2>
+            <p><strong>Email:</strong> {email}</p>
+            <p><strong>Business:</strong> {business}</p>
+            <p><strong>Revenue:</strong> {revenue}</p>
+            <p><strong>Current Marketing:</strong> {marketing}</p>
+            <p><strong>Biggest Challenge:</strong> {challenge}</p>
+        </div>
+        """
+        send_email(NOTIFY_EMAIL, f"New application: {email}", notify_html)
+
+    return jsonify({"ok": True})
+
+
 @app.route("/t/reset", methods=["POST"])
 def reset_stats():
     if not session.get("wl_auth"):
