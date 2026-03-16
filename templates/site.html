@@ -44,9 +44,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: center;
       padding: 24px;
-      padding-top: 18vh;
+      padding-bottom: 120px;
       overflow: hidden;
     }
 
@@ -167,8 +167,11 @@
     .scroll-indicator {
       position: absolute;
       bottom: 40px;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       z-index: 1;
       opacity: 0;
       animation: fadeUp 1s ease 1.2s forwards;
@@ -1485,7 +1488,7 @@
               <div class="funnel-stats"><span class="funnel-stat-val">53</span><span class="funnel-stat-pct">1.1%</span></div>
             </div>
             <div class="funnel-insight">
-              <strong>32% of visitors leave the landing page within 8 seconds.</strong> The headline is performing well, but visitors who scroll past the pricing section drop off at 2x the rate. Consider moving the CTA above the pricing breakdown.
+              <strong>About 1 in 3 people leave your page within 8 seconds.</strong> Your headline is catching their attention, but once they scroll down to the pricing section, most of them leave. Try putting your "Book a Call" button higher on the page so they see it before they get to pricing.
             </div>
           </div>
 
@@ -1495,7 +1498,7 @@
             </div>
             <div>
               <p class="ai-label">AI Insight</p>
-              <p class="ai-text"><strong>Ad 3 is outperforming Ad 1 by 62%.</strong> The lifestyle image resonated more with your 25-34 segment. Consider increasing budget allocation here. Projected ROAS at higher spend is 5.2x based on current conversion patterns.</p>
+              <p class="ai-text"><strong>The image of the blue vehicle in Ad 3 is getting 62% more clicks than Ad 1.</strong> Your audience responds better to lifestyle images with blue tones. Try using similar colors and settings in your next round of creatives. If you increase spend on this ad, we estimate you'll make $5.20 back for every $1 you put in.</p>
             </div>
           </div>
         </div>
@@ -1841,15 +1844,15 @@
       var insights = [
         {
           label: 'AI Insight',
-          text: '<strong>Ad 3 is outperforming Ad 1 by 62%.</strong> The lifestyle image resonated more with your 25-34 segment. Consider increasing budget allocation here \u2014 projected ROAS at higher spend is 5.2x based on current conversion patterns.'
+          text: '<strong>The image of the blue vehicle in Ad 3 is getting 62% more clicks than Ad 1.</strong> Your audience responds better to lifestyle images with blue tones. Try using similar colors and settings in your next round of creatives. If you increase spend on this ad, we estimate you\'ll make $5.20 back for every $1 you put in.'
         },
         {
-          label: 'AI Insight \u2014 Ads',
-          text: '<strong>Your video ads have a 3.2x higher click-through rate than static images.</strong> The first 3 seconds are key \u2014 leads who watch past the hook convert at 8.4%. Consider leading with the customer result, not the product.'
+          label: 'AI Insight',
+          text: '<strong>Your video ads are getting 3x more clicks than your image ads.</strong> People who watch the first 3 seconds of your video are much more likely to become a lead. Try starting your next video with a customer result instead of talking about your service.'
         },
         {
-          label: 'AI Insight \u2014 Leads',
-          text: '<strong>73% of your conversions happen within 48 hours of first click.</strong> Your email sequence is recovering 12 leads/week that would have been lost. The Day 2 follow-up has the highest open rate at 64%.'
+          label: 'AI Insight',
+          text: '<strong>Most of your customers buy within 2 days of seeing your ad.</strong> Your follow-up emails are bringing back about 12 people per week who would have been lost. The second email you send is the one people open most, with a 64% open rate.'
         }
       ];
 
