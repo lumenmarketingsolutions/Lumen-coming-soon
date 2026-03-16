@@ -452,12 +452,25 @@
       margin-bottom: 24px;
     }
 
+    .kpi-row-2 {
+      grid-template-columns: 1fr 1fr;
+    }
+
     .kpi-card {
       background: var(--dark);
       border: 1px solid var(--dark-border);
       border-radius: 12px;
       padding: 16px;
       transition: border-color 0.3s;
+    }
+
+    .kpi-card-lg {
+      padding: 20px;
+      text-align: center;
+    }
+
+    .kpi-card-lg .kpi-value {
+      font-size: 28px;
     }
 
     .kpi-card:hover {
@@ -1659,26 +1672,50 @@
 
           <!-- ── OVERVIEW TAB ── -->
           <div class="tab-content active" id="tab-overview">
-            <div class="kpi-row">
-              <div class="kpi-card">
+            <div class="kpi-row kpi-row-2">
+              <div class="kpi-card kpi-card-lg">
                 <p class="kpi-label">Revenue</p>
                 <p class="kpi-value purple" data-count="16847" data-prefix="$" data-comma="true">$0</p>
                 <p class="kpi-change up">+23.4% vs last period</p>
               </div>
-              <div class="kpi-card">
+              <div class="kpi-card kpi-card-lg">
                 <p class="kpi-label">ROAS</p>
                 <p class="kpi-value green" data-count="4.8" data-suffix="x" data-decimal="true">0x</p>
                 <p class="kpi-change up">+0.6x vs last period</p>
               </div>
-              <div class="kpi-card">
-                <p class="kpi-label">Total Leads</p>
-                <p class="kpi-value white" data-count="127">0</p>
-                <p class="kpi-change up">+34 this week</p>
+            </div>
+
+            <!-- Recent activity preview -->
+            <div class="dash-chart overview-leads">
+              <div class="chart-header">
+                <span class="chart-title">Recent Activity</span>
+                <span class="chart-period">Latest leads</span>
               </div>
-              <div class="kpi-card">
-                <p class="kpi-label">Ad Spend</p>
-                <p class="kpi-value white" data-count="3510" data-prefix="$" data-comma="true">$0</p>
-                <p class="kpi-change">This period</p>
+              <div class="lead-list">
+                <div class="lead-row">
+                  <div class="lead-avatar">JM</div>
+                  <div class="lead-info">
+                    <span class="lead-name">James M.</span>
+                    <span class="lead-source">Ad 2</span>
+                  </div>
+                  <span class="lead-status converted">Converted</span>
+                </div>
+                <div class="lead-row">
+                  <div class="lead-avatar">SR</div>
+                  <div class="lead-info">
+                    <span class="lead-name">Sarah R.</span>
+                    <span class="lead-source">Ad 1</span>
+                  </div>
+                  <span class="lead-status booked">Booked Call</span>
+                </div>
+                <div class="lead-row">
+                  <div class="lead-avatar">DK</div>
+                  <div class="lead-info">
+                    <span class="lead-name">David K.</span>
+                    <span class="lead-source">Retargeting</span>
+                  </div>
+                  <span class="lead-status new-lead">New</span>
+                </div>
               </div>
             </div>
 
