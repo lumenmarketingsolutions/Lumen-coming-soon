@@ -2532,9 +2532,32 @@
     var quizStep = 1;
     var quizFields = ['business', 'revenue', 'marketing', 'challenge'];
 
+    // ── Funnel tracking helper ──
+    var funnelSid = '';
+    function trackFunnel(event, step, value) {
+      // Send to Meta Pixel
+      if (typeof fbq === 'function') {
+        if (event === 'ApplyClick') {
+          fbq('track', 'ViewContent', {content_name: 'Apply Button Click'});
+        } else if (event === 'QuizStep') {
+          fbq('trackCustom', 'QuizStep', {content_name: 'Quiz Step ' + step, content_category: value});
+        } else if (event === 'QuizComplete') {
+          fbq('track', 'CompleteRegistration', {content_name: 'Quiz Complete'});
+        }
+      }
+      // Send to our own server
+      fetch('/t/funnel', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({event: event, step: step, value: value, sid: funnelSid})
+      });
+    }
+
     function openQuiz() {
+      funnelSid = Math.random().toString(36).substr(2, 12);
       document.getElementById('quiz-overlay').classList.add('open');
       document.body.style.overflow = 'hidden';
+      trackFunnel('ApplyClick', '0', 'opened');
     }
 
     function closeQuiz() {
@@ -2552,12 +2575,15 @@
         quizData[quizFields[step - 1]] = btn.textContent;
       }
 
+      // Track quiz step
+      var stepNames = {1: 'Business Type', 2: 'Revenue', 3: 'Current Marketing', 4: 'Challenge'};
+      trackFunnel('QuizStep', String(step), stepNames[step] + ': ' + btn.textContent);
+
       // Advance after short delay
       setTimeout(function() {
         document.getElementById('qs-' + step).classList.remove('active');
         var next = step + 1;
         document.getElementById('qs-' + next).classList.add('active');
-        // Update progress
         document.getElementById('qp-' + next).classList.add('filled');
         quizStep = next;
       }, 300);
@@ -2579,6 +2605,7 @@
         document.getElementById('qs-5').classList.remove('active');
         document.getElementById('qs-done').classList.add('active');
         document.querySelector('.quiz-progress').style.display = 'none';
+        trackFunnel('QuizComplete', '5', 'submitted');
         if(typeof fbq==='function') fbq('track','SubmitApplication',{content_name:'Lumen Application'});
       });
     }

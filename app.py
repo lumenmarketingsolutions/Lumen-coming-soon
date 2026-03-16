@@ -83,9 +83,59 @@ def init_db():
         if col not in existing:
             con.execute(f"ALTER TABLE page_views ADD COLUMN {col} {dtype}")
     con.commit()
+
+    # Funnel events table for internal analytics
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS funnel_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT DEFAULT '',
+            event TEXT NOT NULL,
+            step TEXT DEFAULT '',
+            value TEXT DEFAULT '',
+            ip TEXT DEFAULT '',
+            user_agent TEXT DEFAULT '',
+            timestamp TEXT NOT NULL
+        )
+    """)
+    con.commit()
     con.close()
 
 init_db()
+
+@app.route("/t/funnel", methods=["POST"])
+def track_funnel():
+    data = request.get_json() or {}
+    event = data.get("event", "")
+    step = data.get("step", "")
+    value = data.get("value", "")
+    sid = data.get("sid", "")
+
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    if "," in ip:
+        ip = ip.split(",")[0].strip()
+    user_agent = request.headers.get("User-Agent", "")
+
+    con = sqlite3.connect(DB_PATH)
+    con.execute(
+        """INSERT INTO funnel_events (session_id, event, step, value, ip, user_agent, timestamp)
+        VALUES (?, ?, ?, ?, ?, ?, ?)""",
+        (sid, event, step, value, ip, user_agent, datetime.datetime.utcnow().isoformat()),
+    )
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+@app.route("/t/funnel-stats")
+def funnel_stats():
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    con = sqlite3.connect(DB_PATH)
+    rows = con.execute(
+        "SELECT event, step, value, COUNT(*) as cnt FROM funnel_events GROUP BY event, step, value ORDER BY cnt DESC"
+    ).fetchall()
+    con.close()
+    stats = [{"event": r[0], "step": r[1], "value": r[2], "count": r[3]} for r in rows]
+    return jsonify({"stats": stats})
 
 @app.route("/")
 def index():
