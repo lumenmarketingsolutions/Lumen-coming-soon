@@ -48,7 +48,7 @@
       justify-content: center;
       padding: 24px;
       padding-top: 0;
-      padding-bottom: 80px;
+      padding-bottom: 24px;
       overflow: hidden;
       scroll-snap-align: start;
     }
@@ -167,26 +167,14 @@
       50% { box-shadow: 0 0 0 8px rgba(97,40,219,0); }
     }
 
-    .scroll-indicator {
-      position: absolute;
-      bottom: 24px;
-      left: 0;
-      right: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      z-index: 1;
-      opacity: 0;
-      animation: fadeUp 1s ease 1.2s forwards;
-    }
-
     .scroll-chevron {
       width: 0;
       height: 0;
       border-left: 8px solid transparent;
       border-right: 8px solid transparent;
       border-top: 8px solid var(--purple-light);
-      animation: chevronPulse 2s ease-in-out infinite;
+      opacity: 0;
+      animation: fadeUp 1s ease 1s forwards, chevronPulse 2s ease-in-out 2s infinite;
     }
 
     @keyframes chevronPulse {
@@ -1291,9 +1279,9 @@
       <h1 class="hero-headline">
         Your marketing should make money while you sleep<span class="dot"></span>
       </h1>
-    </div>
-    <div class="scroll-indicator">
-      <div class="scroll-chevron"></div>
+      <div style="margin-top:48px;">
+        <div class="scroll-chevron"></div>
+      </div>
     </div>
   </section>
 
