@@ -760,6 +760,79 @@
       color: var(--green);
     }
 
+    /* Ads snapshot */
+    .ads-snapshot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 10px;
+    }
+
+    .ads-snapshot-col {
+      text-align: center;
+    }
+
+    .ads-snapshot-label {
+      display: block;
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .ads-snapshot-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .ads-snapshot-val.green {
+      color: var(--green);
+    }
+
+    .ads-snapshot-val.purple {
+      color: var(--purple-light);
+    }
+
+    .ads-snapshot-arrow {
+      color: var(--text-muted);
+      font-size: 18px;
+      opacity: 0.5;
+    }
+
+    .ads-snapshot-col.highlight {
+      padding: 8px 14px;
+      background: rgba(97,40,219,0.08);
+      border-radius: 8px;
+      border: 1px solid rgba(97,40,219,0.15);
+    }
+
+    /* Creative spend bar */
+    .creative-spend-bar {
+      height: 3px;
+      background: var(--dark-border);
+      border-radius: 2px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .creative-spend-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: var(--purple);
+    }
+
+    .creative-spend-fill.best {
+      background: var(--green);
+    }
+
     /* AI breakdown */
     .ai-breakdown {
       background: linear-gradient(135deg, rgba(97,40,219,0.08), rgba(97,40,219,0.03)) !important;
@@ -1677,26 +1750,21 @@
 
           <!-- ── ADS TAB ── -->
           <div class="tab-content" id="tab-ads">
-            <div class="kpi-row">
-              <div class="kpi-card">
-                <p class="kpi-label">Active Ads</p>
-                <p class="kpi-value purple">6</p>
-                <p class="kpi-change">3 campaigns</p>
+
+            <!-- Spend → Results snapshot -->
+            <div class="ads-snapshot">
+              <div class="ads-snapshot-col">
+                <span class="ads-snapshot-label">Spend</span>
+                <span class="ads-snapshot-val">$3,510</span>
               </div>
-              <div class="kpi-card">
-                <p class="kpi-label">Avg. CTR</p>
-                <p class="kpi-value green">3.2%</p>
-                <p class="kpi-change up">+0.8% vs avg</p>
+              <span class="ads-snapshot-arrow">→</span>
+              <div class="ads-snapshot-col">
+                <span class="ads-snapshot-label">Revenue</span>
+                <span class="ads-snapshot-val green">$16,847</span>
               </div>
-              <div class="kpi-card">
-                <p class="kpi-label">Cost / Lead</p>
-                <p class="kpi-value white">$27.64</p>
-                <p class="kpi-change up">-$4.10 vs last</p>
-              </div>
-              <div class="kpi-card">
-                <p class="kpi-label">Top ROAS</p>
-                <p class="kpi-value green">6.1x</p>
-                <p class="kpi-change">Ad 3</p>
+              <div class="ads-snapshot-col highlight">
+                <span class="ads-snapshot-label">Return</span>
+                <span class="ads-snapshot-val purple">4.8x</span>
               </div>
             </div>
 
@@ -1717,6 +1785,9 @@
                       <span>ROAS <strong>3.8x</strong></span>
                       <span>Leads <strong>31</strong></span>
                     </div>
+                    <div class="creative-spend-bar">
+                      <div class="creative-spend-fill" style="width:42%"></div>
+                    </div>
                   </div>
                 </div>
                 <div class="creative-row">
@@ -1729,6 +1800,9 @@
                       <span>CTR <strong>2.8%</strong></span>
                       <span>ROAS <strong>4.2x</strong></span>
                       <span>Leads <strong>38</strong></span>
+                    </div>
+                    <div class="creative-spend-bar">
+                      <div class="creative-spend-fill" style="width:28%"></div>
                     </div>
                   </div>
                 </div>
@@ -1743,6 +1817,9 @@
                       <span>ROAS <strong class="green">6.1x</strong></span>
                       <span>Leads <strong class="green">58</strong></span>
                     </div>
+                    <div class="creative-spend-bar best">
+                      <div class="creative-spend-fill best" style="width:78%"></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1753,35 +1830,12 @@
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c4dff" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 14v4"/></svg>
                 <span class="ai-breakdown-label">AI Creative Insight</span>
               </div>
-              <p class="ai-breakdown-text"><strong>Ad 3's blue truck gets 62% more clicks than Ad 1.</strong> Your audience responds to outdoor lifestyle imagery with blue tones. Videos where the first frame shows the vehicle outperform static shots by 2.3x.</p>
+              <p class="ai-breakdown-text"><strong>Every time the blue truck appears in the first frame, CTR jumps 62%.</strong> Your audience converts on outdoor lifestyle imagery. Video ads outperform static by 2.3x — recommend shifting 60% of budget to Ad 3.</p>
             </div>
           </div>
 
           <!-- ── LEADS TAB ── -->
           <div class="tab-content" id="tab-leads">
-            <div class="kpi-row">
-              <div class="kpi-card">
-                <p class="kpi-label">In Pipeline</p>
-                <p class="kpi-value purple">74</p>
-                <p class="kpi-change">Active leads</p>
-              </div>
-              <div class="kpi-card">
-                <p class="kpi-label">Converted</p>
-                <p class="kpi-value green">53</p>
-                <p class="kpi-change up">+12 this week</p>
-              </div>
-              <div class="kpi-card">
-                <p class="kpi-label">Avg. LTV</p>
-                <p class="kpi-value white">$318</p>
-                <p class="kpi-change up">+$42 vs avg</p>
-              </div>
-              <div class="kpi-card">
-                <p class="kpi-label">Close Rate</p>
-                <p class="kpi-value green">41.7%</p>
-                <p class="kpi-change up">+6.2%</p>
-              </div>
-            </div>
-
             <div class="dash-chart">
               <div class="chart-header">
                 <span class="chart-title">Lead Pipeline</span>
