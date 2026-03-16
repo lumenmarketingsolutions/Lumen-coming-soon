@@ -275,20 +275,54 @@ def track_stats():
 
 # ── Admin ─────────────────────────────────────────────────────
 @app.route("/admin", methods=["GET", "POST"])
-def waitlist_admin():
+def admin_landing():
     if request.method == "POST":
         pin = (request.form.get("pin") or "").strip()
         if pin == ADMIN_PIN:
             session["wl_auth"] = True
-            return redirect(url_for("waitlist_admin"))
-        return render_template("waitlist.html", error=True, authed=False, entries=[])
+            return redirect(url_for("admin_landing"))
+        return render_template("admin.html", error=True, authed=False, waitlist_count=0, views_today=0, app_count=0)
     if not session.get("wl_auth"):
-        return render_template("waitlist.html", authed=False, entries=[], error=False)
+        return render_template("admin.html", authed=False, error=False, waitlist_count=0, views_today=0, app_count=0)
+    con = sqlite3.connect(DB_PATH)
+    waitlist_count = con.execute("SELECT COUNT(*) FROM waitlist").fetchone()[0]
+    today = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+    views_today = con.execute("SELECT COUNT(*) FROM page_views WHERE timestamp LIKE ?", (today + "%",)).fetchone()[0]
+    try:
+        app_count = con.execute("SELECT COUNT(*) FROM applications").fetchone()[0]
+    except Exception:
+        app_count = 0
+    con.close()
+    return render_template("admin.html", authed=True, error=False,
+                           waitlist_count=waitlist_count, views_today=views_today, app_count=app_count)
+
+@app.route("/admin/coming-soon")
+def admin_coming_soon():
+    if not session.get("wl_auth"):
+        return redirect(url_for("admin_landing"))
     con = sqlite3.connect(DB_PATH)
     rows = con.execute("SELECT email, created_at FROM waitlist ORDER BY id DESC").fetchall()
     con.close()
     entries = [{"email": r[0], "date": r[1][:10]} for r in rows]
     return render_template("waitlist.html", authed=True, entries=entries, error=False)
+
+@app.route("/admin/main-site")
+def admin_main_site():
+    if not session.get("wl_auth"):
+        return redirect(url_for("admin_landing"))
+    con = sqlite3.connect(DB_PATH)
+    try:
+        apps = con.execute("SELECT email, business, revenue, marketing, challenge, created_at FROM applications ORDER BY id DESC").fetchall()
+    except Exception:
+        apps = []
+    try:
+        funnel = con.execute("SELECT event, step, value, COUNT(*) as cnt FROM funnel_events GROUP BY event, step, value ORDER BY cnt DESC").fetchall()
+    except Exception:
+        funnel = []
+    con.close()
+    applications = [{"email": a[0], "business": a[1], "revenue": a[2], "marketing": a[3], "challenge": a[4], "date": a[5][:10]} for a in apps]
+    funnel_stats = [{"event": f[0], "step": f[1], "value": f[2], "count": f[3]} for f in funnel]
+    return render_template("admin_main.html", authed=True, applications=applications, funnel_stats=funnel_stats)
 
 @app.route("/t/visitors")
 def track_visitors():

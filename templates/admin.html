@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumen — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter',-apple-system,sans-serif;
+      background:#0a0a0f;
+      color:#e8e8f0;
+      min-height:100vh;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .container { width:100%; max-width:520px; margin:0 auto; padding:48px 24px; }
+
+    /* ── PIN screen ── */
+    .pin-card { text-align:center; padding-top:30vh; }
+    .pin-card h1 { font-size:20px; font-weight:700; margin-bottom:8px; }
+    .pin-card p { font-size:13px; color:#6b6b80; margin-bottom:32px; }
+    .pin-form { display:flex; gap:0; max-width:320px; margin:0 auto; }
+    .pin-form input {
+      flex:1; padding:14px 16px; background:#111118;
+      border:1px solid #1a1a25; border-right:none;
+      border-radius:10px 0 0 10px; color:#e8e8f0;
+      font-size:16px; font-family:inherit;
+      letter-spacing:6px; text-align:center; outline:none;
+    }
+    .pin-form input:focus { border-color:#6128DB; }
+    .pin-form button {
+      padding:14px 20px;
+      background:linear-gradient(135deg,#6128DB,#7c4dff);
+      border:none; border-radius:0 10px 10px 0;
+      color:white; font-size:13px; font-weight:600;
+      font-family:inherit; cursor:pointer;
+    }
+    .pin-error { margin-top:16px; font-size:13px; color:#ef4444; }
+
+    /* ── Dashboard selector ── */
+    .admin-header {
+      text-align:center;
+      margin-bottom:48px;
+    }
+    .admin-header h1 {
+      font-size:22px;
+      font-weight:800;
+      letter-spacing:-0.5px;
+      margin-bottom:4px;
+    }
+    .admin-header p {
+      font-size:13px;
+      color:#6b6b80;
+    }
+
+    .page-cards {
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+    }
+
+    .page-card {
+      display:flex;
+      align-items:center;
+      gap:20px;
+      background:#111118;
+      border:1px solid #1a1a25;
+      border-radius:16px;
+      padding:24px;
+      cursor:pointer;
+      transition:border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+      text-decoration:none;
+      color:inherit;
+    }
+    .page-card:hover {
+      border-color:#6128DB;
+      transform:translateY(-2px);
+      box-shadow:0 8px 32px rgba(97,40,219,0.12);
+    }
+    .page-card:active {
+      transform:translateY(0);
+    }
+
+    .page-icon {
+      width:52px;
+      height:52px;
+      border-radius:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+      font-size:22px;
+    }
+    .page-icon.purple {
+      background:rgba(97,40,219,0.15);
+      color:#7c4dff;
+    }
+    .page-icon.green {
+      background:rgba(34,197,94,0.15);
+      color:#22c55e;
+    }
+
+    .page-info {
+      flex:1;
+    }
+    .page-title {
+      font-size:16px;
+      font-weight:700;
+      margin-bottom:4px;
+    }
+    .page-desc {
+      font-size:12px;
+      color:#6b6b80;
+      line-height:1.4;
+    }
+    .page-stats {
+      display:flex;
+      gap:12px;
+      margin-top:8px;
+    }
+    .page-stat {
+      font-size:11px;
+      font-weight:600;
+      color:#7c4dff;
+      background:rgba(97,40,219,0.1);
+      padding:2px 8px;
+      border-radius:6px;
+    }
+    .page-stat.green {
+      color:#22c55e;
+      background:rgba(34,197,94,0.1);
+    }
+
+    .page-arrow {
+      color:#44445a;
+      font-size:18px;
+      flex-shrink:0;
+      transition:color 0.2s;
+    }
+    .page-card:hover .page-arrow {
+      color:#7c4dff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    {% if not authed %}
+    <div class="pin-card">
+      <h1>Admin Access</h1>
+      <p>Enter your PIN to continue.</p>
+      <form class="pin-form" method="POST">
+        <input type="password" name="pin" placeholder="------" maxlength="6" autofocus required>
+        <button type="submit">Unlock</button>
+      </form>
+      {% if error %}
+      <p class="pin-error">Incorrect PIN</p>
+      {% endif %}
+    </div>
+    {% else %}
+
+    <div class="admin-header">
+      <h1>Lumen Admin</h1>
+      <p>Select a page to manage</p>
+    </div>
+
+    <div class="page-cards">
+      <a class="page-card" href="/admin/coming-soon">
+        <div class="page-icon purple">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        <div class="page-info">
+          <p class="page-title">Coming Soon</p>
+          <p class="page-desc">Waitlist signups, page views, visitor analytics</p>
+          <div class="page-stats">
+            <span class="page-stat">{{ waitlist_count }} signup{{ 's' if waitlist_count != 1 }}</span>
+            <span class="page-stat">{{ views_today }} views today</span>
+          </div>
+        </div>
+        <span class="page-arrow">&rsaquo;</span>
+      </a>
+
+      <a class="page-card" href="/admin/main-site">
+        <div class="page-icon green">
+          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4"/></svg>
+        </div>
+        <div class="page-info">
+          <p class="page-title">Main Site</p>
+          <p class="page-desc">Applications, funnel analytics, conversion tracking</p>
+          <div class="page-stats">
+            <span class="page-stat green">{{ app_count }} application{{ 's' if app_count != 1 }}</span>
+          </div>
+        </div>
+        <span class="page-arrow">&rsaquo;</span>
+      </a>
+    </div>
+
+    {% endif %}
+  </div>
+</body>
+</html>

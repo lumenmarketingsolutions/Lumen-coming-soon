@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Main Site — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter',-apple-system,sans-serif;
+      background:#0a0a0f;
+      color:#e8e8f0;
+      min-height:100vh;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .container { width:100%; max-width:520px; margin:0 auto; padding:48px 24px; }
+
+    .back-link {
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:13px; color:#6b6b80; text-decoration:none;
+      margin-bottom:24px; font-weight:500;
+    }
+
+    .section-label {
+      font-size:11px; font-weight:600; letter-spacing:2px;
+      text-transform:uppercase; color:#6b6b80; margin-bottom:16px;
+    }
+
+    /* ── Funnel Stats ── */
+    .funnel-section { margin-bottom:40px; }
+    .funnel-grid {
+      display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;
+    }
+    .funnel-card {
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:12px; padding:18px 16px;
+    }
+    .funnel-val {
+      font-size:28px; font-weight:800; line-height:1;
+      margin-bottom:4px;
+    }
+    .funnel-val.purple { color:#7c4dff; }
+    .funnel-val.green { color:#22c55e; }
+    .funnel-label { font-size:11px; color:#6b6b80; font-weight:500; }
+
+    /* ── Funnel Breakdown ── */
+    .funnel-breakdown {
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:12px; padding:16px; margin-bottom:16px;
+    }
+    .funnel-row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:10px 0; border-bottom:1px solid #1a1a25;
+    }
+    .funnel-row:last-child { border-bottom:none; }
+    .funnel-event { font-size:13px; font-weight:500; }
+    .funnel-count {
+      font-size:13px; font-weight:700; color:#7c4dff;
+      background:rgba(97,40,219,0.1);
+      padding:2px 10px; border-radius:6px;
+    }
+
+    /* ── Applications ── */
+    .app-section { margin-top:8px; }
+    .app-header {
+      display:flex; align-items:baseline;
+      justify-content:space-between; margin-bottom:16px;
+    }
+    .app-header h2 {
+      font-size:11px; font-weight:600; letter-spacing:2px;
+      text-transform:uppercase; color:#6b6b80;
+    }
+    .app-count {
+      font-size:12px; font-weight:600; color:#22c55e;
+      background:rgba(34,197,94,0.12);
+      padding:3px 10px; border-radius:999px;
+    }
+
+    .app-item {
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:12px; padding:16px; margin-bottom:10px;
+    }
+    .app-top {
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:10px;
+    }
+    .app-email { font-size:14px; font-weight:600; }
+    .app-date { font-size:11px; color:#6b6b80; }
+    .app-fields { display:flex; flex-direction:column; gap:6px; }
+    .app-field {
+      font-size:12px; color:#6b6b80; line-height:1.4;
+    }
+    .app-field span {
+      color:#e8e8f0; font-weight:500;
+    }
+    .app-empty {
+      text-align:center; padding:36px 0;
+      font-size:13px; color:#44445a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" href="/admin">&lsaquo; Back to Admin</a>
+
+    <!-- Funnel Overview -->
+    <div class="funnel-section">
+      <p class="section-label">Funnel Analytics</p>
+      {% set page_views = funnel_stats|selectattr('event','equalto','PageView')|map(attribute='count')|sum %}
+      {% set apply_clicks = funnel_stats|selectattr('event','equalto','ApplyClick')|map(attribute='count')|sum %}
+      {% set quiz_completes = funnel_stats|selectattr('event','equalto','QuizComplete')|map(attribute='count')|sum %}
+      <div class="funnel-grid">
+        <div class="funnel-card">
+          <p class="funnel-val purple">{{ applications|length }}</p>
+          <p class="funnel-label">Applications</p>
+        </div>
+        <div class="funnel-card">
+          <p class="funnel-val purple">{{ apply_clicks }}</p>
+          <p class="funnel-label">Apply Clicks</p>
+        </div>
+        <div class="funnel-card">
+          <p class="funnel-val green">{{ quiz_completes }}</p>
+          <p class="funnel-label">Quiz Completions</p>
+        </div>
+        <div class="funnel-card">
+          <p class="funnel-val green">{% if apply_clicks > 0 %}{{ ((quiz_completes / apply_clicks) * 100)|round(1) }}%{% else %}—{% endif %}</p>
+          <p class="funnel-label">Completion Rate</p>
+        </div>
+      </div>
+
+      <!-- Step Breakdown -->
+      {% set quiz_steps = funnel_stats|selectattr('event','equalto','QuizStep')|list %}
+      {% if quiz_steps %}
+      <div class="funnel-breakdown">
+        <p style="font-size:12px;font-weight:600;color:#6b6b80;margin-bottom:12px;">Quiz Step Answers</p>
+        {% for s in quiz_steps %}
+        <div class="funnel-row">
+          <span class="funnel-event">{{ s.value }}</span>
+          <span class="funnel-count">{{ s.count }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Applications -->
+    <div class="app-section">
+      <div class="app-header">
+        <h2>Applications</h2>
+        <span class="app-count">{{ applications|length }}</span>
+      </div>
+      {% if applications %}
+        {% for a in applications %}
+        <div class="app-item">
+          <div class="app-top">
+            <span class="app-email">{{ a.email }}</span>
+            <span class="app-date">{{ a.date }}</span>
+          </div>
+          <div class="app-fields">
+            {% if a.business %}<p class="app-field">Business: <span>{{ a.business }}</span></p>{% endif %}
+            {% if a.revenue %}<p class="app-field">Revenue: <span>{{ a.revenue }}</span></p>{% endif %}
+            {% if a.marketing %}<p class="app-field">Marketing: <span>{{ a.marketing }}</span></p>{% endif %}
+            {% if a.challenge %}<p class="app-field">Challenge: <span>{{ a.challenge }}</span></p>{% endif %}
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p class="app-empty">No applications yet. They're coming.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
