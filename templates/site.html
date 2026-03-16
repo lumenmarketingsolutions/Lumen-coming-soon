@@ -217,8 +217,7 @@
     .reveal {
       opacity: 0;
       filter: blur(6px);
-      transition: opacity 1.4s ease,
-                  filter 1.4s ease;
+      will-change: opacity, filter;
     }
 
     .reveal.visible {
@@ -1712,37 +1711,65 @@
       animate();
     })();
 
-    // ── Scroll reveal ──
+    // ── Scroll reveal — smooth progressive fade ──
     (function() {
-      var reveals = document.querySelectorAll('.reveal, .reveal-line');
-      var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
-        });
-      }, {
-        threshold: 0.15,
-        rootMargin: '0px 0px -40px 0px'
-      });
-
-      reveals.forEach(function(el) { observer.observe(el); });
-
-      // Stagger reveal-line elements
+      var reveals = document.querySelectorAll('.reveal');
       var lines = document.querySelectorAll('.reveal-line');
-      var lineObserver = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting) {
-            // Find index among siblings
-            var siblings = entry.target.parentElement.querySelectorAll('.reveal-line');
-            var idx = Array.prototype.indexOf.call(siblings, entry.target);
-            entry.target.style.transitionDelay = (idx * 0.2) + 's';
-            entry.target.classList.add('visible');
+      var completed = new Set();
+
+      function getProgress(el) {
+        var rect = el.getBoundingClientRect();
+        var windowH = window.innerHeight;
+        // Start fading in when top of element is 85% down the screen
+        // Fully visible when top of element is 55% down the screen
+        var start = windowH * 0.85;
+        var end = windowH * 0.55;
+        var progress = (start - rect.top) / (start - end);
+        return Math.min(Math.max(progress, 0), 1);
+      }
+
+      function update() {
+        reveals.forEach(function(el) {
+          if (completed.has(el)) return;
+          var p = getProgress(el);
+          if (p <= 0) return;
+          // Ease out cubic
+          var eased = 1 - Math.pow(1 - p, 3);
+          el.style.opacity = eased;
+          el.style.filter = 'blur(' + ((1 - eased) * 6) + 'px)';
+          if (p >= 1) {
+            completed.add(el);
+            el.classList.add('visible');
+            el.style.opacity = '';
+            el.style.filter = '';
           }
         });
-      }, { threshold: 0.1 });
 
-      lines.forEach(function(el) { lineObserver.observe(el); });
+        lines.forEach(function(el) {
+          if (completed.has(el)) return;
+          var siblings = el.parentElement.querySelectorAll('.reveal-line');
+          var idx = Array.prototype.indexOf.call(siblings, el);
+          var rect = el.getBoundingClientRect();
+          var windowH = window.innerHeight;
+          var start = windowH * 0.88 - (idx * 40);
+          var end = windowH * 0.6 - (idx * 40);
+          var progress = (start - rect.top) / (start - end);
+          var p = Math.min(Math.max(progress, 0), 1);
+          if (p <= 0) return;
+          var eased = 1 - Math.pow(1 - p, 3);
+          el.style.opacity = eased;
+          el.style.filter = 'blur(' + ((1 - eased) * 4) + 'px)';
+          if (p >= 1) {
+            completed.add(el);
+            el.classList.add('visible');
+            el.style.opacity = '';
+            el.style.filter = '';
+          }
+        });
+
+        requestAnimationFrame(update);
+      }
+      requestAnimationFrame(update);
     })();
 
     // ── Count-up animation for KPIs ──
