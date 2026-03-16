@@ -274,7 +274,7 @@ def track_stats():
     })
 
 # ── Admin ─────────────────────────────────────────────────────
-@app.route("/waitlist", methods=["GET", "POST"])
+@app.route("/admin", methods=["GET", "POST"])
 def waitlist_admin():
     if request.method == "POST":
         pin = (request.form.get("pin") or "").strip()
