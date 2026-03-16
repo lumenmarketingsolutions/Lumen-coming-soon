@@ -473,6 +473,90 @@
       font-size: 28px;
     }
 
+    /* Interactive elements */
+    .kpi-card-lg {
+      cursor: pointer;
+    }
+
+    .kpi-card-lg:active {
+      border-color: var(--purple);
+    }
+
+    .kpi-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+      padding: 0 16px;
+    }
+
+    .kpi-detail.open {
+      max-height: 200px;
+      padding: 10px 16px 4px;
+    }
+
+    .kpi-detail-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      padding: 4px 0;
+      border-bottom: 1px solid var(--dark-border);
+    }
+
+    .kpi-detail-row:last-child {
+      border-bottom: none;
+    }
+
+    .kpi-detail-label {
+      color: var(--text-muted);
+    }
+
+    .kpi-detail-val {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .kpi-detail-val.up {
+      color: var(--green);
+    }
+
+    .lead-row {
+      cursor: pointer;
+    }
+
+    .lead-row:active {
+      background: rgba(97,40,219,0.06);
+      border-radius: 8px;
+    }
+
+    .lead-detail {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+
+    .lead-detail.open {
+      max-height: 120px;
+    }
+
+    .lead-detail-inner {
+      display: flex;
+      gap: 16px;
+      padding: 8px 0 4px 42px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .lead-detail-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .lead-detail-item strong {
+      color: var(--text);
+      font-size: 11px;
+    }
+
     .kpi-card:hover {
       border-color: rgba(97,40,219,0.3);
     }
@@ -822,14 +906,16 @@
 
     .ads-snapshot-arrow {
       color: var(--text-muted);
-      font-size: 18px;
-      opacity: 0.5;
+      font-size: 14px;
+      opacity: 0.4;
+      flex: 0;
     }
 
     .ads-snapshot-col.highlight {
       padding: 8px 14px;
       background: rgba(97,40,219,0.08);
       border-radius: 8px;
+      flex: none;
       border: 1px solid rgba(97,40,219,0.15);
     }
 
@@ -1673,15 +1759,27 @@
           <!-- ── OVERVIEW TAB ── -->
           <div class="tab-content active" id="tab-overview">
             <div class="kpi-row kpi-row-2">
-              <div class="kpi-card kpi-card-lg">
+              <div class="kpi-card kpi-card-lg" onclick="toggleKpiDetail(this)">
                 <p class="kpi-label">Revenue</p>
                 <p class="kpi-value purple" data-count="16847" data-prefix="$" data-comma="true">$0</p>
                 <p class="kpi-change up">+23.4% vs last period</p>
+                <div class="kpi-detail">
+                  <div class="kpi-detail-row"><span class="kpi-detail-label">This week</span><span class="kpi-detail-val up">$6,240</span></div>
+                  <div class="kpi-detail-row"><span class="kpi-detail-label">Last week</span><span class="kpi-detail-val">$5,107</span></div>
+                  <div class="kpi-detail-row"><span class="kpi-detail-label">Avg. order</span><span class="kpi-detail-val">$318</span></div>
+                  <div class="kpi-detail-row"><span class="kpi-detail-label">Highest day</span><span class="kpi-detail-val up">Tue — $1,840</span></div>
+                </div>
               </div>
-              <div class="kpi-card kpi-card-lg">
+              <div class="kpi-card kpi-card-lg" onclick="toggleKpiDetail(this)">
                 <p class="kpi-label">ROAS</p>
                 <p class="kpi-value green" data-count="4.8" data-suffix="x" data-decimal="true">0x</p>
                 <p class="kpi-change up">+0.6x vs last period</p>
+                <div class="kpi-detail">
+                  <div class="kpi-detail-row"><span class="kpi-detail-label">Ad spend</span><span class="kpi-detail-val">$3,510</span></div>
+                  <div class="kpi-detail-row"><span class="kpi-detail-label">Revenue</span><span class="kpi-detail-val up">$16,847</span></div>
+                  <div class="kpi-detail-row"><span class="kpi-detail-label">Cost / lead</span><span class="kpi-detail-val">$27.64</span></div>
+                  <div class="kpi-detail-row"><span class="kpi-detail-label">Best ad</span><span class="kpi-detail-val up">Retargeting — 6.1x</span></div>
+                </div>
               </div>
             </div>
 
@@ -1692,7 +1790,7 @@
                 <span class="chart-period">Latest leads</span>
               </div>
               <div class="lead-list">
-                <div class="lead-row">
+                <div class="lead-row" onclick="toggleLeadDetail(this)">
                   <div class="lead-avatar">JM</div>
                   <div class="lead-info">
                     <span class="lead-name">James M.</span>
@@ -1700,7 +1798,14 @@
                   </div>
                   <span class="lead-status converted">Converted</span>
                 </div>
-                <div class="lead-row">
+                <div class="lead-detail">
+                  <div class="lead-detail-inner">
+                    <div class="lead-detail-item"><span>LTV</span><strong>$640</strong></div>
+                    <div class="lead-detail-item"><span>Days to close</span><strong>3</strong></div>
+                    <div class="lead-detail-item"><span>Touchpoints</span><strong>4</strong></div>
+                  </div>
+                </div>
+                <div class="lead-row" onclick="toggleLeadDetail(this)">
                   <div class="lead-avatar">SR</div>
                   <div class="lead-info">
                     <span class="lead-name">Sarah R.</span>
@@ -1708,13 +1813,27 @@
                   </div>
                   <span class="lead-status booked">Booked Call</span>
                 </div>
-                <div class="lead-row">
+                <div class="lead-detail">
+                  <div class="lead-detail-inner">
+                    <div class="lead-detail-item"><span>Est. value</span><strong>$420</strong></div>
+                    <div class="lead-detail-item"><span>Days in funnel</span><strong>5</strong></div>
+                    <div class="lead-detail-item"><span>Touchpoints</span><strong>6</strong></div>
+                  </div>
+                </div>
+                <div class="lead-row" onclick="toggleLeadDetail(this)">
                   <div class="lead-avatar">DK</div>
                   <div class="lead-info">
                     <span class="lead-name">David K.</span>
                     <span class="lead-source">Retargeting</span>
                   </div>
                   <span class="lead-status new-lead">New</span>
+                </div>
+                <div class="lead-detail">
+                  <div class="lead-detail-inner">
+                    <div class="lead-detail-item"><span>Entered</span><strong>Today</strong></div>
+                    <div class="lead-detail-item"><span>Pages viewed</span><strong>3</strong></div>
+                    <div class="lead-detail-item"><span>Time on site</span><strong>2m 14s</strong></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1918,23 +2037,37 @@
                 <span class="chart-period">Last 7 days</span>
               </div>
               <div class="lead-list">
-                <div class="lead-row">
+                <div class="lead-row" onclick="toggleLeadDetail(this)">
                   <div class="lead-avatar">JM</div>
                   <div class="lead-info">
                     <span class="lead-name">James M.</span>
-                    <span class="lead-source">Meta Ad 3</span>
+                    <span class="lead-source">Ad 2</span>
                   </div>
                   <span class="lead-status converted">Converted</span>
                 </div>
-                <div class="lead-row">
+                <div class="lead-detail">
+                  <div class="lead-detail-inner">
+                    <div class="lead-detail-item"><span>LTV</span><strong>$640</strong></div>
+                    <div class="lead-detail-item"><span>Days to close</span><strong>3</strong></div>
+                    <div class="lead-detail-item"><span>Touchpoints</span><strong>4</strong></div>
+                  </div>
+                </div>
+                <div class="lead-row" onclick="toggleLeadDetail(this)">
                   <div class="lead-avatar">SR</div>
                   <div class="lead-info">
                     <span class="lead-name">Sarah R.</span>
-                    <span class="lead-source">Meta Ad 2</span>
+                    <span class="lead-source">Ad 1</span>
                   </div>
                   <span class="lead-status booked">Booked Call</span>
                 </div>
-                <div class="lead-row">
+                <div class="lead-detail">
+                  <div class="lead-detail-inner">
+                    <div class="lead-detail-item"><span>Est. value</span><strong>$420</strong></div>
+                    <div class="lead-detail-item"><span>Days in funnel</span><strong>5</strong></div>
+                    <div class="lead-detail-item"><span>Touchpoints</span><strong>6</strong></div>
+                  </div>
+                </div>
+                <div class="lead-row" onclick="toggleLeadDetail(this)">
                   <div class="lead-avatar">DK</div>
                   <div class="lead-info">
                     <span class="lead-name">David K.</span>
@@ -1942,21 +2075,42 @@
                   </div>
                   <span class="lead-status new-lead">New</span>
                 </div>
-                <div class="lead-row">
+                <div class="lead-detail">
+                  <div class="lead-detail-inner">
+                    <div class="lead-detail-item"><span>Entered</span><strong>Today</strong></div>
+                    <div class="lead-detail-item"><span>Pages viewed</span><strong>3</strong></div>
+                    <div class="lead-detail-item"><span>Time on site</span><strong>2m 14s</strong></div>
+                  </div>
+                </div>
+                <div class="lead-row" onclick="toggleLeadDetail(this)">
                   <div class="lead-avatar">LP</div>
                   <div class="lead-info">
                     <span class="lead-name">Lisa P.</span>
-                    <span class="lead-source">Meta Ad 3</span>
+                    <span class="lead-source">Ad 2</span>
                   </div>
                   <span class="lead-status converted">Converted</span>
                 </div>
-                <div class="lead-row">
+                <div class="lead-detail">
+                  <div class="lead-detail-inner">
+                    <div class="lead-detail-item"><span>LTV</span><strong>$510</strong></div>
+                    <div class="lead-detail-item"><span>Days to close</span><strong>7</strong></div>
+                    <div class="lead-detail-item"><span>Touchpoints</span><strong>5</strong></div>
+                  </div>
+                </div>
+                <div class="lead-row" onclick="toggleLeadDetail(this)">
                   <div class="lead-avatar">MT</div>
                   <div class="lead-info">
                     <span class="lead-name">Mike T.</span>
-                    <span class="lead-source">Meta Ad 1</span>
+                    <span class="lead-source">Ad 1</span>
                   </div>
                   <span class="lead-status contacted">Contacted</span>
+                </div>
+                <div class="lead-detail">
+                  <div class="lead-detail-inner">
+                    <div class="lead-detail-item"><span>Est. value</span><strong>$280</strong></div>
+                    <div class="lead-detail-item"><span>Days in funnel</span><strong>2</strong></div>
+                    <div class="lead-detail-item"><span>Touchpoints</span><strong>3</strong></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2317,6 +2471,26 @@
       document.querySelectorAll('.tab-content').forEach(function(tc) { tc.classList.remove('active'); });
       var target = document.getElementById('tab-' + tab);
       if (target) target.classList.add('active');
+    }
+
+    // ── Interactive KPI detail toggle ──
+    function toggleKpiDetail(card) {
+      var detail = card.querySelector('.kpi-detail');
+      if (!detail) return;
+      var isOpen = detail.classList.contains('open');
+      // Close all others first
+      document.querySelectorAll('.kpi-detail.open').forEach(function(d) { d.classList.remove('open'); });
+      if (!isOpen) detail.classList.add('open');
+    }
+
+    // ── Interactive lead detail toggle ──
+    function toggleLeadDetail(row) {
+      var detail = row.nextElementSibling;
+      if (!detail || !detail.classList.contains('lead-detail')) return;
+      var isOpen = detail.classList.contains('open');
+      // Close all others first
+      document.querySelectorAll('.lead-detail.open').forEach(function(d) { d.classList.remove('open'); });
+      if (!isOpen) detail.classList.add('open');
     }
 
     // ── Quiz ──
