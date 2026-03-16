@@ -40,14 +40,14 @@
     ══════════════════════════════════════════ */
     .hero {
       position: relative;
-      min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: 24px;
       padding-top: 0;
-      padding-bottom: 100px;
+      padding-bottom: 80px;
       overflow: hidden;
     }
 
@@ -167,7 +167,7 @@
 
     .scroll-indicator {
       position: absolute;
-      bottom: 60px;
+      bottom: 24px;
       left: 0;
       right: 0;
       display: flex;
@@ -178,29 +178,18 @@
       animation: fadeUp 1s ease 1.2s forwards;
     }
 
-    .scroll-text {
-      font-size: 11px;
-      font-weight: 500;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 12px;
+    .scroll-chevron {
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid var(--purple-light);
+      animation: chevronPulse 2s ease-in-out infinite;
     }
 
-    .scroll-arrow {
-      width: 20px;
-      height: 20px;
-      border-right: 2px solid var(--purple-light);
-      border-bottom: 2px solid var(--purple-light);
-      transform: rotate(45deg);
-      margin: 0 auto;
-      animation: scrollBounce 2s ease-in-out infinite;
-      opacity: 0.6;
-    }
-
-    @keyframes scrollBounce {
-      0%, 100% { transform: rotate(45deg) translateY(0); opacity: 0.4; }
-      50% { transform: rotate(45deg) translateY(6px); opacity: 0.8; }
+    @keyframes chevronPulse {
+      0%, 100% { opacity: 0.3; transform: translateY(0); }
+      50% { opacity: 0.7; transform: translateY(4px); }
     }
 
     /* ══════════════════════════════════════════
@@ -1300,8 +1289,7 @@
       </h1>
     </div>
     <div class="scroll-indicator">
-      <div class="scroll-text">Scroll</div>
-      <div class="scroll-arrow"></div>
+      <div class="scroll-chevron"></div>
     </div>
   </section>
 
