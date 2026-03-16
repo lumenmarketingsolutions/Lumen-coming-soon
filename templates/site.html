@@ -600,6 +600,118 @@
       color: var(--green);
     }
 
+    /* Retargeting section */
+    .retarget-section {
+      margin-top: 16px;
+    }
+
+    .retarget-flow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+      margin-bottom: 16px;
+    }
+
+    .retarget-node {
+      text-align: center;
+      flex: 1;
+    }
+
+    .retarget-num {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .retarget-num.green {
+      color: var(--green);
+    }
+
+    .retarget-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .retarget-arrow {
+      color: var(--purple-light);
+      font-size: 16px;
+      opacity: 0.5;
+      flex-shrink: 0;
+    }
+
+    .retarget-rate {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: rgba(34,197,94,0.06);
+      border: 1px solid rgba(34,197,94,0.15);
+      border-radius: 8px;
+    }
+
+    .retarget-rate-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    .retarget-rate-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--green);
+    }
+
+    .retarget-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .retarget-bar-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-dim);
+      width: 80px;
+      flex-shrink: 0;
+    }
+
+    .retarget-bar-track {
+      flex: 1;
+      height: 8px;
+      background: var(--dark);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .retarget-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 1.2s ease;
+    }
+
+    .retarget-bar-fill.purple {
+      background: linear-gradient(90deg, var(--purple), var(--purple-light));
+    }
+
+    .retarget-bar-fill.green {
+      background: linear-gradient(90deg, #16a34a, var(--green));
+    }
+
+    .retarget-bar-pct {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text);
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
     /* AI insight */
     .ai-insight {
       background: linear-gradient(135deg, rgba(97,40,219,0.08), rgba(97,40,219,0.03));
@@ -1053,6 +1165,16 @@
       width: var(--target-width) !important;
     }
 
+    /* Retargeting bars animate in from left */
+    .retarget-bar-fill {
+      width: 0 !important;
+      transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .retarget-section.animated .retarget-bar-fill {
+      width: var(--target-width) !important;
+    }
+
     /* Stagger card reveals */
     .system-card.reveal:nth-child(1) { transition-delay: 0s; }
     .system-card.reveal:nth-child(2) { transition-delay: 0.15s; }
@@ -1322,6 +1444,52 @@
             </div>
             <div class="funnel-insight">
               <strong>1 in 3 people leave your page within 8 seconds.</strong> Your headline is working, but the "Book a Call" button is too far down the page. Move it above pricing.
+            </div>
+          </div>
+
+          <!-- Retargeting Performance -->
+          <div class="dash-chart retarget-section">
+            <div class="chart-header">
+              <span class="chart-title">Retargeting Performance</span>
+              <span class="chart-period">Leads recaptured</span>
+            </div>
+
+            <div class="retarget-flow">
+              <div class="retarget-node">
+                <p class="retarget-num" data-count="4193" data-comma="true">0</p>
+                <p class="retarget-label">Bounced</p>
+              </div>
+              <span class="retarget-arrow">&#8250;</span>
+              <div class="retarget-node">
+                <p class="retarget-num" data-count="2847" data-comma="true">0</p>
+                <p class="retarget-label">Retargeted</p>
+              </div>
+              <span class="retarget-arrow">&#8250;</span>
+              <div class="retarget-node">
+                <p class="retarget-num" data-count="891" data-comma="true">0</p>
+                <p class="retarget-label">Returned</p>
+              </div>
+              <span class="retarget-arrow">&#8250;</span>
+              <div class="retarget-node">
+                <p class="retarget-num green" data-count="214" data-comma="true">0</p>
+                <p class="retarget-label">Converted</p>
+              </div>
+            </div>
+
+            <div class="retarget-bar-row">
+              <span class="retarget-bar-label">Return Rate</span>
+              <div class="retarget-bar-track"><div class="retarget-bar-fill purple" style="--target-width:31%"></div></div>
+              <span class="retarget-bar-pct">31%</span>
+            </div>
+            <div class="retarget-bar-row">
+              <span class="retarget-bar-label">Conversion</span>
+              <div class="retarget-bar-track"><div class="retarget-bar-fill green" style="--target-width:24%"></div></div>
+              <span class="retarget-bar-pct">24%</span>
+            </div>
+
+            <div class="retarget-rate">
+              <span class="retarget-rate-label">Revenue from retargeted leads</span>
+              <span class="retarget-rate-val">$4,280</span>
             </div>
           </div>
 
@@ -1767,6 +1935,36 @@
         }
       }, { threshold: 0.3 });
       funnelObserver.observe(funnelEl);
+    })();
+
+    // ── Retargeting bar animation ──
+    (function() {
+      var retargetEl = document.querySelector('.retarget-section');
+      if (!retargetEl) return;
+      var retargetObserver = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting) {
+          setTimeout(function() { retargetEl.classList.add('animated'); }, 300);
+          retargetObserver.disconnect();
+          // Count up retargeting numbers
+          retargetEl.querySelectorAll('.retarget-num[data-count]').forEach(function(el) {
+            var target = parseInt(el.getAttribute('data-count'));
+            var useComma = el.getAttribute('data-comma') === 'true';
+            var start = 0;
+            var duration = 1200;
+            var startTime = null;
+            function step(ts) {
+              if (!startTime) startTime = ts;
+              var p = Math.min((ts - startTime) / duration, 1);
+              var eased = 1 - Math.pow(1 - p, 3);
+              var val = Math.round(eased * target);
+              el.textContent = useComma ? val.toLocaleString() : val;
+              if (p < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+          });
+        }
+      }, { threshold: 0.3 });
+      retargetObserver.observe(retargetEl);
     })();
 
     // ── Dashboard glow on scroll ──
