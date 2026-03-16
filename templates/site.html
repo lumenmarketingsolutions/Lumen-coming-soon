@@ -1488,14 +1488,14 @@
         transparent 100%
       );
       background-size: 400% 100%;
-      background-position: 150% 0;
+      background-position: 160% 0;
       pointer-events: none;
       opacity: 0;
     }
 
-    .system-card.visible::before {
+    .system-card.shimmer::before {
       opacity: 1;
-      animation: shimmer-once 1.8s cubic-bezier(0.22, 0.6, 0.36, 1) forwards;
+      animation: shimmer-once 2s cubic-bezier(0.12, 0.4, 0.22, 1) forwards;
     }
 
     .system-card {
@@ -1504,8 +1504,10 @@
     }
 
     @keyframes shimmer-once {
-      0% { background-position: 150% 0; }
-      100% { background-position: -50% 0; }
+      0% { background-position: 160% 0; opacity: 0; }
+      15% { opacity: 1; }
+      85% { opacity: 1; }
+      100% { background-position: -10% 0; opacity: 0; }
     }
 
     /* Dashboard glow on scroll */
@@ -1553,13 +1555,13 @@
     .system-card.reveal:nth-child(6) { transition-delay: 0.75s; }
     .system-card.reveal:nth-child(7) { transition-delay: 0.9s; }
 
-    .system-card.reveal.visible:nth-child(1)::before { animation-delay: 0.3s; }
-    .system-card.reveal.visible:nth-child(2)::before { animation-delay: 0.45s; }
-    .system-card.reveal.visible:nth-child(3)::before { animation-delay: 0.6s; }
-    .system-card.reveal.visible:nth-child(4)::before { animation-delay: 0.75s; }
-    .system-card.reveal.visible:nth-child(5)::before { animation-delay: 0.9s; }
-    .system-card.reveal.visible:nth-child(6)::before { animation-delay: 1.05s; }
-    .system-card.reveal.visible:nth-child(7)::before { animation-delay: 1.2s; }
+    .system-card.reveal.shimmer:nth-child(1)::before { animation-delay: 0s; }
+    .system-card.reveal.shimmer:nth-child(2)::before { animation-delay: 0.15s; }
+    .system-card.reveal.shimmer:nth-child(3)::before { animation-delay: 0.3s; }
+    .system-card.reveal.shimmer:nth-child(4)::before { animation-delay: 0.45s; }
+    .system-card.reveal.shimmer:nth-child(5)::before { animation-delay: 0.6s; }
+    .system-card.reveal.shimmer:nth-child(6)::before { animation-delay: 0.75s; }
+    .system-card.reveal.shimmer:nth-child(7)::before { animation-delay: 0.9s; }
 
     /* Glow pulse on AI insight */
     .ai-insight {
@@ -2370,6 +2372,8 @@
         return Math.min(Math.max(progress, 0), 1);
       }
 
+      var shimmered = new Set();
+
       function update() {
         reveals.forEach(function(el) {
           if (completed.has(el)) return;
@@ -2378,6 +2382,11 @@
           var eased = 1 - Math.pow(1 - p, 3);
           el.style.opacity = eased;
           el.style.filter = 'blur(' + ((1 - eased) * 6) + 'px)';
+          // Trigger shimmer early — when card is ~30% faded in
+          if (p >= 0.3 && !shimmered.has(el) && el.classList.contains('system-card')) {
+            shimmered.add(el);
+            el.classList.add('shimmer');
+          }
           if (p >= 1) {
             completed.add(el);
             el.classList.add('visible');
