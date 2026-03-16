@@ -490,13 +490,6 @@
     .kpi-change.down { color: #ef4444; }
 
     /* Chart area */
-    .dash-chart-area {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 16px;
-      margin-bottom: 24px;
-    }
-
     .dash-chart {
       background: var(--dark);
       border: 1px solid var(--dark-border);
@@ -522,106 +515,7 @@
       color: var(--text-muted);
     }
 
-    /* Revenue chart (bars) */
-    .revenue-bars {
-      display: flex;
-      align-items: flex-end;
-      gap: 8px;
-      height: 120px;
-      padding-top: 8px;
-    }
-
-    .rev-bar-col {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      height: 100%;
-      justify-content: flex-end;
-      gap: 6px;
-      position: relative;
-    }
-
-    .rev-bar {
-      width: 100%;
-      border-radius: 4px 4px 0 0;
-      background: linear-gradient(180deg, var(--purple-light), var(--purple));
-      transition: height 0.6s ease, opacity 0.3s;
-      min-height: 4px;
-      position: relative;
-      cursor: pointer;
-    }
-
-    .rev-bar:hover {
-      opacity: 0.8;
-    }
-
-    .rev-bar-tooltip {
-      display: none;
-      position: absolute;
-      top: -28px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--text);
-      color: var(--dark);
-      font-size: 10px;
-      font-weight: 700;
-      padding: 3px 8px;
-      border-radius: 4px;
-      white-space: nowrap;
-    }
-
-    .rev-bar:hover .rev-bar-tooltip {
-      display: block;
-    }
-
-    .rev-label {
-      font-size: 9px;
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-
-    /* Donut chart */
-    .donut-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-    }
-
-    .donut-svg {
-      width: 100px;
-      height: 100px;
-      transform: rotate(-90deg);
-    }
-
-    .donut-track {
-      fill: none;
-      stroke: var(--dark-border);
-      stroke-width: 8;
-    }
-
-    .donut-fill {
-      fill: none;
-      stroke-width: 8;
-      stroke-linecap: round;
-      transition: stroke-dashoffset 1.5s ease;
-    }
-
-    .donut-legend {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--text-dim);
-    }
+    /* (Revenue bars and donut chart CSS removed — funnel is primary visual) */
 
     .legend-dot {
       width: 8px;
@@ -1204,10 +1098,6 @@
         grid-template-columns: 1fr 1fr;
       }
 
-      .dash-chart-area {
-        grid-template-columns: 1fr;
-      }
-
       .dash-tabs {
         gap: 2px;
       }
@@ -1399,41 +1289,11 @@
             </div>
           </div>
 
-          <div class="dash-chart-area">
-            <div class="dash-chart">
-              <div class="chart-header">
-                <span class="chart-title">Revenue — Last 7 Days</span>
-                <span class="chart-period">Mar 1 — Mar 7</span>
-              </div>
-              <div class="revenue-bars" id="rev-chart">
-                <!-- Filled by JS -->
-              </div>
-            </div>
-            <div class="dash-chart">
-              <div class="chart-header">
-                <span class="chart-title">Lead Sources</span>
-              </div>
-              <div class="donut-wrap">
-                <svg class="donut-svg" viewBox="0 0 42 42">
-                  <circle class="donut-track" cx="21" cy="21" r="16"/>
-                  <circle class="donut-fill" cx="21" cy="21" r="16" stroke="#7c4dff" stroke-dasharray="62 100.5" stroke-dashoffset="0"/>
-                  <circle class="donut-fill" cx="21" cy="21" r="16" stroke="#22c55e" stroke-dasharray="25 100.5" stroke-dashoffset="-62"/>
-                  <circle class="donut-fill" cx="21" cy="21" r="16" stroke="#6b6b80" stroke-dasharray="13.5 100.5" stroke-dashoffset="-87"/>
-                </svg>
-                <div class="donut-legend">
-                  <div class="legend-item"><span class="legend-dot" style="background:#7c4dff"></span> Meta Ads (62%)</div>
-                  <div class="legend-item"><span class="legend-dot" style="background:#22c55e"></span> Organic (25%)</div>
-                  <div class="legend-item"><span class="legend-dot" style="background:#6b6b80"></span> Direct (13%)</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <!-- Funnel Conversion Breakdown -->
           <div class="dash-chart funnel-section">
             <div class="chart-header">
               <span class="chart-title">Funnel Performance</span>
-              <span class="chart-period">Page-by-page breakdown</span>
+              <span class="chart-period">Ad click → customer</span>
             </div>
             <div class="funnel-row">
               <span class="funnel-step-name">Ad Click</span>
@@ -1461,7 +1321,7 @@
               <div class="funnel-stats"><span class="funnel-stat-val">53</span><span class="funnel-stat-pct">1.1%</span></div>
             </div>
             <div class="funnel-insight">
-              <strong>About 1 in 3 people leave your page within 8 seconds.</strong> Your headline is catching their attention, but once they scroll down to the pricing section, most of them leave. Try putting your "Book a Call" button higher on the page so they see it before they get to pricing.
+              <strong>1 in 3 people leave your page within 8 seconds.</strong> Your headline is working, but the "Book a Call" button is too far down the page. Move it above pricing.
             </div>
           </div>
 
@@ -1808,33 +1668,7 @@
       }
     })();
 
-    // ── Revenue chart bars ──
-    (function() {
-      var data = [
-        { day: 'Mon', value: 1840 },
-        { day: 'Tue', value: 2210 },
-        { day: 'Wed', value: 1950 },
-        { day: 'Thu', value: 3120 },
-        { day: 'Fri', value: 2780 },
-        { day: 'Sat', value: 2640 },
-        { day: 'Sun', value: 2307 }
-      ];
-
-      var max = Math.max.apply(null, data.map(function(d) { return d.value; }));
-      var chart = document.getElementById('rev-chart');
-
-      data.forEach(function(d) {
-        var pct = (d.value / max) * 100;
-        var col = document.createElement('div');
-        col.className = 'rev-bar-col';
-        col.innerHTML =
-          '<div class="rev-bar" style="height:' + pct + '%">' +
-            '<span class="rev-bar-tooltip">$' + d.value.toLocaleString() + '</span>' +
-          '</div>' +
-          '<span class="rev-label">' + d.day + '</span>';
-        chart.appendChild(col);
-      });
-    })();
+    // ── (Revenue chart removed — funnel is primary visual) ──
 
     // ── Dashboard tab switching ──
     function switchTab(btn, tab) {
