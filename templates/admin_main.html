@@ -45,23 +45,6 @@
     .funnel-val.green { color:#22c55e; }
     .funnel-label { font-size:11px; color:#6b6b80; font-weight:500; }
 
-    /* ── Funnel Breakdown ── */
-    .funnel-breakdown {
-      background:#111118; border:1px solid #1a1a25;
-      border-radius:12px; padding:16px; margin-bottom:16px;
-    }
-    .funnel-row {
-      display:flex; justify-content:space-between; align-items:center;
-      padding:10px 0; border-bottom:1px solid #1a1a25;
-    }
-    .funnel-row:last-child { border-bottom:none; }
-    .funnel-event { font-size:13px; font-weight:500; }
-    .funnel-count {
-      font-size:13px; font-weight:700; color:#7c4dff;
-      background:rgba(97,40,219,0.1);
-      padding:2px 10px; border-radius:6px;
-    }
-
     /* ── Applications ── */
     .app-section { margin-top:8px; }
     .app-header {
@@ -130,19 +113,6 @@
         </div>
       </div>
 
-      <!-- Step Breakdown -->
-      {% set quiz_steps = funnel_stats|selectattr('event','equalto','QuizStep')|list %}
-      {% if quiz_steps %}
-      <div class="funnel-breakdown">
-        <p style="font-size:12px;font-weight:600;color:#6b6b80;margin-bottom:12px;">Quiz Step Answers</p>
-        {% for s in quiz_steps %}
-        <div class="funnel-row">
-          <span class="funnel-event">{{ s.value }}</span>
-          <span class="funnel-count">{{ s.count }}</span>
-        </div>
-        {% endfor %}
-      </div>
-      {% endif %}
     </div>
 
     <!-- Applications -->
