@@ -31,7 +31,9 @@ def send_email(to, subject, html_body):
             print(f"Email send error: {e}")
     threading.Thread(target=_send).start()
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "waitlist.db")
+# Use persistent volume on Railway (/data), fall back to local dir for dev
+DATA_DIR = "/data" if os.path.isdir("/data") else os.path.dirname(__file__)
+DB_PATH = os.path.join(DATA_DIR, "waitlist.db")
 
 def init_db():
     con = sqlite3.connect(DB_PATH)
