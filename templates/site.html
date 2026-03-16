@@ -1487,15 +1487,14 @@
         transparent 60%,
         transparent 100%
       );
-      background-size: 400% 100%;
-      background-position: 160% 0;
+      background-size: 300% 100%;
+      background-position: 110% 0;
       pointer-events: none;
       opacity: 0;
     }
 
     .system-card.shimmer::before {
-      opacity: 1;
-      animation: shimmer-once 2s cubic-bezier(0.12, 0.4, 0.22, 1) forwards;
+      animation: shimmer-once 3s cubic-bezier(0.05, 0.4, 0.15, 1) forwards;
     }
 
     .system-card {
@@ -1504,10 +1503,9 @@
     }
 
     @keyframes shimmer-once {
-      0% { background-position: 160% 0; opacity: 0; }
-      15% { opacity: 1; }
-      85% { opacity: 1; }
-      100% { background-position: -10% 0; opacity: 0; }
+      0% { background-position: 110% 0; opacity: 0; }
+      10% { opacity: 0.8; }
+      100% { background-position: 0% 0; opacity: 0.5; }
     }
 
     /* Dashboard glow on scroll */
@@ -2382,8 +2380,8 @@
           var eased = 1 - Math.pow(1 - p, 3);
           el.style.opacity = eased;
           el.style.filter = 'blur(' + ((1 - eased) * 6) + 'px)';
-          // Trigger shimmer early — when card is ~30% faded in
-          if (p >= 0.3 && !shimmered.has(el) && el.classList.contains('system-card')) {
+          // Trigger shimmer as soon as card starts appearing
+          if (p >= 0.05 && !shimmered.has(el) && el.classList.contains('system-card')) {
             shimmered.add(el);
             el.classList.add('shimmer');
           }
