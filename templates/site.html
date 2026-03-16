@@ -25,6 +25,7 @@
 
     html {
       scroll-behavior: smooth;
+      scroll-snap-type: y proximity;
     }
 
     body {
@@ -49,6 +50,7 @@
       padding-top: 0;
       padding-bottom: 80px;
       overflow: hidden;
+      scroll-snap-align: start;
     }
 
     /* Animated background — inherited from coming soon */
@@ -250,9 +252,10 @@
        SECTION: THE PROBLEM
     ══════════════════════════════════════════ */
     .problem {
-      min-height: 80vh;
+      min-height: 100dvh;
       display: flex;
       align-items: center;
+      scroll-snap-align: start;
     }
 
     .problem-lines {
@@ -287,6 +290,7 @@
     ══════════════════════════════════════════ */
     .system {
       padding-bottom: 80px;
+      scroll-snap-align: start;
     }
 
     .system-headline {
@@ -1917,6 +1921,19 @@
         document.querySelector('.quiz-progress').style.display = 'none';
       });
     }
+
+    // ── Disable scroll snap after passing the system section ──
+    (function() {
+      var systemSection = document.querySelector('.system');
+      var snapDisabled = false;
+      var snapObserver = new IntersectionObserver(function(entries) {
+        if (!entries[0].isIntersecting && entries[0].boundingClientRect.top < 0 && !snapDisabled) {
+          snapDisabled = true;
+          document.documentElement.style.scrollSnapType = 'none';
+        }
+      }, { threshold: 0 });
+      snapObserver.observe(systemSection);
+    })();
 
     // ── Funnel bar animation ──
     (function() {
