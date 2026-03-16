@@ -607,109 +607,84 @@
 
     .retarget-flow {
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 4px;
+      flex-direction: column;
+      gap: 0;
       margin-bottom: 16px;
     }
 
-    .retarget-node {
-      text-align: center;
-      flex: 1;
+    .retarget-step {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--dark-border);
     }
 
-    .retarget-num {
-      font-size: 18px;
-      font-weight: 800;
-      color: var(--text);
-      margin-bottom: 2px;
+    .retarget-step:last-child {
+      border-bottom: none;
     }
 
-    .retarget-num.green {
-      color: var(--green);
-    }
-
-    .retarget-label {
-      font-size: 10px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+    .retarget-step-label {
+      font-size: 12px;
       font-weight: 600;
-    }
-
-    .retarget-arrow {
-      color: var(--purple-light);
-      font-size: 16px;
-      opacity: 0.5;
+      color: var(--text-dim);
+      width: 90px;
       flex-shrink: 0;
     }
 
-    .retarget-rate {
+    .retarget-step-bar {
+      flex: 1;
+      height: 20px;
+      background: var(--dark);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .retarget-step-fill {
+      height: 100%;
+      border-radius: 5px;
+      background: linear-gradient(90deg, var(--purple), var(--purple-light));
+      transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .retarget-step-fill.green {
+      background: linear-gradient(90deg, #16a34a, var(--green));
+    }
+
+    .retarget-step-val {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--text);
+      width: 50px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .retarget-step-val.green {
+      color: var(--green);
+    }
+
+    .retarget-bottom {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 12px 14px;
+      padding: 10px 14px;
       background: rgba(34,197,94,0.06);
       border: 1px solid rgba(34,197,94,0.15);
       border-radius: 8px;
+      margin-top: 4px;
     }
 
-    .retarget-rate-label {
+    .retarget-bottom-label {
       font-size: 12px;
       color: var(--text-dim);
       font-weight: 500;
     }
 
-    .retarget-rate-val {
-      font-size: 20px;
+    .retarget-bottom-val {
+      font-size: 18px;
       font-weight: 800;
       color: var(--green);
-    }
-
-    .retarget-bar-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-
-    .retarget-bar-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-dim);
-      width: 80px;
-      flex-shrink: 0;
-    }
-
-    .retarget-bar-track {
-      flex: 1;
-      height: 8px;
-      background: var(--dark);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .retarget-bar-fill {
-      height: 100%;
-      border-radius: 4px;
-      transition: width 1.2s ease;
-    }
-
-    .retarget-bar-fill.purple {
-      background: linear-gradient(90deg, var(--purple), var(--purple-light));
-    }
-
-    .retarget-bar-fill.green {
-      background: linear-gradient(90deg, #16a34a, var(--green));
-    }
-
-    .retarget-bar-pct {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text);
-      width: 36px;
-      text-align: right;
-      flex-shrink: 0;
     }
 
     /* AI insight */
@@ -1166,12 +1141,12 @@
     }
 
     /* Retargeting bars animate in from left */
-    .retarget-bar-fill {
+    .retarget-step-fill {
       width: 0 !important;
       transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
-    .retarget-section.animated .retarget-bar-fill {
+    .retarget-section.animated .retarget-step-fill {
       width: var(--target-width) !important;
     }
 
@@ -1455,41 +1430,31 @@
             </div>
 
             <div class="retarget-flow">
-              <div class="retarget-node">
-                <p class="retarget-num" data-count="4.1" data-suffix="k" data-decimal="true">0k</p>
-                <p class="retarget-label">Bounced</p>
+              <div class="retarget-step">
+                <span class="retarget-step-label">Bounced</span>
+                <div class="retarget-step-bar"><div class="retarget-step-fill" style="--target-width:100%"></div></div>
+                <span class="retarget-step-val">4.1k</span>
               </div>
-              <span class="retarget-arrow">&#8250;</span>
-              <div class="retarget-node">
-                <p class="retarget-num" data-count="2.8" data-suffix="k" data-decimal="true">0k</p>
-                <p class="retarget-label">Retargeted</p>
+              <div class="retarget-step">
+                <span class="retarget-step-label">Retargeted</span>
+                <div class="retarget-step-bar"><div class="retarget-step-fill" style="--target-width:68%"></div></div>
+                <span class="retarget-step-val">2.8k</span>
               </div>
-              <span class="retarget-arrow">&#8250;</span>
-              <div class="retarget-node">
-                <p class="retarget-num" data-count="891">0</p>
-                <p class="retarget-label">Returned</p>
+              <div class="retarget-step">
+                <span class="retarget-step-label">Returned</span>
+                <div class="retarget-step-bar"><div class="retarget-step-fill" style="--target-width:21%"></div></div>
+                <span class="retarget-step-val">891</span>
               </div>
-              <span class="retarget-arrow">&#8250;</span>
-              <div class="retarget-node">
-                <p class="retarget-num green" data-count="214">0</p>
-                <p class="retarget-label">Converted</p>
+              <div class="retarget-step">
+                <span class="retarget-step-label">Converted</span>
+                <div class="retarget-step-bar"><div class="retarget-step-fill green" style="--target-width:5%"></div></div>
+                <span class="retarget-step-val green">214</span>
               </div>
             </div>
 
-            <div class="retarget-bar-row">
-              <span class="retarget-bar-label">Return Rate</span>
-              <div class="retarget-bar-track"><div class="retarget-bar-fill purple" style="--target-width:31%"></div></div>
-              <span class="retarget-bar-pct">31%</span>
-            </div>
-            <div class="retarget-bar-row">
-              <span class="retarget-bar-label">Conversion</span>
-              <div class="retarget-bar-track"><div class="retarget-bar-fill green" style="--target-width:24%"></div></div>
-              <span class="retarget-bar-pct">24%</span>
-            </div>
-
-            <div class="retarget-rate">
-              <span class="retarget-rate-label">Revenue from retargeted leads</span>
-              <span class="retarget-rate-val">$4,280</span>
+            <div class="retarget-bottom">
+              <span class="retarget-bottom-label">Revenue recaptured</span>
+              <span class="retarget-bottom-val">$4,280</span>
             </div>
           </div>
 
@@ -1912,27 +1877,6 @@
         if (entries[0].isIntersecting) {
           setTimeout(function() { retargetEl.classList.add('animated'); }, 300);
           retargetObserver.disconnect();
-          // Count up retargeting numbers
-          retargetEl.querySelectorAll('.retarget-num[data-count]').forEach(function(el) {
-            var target = parseFloat(el.getAttribute('data-count'));
-            var suffix = el.getAttribute('data-suffix') || '';
-            var isDecimal = el.getAttribute('data-decimal') === 'true';
-            var duration = 1200;
-            var startTime = null;
-            function step(ts) {
-              if (!startTime) startTime = ts;
-              var p = Math.min((ts - startTime) / duration, 1);
-              var eased = 1 - Math.pow(1 - p, 3);
-              var val = eased * target;
-              if (isDecimal) {
-                el.textContent = val.toFixed(1) + suffix;
-              } else {
-                el.textContent = Math.round(val).toLocaleString() + suffix;
-              }
-              if (p < 1) requestAnimationFrame(step);
-            }
-            requestAnimationFrame(step);
-          });
         }
       }, { threshold: 0.3 });
       retargetObserver.observe(retargetEl);
