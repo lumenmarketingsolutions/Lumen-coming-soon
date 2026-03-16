@@ -44,8 +44,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       padding: 24px;
+      padding-top: 18vh;
       overflow: hidden;
     }
 
@@ -173,17 +174,29 @@
       animation: fadeUp 1s ease 1.2s forwards;
     }
 
-    .scroll-line {
-      width: 1px;
-      height: 48px;
-      background: linear-gradient(to bottom, var(--purple), transparent);
-      margin: 0 auto;
-      animation: scrollPulse 2s ease-in-out infinite;
+    .scroll-text {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 12px;
     }
 
-    @keyframes scrollPulse {
-      0%, 100% { opacity: 0.3; transform: scaleY(1); }
-      50% { opacity: 0.8; transform: scaleY(1.2); }
+    .scroll-arrow {
+      width: 20px;
+      height: 20px;
+      border-right: 2px solid var(--purple-light);
+      border-bottom: 2px solid var(--purple-light);
+      transform: rotate(45deg);
+      margin: 0 auto;
+      animation: scrollBounce 2s ease-in-out infinite;
+      opacity: 0.6;
+    }
+
+    @keyframes scrollBounce {
+      0%, 100% { transform: rotate(45deg) translateY(0); opacity: 0.4; }
+      50% { transform: rotate(45deg) translateY(6px); opacity: 0.8; }
     }
 
     /* ══════════════════════════════════════════
@@ -624,6 +637,83 @@
       border-radius: 50%;
     }
 
+    /* Funnel breakdown */
+    .funnel-section {
+      margin-bottom: 24px;
+    }
+
+    .funnel-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--dark-border);
+    }
+
+    .funnel-row:last-child { border-bottom: none; }
+
+    .funnel-step-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      width: 100px;
+      flex-shrink: 0;
+    }
+
+    .funnel-bar-wrap {
+      flex: 1;
+      height: 24px;
+      background: var(--dark);
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .funnel-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      background: linear-gradient(90deg, var(--purple), var(--purple-light));
+      transition: width 1.2s ease;
+    }
+
+    .funnel-bar-fill.green {
+      background: linear-gradient(90deg, #16a34a, var(--green));
+    }
+
+    .funnel-stats {
+      display: flex;
+      gap: 16px;
+      flex-shrink: 0;
+      min-width: 120px;
+      justify-content: flex-end;
+    }
+
+    .funnel-stat-val {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .funnel-stat-pct {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--purple-light);
+    }
+
+    .funnel-insight {
+      margin-top: 12px;
+      padding: 10px 14px;
+      background: rgba(97,40,219,0.06);
+      border-radius: 8px;
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .funnel-insight strong {
+      color: var(--green);
+    }
+
     /* AI insight */
     .ai-insight {
       background: linear-gradient(135deg, rgba(97,40,219,0.08), rgba(97,40,219,0.03));
@@ -1015,6 +1105,97 @@
       to { opacity: 1; }
     }
 
+    /* Shimmer effect on system cards */
+    .system-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 16px;
+      background: linear-gradient(
+        105deg,
+        transparent 40%,
+        rgba(97,40,219,0.06) 45%,
+        rgba(97,40,219,0.1) 50%,
+        rgba(97,40,219,0.06) 55%,
+        transparent 60%
+      );
+      background-size: 200% 100%;
+      animation: shimmer 4s ease-in-out infinite;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .system-card:hover::before {
+      opacity: 1;
+    }
+
+    .system-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* Dashboard glow on scroll */
+    .dashboard.glowing {
+      box-shadow: 0 24px 80px rgba(0,0,0,0.4), 0 0 80px rgba(97,40,219,0.15), 0 0 120px rgba(97,40,219,0.08);
+      transition: box-shadow 1s ease;
+    }
+
+    /* KPI card pulse on count */
+    @keyframes kpiPop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.03); }
+      100% { transform: scale(1); }
+    }
+
+    .kpi-card.counted {
+      animation: kpiPop 0.4s ease;
+    }
+
+    /* Funnel bars animate in from left */
+    .funnel-bar-fill {
+      width: 0 !important;
+      transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .funnel-section.animated .funnel-bar-fill {
+      width: var(--target-width) !important;
+    }
+
+    /* Stagger card reveals */
+    .system-card.reveal:nth-child(1) { transition-delay: 0s; }
+    .system-card.reveal:nth-child(2) { transition-delay: 0.1s; }
+    .system-card.reveal:nth-child(3) { transition-delay: 0.2s; }
+    .system-card.reveal:nth-child(4) { transition-delay: 0.3s; }
+    .system-card.reveal:nth-child(5) { transition-delay: 0.4s; }
+    .system-card.reveal:nth-child(6) { transition-delay: 0.5s; }
+    .system-card.reveal:nth-child(7) { transition-delay: 0.6s; }
+
+    /* Glow pulse on AI insight */
+    .ai-insight {
+      animation: insightGlow 3s ease-in-out infinite;
+    }
+
+    @keyframes insightGlow {
+      0%, 100% { box-shadow: 0 0 0 rgba(97,40,219,0); }
+      50% { box-shadow: 0 0 20px rgba(97,40,219,0.1); }
+    }
+
+    /* Timeline dot glow animation */
+    .tl-item.visible .tl-dot {
+      animation: dotGlow 2s ease-in-out infinite;
+    }
+
+    @keyframes dotGlow {
+      0%, 100% { box-shadow: 0 0 0 1px var(--purple), 0 0 8px var(--purple-glow); }
+      50% { box-shadow: 0 0 0 1px var(--purple), 0 0 20px var(--purple-glow); }
+    }
+
     /* ══════════════════════════════════════════
        RESPONSIVE
     ══════════════════════════════════════════ */
@@ -1107,7 +1288,8 @@
       </h1>
     </div>
     <div class="scroll-indicator">
-      <div class="scroll-line"></div>
+      <div class="scroll-text">Scroll</div>
+      <div class="scroll-arrow"></div>
     </div>
   </section>
 
@@ -1132,7 +1314,7 @@
     <div class="section-inner">
       <p class="section-label reveal">What You Get</p>
       <h2 class="system-headline reveal">A complete AI marketing system.<br>Managed by humans.</h2>
-      <p class="system-sub reveal">Built entirely around how your customers think. Delivered in 14 days. Everything working together — not pieced apart.</p>
+      <p class="system-sub reveal">Built entirely around how your customers think. Delivered in 14 days.</p>
 
       <div class="system-grid">
         <div class="system-card reveal">
@@ -1140,15 +1322,15 @@
             <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
           </div>
           <h3 class="card-title">Deep Dive Audit</h3>
-          <p class="card-desc">Complete business analysis. We study your market, your competitors, your customers — and the friction points killing your growth.</p>
+          <p class="card-desc">Before we touch a single ad, we study your entire business. Your customers, your competitors, what you've tried, what failed. We find the friction points that most agencies never even look for.</p>
         </div>
 
         <div class="system-card reveal">
           <div class="card-icon">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
           </div>
-          <h3 class="card-title">Meta Ad Campaigns</h3>
-          <p class="card-desc">Built by a Certified Meta Performance Marketer. Not the surface-level settings. The ones Meta built for people who understand the platform.</p>
+          <h3 class="card-title">Expert-Level Meta Ads</h3>
+          <p class="card-desc">Managed by a Certified Meta Performance Marketer with over 4,000 hours in Ads Manager. We use campaign structures, pixel configurations, and hidden optimization settings that most advertisers don't know exist.</p>
           <p class="card-stat">4,000+ hours in Ads Manager</p>
         </div>
 
@@ -1157,7 +1339,7 @@
             <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
           </div>
           <h3 class="card-title">Landing Pages</h3>
-          <p class="card-desc">Engineered line by line for psychological conversion. Every word, every color, every button placement — intentional.</p>
+          <p class="card-desc">Every headline, every line of copy, every button is built around how your customer thinks. Not templates. Not best practices. Pages that are cohesive with the ad that brought them there.</p>
           <p class="card-stat">4%+ conversion rate baseline</p>
         </div>
 
@@ -1166,7 +1348,7 @@
             <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><path d="M22 6l-10 7L2 6"/></svg>
           </div>
           <h3 class="card-title">Email Nurture Sequences</h3>
-          <p class="card-desc">Automated follow-up designed for your funnel flow. Turn cold leads warm. Turn warm leads into customers.</p>
+          <p class="card-desc">Every lead that comes through your funnel gets followed up with automatically. Designed to build trust, handle objections, and move people closer to buying without you lifting a finger.</p>
         </div>
 
         <div class="system-card reveal">
@@ -1174,7 +1356,7 @@
             <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
           </div>
           <h3 class="card-title">Full Automations</h3>
-          <p class="card-desc">Custom webhooks bridging any app to any app. CRM, payment processor, database — regardless of auth walls or compliance requirements.</p>
+          <p class="card-desc">Your CRM, your payment processor, your database, all connected with custom webhooks. No manual data entry. No leads slipping through the cracks. We bridge systems regardless of compliance or authentication walls.</p>
         </div>
 
         <div class="system-card reveal">
@@ -1182,7 +1364,7 @@
             <svg viewBox="0 0 24 24"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
           </div>
           <h3 class="card-title">Ongoing Management</h3>
-          <p class="card-desc">We watch the data. We optimize the campaigns. We scale what's winning. You get your time back.</p>
+          <p class="card-desc">We watch the data every day. We kill what's not working. We scale what is. You stop thinking about marketing and get 15+ hours of your week back.</p>
           <p class="card-stat">15+ hours/week saved</p>
         </div>
 
@@ -1191,7 +1373,7 @@
             <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
           </div>
           <h3 class="card-title">Real-Time AI Dashboard</h3>
-          <p class="card-desc">Every click from ad to conversion, tracked. Real-time ROAS with zero manual work. An AI layer that reads your data and tells you — in plain English — what's working, what's not, and why. Nothing on the market does this.</p>
+          <p class="card-desc">Every click from ad to conversion, tracked and visualized. Real-time return on ad spend calculated automatically. An AI layer reads your data and explains in plain English what's working, what's not, and exactly what to do about it. Nothing on the market does this.</p>
         </div>
       </div>
     </div>
@@ -1271,13 +1453,49 @@
             </div>
           </div>
 
+          <!-- Funnel Conversion Breakdown -->
+          <div class="dash-chart funnel-section">
+            <div class="chart-header">
+              <span class="chart-title">Funnel Performance</span>
+              <span class="chart-period">Page-by-page breakdown</span>
+            </div>
+            <div class="funnel-row">
+              <span class="funnel-step-name">Ad Click</span>
+              <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="--target-width:100%"></div></div>
+              <div class="funnel-stats"><span class="funnel-stat-val">4,740</span><span class="funnel-stat-pct">100%</span></div>
+            </div>
+            <div class="funnel-row">
+              <span class="funnel-step-name">Landing Page</span>
+              <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="--target-width:68%"></div></div>
+              <div class="funnel-stats"><span class="funnel-stat-val">3,223</span><span class="funnel-stat-pct">68%</span></div>
+            </div>
+            <div class="funnel-row">
+              <span class="funnel-step-name">Lead Capture</span>
+              <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="--target-width:12%"></div></div>
+              <div class="funnel-stats"><span class="funnel-stat-val">547</span><span class="funnel-stat-pct">11.5%</span></div>
+            </div>
+            <div class="funnel-row">
+              <span class="funnel-step-name">Booked Call</span>
+              <div class="funnel-bar-wrap"><div class="funnel-bar-fill green" style="--target-width:5.4%"></div></div>
+              <div class="funnel-stats"><span class="funnel-stat-val">127</span><span class="funnel-stat-pct">2.7%</span></div>
+            </div>
+            <div class="funnel-row">
+              <span class="funnel-step-name">Customer</span>
+              <div class="funnel-bar-wrap"><div class="funnel-bar-fill green" style="--target-width:2.2%"></div></div>
+              <div class="funnel-stats"><span class="funnel-stat-val">53</span><span class="funnel-stat-pct">1.1%</span></div>
+            </div>
+            <div class="funnel-insight">
+              <strong>32% of visitors leave the landing page within 8 seconds.</strong> The headline is performing well, but visitors who scroll past the pricing section drop off at 2x the rate. Consider moving the CTA above the pricing breakdown.
+            </div>
+          </div>
+
           <div class="ai-insight">
             <div class="ai-icon">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c4dff" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 14v4"/></svg>
             </div>
             <div>
               <p class="ai-label">AI Insight</p>
-              <p class="ai-text"><strong>Ad 3 is outperforming Ad 1 by 62%.</strong> The lifestyle image resonated more with your 25-34 segment. Consider increasing budget allocation here — projected ROAS at higher spend is 5.2x based on current conversion patterns.</p>
+              <p class="ai-text"><strong>Ad 3 is outperforming Ad 1 by 62%.</strong> The lifestyle image resonated more with your 25-34 segment. Consider increasing budget allocation here. Projected ROAS at higher spend is 5.2x based on current conversion patterns.</p>
             </div>
           </div>
         </div>
@@ -1299,14 +1517,14 @@
           <div class="tl-dot"></div>
           <p class="tl-days">Days 1 — 2</p>
           <h3 class="tl-title">The Deep Dive</h3>
-          <p class="tl-desc">We learn everything. Your business, your customers, your competitors, what you've tried, what failed. We look at your entire operation — not just marketing.</p>
+          <p class="tl-desc">We learn everything. Your business, your customers, your competitors, what you've tried, what failed. We look at your entire operation, not just marketing.</p>
         </div>
 
         <div class="tl-item reveal">
           <div class="tl-dot"></div>
           <p class="tl-days">Days 3 — 5</p>
           <h3 class="tl-title">The Build</h3>
-          <p class="tl-desc">Ads, landing pages, email sequences, automations — every piece engineered around how your customer thinks. Not templates. Custom.</p>
+          <p class="tl-desc">Ads, landing pages, email sequences, automations. Every piece engineered around how your customer thinks. Not templates. Custom.</p>
         </div>
 
         <div class="tl-item reveal">
@@ -1327,7 +1545,7 @@
           <div class="tl-dot"></div>
           <p class="tl-days">Days 12 — 14</p>
           <h3 class="tl-title">Scale</h3>
-          <p class="tl-desc">We find the winners and pour fuel on them. Your system is now a machine — generating customers while you focus on running your business.</p>
+          <p class="tl-desc">We find the winners and pour fuel on them. Your system becomes a machine, generating customers while you focus on running your business.</p>
         </div>
       </div>
     </div>
@@ -1339,7 +1557,7 @@
   <section class="apply-section">
     <div class="apply-inner reveal">
       <h2 class="apply-headline">This isn't for everyone<span class="dot"></span></h2>
-      <p class="apply-sub">We hand-pick the businesses we work with. If your business is ready for a system that actually works — we'd like to hear from you.</p>
+      <p class="apply-sub">We hand-pick the businesses we work with. If your business is ready for a system that actually works, we'd like to hear from you.</p>
       <button class="apply-btn" onclick="openQuiz()">Apply</button>
     </div>
   </section>
@@ -1699,6 +1917,40 @@
         document.querySelector('.quiz-progress').style.display = 'none';
       });
     }
+
+    // ── Funnel bar animation ──
+    (function() {
+      var funnelEl = document.querySelector('.funnel-section');
+      if (!funnelEl) return;
+      var funnelObserver = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting) {
+          setTimeout(function() { funnelEl.classList.add('animated'); }, 300);
+          funnelObserver.disconnect();
+        }
+      }, { threshold: 0.3 });
+      funnelObserver.observe(funnelEl);
+    })();
+
+    // ── Dashboard glow on scroll ──
+    (function() {
+      var dashEl = document.querySelector('.dashboard');
+      var glowObserver = new IntersectionObserver(function(entries) {
+        if (entries[0].isIntersecting) {
+          dashEl.classList.add('glowing');
+        }
+      }, { threshold: 0.2 });
+      glowObserver.observe(dashEl);
+    })();
+
+    // ── KPI card pop animation ──
+    (function() {
+      var kpis = document.querySelectorAll('.kpi-card');
+      kpis.forEach(function(card, i) {
+        setTimeout(function() {
+          card.classList.add('counted');
+        }, 1800 + i * 200);
+      });
+    })();
 
     // Close quiz on escape
     document.addEventListener('keydown', function(e) {
