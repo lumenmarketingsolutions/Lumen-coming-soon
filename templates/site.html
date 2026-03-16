@@ -2031,11 +2031,20 @@
       var particles = [];
       var COUNT = 30;
 
+      var lastCanvasW = window.innerWidth;
+      var lastCanvasH = window.innerHeight;
       function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        var newW = window.innerWidth;
+        var newH = window.innerHeight;
+        // Skip iOS Safari URL bar resizes (small height changes, same width)
+        if (newW === lastCanvasW && Math.abs(newH - lastCanvasH) < 100) return;
+        lastCanvasW = newW;
+        lastCanvasH = newH;
+        canvas.width = newW;
+        canvas.height = newH;
       }
-      resize();
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
       window.addEventListener('resize', resize);
 
       function Particle() { this.reset(); }
@@ -2097,13 +2106,18 @@
       var lines = document.querySelectorAll('.reveal-line');
       var completed = new Set();
 
+      // Cache viewport height to prevent iOS Safari URL bar jitter
+      // Only update when change exceeds 100px (real resize, not URL bar)
+      var cachedH = window.innerHeight;
+      window.addEventListener('resize', function() {
+        var newH = window.innerHeight;
+        if (Math.abs(newH - cachedH) > 100) cachedH = newH;
+      });
+
       function getProgress(el) {
         var rect = el.getBoundingClientRect();
-        var windowH = window.innerHeight;
-        // Start fading in when top of element is 85% down the screen
-        // Fully visible when top of element is 55% down the screen
-        var start = windowH * 0.85;
-        var end = windowH * 0.55;
+        var start = cachedH * 0.85;
+        var end = cachedH * 0.55;
         var progress = (start - rect.top) / (start - end);
         return Math.min(Math.max(progress, 0), 1);
       }
@@ -2113,7 +2127,6 @@
           if (completed.has(el)) return;
           var p = getProgress(el);
           if (p <= 0) return;
-          // Ease out cubic
           var eased = 1 - Math.pow(1 - p, 3);
           el.style.opacity = eased;
           el.style.filter = 'blur(' + ((1 - eased) * 6) + 'px)';
@@ -2130,9 +2143,8 @@
           var siblings = el.parentElement.querySelectorAll('.reveal-line');
           var idx = Array.prototype.indexOf.call(siblings, el);
           var rect = el.getBoundingClientRect();
-          var windowH = window.innerHeight;
-          var start = windowH * 0.88 - (idx * 40);
-          var end = windowH * 0.6 - (idx * 40);
+          var start = cachedH * 0.88 - (idx * 40);
+          var end = cachedH * 0.6 - (idx * 40);
           var progress = (start - rect.top) / (start - end);
           var p = Math.min(Math.max(progress, 0), 1);
           if (p <= 0) return;
