@@ -7,6 +7,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "lumen-wl-key-2026")
 ADMIN_PIN = "112501"
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAIL = "kendall@lumenmarketing.co"
+OWNER_IPS = {"209.127.238.130"}
 
 
 def send_email(to, subject, html_body):
@@ -242,13 +243,16 @@ def track_stats():
         "SELECT COUNT(*) FROM page_views WHERE timestamp LIKE ?", (today + "%",)
     ).fetchone()[0]
 
+    owner_placeholders = ",".join("?" for _ in OWNER_IPS)
     if time_filter:
         avg_time = con.execute(
-            f"SELECT AVG(time_on_page) FROM page_views WHERE time_on_page > 0 AND timestamp > ?", time_params
+            f"SELECT AVG(time_on_page) FROM page_views WHERE time_on_page > 0 AND ip NOT IN ({owner_placeholders}) AND timestamp > ?",
+            tuple(OWNER_IPS) + time_params
         ).fetchone()[0] or 0
     else:
         avg_time = con.execute(
-            "SELECT AVG(time_on_page) FROM page_views WHERE time_on_page > 0"
+            f"SELECT AVG(time_on_page) FROM page_views WHERE time_on_page > 0 AND ip NOT IN ({owner_placeholders})",
+            tuple(OWNER_IPS)
         ).fetchone()[0] or 0
 
     # Last 7 days breakdown
@@ -346,6 +350,7 @@ def track_visitors():
             "timezone": r[5], "platform": r[6], "utm_source": r[7],
             "utm_medium": r[8], "utm_campaign": r[9],
             "timestamp": r[10], "time_on_page": round(r[11], 1),
+            "is_owner": r[0] in OWNER_IPS,
         })
 
     # Device breakdown
