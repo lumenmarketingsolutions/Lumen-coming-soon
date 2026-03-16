@@ -1487,15 +1487,15 @@
         transparent 60%,
         transparent 100%
       );
-      background-size: 300% 100%;
-      background-position: 100% 0;
+      background-size: 400% 100%;
+      background-position: 150% 0;
       pointer-events: none;
       opacity: 0;
     }
 
     .system-card.visible::before {
       opacity: 1;
-      animation: shimmer-once 1.4s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+      animation: shimmer-once 1.8s cubic-bezier(0.22, 0.6, 0.36, 1) forwards;
     }
 
     .system-card {
@@ -1504,8 +1504,8 @@
     }
 
     @keyframes shimmer-once {
-      0% { background-position: 100% 0; }
-      100% { background-position: -100% 0; }
+      0% { background-position: 150% 0; }
+      100% { background-position: -50% 0; }
     }
 
     /* Dashboard glow on scroll */
