@@ -619,7 +619,7 @@
     }
 
     .retarget-num {
-      font-size: 22px;
+      font-size: 18px;
       font-weight: 800;
       color: var(--text);
       margin-bottom: 2px;
@@ -1456,22 +1456,22 @@
 
             <div class="retarget-flow">
               <div class="retarget-node">
-                <p class="retarget-num" data-count="4193" data-comma="true">0</p>
+                <p class="retarget-num" data-count="4.1" data-suffix="k" data-decimal="true">0k</p>
                 <p class="retarget-label">Bounced</p>
               </div>
               <span class="retarget-arrow">&#8250;</span>
               <div class="retarget-node">
-                <p class="retarget-num" data-count="2847" data-comma="true">0</p>
+                <p class="retarget-num" data-count="2.8" data-suffix="k" data-decimal="true">0k</p>
                 <p class="retarget-label">Retargeted</p>
               </div>
               <span class="retarget-arrow">&#8250;</span>
               <div class="retarget-node">
-                <p class="retarget-num" data-count="891" data-comma="true">0</p>
+                <p class="retarget-num" data-count="891">0</p>
                 <p class="retarget-label">Returned</p>
               </div>
               <span class="retarget-arrow">&#8250;</span>
               <div class="retarget-node">
-                <p class="retarget-num green" data-count="214" data-comma="true">0</p>
+                <p class="retarget-num green" data-count="214">0</p>
                 <p class="retarget-label">Converted</p>
               </div>
             </div>
@@ -1493,15 +1493,6 @@
             </div>
           </div>
 
-          <div class="ai-insight">
-            <div class="ai-icon">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c4dff" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 14v4"/></svg>
-            </div>
-            <div>
-              <p class="ai-label">AI Insight</p>
-              <p class="ai-text"><strong>The image of the blue vehicle in Ad 3 is getting 62% more clicks than Ad 1.</strong> Your audience responds better to lifestyle images with blue tones. Try using similar colors and settings in your next round of creatives. If you increase spend on this ad, we estimate you'll make $5.20 back for every $1 you put in.</p>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -1842,30 +1833,6 @@
     function switchTab(btn, tab) {
       document.querySelectorAll('.dash-tab').forEach(function(t) { t.classList.remove('active'); });
       btn.classList.add('active');
-
-      var content = document.getElementById('dash-content');
-      var insights = [
-        {
-          label: 'AI Insight',
-          text: '<strong>The image of the blue vehicle in Ad 3 is getting 62% more clicks than Ad 1.</strong> Your audience responds better to lifestyle images with blue tones. Try using similar colors and settings in your next round of creatives. If you increase spend on this ad, we estimate you\'ll make $5.20 back for every $1 you put in.'
-        },
-        {
-          label: 'AI Insight',
-          text: '<strong>Your video ads are getting 3x more clicks than your image ads.</strong> People who watch the first 3 seconds of your video are much more likely to become a lead. Try starting your next video with a customer result instead of talking about your service.'
-        },
-        {
-          label: 'AI Insight',
-          text: '<strong>Most of your customers buy within 2 days of seeing your ad.</strong> Your follow-up emails are bringing back about 12 people per week who would have been lost. The second email you send is the one people open most, with a 64% open rate.'
-        }
-      ];
-
-      var idx = tab === 'overview' ? 0 : tab === 'ads' ? 1 : 2;
-      var insight = insights[idx];
-
-      // Update AI insight
-      var aiEl = content.querySelector('.ai-insight');
-      aiEl.querySelector('.ai-label').textContent = insight.label;
-      aiEl.querySelector('.ai-text').innerHTML = insight.text;
     }
 
     // ── Quiz ──
@@ -1947,17 +1914,21 @@
           retargetObserver.disconnect();
           // Count up retargeting numbers
           retargetEl.querySelectorAll('.retarget-num[data-count]').forEach(function(el) {
-            var target = parseInt(el.getAttribute('data-count'));
-            var useComma = el.getAttribute('data-comma') === 'true';
-            var start = 0;
+            var target = parseFloat(el.getAttribute('data-count'));
+            var suffix = el.getAttribute('data-suffix') || '';
+            var isDecimal = el.getAttribute('data-decimal') === 'true';
             var duration = 1200;
             var startTime = null;
             function step(ts) {
               if (!startTime) startTime = ts;
               var p = Math.min((ts - startTime) / duration, 1);
               var eased = 1 - Math.pow(1 - p, 3);
-              var val = Math.round(eased * target);
-              el.textContent = useComma ? val.toLocaleString() : val;
+              var val = eased * target;
+              if (isDecimal) {
+                el.textContent = val.toFixed(1) + suffix;
+              } else {
+                el.textContent = Math.round(val).toLocaleString() + suffix;
+              }
               if (p < 1) requestAnimationFrame(step);
             }
             requestAnimationFrame(step);
