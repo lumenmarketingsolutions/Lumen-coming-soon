@@ -282,7 +282,7 @@ def track_visitors():
 
 
 # ── Preview route (secret, isolated from live site) ──────────
-PREVIEW_TOKEN = "lumen2026"
+PREVIEW_TOKEN = "2026"
 
 @app.route(f"/preview/{PREVIEW_TOKEN}")
 def preview_site():
