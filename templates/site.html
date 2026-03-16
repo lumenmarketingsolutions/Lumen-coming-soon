@@ -1488,14 +1488,20 @@
         transparent 60%
       );
       background-size: 200% 100%;
-      animation: shimmer 4s ease-in-out infinite;
+      animation: none;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.3s;
+      transition: opacity 0.4s;
+    }
+
+    .system-card.visible::before {
+      opacity: 1;
+      animation: shimmer 2s ease-in-out forwards;
     }
 
     .system-card:hover::before {
       opacity: 1;
+      animation: shimmer 2s ease-in-out forwards;
     }
 
     .system-card {
