@@ -600,91 +600,311 @@
       color: var(--green);
     }
 
-    /* Retargeting section */
-    .retarget-section {
-      margin-top: 16px;
+    /* Tab content */
+    .tab-content {
+      display: none;
     }
 
-    .retarget-flow {
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Retargeting section — distinct from funnel */
+    .retarget-section {
+      margin-top: 16px;
+      background: linear-gradient(135deg, var(--dark-card), rgba(34,197,94,0.04)) !important;
+      border-color: rgba(34,197,94,0.15) !important;
+    }
+
+    .retarget-summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 12px 0;
+    }
+
+    .retarget-stat {
+      text-align: center;
+    }
+
+    .retarget-stat-num {
+      display: block;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+    }
+
+    .retarget-stat.highlight .retarget-stat-num {
+      color: var(--green);
+    }
+
+    .retarget-stat-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 600;
+    }
+
+    .retarget-divider {
+      width: 1px;
+      height: 32px;
+      background: var(--dark-border);
+    }
+
+    .retarget-recapture {
+      margin-top: 8px;
+    }
+
+    .retarget-recapture-bar {
+      height: 6px;
+      background: var(--dark);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .retarget-recapture-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, #16a34a, var(--green));
+      width: 0;
+      transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .retarget-section.animated .retarget-recapture-fill {
+      width: var(--target-width);
+    }
+
+    .retarget-recapture-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .retarget-recapture-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .retarget-recapture-val {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--green);
+    }
+
+    /* Creative performance (Ads tab) */
+    .creative-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .creative-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--dark);
+      border: 1px solid var(--dark-border);
+    }
+
+    .creative-row.best {
+      border-color: rgba(34,197,94,0.3);
+      background: rgba(34,197,94,0.04);
+    }
+
+    .creative-thumb {
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .creative-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .creative-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .creative-name {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .creative-metrics {
+      display: flex;
+      gap: 12px;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .creative-metrics strong {
+      color: var(--text);
+    }
+
+    .creative-metrics strong.green {
+      color: var(--green);
+    }
+
+    /* AI breakdown */
+    .ai-breakdown {
+      background: linear-gradient(135deg, rgba(97,40,219,0.08), rgba(97,40,219,0.03)) !important;
+      border-color: rgba(97,40,219,0.2) !important;
+    }
+
+    .ai-breakdown-icon {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .ai-breakdown-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--purple-light);
+    }
+
+    .ai-breakdown-text {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .ai-breakdown-text strong {
+      color: var(--text);
+    }
+
+    /* Lead pipeline (Leads tab) */
+    .lead-pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .lead-stage-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .lead-stage-name {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .lead-stage-count {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-dim);
+    }
+
+    .lead-stage-bar {
+      height: 8px;
+      background: var(--dark);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .lead-stage-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.8s ease;
+    }
+
+    /* Lead list */
+    .lead-list {
       display: flex;
       flex-direction: column;
       gap: 0;
-      margin-bottom: 16px;
     }
 
-    .retarget-step {
+    .lead-row {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 10px;
       padding: 10px 0;
       border-bottom: 1px solid var(--dark-border);
     }
 
-    .retarget-step:last-child {
+    .lead-row:last-child {
       border-bottom: none;
     }
 
-    .retarget-step-label {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--text-dim);
-      width: 90px;
-      flex-shrink: 0;
-    }
-
-    .retarget-step-bar {
-      flex: 1;
-      height: 20px;
-      background: var(--dark);
-      border-radius: 5px;
-      overflow: hidden;
-    }
-
-    .retarget-step-fill {
-      height: 100%;
-      border-radius: 5px;
-      background: linear-gradient(90deg, var(--purple), var(--purple-light));
-      transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    .retarget-step-fill.green {
-      background: linear-gradient(90deg, #16a34a, var(--green));
-    }
-
-    .retarget-step-val {
-      font-size: 13px;
-      font-weight: 800;
-      color: var(--text);
-      width: 50px;
-      text-align: right;
-      flex-shrink: 0;
-    }
-
-    .retarget-step-val.green {
-      color: var(--green);
-    }
-
-    .retarget-bottom {
+    .lead-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--purple);
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      background: rgba(34,197,94,0.06);
-      border: 1px solid rgba(34,197,94,0.15);
-      border-radius: 8px;
-      margin-top: 4px;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
     }
 
-    .retarget-bottom-label {
+    .lead-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .lead-name {
+      display: block;
       font-size: 12px;
-      color: var(--text-dim);
-      font-weight: 500;
+      font-weight: 600;
+      color: var(--text);
     }
 
-    .retarget-bottom-val {
-      font-size: 18px;
-      font-weight: 800;
+    .lead-source {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .lead-status {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .lead-status.converted {
+      background: rgba(34,197,94,0.1);
       color: var(--green);
+    }
+
+    .lead-status.booked {
+      background: rgba(245,158,11,0.1);
+      color: #f59e0b;
+    }
+
+    .lead-status.new-lead {
+      background: rgba(124,77,255,0.1);
+      color: var(--purple-light);
+    }
+
+    .lead-status.contacted {
+      background: rgba(107,107,128,0.15);
+      color: var(--text-dim);
     }
 
     /* AI insight */
@@ -1140,13 +1360,12 @@
       width: var(--target-width) !important;
     }
 
-    /* Retargeting bars animate in from left */
-    .retarget-step-fill {
+    /* Retargeting recapture bar animates */
+    .retarget-recapture-fill {
       width: 0 !important;
-      transition: width 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     }
 
-    .retarget-section.animated .retarget-step-fill {
+    .retarget-section.animated .retarget-recapture-fill {
       width: var(--target-width) !important;
     }
 
@@ -1362,99 +1581,291 @@
         </div>
 
         <div class="dash-body" id="dash-content">
-          <!-- Overview tab (default) -->
-          <div class="kpi-row">
-            <div class="kpi-card">
-              <p class="kpi-label">Revenue</p>
-              <p class="kpi-value purple" data-count="16847" data-prefix="$" data-comma="true">$0</p>
-              <p class="kpi-change up">+23.4% vs last period</p>
+
+          <!-- ── OVERVIEW TAB ── -->
+          <div class="tab-content active" id="tab-overview">
+            <div class="kpi-row">
+              <div class="kpi-card">
+                <p class="kpi-label">Revenue</p>
+                <p class="kpi-value purple" data-count="16847" data-prefix="$" data-comma="true">$0</p>
+                <p class="kpi-change up">+23.4% vs last period</p>
+              </div>
+              <div class="kpi-card">
+                <p class="kpi-label">ROAS</p>
+                <p class="kpi-value green" data-count="4.8" data-suffix="x" data-decimal="true">0x</p>
+                <p class="kpi-change up">+0.6x vs last period</p>
+              </div>
+              <div class="kpi-card">
+                <p class="kpi-label">Total Leads</p>
+                <p class="kpi-value white" data-count="127">0</p>
+                <p class="kpi-change up">+34 this week</p>
+              </div>
+              <div class="kpi-card">
+                <p class="kpi-label">Ad Spend</p>
+                <p class="kpi-value white" data-count="3510" data-prefix="$" data-comma="true">$0</p>
+                <p class="kpi-change">This period</p>
+              </div>
             </div>
-            <div class="kpi-card">
-              <p class="kpi-label">ROAS</p>
-              <p class="kpi-value green" data-count="4.8" data-suffix="x" data-decimal="true">0x</p>
-              <p class="kpi-change up">+0.6x vs last period</p>
+
+            <div class="dash-chart funnel-section">
+              <div class="chart-header">
+                <span class="chart-title">Funnel Performance</span>
+                <span class="chart-period">Ad click → customer</span>
+              </div>
+              <div class="funnel-row">
+                <span class="funnel-step-name">Ad Click</span>
+                <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="--target-width:100%"></div></div>
+                <div class="funnel-stats"><span class="funnel-stat-val">4,740</span><span class="funnel-stat-pct">100%</span></div>
+              </div>
+              <div class="funnel-row">
+                <span class="funnel-step-name">Landing Page</span>
+                <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="--target-width:68%"></div></div>
+                <div class="funnel-stats"><span class="funnel-stat-val">3,223</span><span class="funnel-stat-pct">68%</span></div>
+              </div>
+              <div class="funnel-row">
+                <span class="funnel-step-name">Lead Capture</span>
+                <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="--target-width:12%"></div></div>
+                <div class="funnel-stats"><span class="funnel-stat-val">547</span><span class="funnel-stat-pct">11.5%</span></div>
+              </div>
+              <div class="funnel-row">
+                <span class="funnel-step-name">Booked Call</span>
+                <div class="funnel-bar-wrap"><div class="funnel-bar-fill green" style="--target-width:5.4%"></div></div>
+                <div class="funnel-stats"><span class="funnel-stat-val">127</span><span class="funnel-stat-pct">2.7%</span></div>
+              </div>
+              <div class="funnel-row">
+                <span class="funnel-step-name">Customer</span>
+                <div class="funnel-bar-wrap"><div class="funnel-bar-fill green" style="--target-width:2.2%"></div></div>
+                <div class="funnel-stats"><span class="funnel-stat-val">53</span><span class="funnel-stat-pct">1.1%</span></div>
+              </div>
+              <div class="funnel-insight">
+                <strong>1 in 3 people leave your page within 8 seconds.</strong> Your headline is working, but the "Book a Call" button is too far down the page. Move it above pricing.
+              </div>
             </div>
-            <div class="kpi-card">
-              <p class="kpi-label">Total Leads</p>
-              <p class="kpi-value white" data-count="127">0</p>
-              <p class="kpi-change up">+34 this week</p>
-            </div>
-            <div class="kpi-card">
-              <p class="kpi-label">Ad Spend</p>
-              <p class="kpi-value white" data-count="3510" data-prefix="$" data-comma="true">$0</p>
-              <p class="kpi-change">This period</p>
+
+            <div class="dash-chart retarget-section">
+              <div class="chart-header">
+                <span class="chart-title">Retargeting</span>
+                <span class="chart-period">Recaptured leads</span>
+              </div>
+              <div class="retarget-summary">
+                <div class="retarget-stat">
+                  <span class="retarget-stat-num">4.1k</span>
+                  <span class="retarget-stat-label">Bounced</span>
+                </div>
+                <span class="retarget-divider"></span>
+                <div class="retarget-stat">
+                  <span class="retarget-stat-num">891</span>
+                  <span class="retarget-stat-label">Returned</span>
+                </div>
+                <span class="retarget-divider"></span>
+                <div class="retarget-stat highlight">
+                  <span class="retarget-stat-num">214</span>
+                  <span class="retarget-stat-label">Converted</span>
+                </div>
+              </div>
+              <div class="retarget-recapture">
+                <div class="retarget-recapture-bar">
+                  <div class="retarget-recapture-fill" style="--target-width:24%"></div>
+                </div>
+                <div class="retarget-recapture-row">
+                  <span class="retarget-recapture-label">24% recapture rate</span>
+                  <span class="retarget-recapture-val">$4,280 recovered</span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Funnel Conversion Breakdown -->
-          <div class="dash-chart funnel-section">
-            <div class="chart-header">
-              <span class="chart-title">Funnel Performance</span>
-              <span class="chart-period">Ad click → customer</span>
+          <!-- ── ADS TAB ── -->
+          <div class="tab-content" id="tab-ads">
+            <div class="kpi-row">
+              <div class="kpi-card">
+                <p class="kpi-label">Active Ads</p>
+                <p class="kpi-value purple">6</p>
+                <p class="kpi-change">3 campaigns</p>
+              </div>
+              <div class="kpi-card">
+                <p class="kpi-label">Avg. CTR</p>
+                <p class="kpi-value green">3.2%</p>
+                <p class="kpi-change up">+0.8% vs avg</p>
+              </div>
+              <div class="kpi-card">
+                <p class="kpi-label">Cost / Lead</p>
+                <p class="kpi-value white">$27.64</p>
+                <p class="kpi-change up">-$4.10 vs last</p>
+              </div>
+              <div class="kpi-card">
+                <p class="kpi-label">Top ROAS</p>
+                <p class="kpi-value green">6.1x</p>
+                <p class="kpi-change">Ad 3</p>
+              </div>
             </div>
-            <div class="funnel-row">
-              <span class="funnel-step-name">Ad Click</span>
-              <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="--target-width:100%"></div></div>
-              <div class="funnel-stats"><span class="funnel-stat-val">4,740</span><span class="funnel-stat-pct">100%</span></div>
+
+            <div class="dash-chart">
+              <div class="chart-header">
+                <span class="chart-title">Creative Performance</span>
+                <span class="chart-period">By ad creative</span>
+              </div>
+              <div class="creative-list">
+                <div class="creative-row">
+                  <div class="creative-thumb" style="background:#1a1a2e;">
+                    <span class="creative-label">Ad 1</span>
+                  </div>
+                  <div class="creative-info">
+                    <span class="creative-name">Lifestyle — studio shot</span>
+                    <div class="creative-metrics">
+                      <span>CTR <strong>2.1%</strong></span>
+                      <span>ROAS <strong>3.8x</strong></span>
+                      <span>Leads <strong>31</strong></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="creative-row">
+                  <div class="creative-thumb" style="background:#1a1a2e;">
+                    <span class="creative-label">Ad 2</span>
+                  </div>
+                  <div class="creative-info">
+                    <span class="creative-name">Testimonial — before/after</span>
+                    <div class="creative-metrics">
+                      <span>CTR <strong>2.8%</strong></span>
+                      <span>ROAS <strong>4.2x</strong></span>
+                      <span>Leads <strong>38</strong></span>
+                    </div>
+                  </div>
+                </div>
+                <div class="creative-row best">
+                  <div class="creative-thumb" style="background:#1a1a2e;">
+                    <span class="creative-label">Ad 3</span>
+                  </div>
+                  <div class="creative-info">
+                    <span class="creative-name">Video — blue truck walkthrough</span>
+                    <div class="creative-metrics">
+                      <span>CTR <strong class="green">4.7%</strong></span>
+                      <span>ROAS <strong class="green">6.1x</strong></span>
+                      <span>Leads <strong class="green">58</strong></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="funnel-row">
-              <span class="funnel-step-name">Landing Page</span>
-              <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="--target-width:68%"></div></div>
-              <div class="funnel-stats"><span class="funnel-stat-val">3,223</span><span class="funnel-stat-pct">68%</span></div>
-            </div>
-            <div class="funnel-row">
-              <span class="funnel-step-name">Lead Capture</span>
-              <div class="funnel-bar-wrap"><div class="funnel-bar-fill" style="--target-width:12%"></div></div>
-              <div class="funnel-stats"><span class="funnel-stat-val">547</span><span class="funnel-stat-pct">11.5%</span></div>
-            </div>
-            <div class="funnel-row">
-              <span class="funnel-step-name">Booked Call</span>
-              <div class="funnel-bar-wrap"><div class="funnel-bar-fill green" style="--target-width:5.4%"></div></div>
-              <div class="funnel-stats"><span class="funnel-stat-val">127</span><span class="funnel-stat-pct">2.7%</span></div>
-            </div>
-            <div class="funnel-row">
-              <span class="funnel-step-name">Customer</span>
-              <div class="funnel-bar-wrap"><div class="funnel-bar-fill green" style="--target-width:2.2%"></div></div>
-              <div class="funnel-stats"><span class="funnel-stat-val">53</span><span class="funnel-stat-pct">1.1%</span></div>
-            </div>
-            <div class="funnel-insight">
-              <strong>1 in 3 people leave your page within 8 seconds.</strong> Your headline is working, but the "Book a Call" button is too far down the page. Move it above pricing.
+
+            <div class="dash-chart ai-breakdown">
+              <div class="ai-breakdown-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7c4dff" stroke-width="2" stroke-linecap="round"><path d="M12 2a4 4 0 0 1 4 4v2a4 4 0 0 1-8 0V6a4 4 0 0 1 4-4z"/><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 14v4"/></svg>
+                <span class="ai-breakdown-label">AI Creative Insight</span>
+              </div>
+              <p class="ai-breakdown-text"><strong>Ad 3's blue truck gets 62% more clicks than Ad 1.</strong> Your audience responds to outdoor lifestyle imagery with blue tones. Videos where the first frame shows the vehicle outperform static shots by 2.3x.</p>
             </div>
           </div>
 
-          <!-- Retargeting Performance -->
-          <div class="dash-chart retarget-section">
-            <div class="chart-header">
-              <span class="chart-title">Retargeting Performance</span>
-              <span class="chart-period">Leads recaptured</span>
-            </div>
-
-            <div class="retarget-flow">
-              <div class="retarget-step">
-                <span class="retarget-step-label">Bounced</span>
-                <div class="retarget-step-bar"><div class="retarget-step-fill" style="--target-width:100%"></div></div>
-                <span class="retarget-step-val">4.1k</span>
+          <!-- ── LEADS TAB ── -->
+          <div class="tab-content" id="tab-leads">
+            <div class="kpi-row">
+              <div class="kpi-card">
+                <p class="kpi-label">In Pipeline</p>
+                <p class="kpi-value purple">74</p>
+                <p class="kpi-change">Active leads</p>
               </div>
-              <div class="retarget-step">
-                <span class="retarget-step-label">Retargeted</span>
-                <div class="retarget-step-bar"><div class="retarget-step-fill" style="--target-width:68%"></div></div>
-                <span class="retarget-step-val">2.8k</span>
+              <div class="kpi-card">
+                <p class="kpi-label">Converted</p>
+                <p class="kpi-value green">53</p>
+                <p class="kpi-change up">+12 this week</p>
               </div>
-              <div class="retarget-step">
-                <span class="retarget-step-label">Returned</span>
-                <div class="retarget-step-bar"><div class="retarget-step-fill" style="--target-width:21%"></div></div>
-                <span class="retarget-step-val">891</span>
+              <div class="kpi-card">
+                <p class="kpi-label">Avg. LTV</p>
+                <p class="kpi-value white">$318</p>
+                <p class="kpi-change up">+$42 vs avg</p>
               </div>
-              <div class="retarget-step">
-                <span class="retarget-step-label">Converted</span>
-                <div class="retarget-step-bar"><div class="retarget-step-fill green" style="--target-width:5%"></div></div>
-                <span class="retarget-step-val green">214</span>
+              <div class="kpi-card">
+                <p class="kpi-label">Close Rate</p>
+                <p class="kpi-value green">41.7%</p>
+                <p class="kpi-change up">+6.2%</p>
               </div>
             </div>
 
-            <div class="retarget-bottom">
-              <span class="retarget-bottom-label">Revenue recaptured</span>
-              <span class="retarget-bottom-val">$4,280</span>
+            <div class="dash-chart">
+              <div class="chart-header">
+                <span class="chart-title">Lead Pipeline</span>
+                <span class="chart-period">Current status breakdown</span>
+              </div>
+              <div class="lead-pipeline">
+                <div class="lead-stage">
+                  <div class="lead-stage-header">
+                    <span class="lead-stage-name">New</span>
+                    <span class="lead-stage-count">28</span>
+                  </div>
+                  <div class="lead-stage-bar"><div class="lead-stage-fill" style="width:37.8%;background:var(--purple-light);"></div></div>
+                </div>
+                <div class="lead-stage">
+                  <div class="lead-stage-header">
+                    <span class="lead-stage-name">Contacted</span>
+                    <span class="lead-stage-count">22</span>
+                  </div>
+                  <div class="lead-stage-bar"><div class="lead-stage-fill" style="width:29.7%;background:var(--purple);"></div></div>
+                </div>
+                <div class="lead-stage">
+                  <div class="lead-stage-header">
+                    <span class="lead-stage-name">Booked Call</span>
+                    <span class="lead-stage-count">14</span>
+                  </div>
+                  <div class="lead-stage-bar"><div class="lead-stage-fill" style="width:18.9%;background:#f59e0b;"></div></div>
+                </div>
+                <div class="lead-stage">
+                  <div class="lead-stage-header">
+                    <span class="lead-stage-name">Proposal Sent</span>
+                    <span class="lead-stage-count">10</span>
+                  </div>
+                  <div class="lead-stage-bar"><div class="lead-stage-fill" style="width:13.5%;background:#22c55e;"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="dash-chart">
+              <div class="chart-header">
+                <span class="chart-title">Recent Leads</span>
+                <span class="chart-period">Last 7 days</span>
+              </div>
+              <div class="lead-list">
+                <div class="lead-row">
+                  <div class="lead-avatar">JM</div>
+                  <div class="lead-info">
+                    <span class="lead-name">James M.</span>
+                    <span class="lead-source">Meta Ad 3</span>
+                  </div>
+                  <span class="lead-status converted">Converted</span>
+                </div>
+                <div class="lead-row">
+                  <div class="lead-avatar">SR</div>
+                  <div class="lead-info">
+                    <span class="lead-name">Sarah R.</span>
+                    <span class="lead-source">Meta Ad 2</span>
+                  </div>
+                  <span class="lead-status booked">Booked Call</span>
+                </div>
+                <div class="lead-row">
+                  <div class="lead-avatar">DK</div>
+                  <div class="lead-info">
+                    <span class="lead-name">David K.</span>
+                    <span class="lead-source">Retargeting</span>
+                  </div>
+                  <span class="lead-status new-lead">New</span>
+                </div>
+                <div class="lead-row">
+                  <div class="lead-avatar">LP</div>
+                  <div class="lead-info">
+                    <span class="lead-name">Lisa P.</span>
+                    <span class="lead-source">Meta Ad 3</span>
+                  </div>
+                  <span class="lead-status converted">Converted</span>
+                </div>
+                <div class="lead-row">
+                  <div class="lead-avatar">MT</div>
+                  <div class="lead-info">
+                    <span class="lead-name">Mike T.</span>
+                    <span class="lead-source">Meta Ad 1</span>
+                  </div>
+                  <span class="lead-status contacted">Contacted</span>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1798,6 +2209,9 @@
     function switchTab(btn, tab) {
       document.querySelectorAll('.dash-tab').forEach(function(t) { t.classList.remove('active'); });
       btn.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(function(tc) { tc.classList.remove('active'); });
+      var target = document.getElementById('tab-' + tab);
+      if (target) target.classList.add('active');
     }
 
     // ── Quiz ──
