@@ -230,25 +230,24 @@
     /* Scroll reveal */
     .reveal {
       opacity: 0;
-      filter: blur(6px);
-      will-change: opacity, filter;
     }
 
     .reveal.visible {
       opacity: 1;
-      filter: blur(0);
+    }
+
+    /* Dashboard uses CSS transition instead of per-frame inline styles */
+    .dashboard.reveal {
+      transition: opacity 0.8s ease;
     }
 
     .reveal-line {
       opacity: 0;
-      filter: blur(4px);
-      transition: opacity 1.2s ease,
-                  filter 1.2s ease;
+      transition: opacity 1.2s ease;
     }
 
     .reveal-line.visible {
       opacity: 1;
-      filter: blur(0);
     }
 
     /* ══════════════════════════════════════════
@@ -2376,7 +2375,24 @@
 
     // ── Scroll reveal — smooth progressive fade ──
     (function() {
-      var reveals = document.querySelectorAll('.reveal');
+      // Dashboard gets its own CSS-transition reveal (tall element with overflow:hidden)
+      var dashReveal = document.getElementById('dashboard-demo');
+      var allReveals = document.querySelectorAll('.reveal');
+      var reveals = [];
+      allReveals.forEach(function(el) {
+        if (el === dashReveal) return;
+        reveals.push(el);
+      });
+      // Reveal dashboard via IntersectionObserver with CSS transition
+      if (dashReveal) {
+        var dashObs = new IntersectionObserver(function(entries) {
+          if (entries[0].isIntersecting) {
+            dashReveal.classList.add('visible');
+            dashObs.disconnect();
+          }
+        }, { threshold: 0.05 });
+        dashObs.observe(dashReveal);
+      }
       var lines = document.querySelectorAll('.reveal-line');
       var completed = new Set();
 
@@ -2398,14 +2414,17 @@
 
       var shimmered = new Set();
 
+      var totalElements = reveals.length + lines.length;
+
       function update() {
+        if (completed.size >= totalElements) return; // stop loop when done
+
         reveals.forEach(function(el) {
           if (completed.has(el)) return;
           var p = getProgress(el);
           if (p <= 0) return;
           var eased = 1 - Math.pow(1 - p, 3);
           el.style.opacity = eased;
-          el.style.filter = 'blur(' + ((1 - eased) * 6) + 'px)';
           // Trigger shimmer as soon as card starts appearing
           if (p >= 0.05 && !shimmered.has(el) && el.classList.contains('system-card')) {
             shimmered.add(el);
@@ -2415,7 +2434,6 @@
             completed.add(el);
             el.classList.add('visible');
             el.style.opacity = '';
-            el.style.filter = '';
           }
         });
 
@@ -2431,12 +2449,10 @@
           if (p <= 0) return;
           var eased = 1 - Math.pow(1 - p, 3);
           el.style.opacity = eased;
-          el.style.filter = 'blur(' + ((1 - eased) * 4) + 'px)';
           if (p >= 1) {
             completed.add(el);
             el.classList.add('visible');
             el.style.opacity = '';
-            el.style.filter = '';
           }
         });
 
