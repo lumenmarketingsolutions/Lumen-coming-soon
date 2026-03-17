@@ -328,7 +328,9 @@
     }
 
     /* ── Responsive ── */
+    /* iOS Safari: prevent auto-zoom on input focus (requires >=16px) */
     @media (max-width: 768px) {
+      input, select, textarea { font-size:16px !important; }
       .topbar { padding:14px 16px; }
       .topbar-left { gap:8px; }
       .topbar-title { font-size:14px; }
