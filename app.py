@@ -99,6 +99,58 @@ def init_db():
         )
     """)
     con.commit()
+
+    # ── CRM tables ──
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS leads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT DEFAULT '',
+            email TEXT NOT NULL,
+            phone TEXT DEFAULT '',
+            business TEXT DEFAULT '',
+            revenue TEXT DEFAULT '',
+            marketing TEXT DEFAULT '',
+            challenge TEXT DEFAULT '',
+            stage TEXT DEFAULT 'new',
+            source TEXT DEFAULT 'application',
+            deal_value REAL DEFAULT 0,
+            follow_up_date TEXT DEFAULT '',
+            tags TEXT DEFAULT '',
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )
+    """)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS lead_activity (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lead_id INTEGER NOT NULL,
+            type TEXT NOT NULL,
+            content TEXT DEFAULT '',
+            metadata TEXT DEFAULT '',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (lead_id) REFERENCES leads(id)
+        )
+    """)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS lead_emails (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lead_id INTEGER NOT NULL,
+            subject TEXT DEFAULT '',
+            body TEXT DEFAULT '',
+            direction TEXT DEFAULT 'sent',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (lead_id) REFERENCES leads(id)
+        )
+    """)
+    con.commit()
+
+    # Migrate leads table if needed
+    existing_leads_cols = [r[1] for r in con.execute("PRAGMA table_info(leads)").fetchall()]
+    leads_new_cols = {"tags": "TEXT DEFAULT ''"}
+    for col, dtype in leads_new_cols.items():
+        if col not in existing_leads_cols:
+            con.execute(f"ALTER TABLE leads ADD COLUMN {col} {dtype}")
+    con.commit()
     con.close()
 
 init_db()
@@ -314,19 +366,7 @@ def admin_coming_soon():
 def admin_main_site():
     if not session.get("wl_auth"):
         return redirect(url_for("admin_landing"))
-    con = sqlite3.connect(DB_PATH)
-    try:
-        apps = con.execute("SELECT email, business, revenue, marketing, challenge, created_at FROM applications ORDER BY id DESC").fetchall()
-    except Exception:
-        apps = []
-    try:
-        funnel = con.execute("SELECT event, step, value, COUNT(*) as cnt FROM funnel_events GROUP BY event, step, value ORDER BY cnt DESC").fetchall()
-    except Exception:
-        funnel = []
-    con.close()
-    applications = [{"email": a[0], "business": a[1], "revenue": a[2], "marketing": a[3], "challenge": a[4], "date": a[5][:10]} for a in apps]
-    funnel_stats = [{"event": f[0], "step": f[1], "value": f[2], "count": f[3]} for f in funnel]
-    return render_template("admin_main.html", authed=True, applications=applications, funnel_stats=funnel_stats)
+    return render_template("admin_main.html")
 
 @app.route("/t/visitors")
 def track_visitors():
@@ -388,6 +428,8 @@ def apply_submit():
     if not email or "@" not in email:
         return jsonify({"ok": False, "error": "Valid email required"})
 
+    now = datetime.datetime.utcnow().isoformat()
+
     # Store application
     con = sqlite3.connect(DB_PATH)
     con.execute("""
@@ -403,8 +445,23 @@ def apply_submit():
     """)
     con.execute(
         "INSERT INTO applications (email, business, revenue, marketing, challenge, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-        (email, business, revenue, marketing, challenge, datetime.datetime.utcnow().isoformat()),
+        (email, business, revenue, marketing, challenge, now),
     )
+
+    # Auto-create CRM lead
+    existing_lead = con.execute("SELECT id FROM leads WHERE email = ?", (email,)).fetchone()
+    if not existing_lead:
+        cur = con.execute(
+            """INSERT INTO leads (name, email, phone, business, revenue, marketing, challenge,
+               stage, source, deal_value, follow_up_date, tags, created_at, updated_at)
+               VALUES (?, ?, '', ?, ?, ?, ?, 'new', 'application', 0, '', '', ?, ?)""",
+            ("", email, business, revenue, marketing, challenge, now, now),
+        )
+        lead_id = cur.lastrowid
+        con.execute(
+            "INSERT INTO lead_activity (lead_id, type, content, metadata, created_at) VALUES (?, 'auto', 'Lead created from application', '', ?)",
+            (lead_id, now),
+        )
     con.commit()
     con.close()
 
@@ -424,6 +481,249 @@ def apply_submit():
 
     return jsonify({"ok": True})
 
+
+# ── CRM API ──────────────────────────────────────────────────
+LEAD_STAGES = ["new", "contacted", "discovery", "proposal", "won", "lost"]
+
+@app.route("/api/leads")
+def api_leads():
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    rows = con.execute("SELECT * FROM leads ORDER BY updated_at DESC").fetchall()
+    leads = [dict(r) for r in rows]
+    con.close()
+    return jsonify({"leads": leads})
+
+@app.route("/api/leads", methods=["POST"])
+def api_create_lead():
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    data = request.get_json() or {}
+    email = (data.get("email") or "").strip().lower()
+    if not email or "@" not in email:
+        return jsonify({"ok": False, "error": "Valid email required"}), 400
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    existing = con.execute("SELECT id FROM leads WHERE email = ?", (email,)).fetchone()
+    if existing:
+        con.close()
+        return jsonify({"ok": False, "error": "Lead with this email already exists"}), 409
+    cur = con.execute(
+        """INSERT INTO leads (name, email, phone, business, revenue, marketing, challenge,
+           stage, source, deal_value, follow_up_date, tags, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+        (data.get("name", ""), email, data.get("phone", ""),
+         data.get("business", ""), data.get("revenue", ""),
+         data.get("marketing", ""), data.get("challenge", ""),
+         "new", data.get("source", "manual"), float(data.get("deal_value", 0)),
+         data.get("follow_up_date", ""), data.get("tags", ""), now, now),
+    )
+    lead_id = cur.lastrowid
+    con.execute(
+        "INSERT INTO lead_activity (lead_id, type, content, metadata, created_at) VALUES (?, 'auto', 'Lead created manually', '', ?)",
+        (lead_id, now),
+    )
+    con.commit()
+    con.close()
+    return jsonify({"ok": True, "id": lead_id})
+
+@app.route("/api/leads/<int:lead_id>", methods=["PUT"])
+def api_update_lead(lead_id):
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    data = request.get_json() or {}
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    lead = con.execute("SELECT * FROM leads WHERE id = ?", (lead_id,)).fetchone()
+    if not lead:
+        con.close()
+        return jsonify({"ok": False, "error": "Lead not found"}), 404
+
+    # Build update
+    fields = []
+    params = []
+    allowed = ["name", "email", "phone", "business", "revenue", "marketing",
+               "challenge", "stage", "source", "deal_value", "follow_up_date", "tags"]
+    for f in allowed:
+        if f in data:
+            fields.append(f"{f} = ?")
+            params.append(data[f] if f != "deal_value" else float(data[f] or 0))
+    if not fields:
+        con.close()
+        return jsonify({"ok": False, "error": "No fields to update"}), 400
+    fields.append("updated_at = ?")
+    params.append(now)
+    params.append(lead_id)
+    con.execute(f"UPDATE leads SET {', '.join(fields)} WHERE id = ?", params)
+
+    # Log stage change
+    old_stage_idx = 0  # default
+    col_names = [desc[0] for desc in con.execute("SELECT * FROM leads LIMIT 0").description]
+    if "stage" in data:
+        old_stage = lead[col_names.index("stage")] if "stage" in col_names else "new"
+        if data["stage"] != old_stage:
+            con.execute(
+                "INSERT INTO lead_activity (lead_id, type, content, metadata, created_at) VALUES (?, 'stage_change', ?, ?, ?)",
+                (lead_id, f"Stage changed from {old_stage} to {data['stage']}", json.dumps({"from": old_stage, "to": data["stage"]}), now),
+            )
+
+    # Log other field updates (not stage)
+    updated_fields = [f for f in data if f in allowed and f != "stage"]
+    if updated_fields:
+        con.execute(
+            "INSERT INTO lead_activity (lead_id, type, content, metadata, created_at) VALUES (?, 'update', ?, '', ?)",
+            (lead_id, f"Updated: {', '.join(updated_fields)}", now),
+        )
+
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+@app.route("/api/leads/<int:lead_id>", methods=["DELETE"])
+def api_delete_lead(lead_id):
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    con = sqlite3.connect(DB_PATH)
+    con.execute("DELETE FROM lead_activity WHERE lead_id = ?", (lead_id,))
+    con.execute("DELETE FROM lead_emails WHERE lead_id = ?", (lead_id,))
+    con.execute("DELETE FROM leads WHERE id = ?", (lead_id,))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+@app.route("/api/leads/<int:lead_id>/activity")
+def api_lead_activity(lead_id):
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    rows = con.execute(
+        "SELECT * FROM lead_activity WHERE lead_id = ? ORDER BY created_at DESC LIMIT 50",
+        (lead_id,)
+    ).fetchall()
+    emails = con.execute(
+        "SELECT * FROM lead_emails WHERE lead_id = ? ORDER BY created_at DESC LIMIT 20",
+        (lead_id,)
+    ).fetchall()
+    con.close()
+    return jsonify({
+        "activity": [dict(r) for r in rows],
+        "emails": [dict(r) for r in emails],
+    })
+
+@app.route("/api/leads/<int:lead_id>/note", methods=["POST"])
+def api_add_note(lead_id):
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    data = request.get_json() or {}
+    content = (data.get("content") or "").strip()
+    if not content:
+        return jsonify({"ok": False, "error": "Note content required"}), 400
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    con.execute(
+        "INSERT INTO lead_activity (lead_id, type, content, metadata, created_at) VALUES (?, 'note', ?, '', ?)",
+        (lead_id, content, now),
+    )
+    con.execute("UPDATE leads SET updated_at = ? WHERE id = ?", (now, lead_id))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+@app.route("/api/leads/<int:lead_id>/email", methods=["POST"])
+def api_send_lead_email(lead_id):
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    data = request.get_json() or {}
+    subject = (data.get("subject") or "").strip()
+    body = (data.get("body") or "").strip()
+    if not subject or not body:
+        return jsonify({"ok": False, "error": "Subject and body required"}), 400
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    lead = con.execute("SELECT email, name FROM leads WHERE id = ?", (lead_id,)).fetchone()
+    if not lead:
+        con.close()
+        return jsonify({"ok": False, "error": "Lead not found"}), 404
+
+    lead_email = lead[0]
+    lead_name = lead[1] or lead_email.split("@")[0]
+
+    # Store email record
+    con.execute(
+        "INSERT INTO lead_emails (lead_id, subject, body, direction, created_at) VALUES (?, ?, ?, 'sent', ?)",
+        (lead_id, subject, body, now),
+    )
+    # Log activity
+    con.execute(
+        "INSERT INTO lead_activity (lead_id, type, content, metadata, created_at) VALUES (?, 'email_sent', ?, ?, ?)",
+        (lead_id, f"Email sent: {subject}", json.dumps({"subject": subject}), now),
+    )
+    con.execute("UPDATE leads SET updated_at = ? WHERE id = ?", (now, lead_id))
+    con.commit()
+    con.close()
+
+    # Actually send the email via Resend
+    if RESEND_API_KEY:
+        email_html = f"""
+        <div style="font-family:Inter,-apple-system,sans-serif;max-width:600px;margin:0 auto;padding:40px 24px;">
+            {body.replace(chr(10), '<br>')}
+        </div>
+        """
+        send_email(lead_email, subject, email_html)
+
+    return jsonify({"ok": True})
+
+@app.route("/api/leads/import-applications", methods=["POST"])
+def api_import_applications():
+    """Import existing applications as leads (one-time migration)."""
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    try:
+        apps = con.execute("SELECT email, business, revenue, marketing, challenge, created_at FROM applications").fetchall()
+    except Exception:
+        apps = []
+    imported = 0
+    for a in apps:
+        existing = con.execute("SELECT id FROM leads WHERE email = ?", (a[0],)).fetchone()
+        if not existing:
+            cur = con.execute(
+                """INSERT INTO leads (name, email, phone, business, revenue, marketing, challenge,
+                   stage, source, deal_value, follow_up_date, tags, created_at, updated_at)
+                   VALUES ('', ?, '', ?, ?, ?, ?, 'new', 'application', 0, '', '', ?, ?)""",
+                (a[0], a[1], a[2], a[3], a[4], a[5], now),
+            )
+            con.execute(
+                "INSERT INTO lead_activity (lead_id, type, content, metadata, created_at) VALUES (?, 'auto', 'Imported from application', '', ?)",
+                (cur.lastrowid, now),
+            )
+            imported += 1
+    con.commit()
+    con.close()
+    return jsonify({"ok": True, "imported": imported})
+
+@app.route("/api/leads/stats")
+def api_lead_stats():
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    con = sqlite3.connect(DB_PATH)
+    total = con.execute("SELECT COUNT(*) FROM leads").fetchone()[0]
+    by_stage = {}
+    for stage in LEAD_STAGES:
+        by_stage[stage] = con.execute("SELECT COUNT(*) FROM leads WHERE stage = ?", (stage,)).fetchone()[0]
+    pipeline_value = con.execute("SELECT COALESCE(SUM(deal_value), 0) FROM leads WHERE stage NOT IN ('won','lost')").fetchone()[0]
+    won_value = con.execute("SELECT COALESCE(SUM(deal_value), 0) FROM leads WHERE stage = 'won'").fetchone()[0]
+    con.close()
+    return jsonify({
+        "total": total,
+        "by_stage": by_stage,
+        "pipeline_value": pipeline_value,
+        "won_value": won_value,
+    })
 
 @app.route("/t/reset", methods=["POST"])
 def reset_stats():
