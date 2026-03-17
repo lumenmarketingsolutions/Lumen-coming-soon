@@ -2548,6 +2548,21 @@
     var quizStep = 1;
     var quizFields = ['business', 'revenue', 'marketing', 'challenge'];
 
+    // ── Page view tracking (main-site) ──
+    (function(){
+      var pvSid=null,pvStart=Date.now(),pvParams=new URLSearchParams(window.location.search);
+      fetch('/t/view',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({page:'main-site',screen:screen.width+'x'+screen.height,
+          language:navigator.language||'',timezone:Intl.DateTimeFormat().resolvedOptions().timeZone||'',
+          platform:navigator.platform||'',utm_source:pvParams.get('utm_source')||'',
+          utm_medium:pvParams.get('utm_medium')||'',utm_campaign:pvParams.get('utm_campaign')||'',
+          utm_content:pvParams.get('utm_content')||''})
+      }).then(function(r){return r.json();}).then(function(d){pvSid=d.sid;});
+      setInterval(function(){if(pvSid){var t=Math.round((Date.now()-pvStart)/1000);
+        fetch('/t/ping',{method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({sid:pvSid,t:t})});}},5000);
+    })();
+
     // ── Funnel tracking helper ──
     var funnelSid = '';
     function trackFunnel(event, step, value) {

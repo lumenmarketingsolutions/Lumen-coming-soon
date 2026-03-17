@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Lumen OS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter',-apple-system,sans-serif;
+      background:#0a0a0f; color:#e8e8f0;
+      min-height:100vh; -webkit-font-smoothing:antialiased;
+    }
+    .topbar {
+      display:flex; align-items:center; gap:12px;
+      padding:16px 24px; border-bottom:1px solid #1a1a25;
+      position:sticky; top:0; background:#0a0a0f; z-index:100;
+    }
+    .back { font-size:13px; color:#6b6b80; text-decoration:none; font-weight:500; }
+    .topbar-title { font-size:16px; font-weight:700; }
+    .container { max-width:600px; margin:0 auto; padding:24px 20px 80px; }
+
+    .stats-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:28px;
+    }
+    .stat-card {
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:12px; padding:16px; text-align:center;
+    }
+    .stat-val { font-size:22px; font-weight:800; color:#7c4dff; margin-bottom:2px; }
+    .stat-label {
+      font-size:9px; font-weight:600; color:#6b6b80;
+      text-transform:uppercase; letter-spacing:1px;
+    }
+
+    .sec-label {
+      font-size:10px; font-weight:700; letter-spacing:2px;
+      text-transform:uppercase; color:#333; margin-bottom:12px;
+    }
+    .section { margin-bottom:32px; }
+
+    .chart-wrap {
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:12px; padding:16px;
+    }
+    .chart { display:flex; align-items:flex-end; gap:6px; height:60px; }
+    .chart-bar {
+      flex:1; background:rgba(97,40,219,0.3); border-radius:3px;
+      min-height:3px; transition:height 0.4s ease;
+      position:relative;
+    }
+    .chart-bar:hover { background:rgba(97,40,219,0.5); }
+    .chart-labels {
+      display:flex; justify-content:space-between;
+      font-size:9px; color:#44445a; margin-top:6px;
+    }
+
+    .visits-table { width:100%; font-size:12px; border-collapse:collapse; }
+    .visits-table th {
+      text-align:left; padding:8px 10px; font-size:10px; font-weight:600;
+      color:#6b6b80; text-transform:uppercase; letter-spacing:1px;
+      border-bottom:1px solid #1a1a25;
+    }
+    .visits-table td { padding:10px; border-bottom:1px solid #0f0f18; color:#6b6b80; }
+    .visits-table td:first-child { color:#e8e8f0; font-weight:500; }
+
+    .snippet-wrap {
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:12px; padding:16px; position:relative;
+    }
+    .snippet-code {
+      background:#0a0a0f; border:1px solid #1a1a25;
+      border-radius:8px; padding:12px; font-family:'SF Mono',Monaco,monospace;
+      font-size:11px; color:#6b6b80; line-height:1.5;
+      overflow-x:auto; white-space:pre; margin-bottom:12px;
+    }
+    .copy-btn {
+      padding:6px 14px; border-radius:6px; border:1px solid #1a1a25;
+      background:#111118; color:#7c4dff; font-family:inherit;
+      font-size:11px; font-weight:600; cursor:pointer;
+    }
+    .copy-btn:hover { border-color:#7c4dff; }
+
+    .empty { text-align:center; padding:32px; font-size:12px; color:#44445a; }
+
+    @media(max-width:768px) {
+      .topbar { padding:14px 16px; }
+      .container { padding:20px 16px 80px; }
+      input,select,textarea { font-size:16px !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="/admin">&lsaquo;</a>
+    <span class="topbar-title" id="dash-title">Dashboard</span>
+  </div>
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <p class="stat-val" id="s-opens">&mdash;</p>
+        <p class="stat-label">Total Opens</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-val" id="s-visitors">&mdash;</p>
+        <p class="stat-label">Unique Visitors</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-val" id="s-duration">&mdash;</p>
+        <p class="stat-label">Avg Duration</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="sec-label">7-Day Trend</p>
+      <div class="chart-wrap">
+        <div class="chart" id="chart"></div>
+        <div class="chart-labels"><span id="chart-start"></span><span id="chart-end"></span></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="sec-label">Recent Visits</p>
+      <div style="overflow-x:auto;">
+        <table class="visits-table">
+          <thead><tr><th>IP</th><th>Device</th><th>Browser</th><th>Duration</th><th>Time</th></tr></thead>
+          <tbody id="visits-body"><tr><td colspan="5" class="empty">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="sec-label">Tracking Snippet</p>
+      <div class="snippet-wrap">
+        <p style="font-size:11px;color:#6b6b80;margin-bottom:10px;">Add this script to the client dashboard to track usage:</p>
+        <div class="snippet-code" id="snippet"></div>
+        <button class="copy-btn" onclick="copySnippet()">Copy Snippet</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+var SLUG='{{ slug }}';
+
+function fmtTime(s){
+  if(s>=60)return Math.floor(s/60)+'m '+Math.round(s%60)+'s';
+  return Math.round(s)+'s';
+}
+function timeAgo(ts){
+  if(!ts)return'—';
+  var d=(Date.now()-new Date(ts+'Z').getTime())/1000;
+  if(d<60)return'Just now';if(d<3600)return Math.floor(d/60)+'m ago';
+  if(d<86400)return Math.floor(d/3600)+'h ago';
+  if(d<604800)return Math.floor(d/86400)+'d ago';
+  return ts.slice(0,10);
+}
+
+// Generate tracking snippet
+var origin=window.location.origin;
+var snippet='<sc'+'ript>\n(function(){\n  var s="'+SLUG+'",h="'+origin+'/t/dash";\n  var sid=Math.random().toString(36).slice(2),st=Date.now();\n  fetch(h,{method:"POST",headers:{"Content-Type":"application/json"},\n    body:JSON.stringify({slug:s,event:"open",sid:sid})});\n  setInterval(function(){\n    var dur=Math.round((Date.now()-st)/1000);\n    fetch(h,{method:"POST",headers:{"Content-Type":"application/json"},\n      body:JSON.stringify({slug:s,event:"ping",sid:sid,duration:dur})});\n  },15000);\n})();\n</sc'+'ript>';
+document.getElementById('snippet').textContent=snippet;
+
+function copySnippet(){
+  navigator.clipboard.writeText(snippet).then(function(){
+    var btn=document.querySelector('.copy-btn');
+    btn.textContent='Copied!';
+    setTimeout(function(){btn.textContent='Copy Snippet';},2000);
+  });
+}
+
+fetch('/api/dashboard/'+SLUG+'/analytics').then(function(r){return r.json();}).then(function(d){
+  document.getElementById('dash-title').textContent=d.dashboard.name;
+  document.getElementById('s-opens').textContent=d.total_opens;
+  document.getElementById('s-visitors').textContent=d.unique_visitors;
+  document.getElementById('s-duration').textContent=fmtTime(d.avg_duration);
+
+  // Chart
+  if(d.daily&&d.daily.length){
+    var mx=Math.max.apply(null,d.daily.map(function(x){return x.opens;}))||1;
+    document.getElementById('chart').innerHTML=d.daily.map(function(x){
+      return'<div class="chart-bar" style="height:'+Math.max((x.opens/mx)*100,5)+'%" title="'+x.date+': '+x.opens+'"></div>';
+    }).join('');
+    document.getElementById('chart-start').textContent=d.daily[0].date.slice(5);
+    document.getElementById('chart-end').textContent=d.daily[d.daily.length-1].date.slice(5);
+  }
+
+  // Visits
+  var tb=document.getElementById('visits-body');
+  if(d.visits.length===0){
+    tb.innerHTML='<tr><td colspan="5" class="empty">No visits recorded yet</td></tr>';
+  } else {
+    tb.innerHTML=d.visits.map(function(v){
+      return'<tr><td>'+v.ip+'</td><td>'+v.device+'</td><td>'+v.browser+'</td>'+
+        '<td>'+(v.duration>0?fmtTime(v.duration):'—')+'</td>'+
+        '<td>'+timeAgo(v.timestamp)+'</td></tr>';
+    }).join('');
+  }
+});
+</script>
+</body>
+</html>

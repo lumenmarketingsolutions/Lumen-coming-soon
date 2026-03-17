@@ -79,6 +79,7 @@ def init_db():
         "utm_medium": "TEXT DEFAULT ''", "utm_campaign": "TEXT DEFAULT ''",
         "utm_content": "TEXT DEFAULT ''", "city": "TEXT DEFAULT ''",
         "region": "TEXT DEFAULT ''", "country": "TEXT DEFAULT ''",
+        "page": "TEXT DEFAULT 'coming-soon'",
     }
     for col, dtype in new_cols.items():
         if col not in existing:
@@ -192,6 +193,41 @@ def init_db():
         if col not in existing_leads_cols:
             con.execute(f"ALTER TABLE leads ADD COLUMN {col} {dtype}")
     con.commit()
+
+    # ── Client dashboard tracking ──
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS client_dashboards (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            slug TEXT UNIQUE NOT NULL,
+            url TEXT DEFAULT '',
+            created_at TEXT NOT NULL
+        )
+    """)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS dashboard_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            dashboard_slug TEXT NOT NULL,
+            event TEXT NOT NULL DEFAULT 'open',
+            session_id TEXT DEFAULT '',
+            ip TEXT DEFAULT '',
+            user_agent TEXT DEFAULT '',
+            duration REAL DEFAULT 0,
+            timestamp TEXT NOT NULL
+        )
+    """)
+    con.commit()
+
+    # Seed default client dashboards
+    existing_dash = con.execute("SELECT id FROM client_dashboards LIMIT 1").fetchone()
+    if not existing_dash:
+        now = datetime.datetime.utcnow().isoformat()
+        con.execute("INSERT INTO client_dashboards (name, slug, url, created_at) VALUES (?, ?, ?, ?)",
+                    ("Avalon Laser", "avalon-laser", "https://web-production-7e73c.up.railway.app", now))
+        con.execute("INSERT INTO client_dashboards (name, slug, url, created_at) VALUES (?, ?, ?, ?)",
+                    ("Berry Clean", "berry-clean", "", now))
+        con.commit()
+
     con.close()
 
 init_db()
@@ -230,6 +266,51 @@ def funnel_stats():
     con.close()
     stats = [{"event": r[0], "step": r[1], "value": r[2], "count": r[3]} for r in rows]
     return jsonify({"stats": stats})
+
+# ── Client Dashboard Tracking ────────────────────────────────
+@app.route("/t/dash", methods=["POST", "OPTIONS"])
+def track_dashboard():
+    # CORS for cross-domain tracking from client dashboards
+    if request.method == "OPTIONS":
+        resp = jsonify({"ok": True})
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        return resp
+    data = request.get_json() or {}
+    slug = data.get("slug", "")
+    event = data.get("event", "open")
+    sid = data.get("sid", "")
+    duration = float(data.get("duration", 0))
+    if not slug:
+        return jsonify({"ok": False}), 400
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    if "," in ip:
+        ip = ip.split(",")[0].strip()
+    user_agent = request.headers.get("User-Agent", "")
+    con = sqlite3.connect(DB_PATH)
+    if event == "ping" and sid:
+        existing = con.execute(
+            "SELECT id FROM dashboard_events WHERE session_id = ? AND dashboard_slug = ? ORDER BY id DESC LIMIT 1",
+            (sid, slug)
+        ).fetchone()
+        if existing:
+            con.execute("UPDATE dashboard_events SET duration = ? WHERE id = ?", (min(duration, 3600), existing[0]))
+        else:
+            con.execute(
+                "INSERT INTO dashboard_events (dashboard_slug, event, session_id, ip, user_agent, duration, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                (slug, "open", sid, ip, user_agent, min(duration, 3600), datetime.datetime.utcnow().isoformat()),
+            )
+    else:
+        con.execute(
+            "INSERT INTO dashboard_events (dashboard_slug, event, session_id, ip, user_agent, duration, timestamp) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (slug, event, sid, ip, user_agent, 0, datetime.datetime.utcnow().isoformat()),
+        )
+    con.commit()
+    con.close()
+    resp = jsonify({"ok": True, "sid": sid})
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
 
 @app.route("/")
 def index():
@@ -285,15 +366,16 @@ def track_view():
     utm_medium = data.get("utm_medium", "")
     utm_campaign = data.get("utm_campaign", "")
     utm_content = data.get("utm_content", "")
+    page = data.get("page", "coming-soon")
 
     con = sqlite3.connect(DB_PATH)
     con.execute(
         """INSERT INTO page_views
         (session_id, timestamp, time_on_page, ip, user_agent, referrer,
-         screen, language, timezone, platform, utm_source, utm_medium, utm_campaign, utm_content)
-        VALUES (?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+         screen, language, timezone, platform, utm_source, utm_medium, utm_campaign, utm_content, page)
+        VALUES (?, ?, 0, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (sid, datetime.datetime.utcnow().isoformat(), ip, user_agent, referrer,
-         screen, language, timezone, platform, utm_source, utm_medium, utm_campaign, utm_content),
+         screen, language, timezone, platform, utm_source, utm_medium, utm_campaign, utm_content, page),
     )
     con.commit()
     con.close()
@@ -378,20 +460,10 @@ def admin_landing():
         if pin == ADMIN_PIN:
             session["wl_auth"] = True
             return redirect(url_for("admin_landing"))
-        return render_template("admin.html", error=True, authed=False, waitlist_count=0, views_today=0, app_count=0)
+        return render_template("admin.html", error=True, authed=False)
     if not session.get("wl_auth"):
-        return render_template("admin.html", authed=False, error=False, waitlist_count=0, views_today=0, app_count=0)
-    con = sqlite3.connect(DB_PATH)
-    waitlist_count = con.execute("SELECT COUNT(*) FROM waitlist").fetchone()[0]
-    today = datetime.datetime.utcnow().strftime("%Y-%m-%d")
-    views_today = con.execute("SELECT COUNT(*) FROM page_views WHERE timestamp LIKE ?", (today + "%",)).fetchone()[0]
-    try:
-        app_count = con.execute("SELECT COUNT(*) FROM applications").fetchone()[0]
-    except Exception:
-        app_count = 0
-    con.close()
-    return render_template("admin.html", authed=True, error=False,
-                           waitlist_count=waitlist_count, views_today=views_today, app_count=app_count)
+        return render_template("admin.html", authed=False, error=False)
+    return render_template("admin.html", authed=True, error=False)
 
 @app.route("/admin/coming-soon")
 def admin_coming_soon():
@@ -407,7 +479,19 @@ def admin_coming_soon():
 def admin_main_site():
     if not session.get("wl_auth"):
         return redirect(url_for("admin_landing"))
+    return render_template("admin_site.html")
+
+@app.route("/admin/crm")
+def admin_crm():
+    if not session.get("wl_auth"):
+        return redirect(url_for("admin_landing"))
     return render_template("admin_main.html")
+
+@app.route("/admin/dashboard/<slug>")
+def admin_dashboard(slug):
+    if not session.get("wl_auth"):
+        return redirect(url_for("admin_landing"))
+    return render_template("admin_dashboard.html", slug=slug)
 
 @app.route("/t/visitors")
 def track_visitors():
@@ -866,6 +950,135 @@ def api_lead_stats():
         "by_stage": by_stage,
         "pipeline_value": pipeline_value,
         "won_value": won_value,
+    })
+
+# ── LOS Overview API ──────────────────────────────────────────
+@app.route("/api/los-overview")
+def api_los_overview():
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    con = sqlite3.connect(DB_PATH)
+    now = datetime.datetime.utcnow()
+    today = now.strftime("%Y-%m-%d")
+    two_min_ago = (now - datetime.timedelta(minutes=2)).isoformat()
+
+    total_views = con.execute("SELECT COUNT(*) FROM page_views").fetchone()[0]
+    views_today = con.execute("SELECT COUNT(*) FROM page_views WHERE timestamp LIKE ?", (today + "%",)).fetchone()[0]
+
+    owner_ph = ",".join("?" for _ in OWNER_IPS)
+    avg_time = con.execute(
+        f"SELECT AVG(time_on_page) FROM page_views WHERE time_on_page > 0 AND ip NOT IN ({owner_ph})",
+        tuple(OWNER_IPS)
+    ).fetchone()[0] or 0
+
+    active_now = con.execute("SELECT COUNT(*) FROM page_views WHERE timestamp > ?", (two_min_ago,)).fetchone()[0]
+    waitlist_count = con.execute("SELECT COUNT(*) FROM waitlist").fetchone()[0]
+    try:
+        app_count = con.execute("SELECT COUNT(*) FROM applications").fetchone()[0]
+    except Exception:
+        app_count = 0
+    lead_count = con.execute("SELECT COUNT(*) FROM leads").fetchone()[0]
+    pipeline_value = con.execute("SELECT COALESCE(SUM(deal_value), 0) FROM leads WHERE stage NOT IN ('won','lost')").fetchone()[0]
+    won_value = con.execute("SELECT COALESCE(SUM(deal_value), 0) FROM leads WHERE stage = 'won'").fetchone()[0]
+
+    daily = []
+    for i in range(6, -1, -1):
+        d = (now - datetime.timedelta(days=i)).strftime("%Y-%m-%d")
+        cnt = con.execute("SELECT COUNT(*) FROM page_views WHERE timestamp LIKE ?", (d + "%",)).fetchone()[0]
+        daily.append({"date": d, "views": cnt})
+
+    dashboards = []
+    try:
+        dbs = con.execute("SELECT name, slug, url FROM client_dashboards ORDER BY id").fetchall()
+        for db_row in dbs:
+            total_opens = con.execute(
+                "SELECT COUNT(*) FROM dashboard_events WHERE dashboard_slug = ? AND event = 'open'", (db_row[1],)
+            ).fetchone()[0]
+            last_ev = con.execute(
+                "SELECT timestamp FROM dashboard_events WHERE dashboard_slug = ? ORDER BY timestamp DESC LIMIT 1", (db_row[1],)
+            ).fetchone()
+            dashboards.append({
+                "name": db_row[0], "slug": db_row[1], "url": db_row[2],
+                "total_opens": total_opens,
+                "last_active": last_ev[0] if last_ev else None,
+            })
+    except Exception:
+        pass
+    con.close()
+    return jsonify({
+        "total_views": total_views, "views_today": views_today,
+        "avg_time": round(avg_time, 1), "active_now": active_now,
+        "waitlist_count": waitlist_count, "app_count": app_count,
+        "lead_count": lead_count, "pipeline_value": pipeline_value,
+        "won_value": won_value, "daily": daily, "dashboards": dashboards,
+    })
+
+@app.route("/api/main-site-analytics")
+def api_main_site_analytics():
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    con = sqlite3.connect(DB_PATH)
+    try:
+        apps = con.execute(
+            "SELECT email, business, revenue, marketing, challenge, created_at FROM applications ORDER BY id DESC"
+        ).fetchall()
+        applications = [{"email": a[0], "business": a[1], "revenue": a[2],
+                         "marketing": a[3], "challenge": a[4], "created_at": a[5]} for a in apps]
+    except Exception:
+        applications = []
+    try:
+        funnel = con.execute(
+            "SELECT event, step, value, COUNT(*) as cnt FROM funnel_events GROUP BY event, step, value ORDER BY cnt DESC"
+        ).fetchall()
+        funnel_stats = [{"event": f[0], "step": f[1], "value": f[2], "count": f[3]} for f in funnel]
+    except Exception:
+        funnel_stats = []
+    con.close()
+    return jsonify({"applications": applications, "funnel": funnel_stats, "total_apps": len(applications)})
+
+@app.route("/api/dashboard/<slug>/analytics")
+def api_dashboard_analytics(slug):
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    con = sqlite3.connect(DB_PATH)
+    now = datetime.datetime.utcnow()
+    total_opens = con.execute(
+        "SELECT COUNT(*) FROM dashboard_events WHERE dashboard_slug = ? AND event = 'open'", (slug,)
+    ).fetchone()[0]
+    unique_ips = con.execute(
+        "SELECT COUNT(DISTINCT ip) FROM dashboard_events WHERE dashboard_slug = ? AND ip != ''", (slug,)
+    ).fetchone()[0]
+    avg_duration = con.execute(
+        "SELECT AVG(duration) FROM dashboard_events WHERE dashboard_slug = ? AND duration > 0", (slug,)
+    ).fetchone()[0] or 0
+
+    daily = []
+    for i in range(6, -1, -1):
+        d = (now - datetime.timedelta(days=i)).strftime("%Y-%m-%d")
+        cnt = con.execute(
+            "SELECT COUNT(*) FROM dashboard_events WHERE dashboard_slug = ? AND event = 'open' AND timestamp LIKE ?",
+            (slug, d + "%")
+        ).fetchone()[0]
+        daily.append({"date": d, "opens": cnt})
+
+    rows = con.execute(
+        "SELECT ip, user_agent, duration, timestamp FROM dashboard_events WHERE dashboard_slug = ? AND event = 'open' ORDER BY timestamp DESC LIMIT 50",
+        (slug,)
+    ).fetchall()
+    visits = []
+    for r in rows:
+        ua = r[1]
+        device = "Mobile" if any(m in ua for m in ["iPhone", "Android", "Mobile"]) else "Desktop"
+        browser = "Safari" if "Safari" in ua and "Chrome" not in ua else "Chrome" if "Chrome" in ua else "Firefox" if "Firefox" in ua else "Other"
+        visits.append({"ip": r[0], "device": device, "browser": browser, "duration": round(r[2], 1), "timestamp": r[3]})
+
+    dash = con.execute("SELECT name, slug, url FROM client_dashboards WHERE slug = ?", (slug,)).fetchone()
+    dash_info = {"name": dash[0], "slug": dash[1], "url": dash[2]} if dash else {"name": slug, "slug": slug, "url": ""}
+    con.close()
+    return jsonify({
+        "dashboard": dash_info, "total_opens": total_opens,
+        "unique_visitors": unique_ips, "avg_duration": round(avg_duration, 1),
+        "daily": daily, "visits": visits,
     })
 
 @app.route("/t/reset", methods=["POST"])

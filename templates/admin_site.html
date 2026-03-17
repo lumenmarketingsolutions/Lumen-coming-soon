@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Main Site — Lumen OS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter',-apple-system,sans-serif;
+      background:#0a0a0f; color:#e8e8f0;
+      min-height:100vh; -webkit-font-smoothing:antialiased;
+    }
+    .topbar {
+      display:flex; align-items:center; gap:12px;
+      padding:16px 24px; border-bottom:1px solid #1a1a25;
+      position:sticky; top:0; background:#0a0a0f; z-index:100;
+    }
+    .back { font-size:13px; color:#6b6b80; text-decoration:none; font-weight:500; }
+    .topbar-title { font-size:16px; font-weight:700; }
+    .container { max-width:600px; margin:0 auto; padding:24px 20px 80px; }
+
+    .stats-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:32px;
+    }
+    .stat-card {
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:12px; padding:16px; text-align:center;
+    }
+    .stat-val { font-size:22px; font-weight:800; color:#7c4dff; margin-bottom:2px; }
+    .stat-label {
+      font-size:9px; font-weight:600; color:#6b6b80;
+      text-transform:uppercase; letter-spacing:1px;
+    }
+
+    .sec-label {
+      font-size:10px; font-weight:700; letter-spacing:2px;
+      text-transform:uppercase; color:#333; margin-bottom:12px;
+    }
+    .section { margin-bottom:32px; }
+
+    .app-list { display:flex; flex-direction:column; gap:8px; }
+    .app-card {
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:12px; padding:16px;
+    }
+    .app-email { font-size:13px; font-weight:600; margin-bottom:4px; }
+    .app-meta { font-size:11px; color:#6b6b80; line-height:1.5; }
+    .app-meta span { display:inline-block; margin-right:12px; }
+    .app-date { font-size:10px; color:#44445a; margin-top:6px; }
+
+    .funnel-list { display:flex; flex-direction:column; gap:6px; }
+    .funnel-row {
+      display:flex; align-items:center; gap:12px;
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:10px; padding:12px 16px;
+    }
+    .funnel-bar {
+      height:6px; border-radius:3px; background:#7c4dff;
+      transition:width 0.4s ease;
+    }
+    .funnel-event { font-size:12px; font-weight:600; flex:1; min-width:0; }
+    .funnel-step { font-size:10px; color:#6b6b80; }
+    .funnel-count { font-size:13px; font-weight:700; color:#7c4dff; flex-shrink:0; }
+
+    .empty { text-align:center; padding:32px; font-size:12px; color:#44445a; }
+
+    @media(max-width:768px) {
+      .stats-grid { grid-template-columns:repeat(2,1fr); }
+      .topbar { padding:14px 16px; }
+      .container { padding:20px 16px 80px; }
+      input,select,textarea { font-size:16px !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="back" href="/admin">&lsaquo;</a>
+    <span class="topbar-title">Main Site</span>
+  </div>
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <p class="stat-val" id="s-apps">&mdash;</p>
+        <p class="stat-label">Applications</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-val" id="s-funnel">&mdash;</p>
+        <p class="stat-label">Funnel Events</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-val" id="s-conv">&mdash;</p>
+        <p class="stat-label">Conversion</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="sec-label">Applications</p>
+      <div class="app-list" id="app-list">
+        <div class="empty">Loading...</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <p class="sec-label">Funnel Breakdown</p>
+      <div class="funnel-list" id="funnel-list">
+        <div class="empty">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+fetch('/api/main-site-analytics').then(function(r){return r.json();}).then(function(d){
+  document.getElementById('s-apps').textContent=d.total_apps;
+
+  var totalFunnel=0;
+  d.funnel.forEach(function(f){totalFunnel+=f.count;});
+  document.getElementById('s-funnel').textContent=totalFunnel;
+
+  // Simple conversion: applications / funnel page_view events
+  var pageViews=d.funnel.filter(function(f){return f.event==='page_view';}).reduce(function(a,f){return a+f.count;},0);
+  var convRate=pageViews>0?((d.total_apps/pageViews)*100).toFixed(1)+'%':'—';
+  document.getElementById('s-conv').textContent=convRate;
+
+  // Applications
+  var al=document.getElementById('app-list');
+  if(d.applications.length===0){
+    al.innerHTML='<div class="empty">No applications yet</div>';
+  } else {
+    al.innerHTML=d.applications.map(function(a){
+      return'<div class="app-card">'+
+        '<p class="app-email">'+esc(a.email)+'</p>'+
+        '<p class="app-meta">'+
+          (a.business?'<span>'+esc(a.business)+'</span>':'')+
+          (a.revenue?'<span>'+esc(a.revenue)+'</span>':'')+
+        '</p>'+
+        (a.challenge?'<p class="app-meta" style="color:#6b6b80;font-style:italic;">"'+esc(a.challenge)+'"</p>':'')+
+        '<p class="app-date">'+(a.created_at||'').slice(0,10)+'</p>'+
+      '</div>';
+    }).join('');
+  }
+
+  // Funnel
+  var fl=document.getElementById('funnel-list');
+  if(d.funnel.length===0){
+    fl.innerHTML='<div class="empty">No funnel data yet</div>';
+  } else {
+    var maxCount=Math.max.apply(null,d.funnel.map(function(f){return f.count;}))||1;
+    fl.innerHTML=d.funnel.map(function(f){
+      var pct=Math.round((f.count/maxCount)*100);
+      return'<div class="funnel-row">'+
+        '<div style="flex:1;min-width:0;">'+
+          '<p class="funnel-event">'+esc(f.event)+'</p>'+
+          (f.step?'<p class="funnel-step">'+esc(f.step)+(f.value?' &middot; '+esc(f.value):'')+'</p>':'')+
+          '<div style="margin-top:6px;background:#1a1a25;border-radius:3px;height:6px;overflow:hidden;">'+
+            '<div class="funnel-bar" style="width:'+pct+'%"></div>'+
+          '</div>'+
+        '</div>'+
+        '<span class="funnel-count">'+f.count+'</span>'+
+      '</div>';
+    }).join('');
+  }
+});
+</script>
+</body>
+</html>

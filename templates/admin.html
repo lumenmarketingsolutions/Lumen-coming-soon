@@ -3,21 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lumen — Admin</title>
+  <title>Lumen OS</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin:0; padding:0; box-sizing:border-box; }
     body {
       font-family:'Inter',-apple-system,sans-serif;
-      background:#0a0a0f;
-      color:#e8e8f0;
-      min-height:100vh;
-      -webkit-font-smoothing:antialiased;
+      background:#0a0a0f; color:#e8e8f0;
+      min-height:100vh; -webkit-font-smoothing:antialiased;
     }
+    .container { max-width:600px; margin:0 auto; padding:40px 20px 80px; }
 
-    .container { width:100%; max-width:520px; margin:0 auto; padding:48px 24px; }
-
-    /* ── PIN screen ── */
+    /* ── PIN ── */
     .pin-card { text-align:center; padding-top:30vh; }
     .pin-card h1 { font-size:20px; font-weight:700; margin-bottom:8px; }
     .pin-card p { font-size:13px; color:#6b6b80; margin-bottom:32px; }
@@ -38,166 +35,290 @@
       font-family:inherit; cursor:pointer;
     }
     .pin-error { margin-top:16px; font-size:13px; color:#ef4444; }
-    @media (max-width: 768px) { input, select, textarea { font-size:16px !important; } }
 
-    /* ── Dashboard selector ── */
-    .admin-header {
-      text-align:center;
-      margin-bottom:48px;
+    /* ── Header ── */
+    .los-header { text-align:center; margin-bottom:28px; }
+    .los-brand {
+      font-size:10px; font-weight:700; letter-spacing:3px;
+      text-transform:uppercase; color:#7c4dff; margin-bottom:2px;
     }
-    .admin-header h1 {
-      font-size:22px;
-      font-weight:800;
-      letter-spacing:-0.5px;
-      margin-bottom:4px;
-    }
-    .admin-header p {
-      font-size:13px;
-      color:#6b6b80;
-    }
+    .los-title { font-size:22px; font-weight:800; letter-spacing:-0.5px; margin-bottom:2px; }
+    .los-sub { font-size:12px; color:#6b6b80; }
 
-    .page-cards {
-      display:flex;
-      flex-direction:column;
-      gap:16px;
+    /* ── Hero Overview ── */
+    .hero {
+      background:#111118; border:1px solid rgba(97,40,219,0.15);
+      border-radius:16px; padding:20px 24px; margin-bottom:4px;
     }
+    .hero-top {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:14px;
+    }
+    .hero-label { font-size:12px; font-weight:700; }
+    .hero-live {
+      display:flex; align-items:center; gap:6px;
+      font-size:10px; font-weight:600; color:#22c55e;
+    }
+    .live-dot {
+      width:6px; height:6px; border-radius:50%; background:#22c55e;
+      animation:pulse 2s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
 
-    .page-card {
-      display:flex;
-      align-items:center;
-      gap:20px;
-      background:#111118;
-      border:1px solid #1a1a25;
-      border-radius:16px;
-      padding:24px;
-      cursor:pointer;
-      transition:border-color 0.2s, transform 0.2s, box-shadow 0.2s;
-      text-decoration:none;
-      color:inherit;
+    .metrics { display:grid; grid-template-columns:repeat(4,1fr); gap:0; margin-bottom:12px; }
+    .metric { text-align:center; padding:6px 0; }
+    .metric-val { font-size:18px; font-weight:800; line-height:1; margin-bottom:2px; }
+    .metric-val.purple { color:#7c4dff; }
+    .metric-val.green { color:#22c55e; }
+    .metric-label {
+      font-size:9px; font-weight:600; color:#44445a;
+      text-transform:uppercase; letter-spacing:0.5px;
     }
-    .page-card:hover {
-      border-color:#6128DB;
-      transform:translateY(-2px);
-      box-shadow:0 8px 32px rgba(97,40,219,0.12);
+    .mini-chart { display:flex; align-items:flex-end; gap:4px; height:28px; }
+    .mini-bar {
+      flex:1; background:rgba(97,40,219,0.25); border-radius:2px;
+      min-height:2px; transition:height 0.4s ease;
     }
-    .page-card:active {
-      transform:translateY(0);
-    }
-
-    .page-icon {
-      width:52px;
-      height:52px;
-      border-radius:14px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      flex-shrink:0;
-      font-size:22px;
-    }
-    .page-icon.purple {
-      background:rgba(97,40,219,0.15);
-      color:#7c4dff;
-    }
-    .page-icon.green {
-      background:rgba(34,197,94,0.15);
-      color:#22c55e;
+    .chart-label {
+      display:flex; justify-content:space-between;
+      font-size:9px; color:#333; margin-top:4px;
     }
 
-    .page-info {
-      flex:1;
-    }
-    .page-title {
-      font-size:16px;
-      font-weight:700;
-      margin-bottom:4px;
-    }
-    .page-desc {
-      font-size:12px;
-      color:#6b6b80;
-      line-height:1.4;
-    }
-    .page-stats {
-      display:flex;
-      gap:12px;
-      margin-top:8px;
-    }
-    .page-stat {
-      font-size:11px;
-      font-weight:600;
-      color:#7c4dff;
-      background:rgba(97,40,219,0.1);
-      padding:2px 8px;
-      border-radius:6px;
-    }
-    .page-stat.green {
-      color:#22c55e;
-      background:rgba(34,197,94,0.1);
+    /* ── Section ── */
+    .sec {
+      font-size:10px; font-weight:700; letter-spacing:2px;
+      text-transform:uppercase; color:#333;
+      margin:24px 0 10px; padding-left:4px;
     }
 
-    .page-arrow {
-      color:#44445a;
-      font-size:18px;
-      flex-shrink:0;
+    /* ── Cards ── */
+    .cards { display:flex; flex-direction:column; gap:10px; }
+    .card {
+      display:flex; align-items:center; gap:16px;
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:14px; padding:18px 20px;
+      cursor:pointer; transition:border-color 0.2s, transform 0.15s;
+      text-decoration:none; color:inherit;
+    }
+    .card:hover {
+      border-color:rgba(97,40,219,0.4);
+      transform:translateY(-1px);
+    }
+    .card:active { transform:translateY(0); }
+    .card-icon {
+      width:40px; height:40px; border-radius:11px;
+      display:flex; align-items:center; justify-content:center;
+      flex-shrink:0; background:rgba(97,40,219,0.1); color:#7c4dff;
+    }
+    .card-body { flex:1; min-width:0; }
+    .card-title { font-size:14px; font-weight:700; margin-bottom:1px; }
+    .card-desc { font-size:11px; color:#6b6b80; }
+    .card-stats { display:flex; gap:6px; margin-top:6px; flex-wrap:wrap; }
+    .stat-tag {
+      font-size:10px; font-weight:600; color:#7c4dff;
+      background:rgba(97,40,219,0.08); padding:2px 8px;
+      border-radius:5px; white-space:nowrap;
+    }
+    .stat-tag.green { color:#22c55e; background:rgba(34,197,94,0.08); }
+    .card-arrow {
+      color:#282835; font-size:18px; flex-shrink:0;
       transition:color 0.2s;
     }
-    .page-card:hover .page-arrow {
-      color:#7c4dff;
+    .card:hover .card-arrow { color:#7c4dff; }
+
+    .card-placeholder {
+      opacity:0.4; pointer-events:none;
+    }
+    .card-placeholder .card-icon { background:rgba(107,107,128,0.1); color:#44445a; }
+
+    @media(max-width:768px) {
+      input,select,textarea { font-size:16px !important; }
+      .metric-val { font-size:16px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    {% if not authed %}
-    <div class="pin-card">
-      <h1>Admin Access</h1>
-      <p>Enter your PIN to continue.</p>
-      <form class="pin-form" method="POST">
-        <input type="password" name="pin" placeholder="------" maxlength="6" autofocus required>
-        <button type="submit">Unlock</button>
-      </form>
-      {% if error %}
-      <p class="pin-error">Incorrect PIN</p>
-      {% endif %}
-    </div>
-    {% else %}
-
-    <div class="admin-header">
-      <h1>Lumen Admin</h1>
-      <p>Select a page to manage</p>
-    </div>
-
-    <div class="page-cards">
-      <a class="page-card" href="/admin/coming-soon">
-        <div class="page-icon purple">
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        </div>
-        <div class="page-info">
-          <p class="page-title">Coming Soon</p>
-          <p class="page-desc">Waitlist signups, page views, visitor analytics</p>
-          <div class="page-stats">
-            <span class="page-stat">{{ waitlist_count }} signup{{ 's' if waitlist_count != 1 }}</span>
-            <span class="page-stat">{{ views_today }} views today</span>
-          </div>
-        </div>
-        <span class="page-arrow">&rsaquo;</span>
-      </a>
-
-      <a class="page-card" href="/admin/main-site">
-        <div class="page-icon green">
-          <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0h4"/></svg>
-        </div>
-        <div class="page-info">
-          <p class="page-title">Main Site</p>
-          <p class="page-desc">Applications, funnel analytics, conversion tracking</p>
-          <div class="page-stats">
-            <span class="page-stat green">{{ app_count }} application{{ 's' if app_count != 1 }}</span>
-          </div>
-        </div>
-        <span class="page-arrow">&rsaquo;</span>
-      </a>
-    </div>
-
-    {% endif %}
+<div class="container">
+  {% if not authed %}
+  <div class="pin-card">
+    <h1>Admin Access</h1>
+    <p>Enter your PIN to continue.</p>
+    <form class="pin-form" method="POST">
+      <input type="password" name="pin" placeholder="------" maxlength="6" autofocus required>
+      <button type="submit">Unlock</button>
+    </form>
+    {% if error %}<p class="pin-error">Incorrect PIN</p>{% endif %}
   </div>
+  {% else %}
+
+  <div class="los-header">
+    <p class="los-brand">Lumen OS</p>
+    <h1 class="los-title">Command Center</h1>
+    <p class="los-sub">Marketing management platform</p>
+  </div>
+
+  <!-- Overview Hero -->
+  <div class="hero">
+    <div class="hero-top">
+      <span class="hero-label">Overview</span>
+      <span class="hero-live"><span class="live-dot"></span> <span id="ov-active">0</span> active</span>
+    </div>
+    <div class="metrics">
+      <div class="metric"><p class="metric-val" id="ov-views">&mdash;</p><p class="metric-label">Views</p></div>
+      <div class="metric"><p class="metric-val" id="ov-today">&mdash;</p><p class="metric-label">Today</p></div>
+      <div class="metric"><p class="metric-val" id="ov-signups">&mdash;</p><p class="metric-label">Signups</p></div>
+      <div class="metric"><p class="metric-val" id="ov-time">&mdash;</p><p class="metric-label">Avg Time</p></div>
+    </div>
+    <div class="metrics" style="margin-bottom:8px;">
+      <div class="metric"><p class="metric-val purple" id="ov-leads">&mdash;</p><p class="metric-label">Leads</p></div>
+      <div class="metric"><p class="metric-val purple" id="ov-apps">&mdash;</p><p class="metric-label">Applications</p></div>
+      <div class="metric"><p class="metric-val green" id="ov-pipeline">&mdash;</p><p class="metric-label">Pipeline</p></div>
+      <div class="metric"><p class="metric-val green" id="ov-won">&mdash;</p><p class="metric-label">Won</p></div>
+    </div>
+    <div class="mini-chart" id="mini-chart"></div>
+    <div class="chart-label"><span id="chart-start"></span><span>7-day views</span><span id="chart-end"></span></div>
+  </div>
+
+  <!-- Pages -->
+  <p class="sec">Pages</p>
+  <div class="cards">
+    <a class="card" href="/admin/coming-soon">
+      <div class="card-icon">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="9" r="7"/><path d="M9 5.5v3.5l2.5 1.5"/></svg>
+      </div>
+      <div class="card-body">
+        <p class="card-title">Coming Soon</p>
+        <p class="card-desc">Waitlist signups, page views, visitor analytics</p>
+        <div class="card-stats">
+          <span class="stat-tag" id="cs-signups">&mdash;</span>
+          <span class="stat-tag" id="cs-views">&mdash;</span>
+        </div>
+      </div>
+      <span class="card-arrow">&rsaquo;</span>
+    </a>
+    <a class="card" href="/admin/main-site">
+      <div class="card-icon">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9l6-6 6 6M5 7.5V15h3v-3h2v3h3V7.5"/></svg>
+      </div>
+      <div class="card-body">
+        <p class="card-title">Main Site</p>
+        <p class="card-desc">Applications, funnel analytics, conversion tracking</p>
+        <div class="card-stats">
+          <span class="stat-tag" id="ms-apps">&mdash;</span>
+        </div>
+      </div>
+      <span class="card-arrow">&rsaquo;</span>
+    </a>
+  </div>
+
+  <!-- Tools -->
+  <p class="sec">Tools</p>
+  <div class="cards">
+    <a class="card" href="/admin/crm">
+      <div class="card-icon">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="2" width="14" height="14" rx="2"/><path d="M6 2v14M2 6h14"/></svg>
+      </div>
+      <div class="card-body">
+        <p class="card-title">CRM Pipeline</p>
+        <p class="card-desc">Lead management, email outreach, deal tracking</p>
+        <div class="card-stats">
+          <span class="stat-tag" id="crm-leads">&mdash;</span>
+          <span class="stat-tag" id="crm-pipeline">&mdash;</span>
+          <span class="stat-tag green" id="crm-won">&mdash;</span>
+        </div>
+      </div>
+      <span class="card-arrow">&rsaquo;</span>
+    </a>
+  </div>
+
+  <!-- Client Dashboards -->
+  <p class="sec">Client Dashboards</p>
+  <div class="cards" id="dash-cards">
+    <div class="card card-placeholder">
+      <div class="card-icon">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="14" height="12" rx="2"/><path d="M5 7h8M5 10h5"/></svg>
+      </div>
+      <div class="card-body"><p class="card-desc">Loading...</p></div>
+    </div>
+  </div>
+
+  {% endif %}
+</div>
+
+{% if authed %}
+<script>
+function fmt(v){
+  if(v>=1000000)return(v/1000000).toFixed(1)+'M';
+  if(v>=1000)return(v/1000).toFixed(v%1000===0?0:1)+'K';
+  return Math.round(v).toString();
+}
+function fmtTime(s){
+  if(s>=60)return Math.floor(s/60)+'m '+Math.round(s%60)+'s';
+  return Math.round(s)+'s';
+}
+function fmtMoney(v){return'$'+fmt(v);}
+function timeAgo(ts){
+  if(!ts)return'Never';
+  var d=(Date.now()-new Date(ts+'Z').getTime())/1000;
+  if(d<60)return'Just now';if(d<3600)return Math.floor(d/60)+'m ago';
+  if(d<86400)return Math.floor(d/3600)+'h ago';
+  if(d<604800)return Math.floor(d/86400)+'d ago';
+  return ts.slice(0,10);
+}
+function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+
+function loadOverview(){
+  fetch('/api/los-overview').then(function(r){return r.json();}).then(function(d){
+    document.getElementById('ov-views').textContent=fmt(d.total_views);
+    document.getElementById('ov-today').textContent=d.views_today;
+    document.getElementById('ov-signups').textContent=d.waitlist_count;
+    document.getElementById('ov-time').textContent=fmtTime(d.avg_time);
+    document.getElementById('ov-leads').textContent=d.lead_count;
+    document.getElementById('ov-apps').textContent=d.app_count;
+    document.getElementById('ov-pipeline').textContent=fmtMoney(d.pipeline_value);
+    document.getElementById('ov-won').textContent=fmtMoney(d.won_value);
+    document.getElementById('ov-active').textContent=d.active_now;
+
+    if(d.daily&&d.daily.length){
+      var mx=Math.max.apply(null,d.daily.map(function(x){return x.views;}))||1;
+      document.getElementById('mini-chart').innerHTML=d.daily.map(function(x){
+        return'<div class="mini-bar" style="height:'+Math.max((x.views/mx)*100,6)+'%"></div>';
+      }).join('');
+      document.getElementById('chart-start').textContent=d.daily[0].date.slice(5);
+      document.getElementById('chart-end').textContent=d.daily[d.daily.length-1].date.slice(5);
+    }
+
+    document.getElementById('cs-signups').textContent=d.waitlist_count+' signup'+(d.waitlist_count!==1?'s':'');
+    document.getElementById('cs-views').textContent=d.views_today+' views today';
+    document.getElementById('ms-apps').textContent=d.app_count+' application'+(d.app_count!==1?'s':'');
+    document.getElementById('crm-leads').textContent=d.lead_count+' lead'+(d.lead_count!==1?'s':'');
+    document.getElementById('crm-pipeline').textContent=fmtMoney(d.pipeline_value)+' pipeline';
+    document.getElementById('crm-won').textContent=fmtMoney(d.won_value)+' won';
+
+    var dc=document.getElementById('dash-cards');
+    if(d.dashboards&&d.dashboards.length){
+      dc.innerHTML=d.dashboards.map(function(db){
+        return'<a class="card" href="/admin/dashboard/'+db.slug+'">'+
+          '<div class="card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="14" height="12" rx="2"/><path d="M5 7h8M5 10h5"/></svg></div>'+
+          '<div class="card-body">'+
+            '<p class="card-title">'+esc(db.name)+'</p>'+
+            '<p class="card-desc">Dashboard usage &amp; client engagement</p>'+
+            '<div class="card-stats">'+
+              '<span class="stat-tag">'+db.total_opens+' open'+(db.total_opens!==1?'s':'')+'</span>'+
+              '<span class="stat-tag">Last: '+timeAgo(db.last_active)+'</span>'+
+            '</div>'+
+          '</div>'+
+          '<span class="card-arrow">&rsaquo;</span>'+
+        '</a>';
+      }).join('');
+    } else {
+      dc.innerHTML='<div class="card card-placeholder"><div class="card-icon"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="14" height="12" rx="2"/><path d="M5 7h8M5 10h5"/></svg></div><div class="card-body"><p class="card-desc">No dashboards tracked yet</p></div></div>';
+    }
+  });
+}
+loadOverview();
+setInterval(loadOverview, 30000);
+</script>
+{% endif %}
 </body>
 </html>
