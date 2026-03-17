@@ -158,7 +158,7 @@ function timeAgo(ts){
 
 // Generate tracking snippet
 var origin=window.location.origin;
-var snippet='<sc'+'ript>\n(function(){\n  var s="'+SLUG+'",h="'+origin+'/t/dash";\n  var sid=Math.random().toString(36).slice(2),st=Date.now();\n  fetch(h,{method:"POST",headers:{"Content-Type":"application/json"},\n    body:JSON.stringify({slug:s,event:"open",sid:sid})});\n  setInterval(function(){\n    var dur=Math.round((Date.now()-st)/1000);\n    fetch(h,{method:"POST",headers:{"Content-Type":"application/json"},\n      body:JSON.stringify({slug:s,event:"ping",sid:sid,duration:dur})});\n  },15000);\n})();\n</sc'+'ript>';
+var snippet='<sc'+'ript>\n(function(){\n  var s="'+SLUG+'",h="'+origin+'/t/dash";\n  var sid=sessionStorage.getItem("_los_sid");\n  var st=parseInt(sessionStorage.getItem("_los_st"))||Date.now();\n  if(!sid){\n    sid=Math.random().toString(36).slice(2);\n    sessionStorage.setItem("_los_sid",sid);\n    sessionStorage.setItem("_los_st",st.toString());\n    fetch(h,{method:"POST",headers:{"Content-Type":"application/json"},\n      body:JSON.stringify({slug:s,event:"open",sid:sid})});\n  }\n  setInterval(function(){\n    var dur=Math.round((Date.now()-st)/1000);\n    fetch(h,{method:"POST",headers:{"Content-Type":"application/json"},\n      body:JSON.stringify({slug:s,event:"ping",sid:sid,duration:dur})});\n  },15000);\n})();\n</sc'+'ript>';
 document.getElementById('snippet').textContent=snippet;
 
 function copySnippet(){
