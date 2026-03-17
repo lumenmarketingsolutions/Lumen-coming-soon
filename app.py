@@ -144,9 +144,50 @@ def init_db():
     """)
     con.commit()
 
+    # ── Pipeline & stage config tables ──
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS pipelines (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+        )
+    """)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS pipeline_stages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            pipeline_id INTEGER NOT NULL,
+            slug TEXT NOT NULL,
+            name TEXT NOT NULL,
+            color TEXT NOT NULL DEFAULT '#7c4dff',
+            position INTEGER NOT NULL DEFAULT 0,
+            FOREIGN KEY (pipeline_id) REFERENCES pipelines(id)
+        )
+    """)
+    con.commit()
+
+    # Seed default pipeline if none exists
+    existing_pipeline = con.execute("SELECT id FROM pipelines LIMIT 1").fetchone()
+    if not existing_pipeline:
+        now = datetime.datetime.utcnow().isoformat()
+        cur = con.execute("INSERT INTO pipelines (name, created_at, updated_at) VALUES ('Main Pipeline', ?, ?)", (now, now))
+        pid = cur.lastrowid
+        default_stages = [
+            ("new", "New", "#7c4dff", 0),
+            ("contacted", "Contacted", "#3b82f6", 1),
+            ("discovery", "Discovery", "#f59e0b", 2),
+            ("proposal", "Proposal", "#f97316", 3),
+            ("won", "Won", "#22c55e", 4),
+            ("lost", "Lost", "#ef4444", 5),
+        ]
+        for slug, name, color, pos in default_stages:
+            con.execute("INSERT INTO pipeline_stages (pipeline_id, slug, name, color, position) VALUES (?, ?, ?, ?, ?)",
+                        (pid, slug, name, color, pos))
+        con.commit()
+
     # Migrate leads table if needed
     existing_leads_cols = [r[1] for r in con.execute("PRAGMA table_info(leads)").fetchall()]
-    leads_new_cols = {"tags": "TEXT DEFAULT ''"}
+    leads_new_cols = {"tags": "TEXT DEFAULT ''", "pipeline_id": "INTEGER DEFAULT 1"}
     for col, dtype in leads_new_cols.items():
         if col not in existing_leads_cols:
             con.execute(f"ALTER TABLE leads ADD COLUMN {col} {dtype}")
@@ -482,16 +523,110 @@ def apply_submit():
     return jsonify({"ok": True})
 
 
-# ── CRM API ──────────────────────────────────────────────────
-LEAD_STAGES = ["new", "contacted", "discovery", "proposal", "won", "lost"]
+# ── Pipeline & Stage API ─────────────────────────────────────
+@app.route("/api/pipelines")
+def api_pipelines():
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    rows = con.execute("SELECT * FROM pipelines ORDER BY id").fetchall()
+    pipelines = []
+    for p in rows:
+        stages = con.execute(
+            "SELECT * FROM pipeline_stages WHERE pipeline_id = ? ORDER BY position", (p["id"],)
+        ).fetchall()
+        pipelines.append({
+            "id": p["id"], "name": p["name"],
+            "stages": [dict(s) for s in stages],
+            "created_at": p["created_at"],
+        })
+    con.close()
+    return jsonify({"pipelines": pipelines})
+
+@app.route("/api/pipelines", methods=["POST"])
+def api_create_pipeline():
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    data = request.get_json() or {}
+    name = (data.get("name") or "").strip()
+    if not name:
+        return jsonify({"ok": False, "error": "Name required"}), 400
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    cur = con.execute("INSERT INTO pipelines (name, created_at, updated_at) VALUES (?, ?, ?)", (name, now, now))
+    pid = cur.lastrowid
+    # Seed with default stages
+    defaults = [("new", "New", "#7c4dff", 0), ("won", "Won", "#22c55e", 1), ("lost", "Lost", "#ef4444", 2)]
+    for slug, sname, color, pos in defaults:
+        con.execute("INSERT INTO pipeline_stages (pipeline_id, slug, name, color, position) VALUES (?, ?, ?, ?, ?)",
+                    (pid, slug, sname, color, pos))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True, "id": pid})
+
+@app.route("/api/pipelines/<int:pid>/stages", methods=["PUT"])
+def api_update_stages(pid):
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    data = request.get_json() or {}
+    stages = data.get("stages", [])
+    if not stages:
+        return jsonify({"ok": False, "error": "At least one stage required"}), 400
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    # Get old stages for remapping
+    old_stages = con.execute("SELECT slug FROM pipeline_stages WHERE pipeline_id = ?", (pid,)).fetchall()
+    old_slugs = {r[0] for r in old_stages}
+    # Delete old stages and insert new
+    con.execute("DELETE FROM pipeline_stages WHERE pipeline_id = ?", (pid,))
+    new_slugs = set()
+    for i, s in enumerate(stages):
+        slug = s.get("slug", "").strip().lower().replace(" ", "_")
+        if not slug:
+            slug = s.get("name", "stage").strip().lower().replace(" ", "_")
+        con.execute(
+            "INSERT INTO pipeline_stages (pipeline_id, slug, name, color, position) VALUES (?, ?, ?, ?, ?)",
+            (pid, slug, s.get("name", slug), s.get("color", "#7c4dff"), i),
+        )
+        new_slugs.add(slug)
+    # Move leads from deleted stages to first stage
+    removed_slugs = old_slugs - new_slugs
+    if removed_slugs and new_slugs:
+        first_slug = stages[0].get("slug", stages[0].get("name", "").strip().lower().replace(" ", "_"))
+        for old_slug in removed_slugs:
+            con.execute("UPDATE leads SET stage = ? WHERE pipeline_id = ? AND stage = ?",
+                        (first_slug, pid, old_slug))
+    con.execute("UPDATE pipelines SET updated_at = ? WHERE id = ?", (now, pid))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+@app.route("/api/pipelines/<int:pid>", methods=["PUT"])
+def api_update_pipeline(pid):
+    if not session.get("wl_auth"):
+        return jsonify({"ok": False}), 401
+    data = request.get_json() or {}
+    name = (data.get("name") or "").strip()
+    if not name:
+        return jsonify({"ok": False, "error": "Name required"}), 400
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    con.execute("UPDATE pipelines SET name = ?, updated_at = ? WHERE id = ?", (name, now, pid))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+# ── CRM Lead API ─────────────────────────────────────────────
 
 @app.route("/api/leads")
 def api_leads():
     if not session.get("wl_auth"):
         return jsonify({"ok": False}), 401
+    pipeline_id = request.args.get("pipeline_id", 1, type=int)
     con = sqlite3.connect(DB_PATH)
     con.row_factory = sqlite3.Row
-    rows = con.execute("SELECT * FROM leads ORDER BY updated_at DESC").fetchall()
+    rows = con.execute("SELECT * FROM leads WHERE pipeline_id = ? ORDER BY updated_at DESC", (pipeline_id,)).fetchall()
     leads = [dict(r) for r in rows]
     con.close()
     return jsonify({"leads": leads})
@@ -510,15 +645,21 @@ def api_create_lead():
     if existing:
         con.close()
         return jsonify({"ok": False, "error": "Lead with this email already exists"}), 409
+    pipeline_id = int(data.get("pipeline_id", 1))
+    # Get first stage of this pipeline
+    first_stage = con.execute(
+        "SELECT slug FROM pipeline_stages WHERE pipeline_id = ? ORDER BY position LIMIT 1", (pipeline_id,)
+    ).fetchone()
+    initial_stage = first_stage[0] if first_stage else "new"
     cur = con.execute(
         """INSERT INTO leads (name, email, phone, business, revenue, marketing, challenge,
-           stage, source, deal_value, follow_up_date, tags, created_at, updated_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+           stage, source, deal_value, follow_up_date, tags, pipeline_id, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (data.get("name", ""), email, data.get("phone", ""),
          data.get("business", ""), data.get("revenue", ""),
          data.get("marketing", ""), data.get("challenge", ""),
-         "new", data.get("source", "manual"), float(data.get("deal_value", 0)),
-         data.get("follow_up_date", ""), data.get("tags", ""), now, now),
+         initial_stage, data.get("source", "manual"), float(data.get("deal_value", 0)),
+         data.get("follow_up_date", ""), data.get("tags", ""), pipeline_id, now, now),
     )
     lead_id = cur.lastrowid
     con.execute(
@@ -710,13 +851,15 @@ def api_import_applications():
 def api_lead_stats():
     if not session.get("wl_auth"):
         return jsonify({"ok": False}), 401
+    pipeline_id = request.args.get("pipeline_id", 1, type=int)
     con = sqlite3.connect(DB_PATH)
-    total = con.execute("SELECT COUNT(*) FROM leads").fetchone()[0]
+    total = con.execute("SELECT COUNT(*) FROM leads WHERE pipeline_id = ?", (pipeline_id,)).fetchone()[0]
+    stages = con.execute("SELECT slug FROM pipeline_stages WHERE pipeline_id = ? ORDER BY position", (pipeline_id,)).fetchall()
     by_stage = {}
-    for stage in LEAD_STAGES:
-        by_stage[stage] = con.execute("SELECT COUNT(*) FROM leads WHERE stage = ?", (stage,)).fetchone()[0]
-    pipeline_value = con.execute("SELECT COALESCE(SUM(deal_value), 0) FROM leads WHERE stage NOT IN ('won','lost')").fetchone()[0]
-    won_value = con.execute("SELECT COALESCE(SUM(deal_value), 0) FROM leads WHERE stage = 'won'").fetchone()[0]
+    for s in stages:
+        by_stage[s[0]] = con.execute("SELECT COUNT(*) FROM leads WHERE pipeline_id = ? AND stage = ?", (pipeline_id, s[0])).fetchone()[0]
+    pipeline_value = con.execute("SELECT COALESCE(SUM(deal_value), 0) FROM leads WHERE pipeline_id = ? AND stage NOT IN ('won','lost')", (pipeline_id,)).fetchone()[0]
+    won_value = con.execute("SELECT COALESCE(SUM(deal_value), 0) FROM leads WHERE pipeline_id = ? AND stage = 'won'", (pipeline_id,)).fetchone()[0]
     con.close()
     return jsonify({
         "total": total,
