@@ -346,6 +346,16 @@
             text-decoration: none;
         }
 
+        /* Scroll arrow - hidden on desktop */
+        .scroll-arrow {
+            display: none;
+        }
+
+        @keyframes breathe {
+            0%, 100% { opacity: 0.25; transform: translateX(-50%) translateY(0); }
+            50% { opacity: 0.5; transform: translateX(-50%) translateY(4px); }
+        }
+
         /* Header stars - hidden on desktop */
         .header-stars {
             display: none;
@@ -451,6 +461,21 @@
                 left: 50%;
                 transform: translateX(-50%);
                 pointer-events: none;
+            }
+
+            .scroll-arrow {
+                display: block;
+                position: absolute;
+                bottom: 30px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 20px;
+                height: 20px;
+                border-right: 1.5px solid rgba(255, 255, 255, 0.3);
+                border-bottom: 1.5px solid rgba(255, 255, 255, 0.3);
+                transform-origin: center;
+                animation: breathe 3s ease-in-out infinite;
+                rotate: 45deg;
             }
 
             .header h1 {
@@ -597,6 +622,7 @@
             <img src="/static/logo-white.png" alt="Lumen" style="height: 28px; margin-bottom: 30px;">
             <h1>Custom CRM Platform</h1>
             <div class="prepared-for">Prepared for <span>Avalon Laser</span>, March 2026</div>
+            <div class="scroll-arrow"></div>
         </div>
 
         <!-- The Problem -->
