@@ -321,6 +321,14 @@ def index():
 def story():
     return render_template("story.html")
 
+@app.route("/avaloncrm")
+def avalon_crm():
+    return render_template("avalon_crm.html")
+
+@app.route("/proposal")
+def proposal():
+    return render_template("avalon_crm.html")
+
 @app.route("/join", methods=["POST"])
 def join_waitlist():
     data = request.get_json()

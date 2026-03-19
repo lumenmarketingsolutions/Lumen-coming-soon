@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avalon CRM Proposal — Lumen Marketing Solutions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #e8e8f0;
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .page {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 50px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding-bottom: 40px;
+            border-bottom: 1px solid rgba(97, 40, 219, 0.3);
+            margin-bottom: 50px;
+        }
+
+        .logo-text {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: #6128DB;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #e8e8f0;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .header .subtitle {
+            font-size: 15px;
+            color: #6b6b80;
+            font-weight: 400;
+        }
+
+        .header .date {
+            font-size: 13px;
+            color: #6b6b80;
+            margin-top: 10px;
+            letter-spacing: 1px;
+        }
+
+        .prepared-for {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #6b6b80;
+        }
+
+        .prepared-for span {
+            color: #e8e8f0;
+            font-weight: 500;
+        }
+
+        /* Sections */
+        .section {
+            margin-bottom: 50px;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: #6128DB;
+            margin-bottom: 16px;
+        }
+
+        .section h2 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #e8e8f0;
+            margin-bottom: 18px;
+            letter-spacing: -0.3px;
+        }
+
+        .section p {
+            font-size: 15px;
+            color: #b0b0c0;
+            margin-bottom: 14px;
+        }
+
+        .section p strong {
+            color: #e8e8f0;
+            font-weight: 500;
+        }
+
+        /* Feature list */
+        .features {
+            list-style: none;
+            padding: 0;
+        }
+
+        .features li {
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 15px;
+            color: #b0b0c0;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .features li:last-child {
+            border-bottom: none;
+        }
+
+        .feature-icon {
+            width: 8px;
+            height: 8px;
+            min-width: 8px;
+            background: #6128DB;
+            border-radius: 50%;
+            margin-top: 8px;
+        }
+
+        .feature-title {
+            color: #e8e8f0;
+            font-weight: 600;
+        }
+
+        /* Comparison */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .compare-card {
+            padding: 28px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .compare-card.current {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .compare-card.proposed {
+            background: rgba(97, 40, 219, 0.08);
+            border-color: rgba(97, 40, 219, 0.25);
+        }
+
+        .compare-card h3 {
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 16px;
+        }
+
+        .compare-card.current h3 {
+            color: #6b6b80;
+        }
+
+        .compare-card.proposed h3 {
+            color: #7c4dff;
+        }
+
+        .compare-card .price {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .compare-card.current .price {
+            color: #e8e8f0;
+        }
+
+        .compare-card.proposed .price {
+            color: #7c4dff;
+        }
+
+        .compare-card .price-note {
+            font-size: 13px;
+            color: #6b6b80;
+            margin-bottom: 18px;
+        }
+
+        .compare-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .compare-card ul li {
+            font-size: 13px;
+            color: #b0b0c0;
+            padding: 5px 0;
+        }
+
+        .compare-card.current ul li::before {
+            content: "- ";
+            color: #6b6b80;
+        }
+
+        .compare-card.proposed ul li::before {
+            content: "+ ";
+            color: #7c4dff;
+        }
+
+        /* Timeline */
+        .timeline {
+            margin-top: 24px;
+        }
+
+        .phase {
+            padding: 28px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: rgba(255, 255, 255, 0.02);
+            margin-bottom: 16px;
+        }
+
+        .phase-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .phase-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #7c4dff;
+        }
+
+        .phase-duration {
+            font-size: 13px;
+            color: #6b6b80;
+            font-weight: 500;
+        }
+
+        .phase h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #e8e8f0;
+            margin-bottom: 10px;
+        }
+
+        .phase p {
+            font-size: 14px;
+            color: #b0b0c0;
+        }
+
+        /* Pricing */
+        .pricing-highlight {
+            text-align: center;
+            padding: 40px;
+            border-radius: 12px;
+            background: rgba(97, 40, 219, 0.08);
+            border: 1px solid rgba(97, 40, 219, 0.25);
+            margin-top: 24px;
+        }
+
+        .pricing-highlight .amount {
+            font-size: 42px;
+            font-weight: 700;
+            color: #7c4dff;
+        }
+
+        .pricing-highlight .amount-sub {
+            font-size: 16px;
+            font-weight: 400;
+            color: #6b6b80;
+        }
+
+        .pricing-highlight .detail {
+            font-size: 14px;
+            color: #b0b0c0;
+            margin-top: 12px;
+        }
+
+        .pricing-highlight .savings {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(97, 40, 219, 0.2);
+            font-size: 15px;
+            color: #e8e8f0;
+            font-weight: 500;
+        }
+
+        .pricing-highlight .savings span {
+            color: #7c4dff;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: rgba(97, 40, 219, 0.2);
+            margin: 50px 0;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid rgba(97, 40, 219, 0.2);
+        }
+
+        .footer .logo-text {
+            margin-bottom: 14px;
+        }
+
+        .footer p {
+            font-size: 13px;
+            color: #6b6b80;
+        }
+
+        .footer a {
+            color: #7c4dff;
+            text-decoration: none;
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: #0a0a0f;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .page {
+                padding: 40px 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-text">Lumen Marketing Solutions</div>
+            <h1>Custom CRM Platform</h1>
+            <div class="subtitle">A lead management system built entirely around Avalon</div>
+            <div class="prepared-for">Prepared for <span>Avalon Laser</span>, March 2026</div>
+        </div>
+
+        <!-- The Problem -->
+        <div class="section">
+            <div class="section-label">The Situation</div>
+            <h2>Your current system wasn't built for you</h2>
+            <p>Moxie runs on Go High Level, which is a one-size-fits-all platform for any industry loaded with hundreds of different features. The tools you actually need get buried under ones you don't, and the system isn't set up to work the way your team wants it to.</p>
+            <p>At <strong>$4,000 per month</strong>, you're paying for a generic platform when you need a system that does exactly what Avalon needs.</p>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- What I'd Build -->
+        <div class="section">
+            <div class="section-label">The Solution</div>
+            <h2>A custom CRM built around how Avalon works</h2>
+            <p>I would build a lead management and CRM system that's designed just for you. Everything in it exists because Avalon needs it, there's no extra features, no confusion, nothing that doesn't make sense.</p>
+
+            <ul class="features">
+                <li>
+                    <div class="feature-icon"></div>
+                    <div><span class="feature-title">Lead Pipeline Management</span> &nbsp;· &nbsp;A clean, intuitive pipeline that shows you exactly where every lead is. Your team sees what needs attention, what's moving forward, and how they need to reach out to leads.</div>
+                </li>
+                <li>
+                    <div class="feature-icon"></div>
+                    <div><span class="feature-title">Boulevard Integration</span> &nbsp;· &nbsp;Your CRM and Boulevard work together. Leads, clients, and appointments stay connected across both systems without manual handoff or copy-pasting between platforms.</div>
+                </li>
+                <li>
+                    <div class="feature-icon"></div>
+                    <div><span class="feature-title">Conversion Tracking</span> &nbsp;· &nbsp;See which leads are converting to appointments, which aren't, and why. Know exactly what's working at a glance.</div>
+                </li>
+                <li>
+                    <div class="feature-icon"></div>
+                    <div><span class="feature-title">Communication Portal</span> &nbsp;· &nbsp;Reach out to leads directly through SMS built into the platform. As your communication needs grow, additional channels like social messaging can be integrated over time.</div>
+                </li>
+                <li>
+                    <div class="feature-icon"></div>
+                    <div><span class="feature-title">Reporting and Campaign History</span> &nbsp;· &nbsp;See which services people are showing the most interest in, which campaigns performed, what worked, and what didn't. A living record of everything you've run so you're never guessing.</div>
+                </li>
+                <li>
+                    <div class="feature-icon"></div>
+                    <div><span class="feature-title">Source of Truth Documentation</span> &nbsp;· &nbsp;Everything learned from your marketing, insights, data, decisions, lives in one place. The system becomes the single source of truth for everything Avalon does on the marketing side.</div>
+                </li>
+            </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Comparison -->
+        <div class="section">
+            <div class="section-label">Comparison</div>
+            <h2>What changes</h2>
+
+            <div class="comparison">
+                <div class="compare-card current">
+                    <h3>Moxie / Go High Level</h3>
+                    <div class="price">$4,000</div>
+                    <div class="price-note">per month</div>
+                    <ul>
+                        <li>Generic out-of-the-box platform</li>
+                        <li>Features you don't use</li>
+                        <li>Not built around your workflow</li>
+                        <li>No direct Boulevard integration</li>
+                        <li>Limited visibility into what's working</li>
+                    </ul>
+                </div>
+                <div class="compare-card proposed">
+                    <h3>Custom CRM by Lumen</h3>
+                    <div class="price">$300 – $500</div>
+                    <div class="price-note">per location, per month</div>
+                    <ul>
+                        <li>Built specifically for Avalon</li>
+                        <li>Only the tools your team needs</li>
+                        <li>Designed around your actual workflow</li>
+                        <li>Boulevard integration</li>
+                        <li>Full reporting and campaign history</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Timeline -->
+        <div class="section">
+            <div class="section-label">Timeline</div>
+            <h2>How we get there</h2>
+
+            <div class="timeline">
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-label">Phase 1, <span style="color: #e8e8f0;">Build</span></div>
+                        <div class="phase-duration">20 days</div>
+                    </div>
+                    <h3>Working Software</h3>
+                    <p>I build the full system based on how Avalon operates, pipeline management, Boulevard integration, conversion tracking, reporting. At the end of this phase, you have a working product ready to use. Your subscription starts here.</p>
+                </div>
+                <div class="phase">
+                    <div class="phase-header">
+                        <div class="phase-label">Phase 2, <span style="color: #e8e8f0;">Optimize</span></div>
+                        <div class="phase-duration">10 days</div>
+                    </div>
+                    <h3>Deploy, Test, Refine</h3>
+                    <p>We deploy the system into Avalon's day-to-day operations. Your team uses it, gives feedback, and flags anything that needs adjustment. I work through bugs, optimize the experience, and make sure everything runs exactly the way you need it to.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Pricing -->
+        <div class="section">
+            <div class="section-label">Investment</div>
+            <h2>What it costs</h2>
+
+            <div class="pricing-highlight">
+                <div class="amount">$0 <span class="amount-sub">build cost</span></div>
+                <div class="detail">I build the system and hand it to you working. You don't pay for development.</div>
+                <div class="savings">
+                    Monthly license: <span>$300 – $500 per location</span>
+                    <br><br>
+                    Current Moxie cost: $4,000/mo → Custom CRM: ~$1,500/mo
+                    <br>
+                    <span>Estimated savings: $2,500+ per month</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- How This Works -->
+        <div class="section">
+            <div class="section-label">The Approach</div>
+            <h2>How I work with you on this</h2>
+            <p>This isn't a situation where I disappear for a month and come back with something you didn't ask for. I build the first version based on everything I already know about how Avalon operates, then we work together to make sure it's exactly right.</p>
+            <p>Avalon is at the center of how this system gets built. Your team's feedback shapes every piece of it so the end result is something that actually fits how you work.</p>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <div class="logo-text">Lumen</div>
+            <p>Kendall Davis, <a href="mailto:kendall@lumenmarketing.co">kendall@lumenmarketing.co</a></p>
+            <p style="margin-top: 6px;"><a href="https://lumenmarketing.co">lumenmarketing.co</a></p>
+        </div>
+
+    </div>
+</body>
+</html>
