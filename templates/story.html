@@ -66,7 +66,7 @@
       text-align:center;
     }
     .logo {
-      height:28px; width:auto; object-fit:contain;
+      height:44px; width:auto; object-fit:contain;
       opacity:0; animation:fadeUp 1.8s cubic-bezier(0.22,1,0.36,1) 1.5s forwards;
     }
     .tagline {
@@ -77,9 +77,9 @@
       opacity:0; animation:fadeUp 1.8s cubic-bezier(0.22,1,0.36,1) 2.3s forwards;
     }
     .date {
-      margin-top:10px;
-      font-size:9px; font-weight:400; letter-spacing:0.4em;
-      color:rgba(97,40,219,0.6);
+      margin-top:14px;
+      font-size:14px; font-weight:400; letter-spacing:0.4em;
+      color:rgba(97,40,219,0.75);
       opacity:0; animation:fadeUp 1.8s cubic-bezier(0.22,1,0.36,1) 2.3s forwards;
     }
     @keyframes fadeUp {
@@ -132,8 +132,8 @@
           this.vx = (Math.random() - 0.5) * 0.15;
           this.vy = -Math.random() * 0.15 - 0.03;
           const mobile = W < 600;
-          this.size = mobile ? Math.random() * 1.4 + 0.5 : Math.random() * 2 + 0.8;
-          this.opacity = mobile ? Math.random() * 0.3 + 0.08 : Math.random() * 0.4 + 0.12;
+          this.size = mobile ? Math.random() * 1.4 + 0.5 : Math.random() * 1.5 + 0.5;
+          this.opacity = mobile ? Math.random() * 0.3 + 0.08 : Math.random() * 0.25 + 0.08;
           this.life = Math.random() * 800 + 500;
           this.maxLife = this.life;
         }
