@@ -77,10 +77,10 @@
       opacity:0; animation:fadeUp 1.8s cubic-bezier(0.22,1,0.36,1) 2.3s forwards;
     }
     .date {
-      margin-top:2px;
+      margin-top:12px;
       font-size:8px; font-weight:300; letter-spacing:0.55em;
       color:rgba(97,40,219,0.5);
-      opacity:0; animation:fadeUp 1.8s cubic-bezier(0.22,1,0.36,1) 2.9s forwards;
+      opacity:0; animation:fadeUp 1.8s cubic-bezier(0.22,1,0.36,1) 2.3s forwards;
     }
     @keyframes fadeUp {
       from { opacity:0; transform:translateY(16px); }
@@ -95,7 +95,6 @@
   <canvas id="particles"></canvas>
   <div class="content">
     <img src="{{ url_for('static', filename='logo-white.png') }}" alt="Lumen" class="logo">
-    <div class="tagline">coming soon</div>
     <div class="date">03.23.26</div>
   </div>
   <script>
