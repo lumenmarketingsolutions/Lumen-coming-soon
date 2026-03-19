@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+* { margin: 0; padding: 0; }
+body {
+    width: 1200px;
+    height: 630px;
+    background: #0a0a0f;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+/* Purple atmospheric glow */
+.glow {
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(97, 40, 219, 0.15) 0%, rgba(97, 40, 219, 0.05) 40%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.glow2 {
+    position: absolute;
+    width: 800px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(124, 77, 255, 0.08) 0%, transparent 60%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+img {
+    height: 60px;
+    position: relative;
+    z-index: 2;
+}
+/* Stars */
+.star {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+}
+.star.dim { opacity: 0.3; width: 1px; height: 1px; }
+.star.bright { opacity: 0.8; width: 2px; height: 2px; }
+</style>
+</head>
+<body>
+    <div class="glow"></div>
+    <div class="glow2"></div>
+    <img src="logo-white.png" alt="Lumen">
+    <!-- Stars scattered around -->
+    <div class="star dim" style="top: 8%; left: 12%;"></div>
+    <div class="star bright" style="top: 15%; left: 75%;"></div>
+    <div class="star dim" style="top: 22%; left: 30%;"></div>
+    <div class="star" style="top: 10%; left: 55%;"></div>
+    <div class="star dim" style="top: 35%; left: 88%;"></div>
+    <div class="star bright" style="top: 45%; left: 8%;"></div>
+    <div class="star dim" style="top: 60%; left: 92%;"></div>
+    <div class="star" style="top: 72%; left: 18%;"></div>
+    <div class="star dim" style="top: 80%; left: 65%;"></div>
+    <div class="star bright" style="top: 88%; left: 40%;"></div>
+    <div class="star dim" style="top: 5%; left: 42%;"></div>
+    <div class="star" style="top: 92%; left: 82%;"></div>
+    <div class="star dim" style="top: 50%; left: 25%;"></div>
+    <div class="star bright" style="top: 30%; left: 60%;"></div>
+    <div class="star dim" style="top: 68%; left: 45%;"></div>
+    <div class="star" style="top: 18%; left: 90%;"></div>
+    <div class="star dim" style="top: 75%; left: 85%;"></div>
+    <div class="star bright" style="top: 40%; left: 35%;"></div>
+    <div class="star dim" style="top: 55%; left: 70%;"></div>
+    <div class="star" style="top: 85%; left: 15%;"></div>
+</body>
+</html>
