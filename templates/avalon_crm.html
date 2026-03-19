@@ -345,6 +345,76 @@
             text-decoration: none;
         }
 
+        /* Mobile styles */
+        @media (max-width: 680px) {
+            .page {
+                padding: 40px 20px;
+            }
+
+            .header h1 {
+                font-size: 26px;
+            }
+
+            .section h2 {
+                font-size: 20px;
+            }
+
+            /* Simplify features: title only, hide descriptions */
+            .features li {
+                padding: 12px 0;
+            }
+
+            .feature-desc {
+                display: none;
+            }
+
+            /* Stack comparison cards */
+            .comparison {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .compare-card {
+                padding: 22px;
+            }
+
+            .compare-card .price {
+                font-size: 24px;
+            }
+
+            /* Timeline */
+            .phase {
+                padding: 20px;
+            }
+
+            .phase-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+
+            /* Pricing */
+            .pricing-highlight {
+                padding: 28px 20px;
+            }
+
+            .pricing-highlight .amount {
+                font-size: 32px;
+            }
+
+            .pricing-highlight .savings {
+                font-size: 14px;
+            }
+
+            .divider {
+                margin: 35px 0;
+            }
+
+            .section {
+                margin-bottom: 35px;
+            }
+        }
+
         /* Print styles */
         @media print {
             body {
@@ -388,27 +458,27 @@
             <ul class="features">
                 <li>
                     <div class="feature-icon"></div>
-                    <div><span class="feature-title">Lead Pipeline Management</span> &nbsp;· &nbsp;A clean, intuitive pipeline that shows you exactly where every lead is. Your team sees what needs attention, what's moving forward, and how they need to reach out to leads.</div>
+                    <div><span class="feature-title">Lead Pipeline Management</span><span class="feature-desc"> &nbsp;· &nbsp;A clean, intuitive pipeline that shows you exactly where every lead is. Your team sees what needs attention, what's moving forward, and how they need to reach out to leads.</span></div>
                 </li>
                 <li>
                     <div class="feature-icon"></div>
-                    <div><span class="feature-title">Boulevard Integration</span> &nbsp;· &nbsp;Your CRM and Boulevard work together. Leads, clients, and appointments stay connected across both systems without manual handoff or copy-pasting between platforms.</div>
+                    <div><span class="feature-title">Boulevard Integration</span><span class="feature-desc"> &nbsp;· &nbsp;Your CRM and Boulevard work together. Leads, clients, and appointments stay connected across both systems without manual handoff or copy-pasting between platforms.</span></div>
                 </li>
                 <li>
                     <div class="feature-icon"></div>
-                    <div><span class="feature-title">Conversion Tracking</span> &nbsp;· &nbsp;See which leads are converting to appointments, which aren't, and why. Know exactly what's working at a glance.</div>
+                    <div><span class="feature-title">Conversion Tracking</span><span class="feature-desc"> &nbsp;· &nbsp;See which leads are converting to appointments, which aren't, and why. Know exactly what's working at a glance.</span></div>
                 </li>
                 <li>
                     <div class="feature-icon"></div>
-                    <div><span class="feature-title">Communication Portal</span> &nbsp;· &nbsp;Reach out to leads directly through SMS built into the platform. As your communication needs grow, additional channels like social messaging can be integrated over time.</div>
+                    <div><span class="feature-title">Communication Portal</span><span class="feature-desc"> &nbsp;· &nbsp;Reach out to leads directly through SMS built into the platform. As your communication needs grow, additional channels like social messaging can be integrated over time.</span></div>
                 </li>
                 <li>
                     <div class="feature-icon"></div>
-                    <div><span class="feature-title">Reporting and Campaign History</span> &nbsp;· &nbsp;See which services people are showing the most interest in, which campaigns performed, what worked, and what didn't. A living record of everything you've run so you're never guessing.</div>
+                    <div><span class="feature-title">Reporting and Campaign History</span><span class="feature-desc"> &nbsp;· &nbsp;See which services people are showing the most interest in, which campaigns performed, what worked, and what didn't. A living record of everything you've run so you're never guessing.</span></div>
                 </li>
                 <li>
                     <div class="feature-icon"></div>
-                    <div><span class="feature-title">Source of Truth Documentation</span> &nbsp;· &nbsp;Everything learned from your marketing, insights, data, decisions, lives in one place. The system becomes the single source of truth for everything Avalon does on the marketing side.</div>
+                    <div><span class="feature-title">Source of Truth Documentation</span><span class="feature-desc"> &nbsp;· &nbsp;Everything learned from your marketing, insights, data, decisions, lives in one place. The system becomes the single source of truth for everything Avalon does on the marketing side.</span></div>
                 </li>
             </ul>
         </div>
