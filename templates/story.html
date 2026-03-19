@@ -78,7 +78,7 @@
     }
     .date {
       margin-top:2px;
-      font-size:8px; font-weight:300; letter-spacing:0.38em;
+      font-size:8px; font-weight:300; letter-spacing:0.42em;
       color:rgba(97,40,219,0.5);
       opacity:0; animation:fadeUp 1.8s cubic-bezier(0.22,1,0.36,1) 2.9s forwards;
     }
@@ -164,14 +164,14 @@
       const shootingStars = [
         {
           // Primary: sweeps left→right, crossing just above the logo
-          triggerMs: 4000, durationMs: 1400,
+          triggerMs: 4000, durationMs: 2200,
           x0: 0.05, y0: 0.38, x1: 0.92, y1: 0.50,
           trailMax: 14, headSize: 0.7, glowSize: 2,
           brightness: 0.6
         },
         {
           // Secondary: shorter, upper-right → lower-left, slightly later
-          triggerMs: 7200, durationMs: 1000,
+          triggerMs: 7200, durationMs: 1600,
           x0: 0.88, y0: 0.24, x1: 0.20, y1: 0.40,
           trailMax: 10, headSize: 0.5, glowSize: 1.5,
           brightness: 0.4
