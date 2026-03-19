@@ -2,102 +2,93 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lumen Story</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Lumen</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
     html, body {
-      width:1080px; height:1920px; overflow:hidden;
+      width:100%; height:100%; overflow:hidden;
       font-family:'Inter', -apple-system, sans-serif;
       background:#0a0a0f; color:#e8e8f0;
       -webkit-font-smoothing:antialiased;
     }
-    .bg-grid {
-      position:absolute; inset:0; z-index:0; overflow:hidden;
-    }
-    .bg-grid::before {
-      content:''; position:absolute; inset:-50%;
-      background-image:
-        linear-gradient(rgba(97,40,219,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(97,40,219,0.03) 1px, transparent 1px);
-      background-size:60px 60px;
-      animation:gridDrift 20s linear infinite;
-    }
-    @keyframes gridDrift {
-      0% { transform:translate(0,0) rotate(0deg); }
-      100% { transform:translate(30px,60px) rotate(0.5deg); }
-    }
+
+    /* Ambient orb glows — very slow drift, no pulsing/scaling */
     .orb {
-      position:absolute; border-radius:50%;
-      filter:blur(100px); opacity:0.45; z-index:0; pointer-events:none;
+      position:fixed; border-radius:50%;
+      filter:blur(120px); pointer-events:none;
     }
     .orb-1 {
-      width:700px; height:700px;
-      background:radial-gradient(circle, rgba(97,40,219,0.4), transparent 70%);
-      top:-8%; left:-15%;
-      animation:orbFloat1 12s ease-in-out infinite;
+      width:60vw; height:60vw;
+      background:radial-gradient(circle, rgba(97,40,219,0.25), transparent 70%);
+      top:-15%; left:-20%;
+      animation:orbDrift1 30s ease-in-out infinite;
     }
     .orb-2 {
-      width:550px; height:550px;
-      background:radial-gradient(circle, rgba(124,77,255,0.25), transparent 70%);
-      bottom:-5%; right:-12%;
-      animation:orbFloat2 15s ease-in-out infinite;
+      width:50vw; height:50vw;
+      background:radial-gradient(circle, rgba(124,77,255,0.15), transparent 70%);
+      bottom:-10%; right:-15%;
+      animation:orbDrift2 35s ease-in-out infinite;
     }
     .orb-3 {
-      width:400px; height:400px;
-      background:radial-gradient(circle, rgba(97,40,219,0.2), transparent 70%);
-      top:45%; left:50%;
-      animation:orbFloat3 18s ease-in-out infinite;
+      width:35vw; height:35vw;
+      background:radial-gradient(circle, rgba(97,40,219,0.12), transparent 70%);
+      top:40%; left:45%;
+      animation:orbDrift3 40s ease-in-out infinite;
     }
-    @keyframes orbFloat1 {
-      0%, 100% { transform:translate(0,0) scale(1); }
-      33% { transform:translate(50px,40px) scale(1.1); }
-      66% { transform:translate(-30px,60px) scale(0.95); }
+    /* Very gentle position drift only — no scale, no opacity change */
+    @keyframes orbDrift1 {
+      0%, 100% { transform:translate(0, 0); }
+      50% { transform:translate(30px, 20px); }
     }
-    @keyframes orbFloat2 {
-      0%, 100% { transform:translate(0,0) scale(1); }
-      33% { transform:translate(-40px,-50px) scale(1.05); }
-      66% { transform:translate(30px,-25px) scale(0.9); }
+    @keyframes orbDrift2 {
+      0%, 100% { transform:translate(0, 0); }
+      50% { transform:translate(-20px, -15px); }
     }
-    @keyframes orbFloat3 {
-      0%, 100% { transform:translate(-50%,0) scale(1); opacity:0.3; }
-      50% { transform:translate(-50%,-40px) scale(1.15); opacity:0.5; }
+    @keyframes orbDrift3 {
+      0%, 100% { transform:translate(-50%, 0); }
+      50% { transform:translate(-50%, -15px); }
     }
-    #particles { position:absolute; inset:0; z-index:1; }
+
+    /* Particle canvas */
+    #particles {
+      position:fixed; inset:0; z-index:1;
+    }
+
+    /* Content */
     .content {
-      position:relative; z-index:2;
+      position:fixed; inset:0; z-index:2;
       display:flex; flex-direction:column;
       align-items:center; justify-content:center;
-      height:100%; padding:60px 40px;
+      padding:40px;
       text-align:center;
     }
     .logo {
-      height:80px; width:auto; object-fit:contain;
+      height:48px; width:auto; object-fit:contain;
       opacity:0; animation:fadeUp 1.8s cubic-bezier(0.22,1,0.36,1) 1.5s forwards;
     }
     .tagline {
-      margin-top:20px;
-      font-size:20px; font-weight:400; letter-spacing:0.3em;
+      margin-top:16px;
+      font-size:13px; font-weight:400; letter-spacing:0.3em;
       text-transform:uppercase;
       color:rgba(232,232,240,0.5);
       opacity:0; animation:fadeUp 1.8s cubic-bezier(0.22,1,0.36,1) 2.3s forwards;
     }
     .date {
-      margin-top:12px;
-      font-size:19px; font-weight:300; letter-spacing:0.25em;
+      margin-top:10px;
+      font-size:12px; font-weight:300; letter-spacing:0.25em;
       color:rgba(97,40,219,0.5);
       opacity:0; animation:fadeUp 1.8s cubic-bezier(0.22,1,0.36,1) 2.9s forwards;
     }
     @keyframes fadeUp {
-      from { opacity:0; transform:translateY(20px); }
+      from { opacity:0; transform:translateY(16px); }
       to { opacity:1; transform:translateY(0); }
     }
   </style>
 </head>
 <body>
-  <div class="bg-grid"></div>
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
   <div class="orb orb-3"></div>
@@ -112,25 +103,29 @@
       const canvas = document.getElementById('particles');
       const ctx = canvas.getContext('2d');
       let particles = [];
-      const COUNT = 120;
-      const W = 1080, H = 1920;
+      const COUNT = 90;
+      let W, H;
+
+      function resize() {
+        W = canvas.width = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+      resize();
+      window.addEventListener('resize', resize);
 
       const startTime = Date.now();
       let lastTick = startTime;
-
-      canvas.width = W;
-      canvas.height = H;
 
       class Particle {
         constructor() { this.reset(true); }
         reset(initial) {
           this.x = Math.random() * W;
           this.y = initial ? Math.random() * H : Math.random() * H;
-          this.vx = (Math.random() - 0.5) * 0.2;
-          this.vy = -Math.random() * 0.2 - 0.05;
-          this.size = Math.random() * 2.5 + 0.8;
-          this.opacity = Math.random() * 0.45 + 0.15;
-          this.life = Math.random() * 600 + 400;
+          this.vx = (Math.random() - 0.5) * 0.15;
+          this.vy = -Math.random() * 0.15 - 0.03;
+          this.size = Math.random() * 2 + 0.8;
+          this.opacity = Math.random() * 0.4 + 0.12;
+          this.life = Math.random() * 800 + 500;
           this.maxLife = this.life;
         }
         update(dt) {
@@ -142,7 +137,7 @@
           }
         }
         draw() {
-          const fade = Math.min(this.life / 80, (this.maxLife - this.life) / 80, 1);
+          const fade = Math.min(this.life / 100, (this.maxLife - this.life) / 100, 1);
           ctx.globalAlpha = this.opacity * fade;
           ctx.fillStyle = '#6128DB';
           ctx.beginPath();
@@ -153,35 +148,31 @@
 
       for (let i = 0; i < COUNT; i++) particles.push(new Particle());
 
-      // Shooting star — slightly faster, quick dissolve
+      // Shooting star
       let starFired = false;
       let starActive = false;
       let starX, starY, starLife;
       let starTrail = [];
-      const STAR_VX = 8;
-      const STAR_VY = 4.5;
-      const STAR_LIFE = 45;
-      const STAR_TRAIL = 12;
 
       function updateStar(elapsed, dt) {
-        if (!starFired && elapsed > 3900) {
+        if (!starFired && elapsed > 4000) {
           starFired = true;
           starActive = true;
-          starX = 100;
-          starY = 200;
-          starLife = STAR_LIFE;
+          starX = W * 0.08;
+          starY = H * 0.1;
+          starLife = 45;
           starTrail = [];
         }
         if (!starActive) return;
 
-        starX += STAR_VX * dt;
-        starY += STAR_VY * dt;
+        starX += 8 * dt;
+        starY += 4.5 * dt;
         starLife -= dt;
 
         starTrail.push({ x: starX, y: starY });
-        if (starTrail.length > STAR_TRAIL) starTrail.shift();
+        if (starTrail.length > 12) starTrail.shift();
 
-        const headFade = Math.min(starLife / 40, 1);
+        const headFade = Math.min(starLife / 15, 1);
 
         for (let i = 0; i < starTrail.length; i++) {
           const t = starTrail[i];
@@ -226,9 +217,9 @@
         lastTick = now;
 
         ctx.clearRect(0, 0, W, H);
-
         particles.forEach(p => { p.update(dt); p.draw(); });
 
+        // Subtle connections
         ctx.strokeStyle = '#6128DB';
         ctx.lineWidth = 0.5;
         for (let i = 0; i < particles.length; i++) {
@@ -236,8 +227,8 @@
             const dx = particles[i].x - particles[j].x;
             const dy = particles[i].y - particles[j].y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 160) {
-              ctx.globalAlpha = (1 - dist / 160) * 0.12;
+            if (dist < 100) {
+              ctx.globalAlpha = (1 - dist / 100) * 0.08;
               ctx.beginPath();
               ctx.moveTo(particles[i].x, particles[i].y);
               ctx.lineTo(particles[j].x, particles[j].y);
