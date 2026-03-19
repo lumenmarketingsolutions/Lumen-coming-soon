@@ -371,22 +371,22 @@
         /* Shooting star */
         .shooting-star {
             position: absolute;
-            width: 80px;
+            width: 60px;
             height: 1px;
-            background: linear-gradient(to right, rgba(124, 77, 255, 0), rgba(255, 255, 255, 0.7));
-            top: 30%;
-            left: -100px;
-            transform: rotate(-15deg);
-            animation: shoot 4s ease-in-out infinite;
+            background: linear-gradient(to right, rgba(124, 77, 255, 0), rgba(255, 255, 255, 0.6));
+            top: 0;
+            left: 0;
+            transform: rotate(-25deg);
+            animation: shoot 5s ease-out infinite;
             animation-delay: 2s;
             opacity: 0;
         }
 
         @keyframes shoot {
-            0% { left: -100px; opacity: 0; }
-            5% { opacity: 1; }
-            30% { left: 110%; opacity: 0; }
-            100% { left: 110%; opacity: 0; }
+            0% { transform: translate(-20px, 60px) rotate(-25deg); opacity: 0; }
+            3% { opacity: 1; }
+            25% { transform: translate(calc(100vw + 50px), calc(-30vh)) rotate(-25deg); opacity: 0; }
+            100% { transform: translate(calc(100vw + 50px), calc(-30vh)) rotate(-25deg); opacity: 0; }
         }
 
         /* Purple glow behind logo on mobile */
@@ -404,8 +404,9 @@
                 min-height: 85vh;
                 display: flex;
                 flex-direction: column;
-                justify-content: flex-end;
+                justify-content: flex-start;
                 align-items: center;
+                padding-top: 40px;
                 padding-bottom: 60px;
                 margin-bottom: 30px;
                 position: relative;
@@ -413,12 +414,25 @@
             }
 
             .header img {
-                position: absolute !important;
-                top: 25% !important;
-                left: 50% !important;
-                transform: translateX(-50%) !important;
-                height: 24px !important;
+                position: relative !important;
+                height: 22px !important;
                 margin-bottom: 0 !important;
+            }
+
+            .header h1 {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 100%;
+            }
+
+            .header .prepared-for {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, calc(-50% + 40px));
+                width: 100%;
             }
 
             /* Stars in header */
