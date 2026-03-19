@@ -316,6 +316,11 @@ def track_dashboard():
 def index():
     return render_template("index.html")
 
+
+@app.route("/story")
+def story():
+    return render_template("story.html")
+
 @app.route("/join", methods=["POST"])
 def join_waitlist():
     data = request.get_json()
