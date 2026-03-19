@@ -103,8 +103,17 @@
       const canvas = document.getElementById('particles');
       const ctx = canvas.getContext('2d');
       let particles = [];
-      const COUNT = 90;
       let W, H;
+      // Scale particle count to screen area — desktop gets ~90, phones get ~35-45
+      function getCount() {
+        const area = window.innerWidth * window.innerHeight;
+        const desktop = 1920 * 1080;
+        return Math.round(Math.max(30, Math.min(90, 90 * (area / desktop))));
+      }
+      const COUNT = getCount();
+      // Connection distance also scales — shorter on small screens
+      const CONNECT_DIST = window.innerWidth < 600 ? 60 : 100;
+      const CONNECT_ALPHA = window.innerWidth < 600 ? 0.04 : 0.08;
 
       function resize() {
         W = canvas.width = window.innerWidth;
@@ -123,8 +132,9 @@
           this.y = initial ? Math.random() * H : Math.random() * H;
           this.vx = (Math.random() - 0.5) * 0.15;
           this.vy = -Math.random() * 0.15 - 0.03;
-          this.size = Math.random() * 2 + 0.8;
-          this.opacity = Math.random() * 0.4 + 0.12;
+          const mobile = W < 600;
+          this.size = mobile ? Math.random() * 1.4 + 0.5 : Math.random() * 2 + 0.8;
+          this.opacity = mobile ? Math.random() * 0.3 + 0.08 : Math.random() * 0.4 + 0.12;
           this.life = Math.random() * 800 + 500;
           this.maxLife = this.life;
         }
@@ -255,8 +265,8 @@
             const dx = particles[i].x - particles[j].x;
             const dy = particles[i].y - particles[j].y;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            if (dist < 100) {
-              ctx.globalAlpha = (1 - dist / 100) * 0.08;
+            if (dist < CONNECT_DIST) {
+              ctx.globalAlpha = (1 - dist / CONNECT_DIST) * CONNECT_ALPHA;
               ctx.beginPath();
               ctx.moveTo(particles[i].x, particles[i].y);
               ctx.lineTo(particles[j].x, particles[j].y);
