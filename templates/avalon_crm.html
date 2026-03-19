@@ -346,6 +346,54 @@
             text-decoration: none;
         }
 
+        /* Header stars - hidden on desktop */
+        .header-stars {
+            display: none;
+        }
+
+        .header-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        .header-star.dim { opacity: 0.25; width: 1px; height: 1px; }
+        .header-star.bright { opacity: 0.7; width: 2.5px; height: 2.5px; }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.8; }
+        }
+
+        /* Shooting star */
+        .shooting-star {
+            position: absolute;
+            width: 80px;
+            height: 1px;
+            background: linear-gradient(to right, rgba(124, 77, 255, 0), rgba(255, 255, 255, 0.7));
+            top: 30%;
+            left: -100px;
+            transform: rotate(-15deg);
+            animation: shoot 4s ease-in-out infinite;
+            animation-delay: 2s;
+            opacity: 0;
+        }
+
+        @keyframes shoot {
+            0% { left: -100px; opacity: 0; }
+            5% { opacity: 1; }
+            30% { left: 110%; opacity: 0; }
+            100% { left: 110%; opacity: 0; }
+        }
+
+        /* Purple glow behind logo on mobile */
+        .header-glow {
+            display: none;
+        }
+
         /* Mobile styles */
         @media (max-width: 680px) {
             .page {
@@ -353,18 +401,42 @@
             }
 
             .header {
-                min-height: 65vh;
+                min-height: 85vh;
                 display: flex;
                 flex-direction: column;
-                justify-content: center;
+                justify-content: flex-end;
                 align-items: center;
-                padding-bottom: 40px;
+                padding-bottom: 60px;
                 margin-bottom: 30px;
+                position: relative;
+                overflow: hidden;
             }
 
             .header img {
-                height: 26px !important;
-                margin-bottom: 24px !important;
+                position: absolute !important;
+                top: 25% !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                height: 24px !important;
+                margin-bottom: 0 !important;
+            }
+
+            /* Stars in header */
+            .header-stars {
+                display: block;
+            }
+
+            .header-glow {
+                display: block;
+                position: absolute;
+                width: 300px;
+                height: 300px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(97, 40, 219, 0.12) 0%, transparent 70%);
+                top: 20%;
+                left: 50%;
+                transform: translateX(-50%);
+                pointer-events: none;
             }
 
             .header h1 {
@@ -492,6 +564,22 @@
 
         <!-- Header -->
         <div class="header">
+            <div class="header-glow"></div>
+            <div class="header-stars">
+                <div class="header-star dim" style="top: 8%; left: 15%;"></div>
+                <div class="header-star bright" style="top: 12%; left: 72%; animation-delay: 1s;"></div>
+                <div class="header-star dim" style="top: 20%; left: 40%; animation-delay: 0.5s;"></div>
+                <div class="header-star" style="top: 6%; left: 58%; animation-delay: 2s;"></div>
+                <div class="header-star dim" style="top: 32%; left: 85%; animation-delay: 1.5s;"></div>
+                <div class="header-star bright" style="top: 38%; left: 10%; animation-delay: 0.8s;"></div>
+                <div class="header-star dim" style="top: 15%; left: 90%; animation-delay: 2.5s;"></div>
+                <div class="header-star" style="top: 45%; left: 30%; animation-delay: 1.2s;"></div>
+                <div class="header-star dim" style="top: 28%; left: 55%; animation-delay: 0.3s;"></div>
+                <div class="header-star bright" style="top: 50%; left: 78%; animation-delay: 1.8s;"></div>
+                <div class="header-star dim" style="top: 18%; left: 25%; animation-delay: 2.2s;"></div>
+                <div class="header-star" style="top: 42%; left: 65%; animation-delay: 0.7s;"></div>
+                <div class="shooting-star"></div>
+            </div>
             <img src="/static/logo-white.png" alt="Lumen" style="height: 28px; margin-bottom: 30px;">
             <h1>Custom CRM Platform</h1>
             <div class="prepared-for">Prepared for <span>Avalon Laser</span>, March 2026</div>
