@@ -535,6 +535,42 @@
     .service-card.shimmer:nth-child(7)::before { animation-delay: 0.72s; }
 
     /* ══════════════════════════════════════════
+       THE PUNCH
+    ══════════════════════════════════════════ */
+    .punch {
+      padding: 140px 24px;
+      text-align: center;
+    }
+
+    .punch-stat {
+      font-size: clamp(80px, 15vw, 160px);
+      font-weight: 900;
+      letter-spacing: -6px;
+      line-height: 1;
+      background: linear-gradient(135deg, #ffffff 0%, var(--purple-light) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0;
+    }
+
+    .punch-line {
+      font-size: clamp(24px, 4vw, 40px);
+      font-weight: 700;
+      letter-spacing: -1px;
+      color: var(--text-dim);
+      margin-bottom: 24px;
+    }
+
+    .punch-sub {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 460px;
+      margin: 0 auto;
+    }
+
+    /* ══════════════════════════════════════════
        RESULTS
     ══════════════════════════════════════════ */
     .result-cards {
@@ -1037,14 +1073,18 @@
           <p class="service-desc">Every cent spent on ads, trackable to exactly what it resulted in. Custom dashboards, real data, full visibility. No guessing.</p>
         </div>
 
-        <div class="service-card full reveal">
-          <div class="service-icon">
-            <svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          </div>
-          <h3 class="service-title">The Full System</h3>
-          <p class="service-desc">One piece affects the next. The ads feed the pages, the pages feed the sequences, the sequences feed the pipeline. This is how the machine works.</p>
-        </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════
+       THE PUNCH
+  ════════════════════════════════════════ -->
+  <section class="punch">
+    <div class="section-inner" style="text-align: center;">
+      <p class="punch-stat reveal">100%</p>
+      <p class="punch-line reveal">success rate.</p>
+      <p class="punch-sub reveal">One piece affects the next. When we control every variable, this is what happens. This is not a claim. It is simply what our data says.</p>
     </div>
   </section>
 
@@ -1092,13 +1132,6 @@
           </div>
         </div>
 
-        <div class="result-card reveal" style="border-color: rgba(97,40,219,0.25); background: linear-gradient(135deg, var(--dark-card), rgba(97,40,219,0.06));">
-          <div class="result-number">100%</div>
-          <div class="result-body">
-            <p class="result-context">Success Rate</p>
-            <p class="result-text">When we control every variable, we have a 100% success rate. This is not a claim, it's simply what our data says.</p>
-          </div>
-        </div>
       </div>
     </div>
   </section>
