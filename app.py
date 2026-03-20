@@ -640,6 +640,10 @@ def preview_site():
 def preview_home():
     return render_template("home.html")
 
+@app.route("/preview/home/about")
+def preview_about():
+    return render_template("about.html")
+
 @app.route("/apply", methods=["POST"])
 def apply_submit():
     data = request.get_json() or {}
