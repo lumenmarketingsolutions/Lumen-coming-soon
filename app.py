@@ -398,7 +398,7 @@ def avalon_onboarding_submit():
 
 @app.route("/admin/avalon-onboarding")
 def admin_avalon_onboarding():
-    if not session.get("admin"):
+    if not session.get("wl_auth"):
         return redirect(url_for("admin"))
     con = sqlite3.connect(DB_PATH)
     con.row_factory = sqlite3.Row
