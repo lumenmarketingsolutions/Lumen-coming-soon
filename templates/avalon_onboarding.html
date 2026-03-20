@@ -205,7 +205,7 @@
                 <p class="hint">This helps me understand who's using the system and what matters most to your role.</p>
                 <div class="field-group">
                     <label>Your name</label>
-                    <input type="text" name="name" placeholder="First and last name" required>
+                    <input type="text" name="name" placeholder="First and last name">
                 </div>
                 <div class="field-group">
                     <label>What's your role at Avalon?</label>
@@ -314,13 +314,6 @@
         }
 
         function nextStep() {
-            if (currentStep === 1) {
-                const name = document.querySelector('[name="name"]').value.trim();
-                if (!name) {
-                    document.querySelector('[name="name"]').focus();
-                    return;
-                }
-            }
             if (currentStep < totalSteps) {
                 document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
                 currentStep++;

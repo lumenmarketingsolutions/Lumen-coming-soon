@@ -352,10 +352,8 @@ def avalon_onboarding():
 @app.route("/avaloncrm/onboarding/submit", methods=["POST"])
 def avalon_onboarding_submit():
     data = request.get_json() or {}
-    name = data.get("name", "").strip()
+    name = data.get("name", "").strip() or "Anonymous"
     role = data.get("role", "").strip()
-    if not name:
-        return jsonify({"error": "Name is required"}), 400
 
     now = datetime.datetime.utcnow().isoformat()
     con = sqlite3.connect(DB_PATH)
