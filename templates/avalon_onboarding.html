@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avalon CRM Onboarding</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #e8e8f0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        .page {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 50px 24px 80px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header img {
+            height: 24px;
+            margin-bottom: 24px;
+        }
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .header p {
+            font-size: 14px;
+            color: #6b6b80;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* Steps */
+        .step {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .step.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #6128DB;
+            margin-bottom: 10px;
+        }
+        .step h2 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        .step .hint {
+            font-size: 13px;
+            color: #6b6b80;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            color: #e8e8f0;
+            outline: none;
+            transition: border-color 0.2s;
+            resize: vertical;
+        }
+        input[type="text"]:focus, textarea:focus {
+            border-color: rgba(97, 40, 219, 0.5);
+        }
+        textarea {
+            min-height: 100px;
+        }
+        ::placeholder {
+            color: #4a4a5a;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+        }
+        .btn {
+            padding: 12px 28px;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-next {
+            background: #6128DB;
+            color: #fff;
+        }
+        .btn-next:hover { background: #7c4dff; }
+        .btn-back {
+            background: none;
+            color: #6b6b80;
+            padding: 12px 0;
+        }
+        .btn-back:hover { color: #e8e8f0; }
+        .btn-submit {
+            background: #6128DB;
+            color: #fff;
+            width: 100%;
+            padding: 14px;
+            font-size: 15px;
+        }
+        .btn-submit:hover { background: #7c4dff; }
+
+        /* Progress */
+        .progress {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 40px;
+        }
+        .progress-dot {
+            flex: 1;
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.06);
+            transition: background 0.3s;
+        }
+        .progress-dot.filled {
+            background: #6128DB;
+        }
+
+        /* Thank you */
+        .thank-you {
+            display: none;
+            text-align: center;
+            padding: 80px 0;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .thank-you h2 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        .thank-you p {
+            font-size: 15px;
+            color: #6b6b80;
+        }
+
+        .field-group {
+            margin-bottom: 16px;
+        }
+        .field-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #b0b0c0;
+            margin-bottom: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <img src="/static/logo-white.png" alt="Lumen">
+            <h1>CRM Onboarding</h1>
+            <p>Help me build the right system for your team. This takes about 3 minutes.</p>
+        </div>
+
+        <div class="progress" id="progress">
+            <div class="progress-dot filled"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+        </div>
+
+        <form id="onboarding-form">
+
+            <!-- Step 1: Who are you -->
+            <div class="step active" data-step="1">
+                <div class="step-label">About You</div>
+                <h2>Let's start with you</h2>
+                <p class="hint">This helps me understand who's using the system and what matters most to your role.</p>
+                <div class="field-group">
+                    <label>Your name</label>
+                    <input type="text" name="name" placeholder="First and last name" required>
+                </div>
+                <div class="field-group">
+                    <label>What's your role at Avalon?</label>
+                    <input type="text" name="role" placeholder="e.g. Front desk, Operations, Owner...">
+                </div>
+                <div class="field-group">
+                    <label>What does a typical day look like for you?</label>
+                    <textarea name="daily_work" placeholder="Walk me through your daily workflow. What do you spend most of your time doing?"></textarea>
+                </div>
+                <div class="nav">
+                    <span></span>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Moxie experience -->
+            <div class="step" data-step="2">
+                <div class="step-label">Current System</div>
+                <h2>Your experience with Moxie</h2>
+                <p class="hint">Be honest. There are no wrong answers here.</p>
+                <div class="field-group">
+                    <label>What do you actually like about Moxie?</label>
+                    <textarea name="moxie_likes" placeholder="Anything that works well, features you'd want to keep..."></textarea>
+                </div>
+                <div class="field-group">
+                    <label>What frustrates you about it?</label>
+                    <textarea name="moxie_frustrations" placeholder="What slows you down, confuses you, or just doesn't work the way you'd want..."></textarea>
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Lead flow -->
+            <div class="step" data-step="3">
+                <div class="step-label">Lead Flow</div>
+                <h2>Connecting to Boulevard</h2>
+                <p class="hint">In a perfect world, how should a lead go from this new system into Boulevard?</p>
+                <div class="field-group">
+                    <label>What should trigger a lead moving into Boulevard? For example, is it when they confirm an appointment, when they pay, or something else?</label>
+                    <textarea name="lead_to_blvd" placeholder="Walk me through how you'd want it to work. What's the moment a lead should cross over into Boulevard, and what should happen from there?"></textarea>
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Dream features -->
+            <div class="step" data-step="4">
+                <div class="step-label">Your Ideal System</div>
+                <h2>If you could build your perfect tool</h2>
+                <p class="hint">Think about what would make your job easier every single day.</p>
+                <div class="field-group">
+                    <label>What features would your dream CRM have?</label>
+                    <textarea name="dream_features" placeholder="Anything. Texting, reminders, dashboards, automations, reports..."></textarea>
+                </div>
+                <div class="field-group">
+                    <label>What should be automated vs. what do you want to control manually?</label>
+                    <textarea name="auto_vs_manual" placeholder="e.g. I want follow-ups to be automatic but I want to manually approve messages before they send..."></textarea>
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 5: Integrations + final -->
+            <div class="step" data-step="5">
+                <div class="step-label">Final Thoughts</div>
+                <h2>Almost done</h2>
+                <p class="hint">Last couple questions and you're good.</p>
+                <div class="field-group">
+                    <label>What other tools or integrations would you want connected?</label>
+                    <textarea name="integrations" placeholder="Instagram, email, calendars, payment systems, anything else you use day-to-day..."></textarea>
+                </div>
+                <div class="field-group">
+                    <label>Anything else I should know?</label>
+                    <textarea name="anything_else" placeholder="Anything on your mind about how this system should work for you."></textarea>
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                    <button type="button" class="btn btn-submit" onclick="submitForm()">Submit</button>
+                </div>
+            </div>
+
+        </form>
+
+        <div class="thank-you" id="thank-you">
+            <h2>You're all set</h2>
+            <p>Thanks for taking the time. This is going to help me build something that actually works for you.</p>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 5;
+
+        function updateProgress() {
+            document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+                dot.classList.toggle('filled', i < currentStep);
+            });
+        }
+
+        function nextStep() {
+            if (currentStep === 1) {
+                const name = document.querySelector('[name="name"]').value.trim();
+                if (!name) {
+                    document.querySelector('[name="name"]').focus();
+                    return;
+                }
+            }
+            if (currentStep < totalSteps) {
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+                currentStep++;
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+                updateProgress();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+                currentStep--;
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+                updateProgress();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function submitForm() {
+            const form = document.getElementById('onboarding-form');
+            const data = {};
+            form.querySelectorAll('input, textarea').forEach(el => {
+                data[el.name] = el.value;
+            });
+
+            fetch('/avaloncrm/onboarding/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.ok) {
+                    form.style.display = 'none';
+                    document.getElementById('progress').style.display = 'none';
+                    document.getElementById('thank-you').style.display = 'block';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

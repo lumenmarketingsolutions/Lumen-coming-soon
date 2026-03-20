@@ -228,6 +228,26 @@ def init_db():
                     ("Berry Clean", "berry-clean", "", now))
         con.commit()
 
+    # Avalon CRM onboarding form submissions
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS avalon_onboarding (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            role TEXT DEFAULT '',
+            daily_work TEXT DEFAULT '',
+            moxie_likes TEXT DEFAULT '',
+            moxie_frustrations TEXT DEFAULT '',
+            lead_to_blvd TEXT DEFAULT '',
+            ideal_workflow TEXT DEFAULT '',
+            dream_features TEXT DEFAULT '',
+            auto_vs_manual TEXT DEFAULT '',
+            integrations TEXT DEFAULT '',
+            anything_else TEXT DEFAULT '',
+            created_at TEXT NOT NULL
+        )
+    """)
+    con.commit()
+
     con.close()
 
 init_db()
@@ -324,6 +344,69 @@ def story():
 @app.route("/avaloncrm")
 def avalon_crm():
     return render_template("avalon_crm.html")
+
+@app.route("/avaloncrm/onboarding")
+def avalon_onboarding():
+    return render_template("avalon_onboarding.html")
+
+@app.route("/avaloncrm/onboarding/submit", methods=["POST"])
+def avalon_onboarding_submit():
+    data = request.get_json() or {}
+    name = data.get("name", "").strip()
+    role = data.get("role", "").strip()
+    if not name:
+        return jsonify({"error": "Name is required"}), 400
+
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    con.execute("""
+        INSERT INTO avalon_onboarding (name, role, daily_work, moxie_likes, moxie_frustrations,
+            lead_to_blvd, ideal_workflow, dream_features, auto_vs_manual, integrations, anything_else, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        name, role,
+        data.get("daily_work", ""),
+        data.get("moxie_likes", ""),
+        data.get("moxie_frustrations", ""),
+        data.get("lead_to_blvd", ""),
+        data.get("ideal_workflow", ""),
+        data.get("dream_features", ""),
+        data.get("auto_vs_manual", ""),
+        data.get("integrations", ""),
+        data.get("anything_else", ""),
+        now
+    ))
+    con.commit()
+    con.close()
+
+    # Email notification
+    answers = f"""
+    <h2>New Avalon CRM Onboarding Submission</h2>
+    <p><strong>Name:</strong> {name}</p>
+    <p><strong>Role:</strong> {role}</p>
+    <p><strong>Daily work:</strong> {data.get('daily_work', '')}</p>
+    <p><strong>What they like about Moxie:</strong> {data.get('moxie_likes', '')}</p>
+    <p><strong>Moxie frustrations:</strong> {data.get('moxie_frustrations', '')}</p>
+    <p><strong>Lead to Boulevard flow:</strong> {data.get('lead_to_blvd', '')}</p>
+    <p><strong>Ideal workflow:</strong> {data.get('ideal_workflow', '')}</p>
+    <p><strong>Dream features:</strong> {data.get('dream_features', '')}</p>
+    <p><strong>Auto vs manual:</strong> {data.get('auto_vs_manual', '')}</p>
+    <p><strong>Integrations wanted:</strong> {data.get('integrations', '')}</p>
+    <p><strong>Anything else:</strong> {data.get('anything_else', '')}</p>
+    """
+    send_email(NOTIFY_EMAIL, f"Avalon Onboarding: {name} ({role})", answers)
+
+    return jsonify({"ok": True})
+
+@app.route("/admin/avalon-onboarding")
+def admin_avalon_onboarding():
+    if not session.get("admin"):
+        return redirect(url_for("admin"))
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    rows = con.execute("SELECT * FROM avalon_onboarding ORDER BY created_at DESC").fetchall()
+    con.close()
+    return render_template("admin_avalon_onboarding.html", submissions=rows)
 
 @app.route("/proposal")
 def proposal():
@@ -1000,6 +1083,11 @@ def api_los_overview():
         cnt = con.execute("SELECT COUNT(*) FROM page_views WHERE timestamp LIKE ?", (d + "%",)).fetchone()[0]
         daily.append({"date": d, "views": cnt})
 
+    try:
+        avalon_onboard_count = con.execute("SELECT COUNT(*) FROM avalon_onboarding").fetchone()[0]
+    except Exception:
+        avalon_onboard_count = 0
+
     dashboards = []
     try:
         dbs = con.execute("SELECT name, slug, url FROM client_dashboards ORDER BY id").fetchall()
@@ -1024,6 +1112,7 @@ def api_los_overview():
         "waitlist_count": waitlist_count, "app_count": app_count,
         "lead_count": lead_count, "pipeline_value": pipeline_value,
         "won_value": won_value, "daily": daily, "dashboards": dashboards,
+        "avalon_onboard_count": avalon_onboard_count,
     })
 
 @app.route("/api/main-site-analytics")

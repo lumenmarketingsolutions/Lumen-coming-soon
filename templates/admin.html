@@ -231,6 +231,24 @@
     </a>
   </div>
 
+  <!-- Avalon -->
+  <p class="sec">Avalon CRM</p>
+  <div class="cards">
+    <a class="card" href="/admin/avalon-onboarding">
+      <div class="card-icon">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h10v12H4z"/><path d="M7 8h4M7 11h2"/></svg>
+      </div>
+      <div class="card-body">
+        <p class="card-title">Onboarding Responses</p>
+        <p class="card-desc">Staff questionnaire submissions for CRM build</p>
+        <div class="card-stats">
+          <span class="stat-tag" id="av-onboard">&mdash;</span>
+        </div>
+      </div>
+      <span class="card-arrow">&rsaquo;</span>
+    </a>
+  </div>
+
   <!-- Client Dashboards -->
   <p class="sec">Client Dashboards</p>
   <div class="cards" id="dash-cards">
@@ -294,6 +312,9 @@ function loadOverview(){
     document.getElementById('crm-leads').textContent=d.lead_count+' lead'+(d.lead_count!==1?'s':'');
     document.getElementById('crm-pipeline').textContent=fmtMoney(d.pipeline_value)+' pipeline';
     document.getElementById('crm-won').textContent=fmtMoney(d.won_value)+' won';
+
+    var avEl=document.getElementById('av-onboard');
+    if(avEl) avEl.textContent=(d.avalon_onboard_count||0)+' response'+((d.avalon_onboard_count||0)!==1?'s':'');
 
     var dc=document.getElementById('dash-cards');
     if(d.dashboards&&d.dashboards.length){

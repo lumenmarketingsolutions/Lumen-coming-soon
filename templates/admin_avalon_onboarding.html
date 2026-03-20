@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Avalon Onboarding Submissions</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0a0a0f;
+            color: #e8e8f0;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 24px; border-bottom: 1px solid #1a1a25;
+            position: sticky; top: 0; background: #0a0a0f; z-index: 100;
+        }
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+        .back-link {
+            font-size: 13px; color: #6b6b80; text-decoration: none; font-weight: 500;
+        }
+        .back-link:hover { color: #e8e8f0; }
+        .topbar-title { font-size: 16px; font-weight: 700; }
+        .topbar-count {
+            font-size: 12px; font-weight: 600; color: #7c4dff;
+            background: rgba(97,40,219,0.12); padding: 2px 10px;
+            border-radius: 6px;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 24px 20px 80px; }
+
+        .empty-state {
+            text-align: center; padding: 80px 20px;
+            color: #44445a; font-size: 14px;
+        }
+
+        .submission {
+            background: #111118; border: 1px solid #1a1a25;
+            border-radius: 14px; padding: 24px; margin-bottom: 16px;
+        }
+        .submission-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; padding-bottom: 14px;
+            border-bottom: 1px solid #1a1a25;
+        }
+        .submission-name { font-size: 16px; font-weight: 700; }
+        .submission-role { font-size: 12px; color: #6b6b80; margin-top: 2px; }
+        .submission-date { font-size: 11px; color: #44445a; }
+
+        .answer-group { margin-bottom: 16px; }
+        .answer-group:last-child { margin-bottom: 0; }
+        .answer-label {
+            font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+            text-transform: uppercase; color: #6b6b80; margin-bottom: 6px;
+        }
+        .answer-text {
+            font-size: 13px; color: #b0b0c0; line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        .answer-text.empty { color: #333; font-style: italic; }
+
+        @media (max-width: 768px) {
+            .topbar { padding: 14px 16px; }
+            .topbar-title { font-size: 14px; }
+            .container { padding: 16px 16px 60px; }
+            .submission { padding: 18px 16px; }
+            .submission-header { flex-direction: column; align-items: flex-start; gap: 4px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-left">
+            <a class="back-link" href="/admin">&lsaquo;</a>
+            <span class="topbar-title">Avalon Onboarding</span>
+            <span class="topbar-count">{{ submissions|length }} response{{ 's' if submissions|length != 1 }}</span>
+        </div>
+    </div>
+
+    <div class="container">
+        {% if submissions|length == 0 %}
+        <div class="empty-state">No submissions yet</div>
+        {% endif %}
+
+        {% for s in submissions %}
+        <div class="submission">
+            <div class="submission-header">
+                <div>
+                    <div class="submission-name">{{ s.name }}</div>
+                    {% if s.role %}<div class="submission-role">{{ s.role }}</div>{% endif %}
+                </div>
+                <div class="submission-date">{{ s.created_at[:16] }}</div>
+            </div>
+
+            {% set fields = [
+                ("Daily Workflow", s.daily_work),
+                ("What they like about Moxie", s.moxie_likes),
+                ("What frustrates them about Moxie", s.moxie_frustrations),
+                ("How leads get from Moxie to Boulevard", s.lead_to_blvd),
+                ("Ideal workflow", s.ideal_workflow),
+                ("Dream CRM features", s.dream_features),
+                ("Auto vs. manual", s.auto_vs_manual),
+                ("Integrations wanted", s.integrations),
+                ("Anything else", s.anything_else)
+            ] %}
+
+            {% for label, value in fields %}
+            {% if value %}
+            <div class="answer-group">
+                <div class="answer-label">{{ label }}</div>
+                <div class="answer-text">{{ value }}</div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
