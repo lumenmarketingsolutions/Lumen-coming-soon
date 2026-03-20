@@ -636,6 +636,10 @@ PREVIEW_TOKEN = "2026"
 def preview_site():
     return render_template("site.html")
 
+@app.route("/preview/home")
+def preview_home():
+    return render_template("home.html")
+
 @app.route("/apply", methods=["POST"])
 def apply_submit():
     data = request.get_json() or {}
