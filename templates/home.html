@@ -570,6 +570,18 @@
       text-align: left;
     }
 
+    .punch-arrow {
+      margin-top: 40px;
+      color: var(--purple-light);
+      opacity: 0.4;
+      animation: breathe 2.5s ease-in-out infinite;
+    }
+
+    @keyframes breathe {
+      0%, 100% { opacity: 0.25; transform: translateY(0); }
+      50% { opacity: 0.6; transform: translateY(6px); }
+    }
+
     /* ══════════════════════════════════════════
        RESULTS
     ══════════════════════════════════════════ */
@@ -991,7 +1003,7 @@
       </p>
       <div class="hero-cta-wrap">
         <a href="#book" class="btn-primary">Book a Free Call</a>
-        <a href="#results" class="btn-ghost">See Our Results</a>
+        <a href="#punch" class="btn-ghost">See Our Results</a>
       </div>
     </div>
     <div class="scroll-indicator">
@@ -1080,11 +1092,14 @@
   <!-- ════════════════════════════════════════
        THE PUNCH
   ════════════════════════════════════════ -->
-  <section class="punch">
+  <section class="punch" id="punch">
     <div class="section-inner" style="text-align: center;">
       <p class="punch-stat reveal">100%</p>
       <p class="punch-line reveal">success rate.</p>
       <p class="punch-sub reveal">When we control every variable, this is what happens. It's not a claim, this is simply what our data shows.</p>
+      <div class="punch-arrow reveal">
+        <svg width="16" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 2v18M2 14l6 6 6-6"/></svg>
+      </div>
     </div>
   </section>
 
