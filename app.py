@@ -1466,26 +1466,16 @@ def mk_delete_lead(lead_id):
 def mk_gmail_connect():
     if not GMAIL_CLIENT_ID:
         return "Gmail not configured. Set GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET.", 400
-    import os as _os
-    _os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-    _os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
-    from google_auth_oauthlib.flow import Flow
-    flow = Flow.from_client_config(
-        {"web": {
-            "client_id": GMAIL_CLIENT_ID,
-            "client_secret": GMAIL_CLIENT_SECRET,
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "redirect_uris": [GMAIL_REDIRECT_URI],
-        }},
-        scopes=["https://www.googleapis.com/auth/gmail.send",
-                "https://www.googleapis.com/auth/userinfo.email"],
-        redirect_uri=GMAIL_REDIRECT_URI,
-    )
-    flow.code_verifier = None
-    auth_url, state = flow.authorization_url(prompt="consent", access_type="offline")
-    session["gmail_state"] = state
-    return redirect(auth_url)
+    from urllib.parse import urlencode
+    params = {
+        "client_id": GMAIL_CLIENT_ID,
+        "redirect_uri": GMAIL_REDIRECT_URI,
+        "response_type": "code",
+        "scope": "https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/userinfo.email",
+        "access_type": "offline",
+        "prompt": "consent",
+    }
+    return redirect("https://accounts.google.com/o/oauth2/auth?" + urlencode(params))
 
 
 @app.route("/marykate/gmail/callback")
@@ -1494,34 +1484,32 @@ def mk_gmail_callback():
     if not code:
         return "No code provided by Google", 400
     try:
-        import os as _os
-        _os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-        _os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
-        from google_auth_oauthlib.flow import Flow
-        flow = Flow.from_client_config(
-            {"web": {
-                "client_id": GMAIL_CLIENT_ID,
-                "client_secret": GMAIL_CLIENT_SECRET,
-                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                "token_uri": "https://oauth2.googleapis.com/token",
-                "redirect_uris": [GMAIL_REDIRECT_URI],
-            }},
-            scopes=["https://www.googleapis.com/auth/gmail.send",
-                    "https://www.googleapis.com/auth/userinfo.email"],
-            redirect_uri=GMAIL_REDIRECT_URI,
-        )
-        flow.code_verifier = None
-        flow.fetch_token(code=code)
-        creds = flow.credentials
-        from googleapiclient.discovery import build
-        service = build("oauth2", "v2", credentials=creds)
-        user_info = service.userinfo().get().execute()
-        gmail_email = user_info.get("email", "")
+        # Exchange code for tokens directly via HTTP — no PKCE
+        token_resp = requests.post("https://oauth2.googleapis.com/token", data={
+            "code": code,
+            "client_id": GMAIL_CLIENT_ID,
+            "client_secret": GMAIL_CLIENT_SECRET,
+            "redirect_uri": GMAIL_REDIRECT_URI,
+            "grant_type": "authorization_code",
+        })
+        token_data = token_resp.json()
+        if "error" in token_data:
+            return f"Gmail token error: {token_data.get('error_description', token_data['error'])}", 400
+        access_token = token_data["access_token"]
+        refresh_token = token_data.get("refresh_token", "")
+        expires_in = token_data.get("expires_in", 3600)
+        expires_at = (datetime.datetime.utcnow() + datetime.timedelta(seconds=expires_in)).isoformat()
+
+        # Get user email
+        user_resp = requests.get("https://www.googleapis.com/oauth2/v2/userinfo",
+                                 headers={"Authorization": f"Bearer {access_token}"})
+        gmail_email = user_resp.json().get("email", "")
+
         con = sqlite3.connect(DB_PATH)
         con.execute("DELETE FROM mk_gmail_tokens")
         con.execute(
             "INSERT INTO mk_gmail_tokens (id, access_token, refresh_token, expires_at, email) VALUES (1, ?, ?, ?, ?)",
-            (creds.token, creds.refresh_token, creds.expiry.isoformat() if creds.expiry else "", gmail_email)
+            (access_token, refresh_token, expires_at, gmail_email)
         )
         con.commit()
         con.close()
@@ -1535,23 +1523,41 @@ def mk_get_gmail_creds():
     con = sqlite3.connect(DB_PATH)
     row = con.execute("SELECT access_token, refresh_token, expires_at, email FROM mk_gmail_tokens WHERE id = 1").fetchone()
     con.close()
-    if not row or not row[1]:
+    if not row or not row[0]:
         return None, ""
+    access_token = row[0]
+    refresh_token = row[1]
+    expires_at = row[2]
+    email = row[3]
+    # Check if expired and refresh
+    if expires_at:
+        try:
+            exp = datetime.datetime.fromisoformat(expires_at)
+            if datetime.datetime.utcnow() >= exp and refresh_token:
+                resp = requests.post("https://oauth2.googleapis.com/token", data={
+                    "client_id": GMAIL_CLIENT_ID,
+                    "client_secret": GMAIL_CLIENT_SECRET,
+                    "refresh_token": refresh_token,
+                    "grant_type": "refresh_token",
+                })
+                td = resp.json()
+                if "access_token" in td:
+                    access_token = td["access_token"]
+                    new_exp = (datetime.datetime.utcnow() + datetime.timedelta(seconds=td.get("expires_in", 3600))).isoformat()
+                    con = sqlite3.connect(DB_PATH)
+                    con.execute("UPDATE mk_gmail_tokens SET access_token = ?, expires_at = ? WHERE id = 1",
+                                (access_token, new_exp))
+                    con.commit()
+                    con.close()
+        except Exception:
+            pass
     from google.oauth2.credentials import Credentials
     creds = Credentials(
-        token=row[0], refresh_token=row[1],
+        token=access_token, refresh_token=refresh_token,
         token_uri="https://oauth2.googleapis.com/token",
         client_id=GMAIL_CLIENT_ID, client_secret=GMAIL_CLIENT_SECRET,
     )
-    if creds.expired:
-        from google.auth.transport.requests import Request
-        creds.refresh(Request())
-        con = sqlite3.connect(DB_PATH)
-        con.execute("UPDATE mk_gmail_tokens SET access_token = ?, expires_at = ? WHERE id = 1",
-                     (creds.token, creds.expiry.isoformat() if creds.expiry else ""))
-        con.commit()
-        con.close()
-    return creds, row[3]
+    return creds, email
 
 
 @app.route("/marykate/api/gmail/status")
