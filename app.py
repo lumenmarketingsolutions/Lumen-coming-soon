@@ -1553,6 +1553,16 @@ def mk_gmail_status():
     return jsonify({"connected": False})
 
 
+@app.route("/marykate/api/gmail/disconnect", methods=["POST"])
+@mk_auth_required
+def mk_gmail_disconnect():
+    con = sqlite3.connect(DB_PATH)
+    con.execute("DELETE FROM mk_gmail_tokens")
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+
 # ── Marykate API: Send Email ──
 @app.route("/marykate/api/send/email", methods=["POST"])
 @mk_auth_required

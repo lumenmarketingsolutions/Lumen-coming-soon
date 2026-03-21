@@ -23,6 +23,7 @@
         <div id="gmail-dot" style="width:8px; height:8px; border-radius:50%; background:var(--text-muted);"></div>
         <span id="gmail-label" style="font-size:13px; color:var(--text-dim);">Checking Gmail...</span>
         <a href="/marykate/gmail/connect" id="gmail-connect-btn" class="btn btn-teal btn-sm" style="margin-left:auto; display:none;">Connect Gmail</a>
+        <button id="gmail-disconnect-btn" class="btn btn-outline btn-sm" style="margin-left:auto; display:none;" onclick="disconnectGmail()">Disconnect</button>
       </div>
     </div>
     <div class="form-group">
@@ -94,6 +95,7 @@ fetch('/marykate/api/gmail/status')
       dot.style.background = 'var(--green)';
       label.textContent = 'Connected as ' + d.email;
       label.style.color = 'var(--text)';
+      document.getElementById('gmail-disconnect-btn').style.display = 'inline-flex';
     } else {
       dot.style.background = 'var(--red)';
       label.textContent = 'Gmail not connected';
@@ -101,6 +103,15 @@ fetch('/marykate/api/gmail/status')
     }
   });
 {% endif %}
+
+function disconnectGmail() {
+  if (!confirm('Disconnect this Gmail account?')) return;
+  fetch('/marykate/api/gmail/disconnect', { method: 'POST' })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) location.reload();
+    });
+}
 
 function toggleAll(checked) {
   document.querySelectorAll('input[name="lead"]').forEach(function(cb) {
