@@ -362,7 +362,9 @@
     .reveal {
       opacity: 0;
       transform: translateY(30px);
-      transition: opacity 1s ease, transform 1s ease;
+      transition-property: opacity, transform;
+      transition-duration: 1s;
+      transition-timing-function: ease;
     }
 
     .reveal.visible {
