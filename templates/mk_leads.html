@@ -8,41 +8,80 @@
   </div>
   <div style="display:flex; gap:10px;">
     <button class="btn btn-outline btn-sm" onclick="document.getElementById('add-modal').style.display='flex'">+ Add Lead</button>
-    <button class="btn btn-teal btn-sm" onclick="document.getElementById('upload-modal').style.display='flex'">Upload CSV</button>
+  </div>
+</div>
+
+<!-- Drag-and-drop upload zone (always visible) -->
+<div id="drop-zone" class="drop-zone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+  <div class="drop-zone-inner">
+    <svg class="drop-icon" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M24 32V12M24 12L16 20M24 12L32 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M8 32V36C8 38.2091 9.79086 40 12 40H36C38.2091 40 40 38.2091 40 36V32" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    {% if not leads %}
+    <p class="drop-title">Upload a spreadsheet with your leads</p>
+    <p class="drop-sub">We'll automatically detect names, emails, and phone numbers</p>
+    {% else %}
+    <p class="drop-title">Drop your file here</p>
+    <p class="drop-sub">CSV, XLSX, XLS &mdash; we'll find the leads automatically</p>
+    {% endif %}
+    <div style="display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap;">
+      <input type="text" class="form-input" id="drop-batch-name" placeholder="Batch name (optional)" style="width:220px; padding:8px 14px; font-size:12px; border-radius:8px; text-align:center;">
+      <label class="btn btn-teal btn-sm" style="cursor:pointer; margin:0;">
+        Browse Files
+        <input type="file" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleFileSelect(this.files[0])">
+      </label>
+    </div>
   </div>
 </div>
 
 <!-- Filter bar -->
-<div style="display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
+{% if leads %}
+<div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; align-items:center;">
   <select id="filter-batch" class="form-select" style="width:auto; min-width:160px; padding:8px 14px; font-size:12px; border-radius:8px;" onchange="filterLeads()">
     <option value="">All Batches</option>
     {% for b in batch_names %}
     <option value="{{ b }}">{{ b }}</option>
     {% endfor %}
   </select>
+  <select id="filter-date" class="form-select" style="width:auto; min-width:140px; padding:8px 14px; font-size:12px; border-radius:8px;" onchange="filterLeads()">
+    <option value="">All Dates</option>
+    <option value="today">Today</option>
+    <option value="yesterday">Yesterday</option>
+    <option value="week">This Week</option>
+  </select>
   <input type="text" id="filter-tag" class="form-input" placeholder="Filter by tag..." style="width:160px; padding:8px 14px; font-size:12px; border-radius:8px;" oninput="filterLeads()">
   <input type="text" id="filter-search" class="form-input" placeholder="Search name or email..." style="width:200px; padding:8px 14px; font-size:12px; border-radius:8px;" oninput="filterLeads()">
+  <button id="bulk-delete-btn" class="btn btn-danger btn-sm" style="display:none; margin-left:auto;" onclick="bulkDelete()">
+    Delete Selected (<span id="bulk-count">0</span>)
+  </button>
 </div>
 
-<!-- Upload zone (shown when no leads) -->
-{% if not leads %}
-<label class="upload-zone" style="cursor:pointer; display:block; margin-bottom:32px;">
-  <p>Drop a CSV file here or click to upload</p>
-  <span>Columns: name, email, phone (at minimum)</span>
-  <input type="file" accept=".csv" style="display:none;" onchange="uploadCSVDirect(this)">
-</label>
+<!-- Batch summary cards -->
+{% if batch_list %}
+<div style="display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap;">
+  {% for b in batch_list %}
+  <div class="batch-card" onclick="selectBatch('{{ b.name }}')" data-batch="{{ b.name }}">
+    <span class="batch-card-name">{{ b.name }}</span>
+    <span class="batch-card-meta">{{ b.date[:10] if b.date else '' }} &middot; {{ b.count }} lead{{ 's' if b.count != 1 else '' }}</span>
+  </div>
+  {% endfor %}
+</div>
 {% endif %}
 
-{% if leads %}
 <div class="table-wrap">
   <table>
     <thead>
       <tr>
+        <th style="width:36px; text-align:center;">
+          <input type="checkbox" id="select-all" onchange="toggleSelectAll(this)" style="accent-color:var(--teal); cursor:pointer;">
+        </th>
         <th>Name</th>
         <th>Email</th>
         <th>Phone</th>
         <th>Tags</th>
         <th>Batch</th>
+        <th>Uploaded</th>
         <th>Sent</th>
         <th>Last Contacted</th>
         <th></th>
@@ -50,7 +89,10 @@
     </thead>
     <tbody id="leads-tbody">
       {% for l in leads %}
-      <tr data-batch="{{ l['batch_name'] or '' }}" data-tags="{{ l['tags'] or '' }}" data-name="{{ l['name'] or '' }}" data-email="{{ l['email'] or '' }}">
+      <tr data-id="{{ l['id'] }}" data-batch="{{ l['batch_name'] or '' }}" data-tags="{{ l['tags'] or '' }}" data-name="{{ l['name'] or '' }}" data-email="{{ l['email'] or '' }}" data-date="{{ l['batch_date'] or l['created_at'][:10] if l['created_at'] else '' }}">
+        <td style="text-align:center;">
+          <input type="checkbox" class="lead-check" value="{{ l['id'] }}" onchange="updateBulkCount()" style="accent-color:var(--teal); cursor:pointer;">
+        </td>
         <td style="font-weight:500;">
           <a href="/marykate/lead/{{ l['id'] }}" style="color:var(--text); text-decoration:none; border-bottom:1px solid transparent; transition:border-color 0.2s;"
              onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='transparent'">
@@ -61,6 +103,7 @@
         <td>{{ l['phone'] or '—' }}</td>
         <td style="font-size:12px;">{{ l['tags'] or '' }}</td>
         <td style="font-size:12px; color:var(--text-muted);">{{ l['batch_name'] or '' }}</td>
+        <td style="font-size:12px; color:var(--text-muted);">{{ l['batch_date'] or (l['created_at'][:10] if l['created_at'] else '—') }}</td>
         <td style="text-align:center;">
           {% if l['send_count'] %}
           <span style="font-size:11px; color:var(--teal); font-weight:600;">{{ l['send_count'] }}x</span>
@@ -79,27 +122,15 @@
 </div>
 {% endif %}
 
-<!-- Upload CSV Modal -->
-<div id="upload-modal" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(8,8,9,0.85); align-items:center; justify-content:center;">
-  <div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:16px; padding:32px; width:100%; max-width:420px;">
-    <h3 style="font-size:16px; font-weight:700; margin-bottom:24px;">Upload CSV</h3>
-    <div class="form-group">
-      <label class="form-label">Batch Name</label>
-      <input type="text" class="form-input" id="upload-batch-name" placeholder="e.g. Facebook Leads Mar 21">
-      <p style="font-size:11px; color:var(--text-muted); margin-top:6px;">Leave blank to auto-generate</p>
+<!-- Upload progress modal -->
+<div id="upload-progress-modal" style="display:none; position:fixed; inset:0; z-index:500; background:rgba(8,8,9,0.92); align-items:center; justify-content:center; flex-direction:column;">
+  <div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:16px; padding:40px 48px; text-align:center; max-width:480px; width:90%;">
+    <div id="upload-spinner" style="margin-bottom:20px;">
+      <div class="sending-spinner"></div>
     </div>
-    <div class="form-group">
-      <label class="upload-zone" style="cursor:pointer; display:block;">
-        <p>Click to select CSV file</p>
-        <span>Columns: name, email, phone (at minimum)</span>
-        <input type="file" accept=".csv" id="csv-upload-modal" style="display:none;" onchange="document.getElementById('upload-file-name').textContent = this.files[0] ? this.files[0].name : ''">
-      </label>
-      <p id="upload-file-name" style="font-size:12px; color:var(--teal); margin-top:8px;"></p>
-    </div>
-    <div style="display:flex; gap:12px; justify-content:flex-end;">
-      <button class="btn btn-outline btn-sm" onclick="document.getElementById('upload-modal').style.display='none'">Cancel</button>
-      <button class="btn btn-teal btn-sm" onclick="uploadCSV()">Upload</button>
-    </div>
+    <p id="upload-status-text" style="font-size:15px; color:var(--text); font-weight:500; margin-bottom:8px;">Uploading and scanning your file...</p>
+    <p id="upload-detail-text" style="font-size:13px; color:var(--text-muted); margin-bottom:0; line-height:1.6;"></p>
+    <button id="upload-done-btn" class="btn btn-teal btn-sm" style="display:none; margin-top:24px;" onclick="location.reload()">Done</button>
   </div>
 </div>
 
@@ -130,72 +161,241 @@
   </div>
 </div>
 
+<style>
+  .drop-zone {
+    border: 2px dashed var(--dark-border);
+    border-radius: 16px;
+    padding: 36px 24px;
+    text-align: center;
+    margin-bottom: 24px;
+    transition: border-color 0.3s, background 0.3s, box-shadow 0.3s;
+    cursor: pointer;
+    position: relative;
+  }
+  .drop-zone.dragover {
+    border-color: var(--teal);
+    background: rgba(18,143,196,0.06);
+    box-shadow: 0 0 24px rgba(18,143,196,0.12);
+  }
+  .drop-zone-inner { pointer-events: auto; }
+  .drop-icon {
+    width: 40px; height: 40px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+    transition: color 0.3s;
+  }
+  .drop-zone.dragover .drop-icon { color: var(--teal); }
+  .drop-title { font-size: 15px; color: var(--text-dim); margin-bottom: 6px; font-weight: 500; }
+  .drop-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+
+  {% if not leads %}
+  .drop-zone {
+    padding: 60px 24px;
+    margin-top: 40px;
+  }
+  .drop-icon { width: 52px; height: 52px; }
+  .drop-title { font-size: 18px; }
+  .drop-sub { font-size: 13px; }
+  {% endif %}
+
+  .batch-card {
+    background: var(--dark-card);
+    border: 1px solid var(--dark-border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .batch-card:hover, .batch-card.active {
+    border-color: var(--teal);
+    background: rgba(18,143,196,0.06);
+  }
+  .batch-card-name {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .batch-card-meta {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 768px) {
+    .drop-zone { padding: 28px 16px; }
+    .drop-icon { width: 32px; height: 32px; }
+    #drop-batch-name { width: 160px !important; }
+  }
+</style>
+
 {% endblock %}
 {% block scripts %}
 <script>
+/* ── Drag and drop ── */
+function handleDragOver(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById('drop-zone').classList.add('dragover');
+}
+function handleDragLeave(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById('drop-zone').classList.remove('dragover');
+}
+function handleDrop(e) {
+  e.preventDefault();
+  e.stopPropagation();
+  document.getElementById('drop-zone').classList.remove('dragover');
+  var files = e.dataTransfer.files;
+  if (files.length > 0) {
+    handleFileSelect(files[0]);
+  }
+}
+function handleFileSelect(file) {
+  if (!file) return;
+  var ext = file.name.split('.').pop().toLowerCase();
+  if (['csv', 'xlsx', 'xls'].indexOf(ext) === -1) {
+    showToast('Unsupported file type. Use CSV, XLSX, or XLS.');
+    return;
+  }
+  var fd = new FormData();
+  fd.append('file', file);
+  var batchName = document.getElementById('drop-batch-name').value.trim();
+  if (batchName) fd.append('batch_name', batchName);
+
+  // Show progress modal
+  var modal = document.getElementById('upload-progress-modal');
+  modal.style.display = 'flex';
+  document.getElementById('upload-spinner').style.display = 'block';
+  document.getElementById('upload-status-text').textContent = 'Uploading and scanning your file...';
+  document.getElementById('upload-detail-text').textContent = file.name;
+  document.getElementById('upload-done-btn').style.display = 'none';
+
+  fetch('/marykate/api/leads/upload', { method: 'POST', body: fd })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      document.getElementById('upload-spinner').style.display = 'none';
+      if (d.ok) {
+        document.getElementById('upload-status-text').textContent = 'Upload complete! Found ' + d.count + ' leads';
+        var detail = 'Batch: "' + d.batch_name + '"';
+        if (d.mappings) {
+          var parts = [];
+          if (d.mappings.name) parts.push('Name \u2192 \u201c' + d.mappings.name + '\u201d');
+          if (d.mappings.email) parts.push('Email \u2192 \u201c' + d.mappings.email + '\u201d');
+          if (d.mappings.phone) parts.push('Phone \u2192 \u201c' + d.mappings.phone + '\u201d');
+          if (d.mappings.tags) parts.push('Tags \u2192 \u201c' + d.mappings.tags + '\u201d');
+          if (parts.length > 0) detail += '\nDetected: ' + parts.join(', ');
+        }
+        document.getElementById('upload-detail-text').style.whiteSpace = 'pre-line';
+        document.getElementById('upload-detail-text').textContent = detail;
+        document.getElementById('upload-done-btn').style.display = 'inline-block';
+      } else {
+        document.getElementById('upload-status-text').textContent = 'Upload failed';
+        document.getElementById('upload-detail-text').textContent = d.error || 'Unknown error';
+        document.getElementById('upload-done-btn').textContent = 'Close';
+        document.getElementById('upload-done-btn').style.display = 'inline-block';
+      }
+    })
+    .catch(function(err) {
+      document.getElementById('upload-spinner').style.display = 'none';
+      document.getElementById('upload-status-text').textContent = 'Upload failed';
+      document.getElementById('upload-detail-text').textContent = 'Network error';
+      document.getElementById('upload-done-btn').textContent = 'Close';
+      document.getElementById('upload-done-btn').style.display = 'inline-block';
+    });
+}
+
+/* ── Filtering ── */
+function getDateStr(daysAgo) {
+  var d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  return d.toISOString().slice(0, 10);
+}
+
 function filterLeads() {
   var batch = document.getElementById('filter-batch').value.toLowerCase();
+  var dateFilter = document.getElementById('filter-date').value;
   var tag = document.getElementById('filter-tag').value.toLowerCase();
   var search = document.getElementById('filter-search').value.toLowerCase();
   var rows = document.querySelectorAll('#leads-tbody tr');
   var visible = 0;
+  var today = getDateStr(0);
+  var yesterday = getDateStr(1);
+  var weekStart = getDateStr(7);
+
   rows.forEach(function(row) {
     var rb = (row.getAttribute('data-batch') || '').toLowerCase();
     var rt = (row.getAttribute('data-tags') || '').toLowerCase();
     var rn = (row.getAttribute('data-name') || '').toLowerCase();
     var re = (row.getAttribute('data-email') || '').toLowerCase();
+    var rd = (row.getAttribute('data-date') || '');
     var show = true;
     if (batch && rb !== batch) show = false;
     if (tag && rt.indexOf(tag) === -1) show = false;
     if (search && rn.indexOf(search) === -1 && re.indexOf(search) === -1) show = false;
+    if (dateFilter === 'today' && rd !== today) show = false;
+    if (dateFilter === 'yesterday' && rd !== yesterday) show = false;
+    if (dateFilter === 'week' && rd < weekStart) show = false;
     row.style.display = show ? '' : 'none';
     if (show) visible++;
   });
   document.getElementById('filtered-count').textContent = visible;
 }
 
-function uploadCSV() {
-  var fileInput = document.getElementById('csv-upload-modal');
-  var file = fileInput.files[0];
-  if (!file) { showToast('Select a CSV file first'); return; }
-  var fd = new FormData();
-  fd.append('file', file);
-  var batchName = document.getElementById('upload-batch-name').value.trim();
-  if (batchName) fd.append('batch_name', batchName);
-  showSending('Uploading leads...');
-  document.getElementById('upload-modal').style.display = 'none';
-  fetch('/marykate/api/leads/upload', { method: 'POST', body: fd })
-    .then(function(r) { return r.json(); })
+function selectBatch(name) {
+  var sel = document.getElementById('filter-batch');
+  sel.value = name;
+  // Toggle batch card active state
+  document.querySelectorAll('.batch-card').forEach(function(c) {
+    c.classList.toggle('active', c.getAttribute('data-batch') === name);
+  });
+  filterLeads();
+}
+
+/* ── Select all / bulk delete ── */
+function toggleSelectAll(masterCb) {
+  var checks = document.querySelectorAll('.lead-check');
+  checks.forEach(function(cb) {
+    var row = cb.closest('tr');
+    if (row.style.display !== 'none') {
+      cb.checked = masterCb.checked;
+    }
+  });
+  updateBulkCount();
+}
+
+function updateBulkCount() {
+  var checks = document.querySelectorAll('.lead-check:checked');
+  var count = checks.length;
+  document.getElementById('bulk-count').textContent = count;
+  document.getElementById('bulk-delete-btn').style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+function bulkDelete() {
+  var checks = document.querySelectorAll('.lead-check:checked');
+  var ids = [];
+  checks.forEach(function(cb) { ids.push(parseInt(cb.value)); });
+  if (ids.length === 0) return;
+  if (!confirm('Delete ' + ids.length + ' selected lead' + (ids.length > 1 ? 's' : '') + '?')) return;
+  showSending('Deleting ' + ids.length + ' leads...');
+  fetch('/marykate/api/leads/bulk-delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ids: ids })
+  }).then(function(r) { return r.json(); })
     .then(function(d) {
       hideSending();
       if (d.ok) {
-        showToast(d.count + ' leads imported to "' + d.batch_name + '"', 'success');
-        setTimeout(function() { location.reload(); }, 1000);
+        showToast(d.deleted + ' leads deleted', 'success');
+        setTimeout(function() { location.reload(); }, 800);
       } else {
-        showToast('Upload failed: ' + (d.error || 'Unknown error'));
+        showToast('Delete failed: ' + (d.error || 'Unknown error'));
       }
     });
 }
 
-function uploadCSVDirect(input) {
-  var file = input.files[0];
-  if (!file) return;
-  var fd = new FormData();
-  fd.append('file', file);
-  showSending('Uploading leads...');
-  fetch('/marykate/api/leads/upload', { method: 'POST', body: fd })
-    .then(function(r) { return r.json(); })
-    .then(function(d) {
-      hideSending();
-      if (d.ok) {
-        showToast(d.count + ' leads imported', 'success');
-        setTimeout(function() { location.reload(); }, 1000);
-      } else {
-        showToast('Upload failed: ' + (d.error || 'Unknown error'));
-      }
-    });
-}
-
+/* ── Single lead actions ── */
 function addLead() {
   var data = {
     name: document.getElementById('add-name').value,

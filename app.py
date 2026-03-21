@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-import os, sqlite3, datetime, uuid, json, threading, requests, csv, io, time, base64
+import os, sqlite3, datetime, uuid, json, threading, requests, csv, io, time, base64, re
 from email.mime.text import MIMEText
 
 app = Flask(__name__)
@@ -1407,9 +1407,15 @@ def mk_leads_page():
     con.row_factory = sqlite3.Row
     leads = con.execute("SELECT * FROM mk_leads ORDER BY created_at DESC").fetchall()
     batches = con.execute("SELECT DISTINCT batch_name FROM mk_leads WHERE batch_name != '' ORDER BY batch_name").fetchall()
+    batch_info = con.execute("""
+        SELECT batch_name, batch_date, COUNT(*) as lead_count
+        FROM mk_leads WHERE batch_name != ''
+        GROUP BY batch_name ORDER BY batch_date DESC, batch_name
+    """).fetchall()
     con.close()
     batch_names = [b["batch_name"] for b in batches]
-    return render_template("mk_leads.html", active="leads", leads=leads, batch_names=batch_names)
+    batch_list = [{"name": b["batch_name"], "date": b["batch_date"] or "", "count": b["lead_count"]} for b in batch_info]
+    return render_template("mk_leads.html", active="leads", leads=leads, batch_names=batch_names, batch_list=batch_list)
 
 
 @app.route("/marykate/compose")
@@ -1503,14 +1509,94 @@ def mk_delete_template(tpl_id):
 
 
 # ── Marykate API: Leads ──
+
+def _detect_column(headers, patterns):
+    """Find the best matching column header from a list of regex patterns."""
+    for h in headers:
+        h_clean = h.strip().lower()
+        for p in patterns:
+            if re.fullmatch(p, h_clean):
+                return h
+    return None
+
+def _parse_uploaded_file(file):
+    """Parse CSV, XLSX, or XLS file into a list of dicts."""
+    filename = file.filename.lower()
+    if filename.endswith(('.xlsx', '.xls')):
+        import openpyxl
+        file_bytes = file.read()
+        wb = openpyxl.load_workbook(io.BytesIO(file_bytes), read_only=True, data_only=True)
+        ws = wb.active
+        rows_iter = ws.iter_rows(values_only=True)
+        header_row = next(rows_iter, None)
+        if not header_row:
+            return [], []
+        headers = [str(h).strip() if h is not None else "" for h in header_row]
+        data = []
+        for row in rows_iter:
+            d = {}
+            for i, val in enumerate(row):
+                if i < len(headers):
+                    d[headers[i]] = str(val).strip() if val is not None else ""
+            data.append(d)
+        wb.close()
+        return headers, data
+    else:
+        content = file.read().decode("utf-8-sig")
+        reader = csv.DictReader(io.StringIO(content))
+        headers = reader.fieldnames or []
+        data = list(reader)
+        return headers, data
+
+
 @app.route("/marykate/api/leads/upload", methods=["POST"])
 @mk_auth_required
 def mk_upload_leads():
     file = request.files.get("file")
     if not file:
         return jsonify({"ok": False, "error": "No file"})
-    content = file.read().decode("utf-8-sig")
-    reader = csv.DictReader(io.StringIO(content))
+
+    filename = file.filename.lower()
+    if not filename.endswith(('.csv', '.xlsx', '.xls')):
+        return jsonify({"ok": False, "error": "Unsupported file type. Use CSV, XLSX, or XLS."})
+
+    headers, data = _parse_uploaded_file(file)
+    if not headers:
+        return jsonify({"ok": False, "error": "File is empty or has no headers"})
+
+    # Smart column detection
+    name_patterns = [r'name', r'full\s*name', r'full_name', r'contact\s*name', r'lead\s*name',
+                     r'client', r'customer', r'contact', r'person']
+    first_name_patterns = [r'first\s*name', r'first_name', r'first', r'fname', r'given\s*name']
+    last_name_patterns = [r'last\s*name', r'last_name', r'last', r'lname', r'surname', r'family\s*name']
+    email_patterns = [r'e?\-?mail', r'email\s*address', r'email_address', r'contact\s*email', r'e_mail']
+    phone_patterns = [r'phone', r'phone\s*number', r'phone_number', r'mobile', r'cell',
+                      r'telephone', r'tel', r'contact\s*phone', r'number', r'cell\s*phone',
+                      r'mobile\s*number', r'mobile_number', r'phone_no']
+    tag_patterns = [r'tags?', r'source', r'category', r'type', r'label', r'labels', r'group', r'status']
+
+    name_col = _detect_column(headers, name_patterns)
+    first_col = _detect_column(headers, first_name_patterns)
+    last_col = _detect_column(headers, last_name_patterns)
+    email_col = _detect_column(headers, email_patterns)
+    phone_col = _detect_column(headers, phone_patterns)
+    tag_col = _detect_column(headers, tag_patterns)
+
+    # Build mapping info for response
+    mappings = {}
+    combine_name = False
+    if name_col:
+        mappings["name"] = name_col
+    elif first_col:
+        mappings["name"] = first_col + (" + " + last_col if last_col else "")
+        combine_name = True
+    if email_col:
+        mappings["email"] = email_col
+    if phone_col:
+        mappings["phone"] = phone_col
+    if tag_col:
+        mappings["tags"] = tag_col
+
     now = datetime.datetime.utcnow().isoformat()
     batch_name = (request.form.get("batch_name") or "").strip()
     if not batch_name:
@@ -1518,19 +1604,39 @@ def mk_upload_leads():
     batch_date = datetime.datetime.utcnow().strftime("%Y-%m-%d")
     con = sqlite3.connect(DB_PATH)
     count = 0
-    for row in reader:
-        name = row.get("name") or row.get("Name") or row.get("Full Name") or row.get("full_name") or ""
-        email = row.get("email") or row.get("Email") or row.get("EMAIL") or row.get("email_address") or ""
-        phone = row.get("phone") or row.get("Phone") or row.get("PHONE") or row.get("phone_number") or row.get("Mobile") or ""
-        tags = row.get("tags") or row.get("Tags") or row.get("tag") or ""
-        if not email.strip() and not phone.strip():
+    for row in data:
+        if combine_name:
+            fn = (row.get(first_col, "") or "").strip() if first_col else ""
+            ln = (row.get(last_col, "") or "").strip() if last_col else ""
+            name = (fn + " " + ln).strip()
+        else:
+            name = (row.get(name_col, "") or "").strip() if name_col else ""
+        email = (row.get(email_col, "") or "").strip().lower() if email_col else ""
+        phone = (row.get(phone_col, "") or "").strip() if phone_col else ""
+        tags = (row.get(tag_col, "") or "").strip() if tag_col else ""
+        if not email and not phone:
             continue
         con.execute("INSERT INTO mk_leads (name, email, phone, tags, batch_name, batch_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    (name.strip(), email.strip().lower(), phone.strip(), tags.strip(), batch_name, batch_date, now))
+                    (name, email, phone, tags, batch_name, batch_date, now))
         count += 1
     con.commit()
     con.close()
-    return jsonify({"ok": True, "count": count, "batch_name": batch_name})
+    return jsonify({"ok": True, "count": count, "batch_name": batch_name, "mappings": mappings})
+
+
+@app.route("/marykate/api/leads/bulk-delete", methods=["POST"])
+@mk_auth_required
+def mk_bulk_delete_leads():
+    data = request.get_json() or {}
+    ids = data.get("ids", [])
+    if not ids:
+        return jsonify({"ok": False, "error": "No IDs provided"})
+    con = sqlite3.connect(DB_PATH)
+    placeholders = ",".join("?" * len(ids))
+    con.execute(f"DELETE FROM mk_leads WHERE id IN ({placeholders})", ids)
+    con.commit()
+    con.close()
+    return jsonify({"ok": True, "deleted": len(ids)})
 
 
 @app.route("/marykate/api/leads/add", methods=["POST"])
