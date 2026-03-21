@@ -1,0 +1,148 @@
+{% extends "mk_base.html" %}
+{% block title %}Compose{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Compose</h1>
+    <p class="page-sub">Write and send to your leads.</p>
+  </div>
+</div>
+
+<!-- Channel tabs -->
+<div style="display:flex; gap:8px; margin-bottom:32px;">
+  <a href="/marykate/compose?channel=email" class="btn btn-sm {% if channel == 'email' %}btn-teal{% else %}btn-outline{% endif %}">Email</a>
+  <a href="/marykate/compose?channel=sms" class="btn btn-sm {% if channel == 'sms' %}btn-teal{% else %}btn-outline{% endif %}">SMS</a>
+</div>
+
+<div style="display:grid; grid-template-columns:1fr 320px; gap:24px;">
+  <!-- Compose form -->
+  <div>
+    {% if channel == 'email' %}
+    <div id="gmail-status" style="margin-bottom:20px;">
+      <div style="display:flex; align-items:center; gap:12px; padding:14px 18px; background:var(--dark-card); border:1px solid var(--dark-border); border-radius:12px;">
+        <div id="gmail-dot" style="width:8px; height:8px; border-radius:50%; background:var(--text-muted);"></div>
+        <span id="gmail-label" style="font-size:13px; color:var(--text-dim);">Checking Gmail...</span>
+        <a href="/marykate/gmail/connect" id="gmail-connect-btn" class="btn btn-teal btn-sm" style="margin-left:auto; display:none;">Connect Gmail</a>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Subject</label>
+      <input type="text" class="form-input" id="compose-subject" placeholder="Email subject line">
+    </div>
+    {% endif %}
+
+    <div class="form-group">
+      <label class="form-label">{{ 'Email Body' if channel == 'email' else 'Message' }}</label>
+      <textarea class="form-textarea" id="compose-body" placeholder="Write your message here...&#10;&#10;Use {{name}} to personalize with the lead's name." style="min-height:{{ '240px' if channel == 'email' else '160px' }};"></textarea>
+    </div>
+
+    {% if channel == 'email' %}
+    <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">
+      Tip: You can use basic HTML for formatting. Use <code style="color:var(--teal);">{% raw %}{{name}}{% endraw %}</code> to insert the lead's name.
+    </p>
+    {% else %}
+    <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">
+      Use <code style="color:var(--teal);">{% raw %}{{name}}{% endraw %}</code> to insert the lead's name. Standard SMS rates apply.
+    </p>
+    {% endif %}
+
+    <button class="btn btn-teal" id="send-btn" onclick="sendCampaign()">
+      Send {{ 'Emails' if channel == 'email' else 'Texts' }}
+    </button>
+  </div>
+
+  <!-- Lead selector -->
+  <div>
+    <label class="form-label">Recipients</label>
+    <div class="select-actions">
+      <button onclick="toggleAll(true)">Select All</button>
+      <button onclick="toggleAll(false)">Deselect All</button>
+    </div>
+    <div class="lead-select-list">
+      {% for l in leads %}
+      {% if (channel == 'email' and l[2]) or (channel == 'sms' and l[3]) %}
+      <label class="lead-select-item">
+        <input type="checkbox" name="lead" value="{{ l[0] }}">
+        <span class="lead-name">{{ l[1] or 'No name' }}</span>
+        <span class="lead-detail">{{ l[2] if channel == 'email' else l[3] }}</span>
+      </label>
+      {% endif %}
+      {% endfor %}
+    </div>
+    {% if not leads %}
+    <p style="font-size:13px; color:var(--text-muted); text-align:center; padding:32px 0;">
+      No leads yet. <a href="/marykate/leads" style="color:var(--teal);">Add some first.</a>
+    </p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var channel = '{{ channel }}';
+
+// Check Gmail status
+{% if channel == 'email' %}
+fetch('/marykate/api/gmail/status')
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    var dot = document.getElementById('gmail-dot');
+    var label = document.getElementById('gmail-label');
+    var btn = document.getElementById('gmail-connect-btn');
+    if (d.connected) {
+      dot.style.background = 'var(--green)';
+      label.textContent = 'Connected as ' + d.email;
+      label.style.color = 'var(--text)';
+    } else {
+      dot.style.background = 'var(--red)';
+      label.textContent = 'Gmail not connected';
+      btn.style.display = 'inline-flex';
+    }
+  });
+{% endif %}
+
+function toggleAll(checked) {
+  document.querySelectorAll('input[name="lead"]').forEach(function(cb) {
+    cb.checked = checked;
+  });
+}
+
+function sendCampaign() {
+  var ids = [];
+  document.querySelectorAll('input[name="lead"]:checked').forEach(function(cb) {
+    ids.push(parseInt(cb.value));
+  });
+  if (ids.length === 0) { showToast('Select at least one recipient'); return; }
+
+  var body = document.getElementById('compose-body').value.trim();
+  if (!body) { showToast('Write a message first'); return; }
+
+  var payload = { body: body, lead_ids: ids };
+  var endpoint = '/marykate/api/send/sms';
+
+  if (channel === 'email') {
+    var subject = document.getElementById('compose-subject').value.trim();
+    if (!subject) { showToast('Add a subject line'); return; }
+    payload.subject = subject;
+    endpoint = '/marykate/api/send/email';
+  }
+
+  showSending('Sending to ' + ids.length + ' recipient' + (ids.length > 1 ? 's' : '') + '...');
+
+  fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(function(r) { return r.json(); })
+    .then(function(d) {
+      hideSending();
+      if (d.ok) {
+        showToast(d.sent + ' sent' + (d.errors ? ', ' + d.errors + ' failed' : ''), 'success');
+      } else {
+        showToast(d.error || 'Send failed');
+      }
+    });
+}
+</script>
+{% endblock %}

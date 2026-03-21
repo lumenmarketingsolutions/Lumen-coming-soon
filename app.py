@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
-import os, sqlite3, datetime, uuid, json, threading, requests
+import os, sqlite3, datetime, uuid, json, threading, requests, csv, io, time, base64
+from email.mime.text import MIMEText
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "lumen-wl-key-2026")
@@ -8,6 +9,15 @@ ADMIN_PIN = "112501"
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAIL = "kendall@lumenmarketing.co"
 OWNER_IPS = {"209.127.238.130"}
+
+# ── Marykate Agent Config ──
+MK_PIN = os.environ.get("MK_PIN", "112501")
+GMAIL_CLIENT_ID = os.environ.get("GMAIL_CLIENT_ID", "")
+GMAIL_CLIENT_SECRET = os.environ.get("GMAIL_CLIENT_SECRET", "")
+GMAIL_REDIRECT_URI = os.environ.get("GMAIL_REDIRECT_URI", "https://lumenmarketing.co/marykate/gmail/callback")
+TWILIO_SID = os.environ.get("TWILIO_SID", "")
+TWILIO_AUTH = os.environ.get("TWILIO_AUTH", "")
+TWILIO_PHONE = os.environ.get("TWILIO_PHONE", "")
 
 
 def send_email(to, subject, html_body):
@@ -247,6 +257,51 @@ def init_db():
         )
     """)
     con.commit()
+
+    # Marykate agent tables
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS mk_leads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT DEFAULT '',
+            email TEXT DEFAULT '',
+            phone TEXT DEFAULT '',
+            tags TEXT DEFAULT '',
+            created_at TEXT NOT NULL
+        )
+    """)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS mk_campaigns (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            channel TEXT NOT NULL,
+            subject TEXT DEFAULT '',
+            body TEXT NOT NULL,
+            status TEXT DEFAULT 'draft',
+            sent_count INTEGER DEFAULT 0,
+            created_at TEXT NOT NULL
+        )
+    """)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS mk_send_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            campaign_id INTEGER,
+            lead_id INTEGER,
+            channel TEXT NOT NULL,
+            recipient TEXT NOT NULL,
+            status TEXT DEFAULT 'sent',
+            error TEXT DEFAULT '',
+            sent_at TEXT NOT NULL
+        )
+    """)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS mk_gmail_tokens (
+            id INTEGER PRIMARY KEY,
+            access_token TEXT,
+            refresh_token TEXT,
+            expires_at TEXT,
+            email TEXT DEFAULT ''
+        )
+    """)
 
     con.close()
 
@@ -1268,6 +1323,331 @@ def reset_stats():
     con.commit()
     con.close()
     return jsonify({"ok": True})
+
+
+# ════════════════════════════════════════════════════════════
+#   MARYKATE AGENT
+# ════════════════════════════════════════════════════════════
+
+def mk_auth_required(f):
+    from functools import wraps
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get("mk_auth"):
+            return redirect("/marykate/login")
+        return f(*args, **kwargs)
+    return decorated
+
+
+@app.route("/marykate/login", methods=["GET", "POST"])
+def mk_login():
+    if request.method == "POST":
+        pin = request.form.get("pin", "")
+        if pin == MK_PIN:
+            session["mk_auth"] = True
+            return redirect("/marykate")
+        return render_template("mk_login.html", error="Wrong pin")
+    return render_template("mk_login.html")
+
+
+@app.route("/marykate/logout")
+def mk_logout():
+    session.pop("mk_auth", None)
+    return redirect("/marykate/login")
+
+
+@app.route("/marykate")
+@mk_auth_required
+def mk_dashboard():
+    con = sqlite3.connect(DB_PATH)
+    lead_count = con.execute("SELECT COUNT(*) FROM mk_leads").fetchone()[0]
+    campaign_count = con.execute("SELECT COUNT(*) FROM mk_campaigns").fetchone()[0]
+    sent_count = con.execute("SELECT COUNT(*) FROM mk_send_log").fetchone()[0]
+    recent = con.execute("SELECT * FROM mk_send_log ORDER BY sent_at DESC LIMIT 10").fetchall()
+    con.close()
+    return render_template("mk_dashboard.html", active="dashboard",
+        lead_count=lead_count, campaign_count=campaign_count,
+        sent_count=sent_count, recent=recent)
+
+
+@app.route("/marykate/leads")
+@mk_auth_required
+def mk_leads_page():
+    con = sqlite3.connect(DB_PATH)
+    leads = con.execute("SELECT * FROM mk_leads ORDER BY created_at DESC").fetchall()
+    con.close()
+    return render_template("mk_leads.html", active="leads", leads=leads)
+
+
+@app.route("/marykate/compose")
+@mk_auth_required
+def mk_compose_page():
+    channel = request.args.get("channel", "email")
+    con = sqlite3.connect(DB_PATH)
+    leads = con.execute("SELECT * FROM mk_leads ORDER BY name ASC").fetchall()
+    con.close()
+    return render_template("mk_compose.html", active="compose", leads=leads, channel=channel)
+
+
+@app.route("/marykate/campaigns")
+@mk_auth_required
+def mk_campaigns_page():
+    con = sqlite3.connect(DB_PATH)
+    campaigns = con.execute("SELECT * FROM mk_campaigns ORDER BY created_at DESC").fetchall()
+    con.close()
+    return render_template("mk_campaigns.html", active="campaigns", campaigns=campaigns)
+
+
+@app.route("/marykate/whatsapp")
+@mk_auth_required
+def mk_whatsapp_page():
+    return render_template("mk_whatsapp.html", active="whatsapp")
+
+
+# ── Marykate API: Leads ──
+@app.route("/marykate/api/leads/upload", methods=["POST"])
+@mk_auth_required
+def mk_upload_leads():
+    file = request.files.get("file")
+    if not file:
+        return jsonify({"ok": False, "error": "No file"})
+    content = file.read().decode("utf-8-sig")
+    reader = csv.DictReader(io.StringIO(content))
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    count = 0
+    for row in reader:
+        name = row.get("name") or row.get("Name") or row.get("Full Name") or row.get("full_name") or ""
+        email = row.get("email") or row.get("Email") or row.get("EMAIL") or row.get("email_address") or ""
+        phone = row.get("phone") or row.get("Phone") or row.get("PHONE") or row.get("phone_number") or row.get("Mobile") or ""
+        tags = row.get("tags") or row.get("Tags") or row.get("tag") or ""
+        if not email.strip() and not phone.strip():
+            continue
+        con.execute("INSERT INTO mk_leads (name, email, phone, tags, created_at) VALUES (?, ?, ?, ?, ?)",
+                    (name.strip(), email.strip().lower(), phone.strip(), tags.strip(), now))
+        count += 1
+    con.commit()
+    con.close()
+    return jsonify({"ok": True, "count": count})
+
+
+@app.route("/marykate/api/leads/add", methods=["POST"])
+@mk_auth_required
+def mk_add_lead():
+    data = request.get_json() or {}
+    name = data.get("name", "").strip()
+    email = data.get("email", "").strip().lower()
+    phone = data.get("phone", "").strip()
+    tags = data.get("tags", "").strip()
+    if not email and not phone:
+        return jsonify({"ok": False, "error": "Email or phone required"})
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    con.execute("INSERT INTO mk_leads (name, email, phone, tags, created_at) VALUES (?, ?, ?, ?, ?)",
+                (name, email, phone, tags, now))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+
+@app.route("/marykate/api/leads/<int:lead_id>", methods=["DELETE"])
+@mk_auth_required
+def mk_delete_lead(lead_id):
+    con = sqlite3.connect(DB_PATH)
+    con.execute("DELETE FROM mk_leads WHERE id = ?", (lead_id,))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+
+# ── Marykate Gmail OAuth ──
+@app.route("/marykate/gmail/connect")
+@mk_auth_required
+def mk_gmail_connect():
+    if not GMAIL_CLIENT_ID:
+        return "Gmail not configured. Set GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET.", 400
+    from google_auth_oauthlib.flow import Flow
+    flow = Flow.from_client_config(
+        {"web": {
+            "client_id": GMAIL_CLIENT_ID,
+            "client_secret": GMAIL_CLIENT_SECRET,
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "redirect_uris": [GMAIL_REDIRECT_URI],
+        }},
+        scopes=["https://www.googleapis.com/auth/gmail.send",
+                "https://www.googleapis.com/auth/userinfo.email"],
+        redirect_uri=GMAIL_REDIRECT_URI,
+    )
+    auth_url, _ = flow.authorization_url(prompt="consent", access_type="offline")
+    return redirect(auth_url)
+
+
+@app.route("/marykate/gmail/callback")
+@mk_auth_required
+def mk_gmail_callback():
+    code = request.args.get("code")
+    if not code:
+        return "No code", 400
+    from google_auth_oauthlib.flow import Flow
+    flow = Flow.from_client_config(
+        {"web": {
+            "client_id": GMAIL_CLIENT_ID,
+            "client_secret": GMAIL_CLIENT_SECRET,
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "redirect_uris": [GMAIL_REDIRECT_URI],
+        }},
+        scopes=["https://www.googleapis.com/auth/gmail.send",
+                "https://www.googleapis.com/auth/userinfo.email"],
+        redirect_uri=GMAIL_REDIRECT_URI,
+    )
+    flow.fetch_token(code=code)
+    creds = flow.credentials
+    from googleapiclient.discovery import build
+    service = build("oauth2", "v2", credentials=creds)
+    user_info = service.userinfo().get().execute()
+    gmail_email = user_info.get("email", "")
+    con = sqlite3.connect(DB_PATH)
+    con.execute("DELETE FROM mk_gmail_tokens")
+    con.execute(
+        "INSERT INTO mk_gmail_tokens (id, access_token, refresh_token, expires_at, email) VALUES (1, ?, ?, ?, ?)",
+        (creds.token, creds.refresh_token, creds.expiry.isoformat() if creds.expiry else "", gmail_email)
+    )
+    con.commit()
+    con.close()
+    return redirect("/marykate/compose?channel=email")
+
+
+def mk_get_gmail_creds():
+    con = sqlite3.connect(DB_PATH)
+    row = con.execute("SELECT access_token, refresh_token, expires_at, email FROM mk_gmail_tokens WHERE id = 1").fetchone()
+    con.close()
+    if not row or not row[1]:
+        return None, ""
+    from google.oauth2.credentials import Credentials
+    creds = Credentials(
+        token=row[0], refresh_token=row[1],
+        token_uri="https://oauth2.googleapis.com/token",
+        client_id=GMAIL_CLIENT_ID, client_secret=GMAIL_CLIENT_SECRET,
+    )
+    if creds.expired:
+        from google.auth.transport.requests import Request
+        creds.refresh(Request())
+        con = sqlite3.connect(DB_PATH)
+        con.execute("UPDATE mk_gmail_tokens SET access_token = ?, expires_at = ? WHERE id = 1",
+                     (creds.token, creds.expiry.isoformat() if creds.expiry else ""))
+        con.commit()
+        con.close()
+    return creds, row[3]
+
+
+@app.route("/marykate/api/gmail/status")
+@mk_auth_required
+def mk_gmail_status():
+    con = sqlite3.connect(DB_PATH)
+    row = con.execute("SELECT email FROM mk_gmail_tokens WHERE id = 1").fetchone()
+    con.close()
+    if row and row[0]:
+        return jsonify({"connected": True, "email": row[0]})
+    return jsonify({"connected": False})
+
+
+# ── Marykate API: Send Email ──
+@app.route("/marykate/api/send/email", methods=["POST"])
+@mk_auth_required
+def mk_send_email():
+    data = request.get_json() or {}
+    subject = data.get("subject", "")
+    body = data.get("body", "")
+    lead_ids = data.get("lead_ids", [])
+    if not subject or not body or not lead_ids:
+        return jsonify({"ok": False, "error": "Subject, body, and recipients required"})
+    creds, sender_email = mk_get_gmail_creds()
+    if not creds:
+        return jsonify({"ok": False, "error": "Gmail not connected"})
+    from googleapiclient.discovery import build
+    service = build("gmail", "v1", credentials=creds)
+    con = sqlite3.connect(DB_PATH)
+    now = datetime.datetime.utcnow().isoformat()
+    cur = con.execute(
+        "INSERT INTO mk_campaigns (name, channel, subject, body, status, created_at) VALUES (?, 'email', ?, ?, 'sending', ?)",
+        (subject[:60], subject, body, now)
+    )
+    campaign_id = cur.lastrowid
+    sent = 0
+    errors = 0
+    for lid in lead_ids:
+        lead = con.execute("SELECT id, name, email FROM mk_leads WHERE id = ?", (lid,)).fetchone()
+        if not lead or not lead[2]:
+            continue
+        personalized_body = body.replace("{{name}}", lead[1] or "there")
+        personalized_subject = subject.replace("{{name}}", lead[1] or "there")
+        msg = MIMEText(personalized_body, "html")
+        msg["to"] = lead[2]
+        msg["from"] = sender_email
+        msg["subject"] = personalized_subject
+        try:
+            raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+            service.users().messages().send(userId="me", body={"raw": raw}).execute()
+            con.execute(
+                "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, sent_at) VALUES (?, ?, 'email', ?, 'sent', ?)",
+                (campaign_id, lead[0], lead[2], now))
+            sent += 1
+        except Exception as e:
+            con.execute(
+                "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, error, sent_at) VALUES (?, ?, 'email', ?, 'failed', ?, ?)",
+                (campaign_id, lead[0], lead[2], str(e)[:200], now))
+            errors += 1
+        time.sleep(1)
+    con.execute("UPDATE mk_campaigns SET status = 'sent', sent_count = ? WHERE id = ?", (sent, campaign_id))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True, "sent": sent, "errors": errors})
+
+
+# ── Marykate API: Send SMS ──
+@app.route("/marykate/api/send/sms", methods=["POST"])
+@mk_auth_required
+def mk_send_sms():
+    data = request.get_json() or {}
+    body = data.get("body", "")
+    lead_ids = data.get("lead_ids", [])
+    if not body or not lead_ids:
+        return jsonify({"ok": False, "error": "Message and recipients required"})
+    if not TWILIO_SID or not TWILIO_AUTH or not TWILIO_PHONE:
+        return jsonify({"ok": False, "error": "Twilio not configured"})
+    from twilio.rest import Client
+    client = Client(TWILIO_SID, TWILIO_AUTH)
+    con = sqlite3.connect(DB_PATH)
+    now = datetime.datetime.utcnow().isoformat()
+    cur = con.execute(
+        "INSERT INTO mk_campaigns (name, channel, body, status, created_at) VALUES (?, 'sms', ?, 'sending', ?)",
+        (body[:60], body, now))
+    campaign_id = cur.lastrowid
+    sent = 0
+    errors = 0
+    for lid in lead_ids:
+        lead = con.execute("SELECT id, name, phone FROM mk_leads WHERE id = ?", (lid,)).fetchone()
+        if not lead or not lead[2]:
+            continue
+        personalized = body.replace("{{name}}", lead[1] or "there")
+        try:
+            client.messages.create(body=personalized, from_=TWILIO_PHONE, to=lead[2])
+            con.execute(
+                "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, sent_at) VALUES (?, ?, 'sms', ?, 'sent', ?)",
+                (campaign_id, lead[0], lead[2], now))
+            sent += 1
+        except Exception as e:
+            con.execute(
+                "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, error, sent_at) VALUES (?, ?, 'sms', ?, 'failed', ?, ?)",
+                (campaign_id, lead[0], lead[2], str(e)[:200], now))
+            errors += 1
+        time.sleep(0.5)
+    con.execute("UPDATE mk_campaigns SET status = 'sent', sent_count = ? WHERE id = ?", (sent, campaign_id))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True, "sent": sent, "errors": errors})
 
 
 if __name__ == "__main__":

@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Marykate{% endblock %} — Agent</title>
+  <meta property="og:title" content="Marykate, your agent">
+  <meta property="og:description" content="Built by Lumen">
+  <meta property="og:image" content="/static/og-marykate.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --teal: #128fc4;
+      --teal-light: #1aabe8;
+      --teal-glow: rgba(18,143,196,0.25);
+      --purple: #802fde;
+      --dark: #080809;
+      --dark-card: #111114;
+      --dark-border: #1c1c24;
+      --dark-hover: #161619;
+      --text: #e8e8f0;
+      --text-dim: #6b6b80;
+      --text-muted: #44445a;
+      --green: #34d399;
+      --red: #f87171;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 240px; min-height: 100vh;
+      background: var(--dark-card);
+      border-right: 1px solid var(--dark-border);
+      padding: 24px 16px;
+      display: flex; flex-direction: column;
+      position: fixed; left: 0; top: 0; bottom: 0;
+      z-index: 50;
+    }
+    .sidebar-logo { height: 18px; opacity: 0.8; margin-bottom: 8px; }
+    .sidebar-greeting {
+      font-size: 11px; color: var(--text-muted); margin-bottom: 32px;
+      letter-spacing: 0.5px;
+    }
+    .sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .sidebar-nav a {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 14px; border-radius: 10px;
+      font-size: 13px; font-weight: 500;
+      color: var(--text-dim); text-decoration: none;
+      transition: all 0.2s;
+    }
+    .sidebar-nav a:hover { background: var(--dark-hover); color: var(--text); }
+    .sidebar-nav a.active { background: rgba(18,143,196,0.12); color: var(--teal); }
+    .sidebar-nav a svg { width: 18px; height: 18px; flex-shrink: 0; }
+    .sidebar-nav .coming-soon {
+      font-size: 9px; background: var(--purple); color: white;
+      padding: 2px 6px; border-radius: 4px; font-weight: 600;
+      letter-spacing: 0.5px; margin-left: auto;
+    }
+    .sidebar-bottom {
+      border-top: 1px solid var(--dark-border);
+      padding-top: 16px; margin-top: 16px;
+    }
+    .sidebar-bottom a {
+      font-size: 12px; color: var(--text-muted); text-decoration: none;
+      transition: color 0.2s;
+    }
+    .sidebar-bottom a:hover { color: var(--text); }
+
+    /* ── Main ── */
+    .main { margin-left: 240px; flex: 1; padding: 32px 40px; }
+    .page-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 32px;
+    }
+    .page-title { font-size: 22px; font-weight: 700; }
+    .page-sub { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+
+    /* ── Cards ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .stat-card {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .stat-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    .stat-value { font-size: 28px; font-weight: 800; letter-spacing: -1px; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 10px 20px;
+      font-size: 13px; font-weight: 600;
+      border: none; border-radius: 10px;
+      cursor: pointer; font-family: inherit;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-teal { background: var(--teal); color: white; }
+    .btn-teal:hover { background: var(--teal-light); transform: translateY(-1px); }
+    .btn-outline { background: transparent; color: var(--text-dim); border: 1px solid var(--dark-border); }
+    .btn-outline:hover { border-color: var(--text-muted); color: var(--text); }
+    .btn-sm { padding: 7px 14px; font-size: 12px; border-radius: 8px; }
+    .btn-danger { background: rgba(248,113,113,0.1); color: var(--red); border: 1px solid rgba(248,113,113,0.2); }
+    .btn-danger:hover { background: rgba(248,113,113,0.2); }
+
+    /* ── Table ── */
+    .table-wrap {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left; padding: 14px 20px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--dark-border);
+    }
+    td {
+      padding: 14px 20px;
+      font-size: 13px; color: var(--text-dim);
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+    }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: var(--dark-hover); }
+    .badge {
+      display: inline-block; padding: 3px 10px;
+      border-radius: 6px; font-size: 11px; font-weight: 600;
+    }
+    .badge-sent { background: rgba(52,211,153,0.12); color: var(--green); }
+    .badge-failed { background: rgba(248,113,113,0.12); color: var(--red); }
+    .badge-draft { background: rgba(107,107,128,0.12); color: var(--text-dim); }
+
+    /* ── Forms ── */
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      display: block; font-size: 11px; font-weight: 600;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 8px;
+    }
+    .form-input, .form-textarea, .form-select {
+      width: 100%; padding: 12px 16px;
+      background: var(--dark);
+      border: 1px solid var(--dark-border);
+      border-radius: 10px;
+      color: var(--text); font-size: 14px;
+      font-family: inherit; outline: none;
+      transition: border-color 0.3s;
+    }
+    .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--teal); }
+    .form-input::placeholder, .form-textarea::placeholder { color: var(--text-muted); }
+    .form-textarea { resize: vertical; min-height: 160px; line-height: 1.7; }
+    .form-select { cursor: pointer; -webkit-appearance: none; }
+
+    /* ── Upload ── */
+    .upload-zone {
+      border: 2px dashed var(--dark-border);
+      border-radius: 14px; padding: 40px;
+      text-align: center; cursor: pointer;
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .upload-zone:hover { border-color: var(--teal); background: rgba(18,143,196,0.04); }
+    .upload-zone p { font-size: 14px; color: var(--text-dim); margin-bottom: 8px; }
+    .upload-zone span { font-size: 12px; color: var(--text-muted); }
+
+    /* ── Checkbox list ── */
+    .lead-select-list {
+      max-height: 300px; overflow-y: auto;
+      background: var(--dark);
+      border: 1px solid var(--dark-border);
+      border-radius: 10px;
+    }
+    .lead-select-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.02);
+      font-size: 13px; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .lead-select-item:hover { background: var(--dark-hover); }
+    .lead-select-item:last-child { border-bottom: none; }
+    .lead-select-item input[type="checkbox"] { accent-color: var(--teal); }
+    .lead-select-item .lead-name { color: var(--text); font-weight: 500; }
+    .lead-select-item .lead-detail { color: var(--text-muted); font-size: 12px; margin-left: auto; }
+
+    .select-actions {
+      display: flex; gap: 12px; margin-bottom: 8px;
+    }
+    .select-actions button {
+      background: none; border: none; color: var(--teal);
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      font-family: inherit;
+    }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px;
+      background: var(--dark-card); border: 1px solid var(--dark-border);
+      border-radius: 12px; padding: 16px 24px;
+      font-size: 14px; z-index: 999;
+      transform: translateY(100px); opacity: 0;
+      transition: all 0.3s;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast-success { border-color: rgba(52,211,153,0.3); }
+
+    /* ── Mobile ── */
+    .mobile-header {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0;
+      height: 56px; background: var(--dark-card);
+      border-bottom: 1px solid var(--dark-border);
+      padding: 0 20px; align-items: center; justify-content: space-between;
+      z-index: 60;
+    }
+    .mobile-header img { height: 16px; opacity: 0.8; }
+    .mobile-menu-btn {
+      background: none; border: none; color: var(--text); cursor: pointer; padding: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); transition: transform 0.3s; width: 280px; }
+      .sidebar.open { transform: translateX(0); }
+      .mobile-header { display: flex; }
+      .main { margin-left: 0; padding: 72px 20px 32px; }
+      .stat-grid { grid-template-columns: 1fr 1fr; }
+      .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+    }
+
+    /* ── Sending overlay ── */
+    .sending-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(8,8,9,0.9);
+      align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px;
+    }
+    .sending-overlay.show { display: flex; }
+    .sending-spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--dark-border);
+      border-top-color: var(--teal);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .sending-text { font-size: 15px; color: var(--text-dim); }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile header -->
+  <div class="mobile-header">
+    <img src="/static/logo-white.png" alt="Lumen">
+    <button class="mobile-menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+      <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </div>
+
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <img src="/static/logo-white.png" alt="Lumen" class="sidebar-logo">
+      <p class="sidebar-greeting">Marykate's agent</p>
+      <nav class="sidebar-nav">
+        <a href="/marykate" class="{% if active == 'dashboard' %}active{% endif %}">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25a2.25 2.25 0 01-2.25-2.25v-2.25z"/></svg>
+          Dashboard
+        </a>
+        <a href="/marykate/leads" class="{% if active == 'leads' %}active{% endif %}">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+          Leads
+        </a>
+        <a href="/marykate/compose?channel=email" class="{% if active == 'compose' %}active{% endif %}">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+          Compose
+        </a>
+        <a href="/marykate/campaigns" class="{% if active == 'campaigns' %}active{% endif %}">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z"/></svg>
+          Campaigns
+        </a>
+        <a href="/marykate/whatsapp" class="{% if active == 'whatsapp' %}active{% endif %}">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+          WhatsApp
+          <span class="coming-soon">SOON</span>
+        </a>
+      </nav>
+      <div class="sidebar-bottom">
+        <a href="/marykate/logout">Log out</a>
+      </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Sending overlay -->
+  <div class="sending-overlay" id="sending-overlay">
+    <div class="sending-spinner"></div>
+    <p class="sending-text" id="sending-text">Sending...</p>
+  </div>
+
+  <script>
+    function showToast(msg, type) {
+      var t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show' + (type === 'success' ? ' toast-success' : '');
+      setTimeout(function() { t.className = 'toast'; }, 3000);
+    }
+    function showSending(msg) {
+      document.getElementById('sending-text').textContent = msg || 'Sending...';
+      document.getElementById('sending-overlay').classList.add('show');
+    }
+    function hideSending() {
+      document.getElementById('sending-overlay').classList.remove('show');
+    }
+    // Close mobile sidebar on nav click
+    document.querySelectorAll('.sidebar-nav a').forEach(function(a) {
+      a.addEventListener('click', function() {
+        document.querySelector('.sidebar').classList.remove('open');
+      });
+    });
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

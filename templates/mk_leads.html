@@ -1,0 +1,132 @@
+{% extends "mk_base.html" %}
+{% block title %}Leads{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Leads</h1>
+    <p class="page-sub">{{ leads|length }} total leads</p>
+  </div>
+  <div style="display:flex; gap:10px;">
+    <button class="btn btn-outline btn-sm" onclick="document.getElementById('add-modal').style.display='flex'">+ Add Lead</button>
+    <label class="btn btn-teal btn-sm" style="cursor:pointer;">
+      Upload CSV
+      <input type="file" accept=".csv" id="csv-upload" style="display:none;" onchange="uploadCSV(this)">
+    </label>
+  </div>
+</div>
+
+<!-- Upload zone (shown when no leads) -->
+{% if not leads %}
+<label class="upload-zone" style="cursor:pointer; display:block; margin-bottom:32px;">
+  <p>Drop a CSV file here or click to upload</p>
+  <span>Columns: name, email, phone (at minimum)</span>
+  <input type="file" accept=".csv" style="display:none;" onchange="uploadCSV(this)">
+</label>
+{% endif %}
+
+{% if leads %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Tags</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in leads %}
+      <tr>
+        <td style="color:var(--text); font-weight:500;">{{ l[1] or '—' }}</td>
+        <td>{{ l[2] or '—' }}</td>
+        <td>{{ l[3] or '—' }}</td>
+        <td style="font-size:12px;">{{ l[4] or '' }}</td>
+        <td style="text-align:right;">
+          <button class="btn btn-danger btn-sm" onclick="deleteLead({{ l[0] }}, this)">Remove</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+<!-- Add Lead Modal -->
+<div id="add-modal" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(8,8,9,0.85); align-items:center; justify-content:center;">
+  <div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:16px; padding:32px; width:100%; max-width:420px;">
+    <h3 style="font-size:16px; font-weight:700; margin-bottom:24px;">Add a Lead</h3>
+    <div class="form-group">
+      <label class="form-label">Name</label>
+      <input type="text" class="form-input" id="add-name" placeholder="Full name">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input type="email" class="form-input" id="add-email" placeholder="email@example.com">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Phone</label>
+      <input type="text" class="form-input" id="add-phone" placeholder="+1 555 123 4567">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tags</label>
+      <input type="text" class="form-input" id="add-tags" placeholder="e.g. hot, facebook, referral">
+    </div>
+    <div style="display:flex; gap:12px; justify-content:flex-end;">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('add-modal').style.display='none'">Cancel</button>
+      <button class="btn btn-teal btn-sm" onclick="addLead()">Add Lead</button>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+function uploadCSV(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var fd = new FormData();
+  fd.append('file', file);
+  showSending('Uploading leads...');
+  fetch('/marykate/api/leads/upload', { method: 'POST', body: fd })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      hideSending();
+      if (d.ok) {
+        showToast(d.count + ' leads imported', 'success');
+        setTimeout(function() { location.reload(); }, 1000);
+      } else {
+        showToast('Upload failed: ' + (d.error || 'Unknown error'));
+      }
+    });
+}
+
+function addLead() {
+  var data = {
+    name: document.getElementById('add-name').value,
+    email: document.getElementById('add-email').value,
+    phone: document.getElementById('add-phone').value,
+    tags: document.getElementById('add-tags').value,
+  };
+  fetch('/marykate/api/leads/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  }).then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) { location.reload(); }
+      else { showToast(d.error || 'Failed'); }
+    });
+}
+
+function deleteLead(id, btn) {
+  if (!confirm('Remove this lead?')) return;
+  fetch('/marykate/api/leads/' + id, { method: 'DELETE' })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) btn.closest('tr').remove();
+    });
+}
+</script>
+{% endblock %}

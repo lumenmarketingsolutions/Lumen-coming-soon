@@ -1,0 +1,43 @@
+{% extends "mk_base.html" %}
+{% block title %}Campaigns{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Campaigns</h1>
+    <p class="page-sub">Everything you have sent.</p>
+  </div>
+  <a href="/marykate/compose?channel=email" class="btn btn-teal btn-sm">New Campaign</a>
+</div>
+
+{% if campaigns %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Channel</th>
+        <th>Sent</th>
+        <th>Status</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for c in campaigns %}
+      <tr>
+        <td style="color:var(--text); font-weight:500;">{{ c[1] }}</td>
+        <td style="text-transform:uppercase; font-size:11px; font-weight:600; letter-spacing:1px;">{{ c[2] }}</td>
+        <td>{{ c[6] }}</td>
+        <td><span class="badge badge-{{ c[5] }}">{{ c[5] }}</span></td>
+        <td style="font-size:12px;">{{ c[7][:16] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div style="text-align:center; padding:60px 20px; color:var(--text-muted);">
+  <p style="font-size:15px; margin-bottom:8px;">No campaigns yet.</p>
+  <p style="font-size:13px;"><a href="/marykate/compose?channel=email" style="color:var(--teal);">Send your first one.</a></p>
+</div>
+{% endif %}
+{% endblock %}

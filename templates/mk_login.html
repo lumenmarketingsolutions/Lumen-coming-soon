@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marykate — Login</title>
+  <meta property="og:title" content="Marykate, your agent">
+  <meta property="og:description" content="Built by Lumen">
+  <meta property="og:image" content="/static/og-marykate.png">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --teal: #128fc4;
+      --purple: #802fde;
+      --dark: #080809;
+      --dark-card: #111114;
+      --dark-border: #1c1c24;
+      --text: #e8e8f0;
+      --text-dim: #6b6b80;
+      --text-muted: #44445a;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      -webkit-font-smoothing: antialiased;
+    }
+    .login-card {
+      width: 100%; max-width: 380px;
+      padding: 48px 36px;
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 20px;
+      text-align: center;
+    }
+    .login-logo { height: 22px; margin-bottom: 32px; opacity: 0.9; }
+    .login-greeting {
+      font-size: 22px; font-weight: 700; margin-bottom: 6px;
+    }
+    .login-sub {
+      font-size: 13px; color: var(--text-dim); margin-bottom: 32px;
+    }
+    .login-input {
+      width: 100%; padding: 14px 18px;
+      background: var(--dark);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      color: var(--text); font-size: 16px;
+      font-family: inherit; outline: none;
+      text-align: center; letter-spacing: 8px;
+      margin-bottom: 16px;
+      transition: border-color 0.3s;
+    }
+    .login-input:focus { border-color: var(--teal); }
+    .login-input::placeholder { letter-spacing: 2px; color: var(--text-muted); }
+    .login-btn {
+      width: 100%; padding: 14px;
+      background: var(--teal);
+      color: white; font-weight: 600; font-size: 14px;
+      border: none; border-radius: 12px;
+      cursor: pointer; font-family: inherit;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .login-btn:hover { background: #0fa8e6; transform: translateY(-1px); }
+    .login-error {
+      color: #ff6b6b; font-size: 13px; margin-bottom: 16px;
+    }
+    .login-footer {
+      margin-top: 32px; font-size: 11px; color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <img src="/static/logo-white.png" alt="Lumen" class="login-logo">
+    <h1 class="login-greeting">Hey, Marykate.</h1>
+    <p class="login-sub">Enter your pin to get in.</p>
+    {% if error %}
+    <p class="login-error">{{ error }}</p>
+    {% endif %}
+    <form method="POST">
+      <input type="password" name="pin" class="login-input" placeholder="••••••" autofocus>
+      <button type="submit" class="login-btn">Enter</button>
+    </form>
+    <p class="login-footer">Built by Lumen</p>
+  </div>
+</body>
+</html>

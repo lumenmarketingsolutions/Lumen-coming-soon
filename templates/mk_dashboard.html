@@ -1,0 +1,56 @@
+{% extends "mk_base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-sub">Your outreach at a glance.</p>
+  </div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <p class="stat-label">Leads</p>
+    <p class="stat-value">{{ lead_count }}</p>
+  </div>
+  <div class="stat-card">
+    <p class="stat-label">Campaigns</p>
+    <p class="stat-value">{{ campaign_count }}</p>
+  </div>
+  <div class="stat-card">
+    <p class="stat-label">Messages Sent</p>
+    <p class="stat-value">{{ sent_count }}</p>
+  </div>
+</div>
+
+{% if recent %}
+<h3 style="font-size:14px; font-weight:600; margin-bottom:16px; color:var(--text-dim);">Recent Activity</h3>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Channel</th>
+        <th>Recipient</th>
+        <th>Status</th>
+        <th>Sent</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in recent %}
+      <tr>
+        <td style="text-transform:uppercase; font-size:11px; font-weight:600; letter-spacing:1px;">{{ r[3] }}</td>
+        <td>{{ r[4] }}</td>
+        <td><span class="badge badge-{{ r[5] }}">{{ r[5] }}</span></td>
+        <td style="font-size:12px;">{{ r[7][:16] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div style="text-align:center; padding:60px 20px; color:var(--text-muted);">
+  <p style="font-size:15px; margin-bottom:8px;">No activity yet.</p>
+  <p style="font-size:13px;">Upload some leads and send your first campaign.</p>
+</div>
+{% endif %}
+{% endblock %}
