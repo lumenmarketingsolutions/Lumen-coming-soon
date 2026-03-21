@@ -32,10 +32,21 @@
   </div>
 </div>
 
-<!-- Channel tabs -->
-<div style="display:flex; gap:8px; margin-bottom:32px;">
+<!-- Channel tabs + template selector -->
+<div style="display:flex; gap:8px; margin-bottom:20px; align-items:center; flex-wrap:wrap;">
   <a href="/marykate/compose?channel=email" class="btn btn-sm {% if channel == 'email' %}btn-teal{% else %}btn-outline{% endif %}">Email</a>
   <a href="/marykate/compose?channel=sms" class="btn btn-sm {% if channel == 'sms' %}btn-teal{% else %}btn-outline{% endif %}">SMS</a>
+  <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+    {% if templates %}
+    <select id="template-select" class="form-select" style="width:auto; min-width:160px; padding:7px 12px; font-size:12px; border-radius:8px;" onchange="loadTemplate(this.value)">
+      <option value="">Load Template...</option>
+      {% for t in templates %}
+      <option value="{{ t['id'] }}">{{ t['name'] }}</option>
+      {% endfor %}
+    </select>
+    {% endif %}
+    <button class="btn btn-outline btn-sm" onclick="document.getElementById('save-tpl-modal').style.display='flex'">Save as Template</button>
+  </div>
 </div>
 
 <div style="display:grid; grid-template-columns:1fr 320px; gap:24px;">
@@ -112,6 +123,21 @@
       No leads yet. <a href="/marykate/leads" style="color:var(--teal);">Add some first.</a>
     </p>
     {% endif %}
+  </div>
+</div>
+
+<!-- Save as Template modal -->
+<div id="save-tpl-modal" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(8,8,9,0.85); align-items:center; justify-content:center;">
+  <div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:16px; padding:32px; width:100%; max-width:420px;">
+    <h3 style="font-size:16px; font-weight:700; margin-bottom:24px;">Save as Template</h3>
+    <div class="form-group">
+      <label class="form-label">Template Name</label>
+      <input type="text" class="form-input" id="save-tpl-name" placeholder="e.g. Cold Intro, Follow Up">
+    </div>
+    <div style="display:flex; gap:12px; justify-content:flex-end;">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('save-tpl-modal').style.display='none'">Cancel</button>
+      <button class="btn btn-teal btn-sm" onclick="saveAsTemplate()">Save</button>
+    </div>
   </div>
 </div>
 
@@ -289,6 +315,35 @@ function doSend(payload, endpoint) {
   pendingPayload = null;
   pendingEndpoint = null;
   duplicateIds = [];
+}
+
+function loadTemplate(id) {
+  if (!id) return;
+  window.location.href = '/marykate/compose?channel=' + channel + '&template=' + id;
+}
+
+function saveAsTemplate() {
+  var name = document.getElementById('save-tpl-name').value.trim();
+  if (!name) { showToast('Give it a name'); return; }
+  var body = document.getElementById('compose-body').value.trim();
+  if (!body) { showToast('Write a message first'); return; }
+  var data = { name: name, channel: channel, body: body, subject: '' };
+  if (channel === 'email') {
+    var subj = document.getElementById('compose-subject');
+    if (subj) data.subject = subj.value.trim();
+  }
+  fetch('/marykate/api/templates', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  }).then(function(r) { return r.json(); })
+    .then(function(d) {
+      document.getElementById('save-tpl-modal').style.display = 'none';
+      if (d.ok) {
+        showToast('Template saved', 'success');
+        setTimeout(function() { location.reload(); }, 500);
+      } else { showToast(d.error || 'Failed'); }
+    });
 }
 </script>
 {% endblock %}

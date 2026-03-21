@@ -44,9 +44,17 @@
       position: fixed; left: 0; top: 0; bottom: 0;
       z-index: 50;
     }
-    .sidebar-logo { height: 18px; opacity: 0.8; margin-bottom: 8px; }
+    .sidebar-logo { height: 18px; opacity: 0.9; margin-bottom: 8px; }
+    .sidebar-header {
+      background: rgba(255,255,255,0.03);
+      margin: -24px -16px 0;
+      padding: 24px 16px 16px;
+      border-radius: 0;
+      border-bottom: 1px solid var(--dark-border);
+      margin-bottom: 20px;
+    }
     .sidebar-greeting {
-      font-size: 11px; color: var(--text-muted); margin-bottom: 32px;
+      font-size: 11px; color: var(--text-muted); margin-bottom: 0;
       letter-spacing: 0.5px;
     }
     .sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
@@ -272,8 +280,10 @@
   <div class="layout">
     <!-- Sidebar -->
     <aside class="sidebar">
-      <img src="/static/logo-mk.png" alt="Lumen x BeyondAds" class="sidebar-logo" style="height:24px;">
-      <p class="sidebar-greeting">Marykate's agent</p>
+      <div class="sidebar-header">
+        <img src="/static/logo-mk.png" alt="Lumen x BeyondAds" class="sidebar-logo" style="height:24px;">
+        <p class="sidebar-greeting">Marykate's agent</p>
+      </div>
       <nav class="sidebar-nav">
         <a href="/marykate" class="{% if active == 'dashboard' %}active{% endif %}">
           <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25a2.25 2.25 0 01-2.25-2.25v-2.25z"/></svg>

@@ -1424,9 +1424,10 @@ def mk_compose_page():
     template = None
     if template_id:
         template = con.execute("SELECT * FROM mk_templates WHERE id = ?", (template_id,)).fetchone()
+    templates = con.execute("SELECT * FROM mk_templates WHERE channel = ? ORDER BY name", (channel,)).fetchall()
     con.close()
     batch_names = [b["batch_name"] for b in batches]
-    return render_template("mk_compose.html", active="compose", leads=leads, channel=channel, batch_names=batch_names, template=template)
+    return render_template("mk_compose.html", active="compose", leads=leads, channel=channel, batch_names=batch_names, template=template, templates=templates)
 
 
 @app.route("/marykate/campaigns")
