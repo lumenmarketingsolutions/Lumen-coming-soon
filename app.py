@@ -1466,6 +1466,9 @@ def mk_delete_lead(lead_id):
 def mk_gmail_connect():
     if not GMAIL_CLIENT_ID:
         return "Gmail not configured. Set GMAIL_CLIENT_ID and GMAIL_CLIENT_SECRET.", 400
+    import os as _os
+    _os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+    _os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
     from google_auth_oauthlib.flow import Flow
     flow = Flow.from_client_config(
         {"web": {
@@ -1484,39 +1487,45 @@ def mk_gmail_connect():
 
 
 @app.route("/marykate/gmail/callback")
-@mk_auth_required
 def mk_gmail_callback():
     code = request.args.get("code")
     if not code:
-        return "No code", 400
-    from google_auth_oauthlib.flow import Flow
-    flow = Flow.from_client_config(
-        {"web": {
-            "client_id": GMAIL_CLIENT_ID,
-            "client_secret": GMAIL_CLIENT_SECRET,
-            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-            "token_uri": "https://oauth2.googleapis.com/token",
-            "redirect_uris": [GMAIL_REDIRECT_URI],
-        }},
-        scopes=["https://www.googleapis.com/auth/gmail.send",
-                "https://www.googleapis.com/auth/userinfo.email"],
-        redirect_uri=GMAIL_REDIRECT_URI,
-    )
-    flow.fetch_token(code=code)
-    creds = flow.credentials
-    from googleapiclient.discovery import build
-    service = build("oauth2", "v2", credentials=creds)
-    user_info = service.userinfo().get().execute()
-    gmail_email = user_info.get("email", "")
-    con = sqlite3.connect(DB_PATH)
-    con.execute("DELETE FROM mk_gmail_tokens")
-    con.execute(
-        "INSERT INTO mk_gmail_tokens (id, access_token, refresh_token, expires_at, email) VALUES (1, ?, ?, ?, ?)",
-        (creds.token, creds.refresh_token, creds.expiry.isoformat() if creds.expiry else "", gmail_email)
-    )
-    con.commit()
-    con.close()
-    return redirect("/marykate/compose?channel=email")
+        return "No code provided by Google", 400
+    try:
+        import os as _os
+        _os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+        _os.environ["OAUTHLIB_RELAX_TOKEN_SCOPE"] = "1"
+        from google_auth_oauthlib.flow import Flow
+        flow = Flow.from_client_config(
+            {"web": {
+                "client_id": GMAIL_CLIENT_ID,
+                "client_secret": GMAIL_CLIENT_SECRET,
+                "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+                "token_uri": "https://oauth2.googleapis.com/token",
+                "redirect_uris": [GMAIL_REDIRECT_URI],
+            }},
+            scopes=["https://www.googleapis.com/auth/gmail.send",
+                    "https://www.googleapis.com/auth/userinfo.email"],
+            redirect_uri=GMAIL_REDIRECT_URI,
+        )
+        flow.fetch_token(code=code)
+        creds = flow.credentials
+        from googleapiclient.discovery import build
+        service = build("oauth2", "v2", credentials=creds)
+        user_info = service.userinfo().get().execute()
+        gmail_email = user_info.get("email", "")
+        con = sqlite3.connect(DB_PATH)
+        con.execute("DELETE FROM mk_gmail_tokens")
+        con.execute(
+            "INSERT INTO mk_gmail_tokens (id, access_token, refresh_token, expires_at, email) VALUES (1, ?, ?, ?, ?)",
+            (creds.token, creds.refresh_token, creds.expiry.isoformat() if creds.expiry else "", gmail_email)
+        )
+        con.commit()
+        con.close()
+        session["mk_auth"] = True
+        return redirect("/marykate/compose?channel=email")
+    except Exception as e:
+        return f"Gmail connection error: {e}", 500
 
 
 def mk_get_gmail_creds():
