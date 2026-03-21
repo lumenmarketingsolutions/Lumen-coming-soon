@@ -1572,34 +1572,25 @@ def mk_gmail_disconnect():
     return jsonify({"ok": True})
 
 
-# ── Marykate API: Send Email ──
-@app.route("/marykate/api/send/email", methods=["POST"])
-@mk_auth_required
-def mk_send_email():
-    data = request.get_json() or {}
-    subject = data.get("subject", "")
-    body = data.get("body", "")
-    lead_ids = data.get("lead_ids", [])
-    if not subject or not body or not lead_ids:
-        return jsonify({"ok": False, "error": "Subject, body, and recipients required"})
-    creds, sender_email = mk_get_gmail_creds()
-    if not creds:
-        return jsonify({"ok": False, "error": "Gmail not connected"})
+# ── Marykate: Background send helpers ──
+def _mk_send_emails_bg(campaign_id, subject, body, lead_ids, creds_token, creds_refresh, sender_email):
+    """Send emails in background thread so request doesn't time out."""
+    from google.oauth2.credentials import Credentials
     from googleapiclient.discovery import build
+    creds = Credentials(
+        token=creds_token, refresh_token=creds_refresh,
+        token_uri="https://oauth2.googleapis.com/token",
+        client_id=GMAIL_CLIENT_ID, client_secret=GMAIL_CLIENT_SECRET,
+    )
     service = build("gmail", "v1", credentials=creds)
     con = sqlite3.connect(DB_PATH)
-    now = datetime.datetime.utcnow().isoformat()
-    cur = con.execute(
-        "INSERT INTO mk_campaigns (name, channel, subject, body, status, created_at) VALUES (?, 'email', ?, ?, 'sending', ?)",
-        (subject[:60], subject, body, now)
-    )
-    campaign_id = cur.lastrowid
     sent = 0
     errors = 0
     for lid in lead_ids:
         lead = con.execute("SELECT id, name, email FROM mk_leads WHERE id = ?", (lid,)).fetchone()
         if not lead or not lead[2]:
             continue
+        now = datetime.datetime.utcnow().isoformat()
         personalized_body = body.replace("{{name}}", lead[1] or "there")
         personalized_subject = subject.replace("{{name}}", lead[1] or "there")
         msg = MIMEText(personalized_body, "html")
@@ -1618,11 +1609,70 @@ def mk_send_email():
                 "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, error, sent_at) VALUES (?, ?, 'email', ?, 'failed', ?, ?)",
                 (campaign_id, lead[0], lead[2], str(e)[:200], now))
             errors += 1
+        con.commit()
         time.sleep(1)
     con.execute("UPDATE mk_campaigns SET status = 'sent', sent_count = ? WHERE id = ?", (sent, campaign_id))
     con.commit()
     con.close()
-    return jsonify({"ok": True, "sent": sent, "errors": errors})
+
+
+def _mk_send_sms_bg(campaign_id, body, lead_ids):
+    """Send SMS in background thread so request doesn't time out."""
+    from twilio.rest import Client
+    client = Client(TWILIO_SID, TWILIO_AUTH)
+    con = sqlite3.connect(DB_PATH)
+    sent = 0
+    errors = 0
+    for lid in lead_ids:
+        lead = con.execute("SELECT id, name, phone FROM mk_leads WHERE id = ?", (lid,)).fetchone()
+        if not lead or not lead[2]:
+            continue
+        now = datetime.datetime.utcnow().isoformat()
+        personalized = body.replace("{{name}}", lead[1] or "there")
+        try:
+            client.messages.create(body=personalized, from_=TWILIO_PHONE, to=lead[2])
+            con.execute(
+                "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, sent_at) VALUES (?, ?, 'sms', ?, 'sent', ?)",
+                (campaign_id, lead[0], lead[2], now))
+            sent += 1
+        except Exception as e:
+            con.execute(
+                "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, error, sent_at) VALUES (?, ?, 'sms', ?, 'failed', ?, ?)",
+                (campaign_id, lead[0], lead[2], str(e)[:200], now))
+            errors += 1
+        con.commit()
+        time.sleep(0.5)
+    con.execute("UPDATE mk_campaigns SET status = 'sent', sent_count = ? WHERE id = ?", (sent, campaign_id))
+    con.commit()
+    con.close()
+
+
+# ── Marykate API: Send Email ──
+@app.route("/marykate/api/send/email", methods=["POST"])
+@mk_auth_required
+def mk_send_email():
+    data = request.get_json() or {}
+    subject = data.get("subject", "")
+    body = data.get("body", "")
+    lead_ids = data.get("lead_ids", [])
+    if not subject or not body or not lead_ids:
+        return jsonify({"ok": False, "error": "Subject, body, and recipients required"})
+    creds, sender_email = mk_get_gmail_creds()
+    if not creds:
+        return jsonify({"ok": False, "error": "Gmail not connected"})
+    con = sqlite3.connect(DB_PATH)
+    now = datetime.datetime.utcnow().isoformat()
+    cur = con.execute(
+        "INSERT INTO mk_campaigns (name, channel, subject, body, status, created_at) VALUES (?, 'email', ?, ?, 'sending', ?)",
+        (subject[:60], subject, body, now)
+    )
+    campaign_id = cur.lastrowid
+    con.commit()
+    con.close()
+    threading.Thread(target=_mk_send_emails_bg, args=(
+        campaign_id, subject, body, lead_ids, creds.token, creds.refresh_token, sender_email
+    )).start()
+    return jsonify({"ok": True, "sent": len(lead_ids), "errors": 0, "queued": True})
 
 
 # ── Marykate API: Send SMS ──
@@ -1636,37 +1686,16 @@ def mk_send_sms():
         return jsonify({"ok": False, "error": "Message and recipients required"})
     if not TWILIO_SID or not TWILIO_AUTH or not TWILIO_PHONE:
         return jsonify({"ok": False, "error": "Twilio not configured"})
-    from twilio.rest import Client
-    client = Client(TWILIO_SID, TWILIO_AUTH)
     con = sqlite3.connect(DB_PATH)
     now = datetime.datetime.utcnow().isoformat()
     cur = con.execute(
         "INSERT INTO mk_campaigns (name, channel, body, status, created_at) VALUES (?, 'sms', ?, 'sending', ?)",
         (body[:60], body, now))
     campaign_id = cur.lastrowid
-    sent = 0
-    errors = 0
-    for lid in lead_ids:
-        lead = con.execute("SELECT id, name, phone FROM mk_leads WHERE id = ?", (lid,)).fetchone()
-        if not lead or not lead[2]:
-            continue
-        personalized = body.replace("{{name}}", lead[1] or "there")
-        try:
-            client.messages.create(body=personalized, from_=TWILIO_PHONE, to=lead[2])
-            con.execute(
-                "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, sent_at) VALUES (?, ?, 'sms', ?, 'sent', ?)",
-                (campaign_id, lead[0], lead[2], now))
-            sent += 1
-        except Exception as e:
-            con.execute(
-                "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, error, sent_at) VALUES (?, ?, 'sms', ?, 'failed', ?, ?)",
-                (campaign_id, lead[0], lead[2], str(e)[:200], now))
-            errors += 1
-        time.sleep(0.5)
-    con.execute("UPDATE mk_campaigns SET status = 'sent', sent_count = ? WHERE id = ?", (sent, campaign_id))
     con.commit()
     con.close()
-    return jsonify({"ok": True, "sent": sent, "errors": errors})
+    threading.Thread(target=_mk_send_sms_bg, args=(campaign_id, body, lead_ids)).start()
+    return jsonify({"ok": True, "sent": len(lead_ids), "errors": 0, "queued": True})
 
 
 if __name__ == "__main__":
