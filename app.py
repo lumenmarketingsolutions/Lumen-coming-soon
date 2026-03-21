@@ -1482,7 +1482,15 @@ def mk_gmail_connect():
                 "https://www.googleapis.com/auth/userinfo.email"],
         redirect_uri=GMAIL_REDIRECT_URI,
     )
-    auth_url, _ = flow.authorization_url(prompt="consent", access_type="offline")
+    # Disable PKCE — generate code_verifier ourselves and store in session
+    import hashlib, secrets
+    code_verifier = secrets.token_urlsafe(64)
+    session["gmail_code_verifier"] = code_verifier
+    auth_url, state = flow.authorization_url(
+        prompt="consent", access_type="offline",
+        code_verifier=code_verifier,
+    )
+    session["gmail_state"] = state
     return redirect(auth_url)
 
 
@@ -1508,7 +1516,8 @@ def mk_gmail_callback():
                     "https://www.googleapis.com/auth/userinfo.email"],
             redirect_uri=GMAIL_REDIRECT_URI,
         )
-        flow.fetch_token(code=code)
+        code_verifier = session.pop("gmail_code_verifier", None)
+        flow.fetch_token(code=code, code_verifier=code_verifier)
         creds = flow.credentials
         from googleapiclient.discovery import build
         service = build("oauth2", "v2", credentials=creds)
