@@ -1288,7 +1288,14 @@
   <script>
     // ── Scroll restoration ──
     history.scrollRestoration = 'manual';
-    window.onload = function() { window.scrollTo(0, 0); };
+    window.onload = function() {
+      if (window.location.hash) {
+        var el = document.querySelector(window.location.hash);
+        if (el) { setTimeout(function() { el.scrollIntoView({ behavior: 'smooth' }); }, 100); }
+      } else {
+        window.scrollTo(0, 0);
+      }
+    };
 
     // ── Particle canvas ──
     (function() {
