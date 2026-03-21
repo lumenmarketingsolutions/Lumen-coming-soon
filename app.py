@@ -644,6 +644,24 @@ def preview_home():
 def preview_about():
     return render_template("about.html")
 
+@app.route("/preview/home/funnel")
+def preview_funnel():
+    return render_template("funnel.html")
+
+@app.route("/api/funnel-signup", methods=["POST"])
+def funnel_signup():
+    data = request.get_json() or {}
+    email = data.get("email", "").strip()
+    if not email:
+        return jsonify({"ok": False})
+    db_path = os.path.join(os.environ.get("RAILWAY_VOLUME_MOUNT_PATH", "."), "users.db")
+    conn = sqlite3.connect(db_path)
+    conn.execute("CREATE TABLE IF NOT EXISTS funnel_signups (id INTEGER PRIMARY KEY, email TEXT, created_at TEXT)")
+    conn.execute("INSERT INTO funnel_signups (email, created_at) VALUES (?, ?)", (email, datetime.datetime.utcnow().isoformat()))
+    conn.commit()
+    conn.close()
+    return jsonify({"ok": True})
+
 @app.route("/apply", methods=["POST"])
 def apply_submit():
     data = request.get_json() or {}
