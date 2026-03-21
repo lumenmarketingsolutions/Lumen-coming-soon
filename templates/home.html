@@ -362,7 +362,7 @@
     .reveal {
       opacity: 0;
       transform: translateY(30px);
-      transition: opacity 0.8s ease, transform 0.8s ease;
+      transition: opacity 1s ease, transform 1s ease;
     }
 
     .reveal.visible {
@@ -518,13 +518,13 @@
     }
 
     /* Stagger */
-    .service-card.reveal:nth-child(1) { transition-delay: 0s; }
-    .service-card.reveal:nth-child(2) { transition-delay: 0.15s; }
-    .service-card.reveal:nth-child(3) { transition-delay: 0.3s; }
-    .service-card.reveal:nth-child(4) { transition-delay: 0.45s; }
-    .service-card.reveal:nth-child(5) { transition-delay: 0.1s; }
-    .service-card.reveal:nth-child(6) { transition-delay: 0.25s; }
-    .service-card.reveal:nth-child(7) { transition-delay: 0.4s; }
+    .service-card.reveal:nth-child(1) { transition-delay: 0.1s; }
+    .service-card.reveal:nth-child(2) { transition-delay: 0.3s; }
+    .service-card.reveal:nth-child(3) { transition-delay: 0.5s; }
+    .service-card.reveal:nth-child(4) { transition-delay: 0.7s; }
+    .service-card.reveal:nth-child(5) { transition-delay: 0.2s; }
+    .service-card.reveal:nth-child(6) { transition-delay: 0.4s; }
+    .service-card.reveal:nth-child(7) { transition-delay: 0.6s; }
 
     .service-card.shimmer:nth-child(1)::before { animation-delay: 0s; }
     .service-card.shimmer:nth-child(2)::before { animation-delay: 0.12s; }
@@ -534,11 +534,11 @@
     .service-card.shimmer:nth-child(6)::before { animation-delay: 0.6s; }
     .service-card.shimmer:nth-child(7)::before { animation-delay: 0.72s; }
 
-    .result-card.reveal:nth-child(1) { transition-delay: 0s; }
-    .result-card.reveal:nth-child(2) { transition-delay: 0.15s; }
-    .result-card.reveal:nth-child(3) { transition-delay: 0.3s; }
-    .result-card.reveal:nth-child(4) { transition-delay: 0.45s; }
-    .result-card.reveal:nth-child(5) { transition-delay: 0.6s; }
+    .result-card.reveal:nth-child(1) { transition-delay: 0.1s; }
+    .result-card.reveal:nth-child(2) { transition-delay: 0.3s; }
+    .result-card.reveal:nth-child(3) { transition-delay: 0.5s; }
+    .result-card.reveal:nth-child(4) { transition-delay: 0.7s; }
+    .result-card.reveal:nth-child(5) { transition-delay: 0.9s; }
 
     /* ══════════════════════════════════════════
        THE PUNCH
@@ -1347,7 +1347,7 @@
             }
           }
         });
-      }, { threshold: 0.2, rootMargin: '0px 0px -80px 0px' });
+      }, { threshold: 0.15, rootMargin: '0px 0px -120px 0px' });
 
       reveals.forEach(function(el) { observer.observe(el); });
 
