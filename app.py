@@ -303,6 +303,34 @@ def init_db():
         )
     """)
 
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS mk_templates (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            channel TEXT NOT NULL DEFAULT 'email',
+            subject TEXT DEFAULT '',
+            body TEXT NOT NULL,
+            created_at TEXT NOT NULL
+        )
+    """)
+
+    # Migrate mk_leads: add new columns if they don't exist
+    mk_leads_cols = [r[1] for r in con.execute("PRAGMA table_info(mk_leads)").fetchall()]
+    mk_new_cols = {
+        "batch_name": "TEXT DEFAULT ''",
+        "batch_date": "TEXT DEFAULT ''",
+        "notes": "TEXT DEFAULT ''",
+        "last_contacted": "TEXT DEFAULT ''",
+        "send_count": "INTEGER DEFAULT 0",
+    }
+    for col, dtype in mk_new_cols.items():
+        if col not in mk_leads_cols:
+            try:
+                con.execute(f"ALTER TABLE mk_leads ADD COLUMN {col} {dtype}")
+            except Exception:
+                pass
+    con.commit()
+
     con.close()
 
 init_db()
@@ -1360,33 +1388,45 @@ def mk_logout():
 @mk_auth_required
 def mk_dashboard():
     con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
     lead_count = con.execute("SELECT COUNT(*) FROM mk_leads").fetchone()[0]
     campaign_count = con.execute("SELECT COUNT(*) FROM mk_campaigns").fetchone()[0]
     sent_count = con.execute("SELECT COUNT(*) FROM mk_send_log").fetchone()[0]
     recent = con.execute("SELECT * FROM mk_send_log ORDER BY sent_at DESC LIMIT 10").fetchall()
+    recent_leads = con.execute("SELECT * FROM mk_leads ORDER BY created_at DESC LIMIT 5").fetchall()
     con.close()
     return render_template("mk_dashboard.html", active="dashboard",
         lead_count=lead_count, campaign_count=campaign_count,
-        sent_count=sent_count, recent=recent)
+        sent_count=sent_count, recent=recent, recent_leads=recent_leads)
 
 
 @app.route("/marykate/leads")
 @mk_auth_required
 def mk_leads_page():
     con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
     leads = con.execute("SELECT * FROM mk_leads ORDER BY created_at DESC").fetchall()
+    batches = con.execute("SELECT DISTINCT batch_name FROM mk_leads WHERE batch_name != '' ORDER BY batch_name").fetchall()
     con.close()
-    return render_template("mk_leads.html", active="leads", leads=leads)
+    batch_names = [b["batch_name"] for b in batches]
+    return render_template("mk_leads.html", active="leads", leads=leads, batch_names=batch_names)
 
 
 @app.route("/marykate/compose")
 @mk_auth_required
 def mk_compose_page():
     channel = request.args.get("channel", "email")
+    template_id = request.args.get("template")
     con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
     leads = con.execute("SELECT * FROM mk_leads ORDER BY name ASC").fetchall()
+    batches = con.execute("SELECT DISTINCT batch_name FROM mk_leads WHERE batch_name != '' ORDER BY batch_name").fetchall()
+    template = None
+    if template_id:
+        template = con.execute("SELECT * FROM mk_templates WHERE id = ?", (template_id,)).fetchone()
     con.close()
-    return render_template("mk_compose.html", active="compose", leads=leads, channel=channel)
+    batch_names = [b["batch_name"] for b in batches]
+    return render_template("mk_compose.html", active="compose", leads=leads, channel=channel, batch_names=batch_names, template=template)
 
 
 @app.route("/marykate/campaigns")
@@ -1404,6 +1444,63 @@ def mk_whatsapp_page():
     return render_template("mk_whatsapp.html", active="whatsapp")
 
 
+@app.route("/marykate/templates")
+@mk_auth_required
+def mk_templates_page():
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    templates = con.execute("SELECT * FROM mk_templates ORDER BY created_at DESC").fetchall()
+    con.close()
+    return render_template("mk_templates.html", active="templates", templates=templates)
+
+
+@app.route("/marykate/api/templates", methods=["POST"])
+@mk_auth_required
+def mk_create_template():
+    data = request.get_json() or {}
+    name = data.get("name", "").strip()
+    channel = data.get("channel", "email")
+    subject = data.get("subject", "").strip()
+    body = data.get("body", "").strip()
+    if not name or not body:
+        return jsonify({"ok": False, "error": "Name and body required"})
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    con.execute("INSERT INTO mk_templates (name, channel, subject, body, created_at) VALUES (?, ?, ?, ?, ?)",
+                (name, channel, subject, body, now))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+
+@app.route("/marykate/api/templates/<int:tpl_id>", methods=["POST"])
+@mk_auth_required
+def mk_update_template(tpl_id):
+    data = request.get_json() or {}
+    name = data.get("name", "").strip()
+    channel = data.get("channel", "email")
+    subject = data.get("subject", "").strip()
+    body = data.get("body", "").strip()
+    if not name or not body:
+        return jsonify({"ok": False, "error": "Name and body required"})
+    con = sqlite3.connect(DB_PATH)
+    con.execute("UPDATE mk_templates SET name=?, channel=?, subject=?, body=? WHERE id=?",
+                (name, channel, subject, body, tpl_id))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+
+@app.route("/marykate/api/templates/<int:tpl_id>", methods=["DELETE"])
+@mk_auth_required
+def mk_delete_template(tpl_id):
+    con = sqlite3.connect(DB_PATH)
+    con.execute("DELETE FROM mk_templates WHERE id=?", (tpl_id,))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+
 # ── Marykate API: Leads ──
 @app.route("/marykate/api/leads/upload", methods=["POST"])
 @mk_auth_required
@@ -1414,6 +1511,10 @@ def mk_upload_leads():
     content = file.read().decode("utf-8-sig")
     reader = csv.DictReader(io.StringIO(content))
     now = datetime.datetime.utcnow().isoformat()
+    batch_name = (request.form.get("batch_name") or "").strip()
+    if not batch_name:
+        batch_name = "Upload " + datetime.datetime.utcnow().strftime("%b %d")
+    batch_date = datetime.datetime.utcnow().strftime("%Y-%m-%d")
     con = sqlite3.connect(DB_PATH)
     count = 0
     for row in reader:
@@ -1423,12 +1524,12 @@ def mk_upload_leads():
         tags = row.get("tags") or row.get("Tags") or row.get("tag") or ""
         if not email.strip() and not phone.strip():
             continue
-        con.execute("INSERT INTO mk_leads (name, email, phone, tags, created_at) VALUES (?, ?, ?, ?, ?)",
-                    (name.strip(), email.strip().lower(), phone.strip(), tags.strip(), now))
+        con.execute("INSERT INTO mk_leads (name, email, phone, tags, batch_name, batch_date, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (name.strip(), email.strip().lower(), phone.strip(), tags.strip(), batch_name, batch_date, now))
         count += 1
     con.commit()
     con.close()
-    return jsonify({"ok": True, "count": count})
+    return jsonify({"ok": True, "count": count, "batch_name": batch_name})
 
 
 @app.route("/marykate/api/leads/add", methods=["POST"])
@@ -1458,6 +1559,75 @@ def mk_delete_lead(lead_id):
     con.commit()
     con.close()
     return jsonify({"ok": True})
+
+
+@app.route("/marykate/api/leads/<int:lead_id>/notes", methods=["POST"])
+@mk_auth_required
+def mk_save_notes(lead_id):
+    data = request.get_json() or {}
+    notes = data.get("notes", "")
+    con = sqlite3.connect(DB_PATH)
+    con.execute("UPDATE mk_leads SET notes = ? WHERE id = ?", (notes, lead_id))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+
+@app.route("/marykate/lead/<int:lead_id>")
+@mk_auth_required
+def mk_lead_detail(lead_id):
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    lead = con.execute("SELECT * FROM mk_leads WHERE id = ?", (lead_id,)).fetchone()
+    if not lead:
+        con.close()
+        return redirect("/marykate/leads")
+    send_logs = con.execute(
+        "SELECT * FROM mk_send_log WHERE lead_id = ? ORDER BY sent_at DESC", (lead_id,)
+    ).fetchall()
+    con.close()
+    return render_template("mk_lead_detail.html", active="leads", lead=lead, send_logs=send_logs)
+
+
+@app.route("/marykate/api/send/check-duplicates", methods=["POST"])
+@mk_auth_required
+def mk_check_duplicates():
+    data = request.get_json() or {}
+    lead_ids = data.get("lead_ids", [])
+    channel = data.get("channel", "email")
+    subject = data.get("subject", "")
+    body = data.get("body", "")
+    if not lead_ids:
+        return jsonify({"duplicates": []})
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    duplicates = []
+    for lid in lead_ids:
+        # Check if this lead has already received a message with same subject/body on same channel
+        if channel == "email" and subject:
+            row = con.execute(
+                """SELECT sl.id FROM mk_send_log sl
+                   JOIN mk_campaigns c ON sl.campaign_id = c.id
+                   WHERE sl.lead_id = ? AND sl.channel = 'email' AND c.subject = ? AND sl.status = 'sent'
+                   LIMIT 1""",
+                (lid, subject)
+            ).fetchone()
+        elif channel == "sms" and body:
+            row = con.execute(
+                """SELECT sl.id FROM mk_send_log sl
+                   JOIN mk_campaigns c ON sl.campaign_id = c.id
+                   WHERE sl.lead_id = ? AND sl.channel = 'sms' AND c.body = ? AND sl.status = 'sent'
+                   LIMIT 1""",
+                (lid, body)
+            ).fetchone()
+        else:
+            row = None
+        if row:
+            lead = con.execute("SELECT id, name, email, phone FROM mk_leads WHERE id = ?", (lid,)).fetchone()
+            if lead:
+                duplicates.append({"id": lead["id"], "name": lead["name"] or lead["email"] or lead["phone"]})
+    con.close()
+    return jsonify({"duplicates": duplicates})
 
 
 # ── Marykate Gmail OAuth ──
@@ -1612,6 +1782,9 @@ def _mk_send_emails_bg(campaign_id, subject, body, lead_ids, creds_token, creds_
             con.execute(
                 "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, sent_at) VALUES (?, ?, 'email', ?, 'sent', ?)",
                 (campaign_id, lead[0], lead[2], now))
+            con.execute(
+                "UPDATE mk_leads SET last_contacted = ?, send_count = send_count + 1 WHERE id = ?",
+                (now, lead[0]))
             sent += 1
         except Exception as e:
             con.execute(
@@ -1643,6 +1816,9 @@ def _mk_send_sms_bg(campaign_id, body, lead_ids):
             con.execute(
                 "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, sent_at) VALUES (?, ?, 'sms', ?, 'sent', ?)",
                 (campaign_id, lead[0], lead[2], now))
+            con.execute(
+                "UPDATE mk_leads SET last_contacted = ?, send_count = send_count + 1 WHERE id = ?",
+                (now, lead[0]))
             sent += 1
         except Exception as e:
             con.execute(

@@ -1,6 +1,30 @@
 {% extends "mk_base.html" %}
 {% block title %}Compose{% endblock %}
 {% block content %}
+<style>
+  .dup-modal-overlay {
+    display:none; position:fixed; inset:0; z-index:300;
+    background:rgba(8,8,9,0.9); align-items:center; justify-content:center;
+  }
+  .dup-modal-overlay.show { display:flex; }
+  .dup-modal {
+    background:var(--dark-card); border:1px solid rgba(245,158,11,0.3);
+    border-radius:16px; padding:32px; width:100%; max-width:480px;
+    box-shadow: 0 0 40px rgba(245,158,11,0.08);
+  }
+  .dup-modal h3 { font-size:16px; font-weight:700; margin-bottom:8px; color:#f59e0b; }
+  .dup-modal .dup-desc { font-size:13px; color:var(--text-dim); margin-bottom:20px; }
+  .dup-list { max-height:200px; overflow-y:auto; margin-bottom:20px; }
+  .dup-list-item {
+    padding:8px 14px; font-size:13px; color:var(--text-dim);
+    border-bottom:1px solid rgba(255,255,255,0.03);
+  }
+  .dup-list-item:last-child { border-bottom:none; }
+  .dup-actions { display:flex; gap:12px; justify-content:flex-end; }
+  .btn-amber { background:rgba(245,158,11,0.15); color:#f59e0b; border:1px solid rgba(245,158,11,0.3); }
+  .btn-amber:hover { background:rgba(245,158,11,0.25); }
+</style>
+
 <div class="page-header">
   <div>
     <h1 class="page-title">Compose</h1>
@@ -28,13 +52,13 @@
     </div>
     <div class="form-group">
       <label class="form-label">Subject</label>
-      <input type="text" class="form-input" id="compose-subject" placeholder="Email subject line">
+      <input type="text" class="form-input" id="compose-subject" placeholder="Email subject line" value="{{ template['subject'] if template else '' }}">
     </div>
     {% endif %}
 
     <div class="form-group">
       <label class="form-label">{{ 'Email Body' if channel == 'email' else 'Message' }}</label>
-      <textarea class="form-textarea" id="compose-body" placeholder="Write your message here...&#10;&#10;Use {{name}} to personalize with the lead's name." style="min-height:{{ '240px' if channel == 'email' else '160px' }};"></textarea>
+      <textarea class="form-textarea" id="compose-body" placeholder="Write your message here...&#10;&#10;Use {{name}} to personalize with the lead's name." style="min-height:{{ '240px' if channel == 'email' else '160px' }};">{{ template['body'] if template else '' }}</textarea>
     </div>
 
     {% if channel == 'email' %}
@@ -55,17 +79,30 @@
   <!-- Lead selector -->
   <div>
     <label class="form-label">Recipients</label>
+    <!-- Filter controls -->
+    <div style="display:flex; gap:8px; margin-bottom:8px;">
+      <select id="compose-filter-batch" class="form-select" style="flex:1; padding:6px 10px; font-size:11px; border-radius:6px;" onchange="filterComposeLeads()">
+        <option value="">All Batches</option>
+        {% for b in batch_names %}
+        <option value="{{ b }}">{{ b }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" id="compose-filter-search" class="form-input" placeholder="Search..." style="flex:1; padding:6px 10px; font-size:11px; border-radius:6px;" oninput="filterComposeLeads()">
+    </div>
     <div class="select-actions">
       <button onclick="toggleAll(true)">Select All</button>
       <button onclick="toggleAll(false)">Deselect All</button>
     </div>
     <div class="lead-select-list">
       {% for l in leads %}
-      {% if (channel == 'email' and l[2]) or (channel == 'sms' and l[3]) %}
-      <label class="lead-select-item">
-        <input type="checkbox" name="lead" value="{{ l[0] }}">
-        <span class="lead-name">{{ l[1] or 'No name' }}</span>
-        <span class="lead-detail">{{ l[2] if channel == 'email' else l[3] }}</span>
+      {% if (channel == 'email' and l['email']) or (channel == 'sms' and l['phone']) %}
+      <label class="lead-select-item" data-batch="{{ l['batch_name'] or '' }}" data-name="{{ l['name'] or '' }}" data-email="{{ l['email'] or '' }}">
+        <input type="checkbox" name="lead" value="{{ l['id'] }}">
+        <span class="lead-name">{{ l['name'] or 'No name' }}</span>
+        {% if l['send_count'] %}
+        <span style="font-size:10px; color:var(--text-muted); margin-left:4px;">sent {{ l['send_count'] }}x</span>
+        {% endif %}
+        <span class="lead-detail">{{ l['email'] if channel == 'email' else l['phone'] }}</span>
       </label>
       {% endif %}
       {% endfor %}
@@ -77,11 +114,28 @@
     {% endif %}
   </div>
 </div>
+
+<!-- Duplicate warning modal -->
+<div class="dup-modal-overlay" id="dup-modal">
+  <div class="dup-modal">
+    <h3>Duplicate Warning</h3>
+    <p class="dup-desc">These leads have already received this exact message:</p>
+    <div class="dup-list" id="dup-list"></div>
+    <div class="dup-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeDupModal()">Cancel</button>
+      <button class="btn btn-amber btn-sm" onclick="sendSkipDuplicates()">Skip Duplicates</button>
+      <button class="btn btn-teal btn-sm" onclick="sendAnyway()">Send Anyway</button>
+    </div>
+  </div>
+</div>
 {% endblock %}
 
 {% block scripts %}
 <script>
 var channel = '{{ channel }}';
+var pendingPayload = null;
+var pendingEndpoint = null;
+var duplicateIds = [];
 
 // Check Gmail status
 {% if channel == 'email' %}
@@ -113,9 +167,25 @@ function disconnectGmail() {
     });
 }
 
+function filterComposeLeads() {
+  var batch = document.getElementById('compose-filter-batch').value.toLowerCase();
+  var search = document.getElementById('compose-filter-search').value.toLowerCase();
+  document.querySelectorAll('.lead-select-item').forEach(function(item) {
+    var ib = (item.getAttribute('data-batch') || '').toLowerCase();
+    var iname = (item.getAttribute('data-name') || '').toLowerCase();
+    var iemail = (item.getAttribute('data-email') || '').toLowerCase();
+    var show = true;
+    if (batch && ib !== batch) show = false;
+    if (search && iname.indexOf(search) === -1 && iemail.indexOf(search) === -1) show = false;
+    item.style.display = show ? '' : 'none';
+  });
+}
+
 function toggleAll(checked) {
-  document.querySelectorAll('input[name="lead"]').forEach(function(cb) {
-    cb.checked = checked;
+  document.querySelectorAll('.lead-select-item').forEach(function(item) {
+    if (item.style.display !== 'none') {
+      item.querySelector('input[name="lead"]').checked = checked;
+    }
   });
 }
 
@@ -131,16 +201,78 @@ function sendCampaign() {
 
   var payload = { body: body, lead_ids: ids };
   var endpoint = '/marykate/api/send/sms';
+  var checkPayload = { lead_ids: ids, channel: channel, body: body };
 
   if (channel === 'email') {
     var subject = document.getElementById('compose-subject').value.trim();
     if (!subject) { showToast('Add a subject line'); return; }
     payload.subject = subject;
     endpoint = '/marykate/api/send/email';
+    checkPayload.subject = subject;
   }
 
-  showSending('Sending to ' + ids.length + ' recipient' + (ids.length > 1 ? 's' : '') + '...');
+  // Store for later use
+  pendingPayload = payload;
+  pendingEndpoint = endpoint;
 
+  // Check for duplicates first
+  fetch('/marykate/api/send/check-duplicates', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(checkPayload)
+  }).then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.duplicates && d.duplicates.length > 0) {
+        duplicateIds = d.duplicates.map(function(dup) { return dup.id; });
+        var list = document.getElementById('dup-list');
+        list.innerHTML = '';
+        d.duplicates.forEach(function(dup) {
+          var div = document.createElement('div');
+          div.className = 'dup-list-item';
+          div.textContent = dup.name;
+          list.appendChild(div);
+        });
+        document.getElementById('dup-modal').classList.add('show');
+      } else {
+        doSend(payload, endpoint);
+      }
+    });
+}
+
+function closeDupModal() {
+  document.getElementById('dup-modal').classList.remove('show');
+  pendingPayload = null;
+  pendingEndpoint = null;
+  duplicateIds = [];
+}
+
+function sendSkipDuplicates() {
+  document.getElementById('dup-modal').classList.remove('show');
+  if (!pendingPayload) return;
+  // Remove duplicate IDs from the payload
+  pendingPayload.lead_ids = pendingPayload.lead_ids.filter(function(id) {
+    return duplicateIds.indexOf(id) === -1;
+  });
+  // Also uncheck them
+  duplicateIds.forEach(function(id) {
+    var cb = document.querySelector('input[name="lead"][value="' + id + '"]');
+    if (cb) cb.checked = false;
+  });
+  if (pendingPayload.lead_ids.length === 0) {
+    showToast('No recipients left after removing duplicates');
+    return;
+  }
+  doSend(pendingPayload, pendingEndpoint);
+}
+
+function sendAnyway() {
+  document.getElementById('dup-modal').classList.remove('show');
+  if (!pendingPayload) return;
+  doSend(pendingPayload, pendingEndpoint);
+}
+
+function doSend(payload, endpoint) {
+  showSending('Sending to ' + payload.lead_ids.length + ' recipient' + (payload.lead_ids.length > 1 ? 's' : '') + '...');
   fetch(endpoint, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -154,6 +286,9 @@ function sendCampaign() {
         showToast(d.error || 'Send failed');
       }
     });
+  pendingPayload = null;
+  pendingEndpoint = null;
+  duplicateIds = [];
 }
 </script>
 {% endblock %}

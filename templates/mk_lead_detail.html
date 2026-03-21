@@ -1,0 +1,105 @@
+{% extends "mk_base.html" %}
+{% block title %}{{ lead['name'] or 'Lead' }}{% endblock %}
+{% block content %}
+<div style="margin-bottom:24px;">
+  <a href="/marykate/leads" style="color:var(--text-dim); text-decoration:none; font-size:13px; display:inline-flex; align-items:center; gap:6px; transition:color 0.2s;"
+     onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+    Back to Leads
+  </a>
+</div>
+
+<!-- Lead info card -->
+<div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:14px; padding:28px; margin-bottom:24px;">
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+    <div>
+      <h1 style="font-size:22px; font-weight:700; margin-bottom:6px;">{{ lead['name'] or '(no name)' }}</h1>
+      <div style="display:flex; gap:20px; flex-wrap:wrap; font-size:13px; color:var(--text-dim);">
+        {% if lead['email'] %}
+        <span>{{ lead['email'] }}</span>
+        {% endif %}
+        {% if lead['phone'] %}
+        <span>{{ lead['phone'] }}</span>
+        {% endif %}
+      </div>
+    </div>
+    <div style="display:flex; gap:12px; flex-wrap:wrap;">
+      {% if lead['tags'] %}
+      {% for tag in lead['tags'].split(',') %}
+      <span style="font-size:11px; padding:4px 10px; border-radius:6px; background:rgba(18,143,196,0.1); color:var(--teal); font-weight:600;">{{ tag.strip() }}</span>
+      {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+  <div style="display:flex; gap:24px; margin-top:16px; flex-wrap:wrap; font-size:12px; color:var(--text-muted);">
+    {% if lead['batch_name'] %}
+    <span>Batch: <strong style="color:var(--text-dim);">{{ lead['batch_name'] }}</strong></span>
+    {% endif %}
+    <span>Messages sent: <strong style="color:var(--text-dim);">{{ lead['send_count'] or 0 }}</strong></span>
+    {% if lead['last_contacted'] %}
+    <span>Last contacted: <strong style="color:var(--text-dim);">{{ lead['last_contacted'][:16] }}</strong></span>
+    {% endif %}
+    <span>Added: <strong style="color:var(--text-dim);">{{ lead['created_at'][:10] }}</strong></span>
+  </div>
+</div>
+
+<!-- Notes -->
+<div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:14px; padding:28px; margin-bottom:24px;">
+  <h3 style="font-size:14px; font-weight:600; margin-bottom:16px; color:var(--text-dim);">Notes</h3>
+  <textarea class="form-textarea" id="lead-notes" placeholder="Add notes about this lead..." style="min-height:100px;">{{ lead['notes'] or '' }}</textarea>
+  <div style="margin-top:12px; text-align:right;">
+    <button class="btn btn-teal btn-sm" onclick="saveNotes()">Save Notes</button>
+  </div>
+</div>
+
+<!-- Activity timeline -->
+<div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:14px; padding:28px;">
+  <h3 style="font-size:14px; font-weight:600; margin-bottom:16px; color:var(--text-dim);">Activity Timeline</h3>
+  {% if send_logs %}
+  <div style="display:flex; flex-direction:column; gap:0;">
+    {% for log in send_logs %}
+    <div style="display:flex; align-items:flex-start; gap:16px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.03);{% if loop.last %} border-bottom:none;{% endif %}">
+      <div style="width:32px; height:32px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+        {% if log['channel'] == 'email' %}background:rgba(18,143,196,0.12);{% else %}background:rgba(128,47,222,0.12);{% endif %}">
+        {% if log['channel'] == 'email' %}
+        <svg width="16" height="16" fill="none" stroke="var(--teal)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+        {% else %}
+        <svg width="16" height="16" fill="none" stroke="var(--purple)" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375"/></svg>
+        {% endif %}
+      </div>
+      <div style="flex:1; min-width:0;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <span style="font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim);">{{ log['channel'] }}</span>
+          <span class="badge badge-{{ log['status'] }}">{{ log['status'] }}</span>
+        </div>
+        <p style="font-size:13px; color:var(--text-dim);">{{ log['recipient'] }}</p>
+        {% if log['error'] %}
+        <p style="font-size:12px; color:var(--red); margin-top:4px;">{{ log['error'] }}</p>
+        {% endif %}
+      </div>
+      <span style="font-size:11px; color:var(--text-muted); white-space:nowrap;">{{ log['sent_at'][:16] }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p style="font-size:13px; color:var(--text-muted); text-align:center; padding:24px 0;">No messages sent to this lead yet.</p>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function saveNotes() {
+  var notes = document.getElementById('lead-notes').value;
+  fetch('/marykate/api/leads/{{ lead["id"] }}/notes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ notes: notes })
+  }).then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) showToast('Notes saved', 'success');
+      else showToast('Failed to save');
+    });
+}
+</script>
+{% endblock %}

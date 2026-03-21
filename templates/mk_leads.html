@@ -4,15 +4,24 @@
 <div class="page-header">
   <div>
     <h1 class="page-title">Leads</h1>
-    <p class="page-sub">{{ leads|length }} total leads</p>
+    <p class="page-sub"><span id="filtered-count">{{ leads|length }}</span> of {{ leads|length }} leads</p>
   </div>
   <div style="display:flex; gap:10px;">
     <button class="btn btn-outline btn-sm" onclick="document.getElementById('add-modal').style.display='flex'">+ Add Lead</button>
-    <label class="btn btn-teal btn-sm" style="cursor:pointer;">
-      Upload CSV
-      <input type="file" accept=".csv" id="csv-upload" style="display:none;" onchange="uploadCSV(this)">
-    </label>
+    <button class="btn btn-teal btn-sm" onclick="document.getElementById('upload-modal').style.display='flex'">Upload CSV</button>
   </div>
+</div>
+
+<!-- Filter bar -->
+<div style="display:flex; gap:12px; margin-bottom:20px; flex-wrap:wrap;">
+  <select id="filter-batch" class="form-select" style="width:auto; min-width:160px; padding:8px 14px; font-size:12px; border-radius:8px;" onchange="filterLeads()">
+    <option value="">All Batches</option>
+    {% for b in batch_names %}
+    <option value="{{ b }}">{{ b }}</option>
+    {% endfor %}
+  </select>
+  <input type="text" id="filter-tag" class="form-input" placeholder="Filter by tag..." style="width:160px; padding:8px 14px; font-size:12px; border-radius:8px;" oninput="filterLeads()">
+  <input type="text" id="filter-search" class="form-input" placeholder="Search name or email..." style="width:200px; padding:8px 14px; font-size:12px; border-radius:8px;" oninput="filterLeads()">
 </div>
 
 <!-- Upload zone (shown when no leads) -->
@@ -20,7 +29,7 @@
 <label class="upload-zone" style="cursor:pointer; display:block; margin-bottom:32px;">
   <p>Drop a CSV file here or click to upload</p>
   <span>Columns: name, email, phone (at minimum)</span>
-  <input type="file" accept=".csv" style="display:none;" onchange="uploadCSV(this)">
+  <input type="file" accept=".csv" style="display:none;" onchange="uploadCSVDirect(this)">
 </label>
 {% endif %}
 
@@ -33,18 +42,35 @@
         <th>Email</th>
         <th>Phone</th>
         <th>Tags</th>
+        <th>Batch</th>
+        <th>Sent</th>
+        <th>Last Contacted</th>
         <th></th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="leads-tbody">
       {% for l in leads %}
-      <tr>
-        <td style="color:var(--text); font-weight:500;">{{ l[1] or '—' }}</td>
-        <td>{{ l[2] or '—' }}</td>
-        <td>{{ l[3] or '—' }}</td>
-        <td style="font-size:12px;">{{ l[4] or '' }}</td>
+      <tr data-batch="{{ l['batch_name'] or '' }}" data-tags="{{ l['tags'] or '' }}" data-name="{{ l['name'] or '' }}" data-email="{{ l['email'] or '' }}">
+        <td style="font-weight:500;">
+          <a href="/marykate/lead/{{ l['id'] }}" style="color:var(--text); text-decoration:none; border-bottom:1px solid transparent; transition:border-color 0.2s;"
+             onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='transparent'">
+            {{ l['name'] or '(no name)' }}
+          </a>
+        </td>
+        <td>{{ l['email'] or '—' }}</td>
+        <td>{{ l['phone'] or '—' }}</td>
+        <td style="font-size:12px;">{{ l['tags'] or '' }}</td>
+        <td style="font-size:12px; color:var(--text-muted);">{{ l['batch_name'] or '' }}</td>
+        <td style="text-align:center;">
+          {% if l['send_count'] %}
+          <span style="font-size:11px; color:var(--teal); font-weight:600;">{{ l['send_count'] }}x</span>
+          {% else %}
+          <span style="font-size:11px; color:var(--text-muted);">0</span>
+          {% endif %}
+        </td>
+        <td style="font-size:12px; color:var(--text-muted);">{{ l['last_contacted'][:10] if l['last_contacted'] else '—' }}</td>
         <td style="text-align:right;">
-          <button class="btn btn-danger btn-sm" onclick="deleteLead({{ l[0] }}, this)">Remove</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteLead({{ l['id'] }}, this)">Remove</button>
         </td>
       </tr>
       {% endfor %}
@@ -52,6 +78,30 @@
   </table>
 </div>
 {% endif %}
+
+<!-- Upload CSV Modal -->
+<div id="upload-modal" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(8,8,9,0.85); align-items:center; justify-content:center;">
+  <div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:16px; padding:32px; width:100%; max-width:420px;">
+    <h3 style="font-size:16px; font-weight:700; margin-bottom:24px;">Upload CSV</h3>
+    <div class="form-group">
+      <label class="form-label">Batch Name</label>
+      <input type="text" class="form-input" id="upload-batch-name" placeholder="e.g. Facebook Leads Mar 21">
+      <p style="font-size:11px; color:var(--text-muted); margin-top:6px;">Leave blank to auto-generate</p>
+    </div>
+    <div class="form-group">
+      <label class="upload-zone" style="cursor:pointer; display:block;">
+        <p>Click to select CSV file</p>
+        <span>Columns: name, email, phone (at minimum)</span>
+        <input type="file" accept=".csv" id="csv-upload-modal" style="display:none;" onchange="document.getElementById('upload-file-name').textContent = this.files[0] ? this.files[0].name : ''">
+      </label>
+      <p id="upload-file-name" style="font-size:12px; color:var(--teal); margin-top:8px;"></p>
+    </div>
+    <div style="display:flex; gap:12px; justify-content:flex-end;">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('upload-modal').style.display='none'">Cancel</button>
+      <button class="btn btn-teal btn-sm" onclick="uploadCSV()">Upload</button>
+    </div>
+  </div>
+</div>
 
 <!-- Add Lead Modal -->
 <div id="add-modal" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(8,8,9,0.85); align-items:center; justify-content:center;">
@@ -83,7 +133,51 @@
 {% endblock %}
 {% block scripts %}
 <script>
-function uploadCSV(input) {
+function filterLeads() {
+  var batch = document.getElementById('filter-batch').value.toLowerCase();
+  var tag = document.getElementById('filter-tag').value.toLowerCase();
+  var search = document.getElementById('filter-search').value.toLowerCase();
+  var rows = document.querySelectorAll('#leads-tbody tr');
+  var visible = 0;
+  rows.forEach(function(row) {
+    var rb = (row.getAttribute('data-batch') || '').toLowerCase();
+    var rt = (row.getAttribute('data-tags') || '').toLowerCase();
+    var rn = (row.getAttribute('data-name') || '').toLowerCase();
+    var re = (row.getAttribute('data-email') || '').toLowerCase();
+    var show = true;
+    if (batch && rb !== batch) show = false;
+    if (tag && rt.indexOf(tag) === -1) show = false;
+    if (search && rn.indexOf(search) === -1 && re.indexOf(search) === -1) show = false;
+    row.style.display = show ? '' : 'none';
+    if (show) visible++;
+  });
+  document.getElementById('filtered-count').textContent = visible;
+}
+
+function uploadCSV() {
+  var fileInput = document.getElementById('csv-upload-modal');
+  var file = fileInput.files[0];
+  if (!file) { showToast('Select a CSV file first'); return; }
+  var fd = new FormData();
+  fd.append('file', file);
+  var batchName = document.getElementById('upload-batch-name').value.trim();
+  if (batchName) fd.append('batch_name', batchName);
+  showSending('Uploading leads...');
+  document.getElementById('upload-modal').style.display = 'none';
+  fetch('/marykate/api/leads/upload', { method: 'POST', body: fd })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      hideSending();
+      if (d.ok) {
+        showToast(d.count + ' leads imported to "' + d.batch_name + '"', 'success');
+        setTimeout(function() { location.reload(); }, 1000);
+      } else {
+        showToast('Upload failed: ' + (d.error || 'Unknown error'));
+      }
+    });
+}
+
+function uploadCSVDirect(input) {
   var file = input.files[0];
   if (!file) return;
   var fd = new FormData();

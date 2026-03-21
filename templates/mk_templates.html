@@ -1,0 +1,135 @@
+{% extends "mk_base.html" %}
+{% block title %}Templates{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Templates</h1>
+    <p class="page-sub">Save and reuse your best messages.</p>
+  </div>
+  <button class="btn btn-teal btn-sm" onclick="document.getElementById('tpl-modal').style.display='flex'">+ New Template</button>
+</div>
+
+{% if templates %}
+<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px;">
+  {% for t in templates %}
+  <div class="stat-card" style="position:relative;">
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <span class="badge badge-{{ 'sent' if t['channel'] == 'email' else 'draft' }}" style="text-transform:uppercase; font-size:10px; letter-spacing:1px;">{{ t['channel'] }}</span>
+      <h3 style="font-size:14px; font-weight:600; flex:1;">{{ t['name'] }}</h3>
+    </div>
+    {% if t['subject'] %}
+    <p style="font-size:12px; color:var(--text-dim); margin-bottom:6px;"><strong>Subject:</strong> {{ t['subject'] }}</p>
+    {% endif %}
+    <p style="font-size:12px; color:var(--text-muted); line-height:1.6; margin-bottom:16px; max-height:80px; overflow:hidden;">{{ t['body'][:200] }}{% if t['body']|length > 200 %}...{% endif %}</p>
+    <div style="display:flex; gap:8px;">
+      <a href="/marykate/compose?channel={{ t['channel'] }}&template={{ t['id'] }}" class="btn btn-teal btn-sm">Use</a>
+      <button class="btn btn-outline btn-sm" onclick="editTemplate({{ t['id'] }}, '{{ t['name']|e }}', '{{ t['channel'] }}', '{{ t['subject']|e }}', `{{ t['body']|e }}`)">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteTemplate({{ t['id'] }})">Delete</button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div style="text-align:center; padding:60px 20px; color:var(--text-muted);">
+  <p style="font-size:15px; margin-bottom:8px;">No templates yet.</p>
+  <p style="font-size:13px;">Create one to speed up your outreach.</p>
+</div>
+{% endif %}
+
+<!-- New/Edit Template Modal -->
+<div id="tpl-modal" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(8,8,9,0.85); align-items:center; justify-content:center;">
+  <div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:16px; padding:32px; width:100%; max-width:520px;">
+    <h3 id="tpl-modal-title" style="font-size:16px; font-weight:700; margin-bottom:24px;">New Template</h3>
+    <input type="hidden" id="tpl-id" value="">
+    <div class="form-group">
+      <label class="form-label">Template Name</label>
+      <input type="text" class="form-input" id="tpl-name" placeholder="e.g. Cold Intro, Follow Up, Re-engagement">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Channel</label>
+      <select class="form-select" id="tpl-channel" onchange="toggleSubject()">
+        <option value="email">Email</option>
+        <option value="sms">SMS</option>
+      </select>
+    </div>
+    <div class="form-group" id="tpl-subject-group">
+      <label class="form-label">Subject Line</label>
+      <input type="text" class="form-input" id="tpl-subject" placeholder="Email subject">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Body</label>
+      <textarea class="form-textarea" id="tpl-body" placeholder="Write your template here...&#10;&#10;Use {{name}} to personalize."></textarea>
+    </div>
+    <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">
+      Use <code style="color:var(--teal);">{% raw %}{{name}}{% endraw %}</code> to insert the lead's name.
+    </p>
+    <div style="display:flex; gap:12px; justify-content:flex-end;">
+      <button class="btn btn-outline btn-sm" onclick="closeTplModal()">Cancel</button>
+      <button class="btn btn-teal btn-sm" onclick="saveTemplate()">Save Template</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleSubject() {
+  var ch = document.getElementById('tpl-channel').value;
+  document.getElementById('tpl-subject-group').style.display = ch === 'email' ? '' : 'none';
+}
+
+function closeTplModal() {
+  document.getElementById('tpl-modal').style.display = 'none';
+  document.getElementById('tpl-id').value = '';
+  document.getElementById('tpl-name').value = '';
+  document.getElementById('tpl-channel').value = 'email';
+  document.getElementById('tpl-subject').value = '';
+  document.getElementById('tpl-body').value = '';
+  document.getElementById('tpl-modal-title').textContent = 'New Template';
+  toggleSubject();
+}
+
+function editTemplate(id, name, channel, subject, body) {
+  document.getElementById('tpl-id').value = id;
+  document.getElementById('tpl-name').value = name;
+  document.getElementById('tpl-channel').value = channel;
+  document.getElementById('tpl-subject').value = subject;
+  document.getElementById('tpl-body').value = body;
+  document.getElementById('tpl-modal-title').textContent = 'Edit Template';
+  toggleSubject();
+  document.getElementById('tpl-modal').style.display = 'flex';
+}
+
+function saveTemplate() {
+  var id = document.getElementById('tpl-id').value;
+  var data = {
+    name: document.getElementById('tpl-name').value.trim(),
+    channel: document.getElementById('tpl-channel').value,
+    subject: document.getElementById('tpl-subject').value.trim(),
+    body: document.getElementById('tpl-body').value.trim(),
+  };
+  if (!data.name || !data.body) { showToast('Name and body required'); return; }
+  var url = id ? '/marykate/api/templates/' + id : '/marykate/api/templates';
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  }).then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) {
+        showToast('Template saved', 'success');
+        setTimeout(function() { location.reload(); }, 500);
+      } else { showToast(d.error || 'Failed'); }
+    });
+}
+
+function deleteTemplate(id) {
+  if (!confirm('Delete this template?')) return;
+  fetch('/marykate/api/templates/' + id, { method: 'DELETE' })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+      if (d.ok) location.reload();
+    });
+}
+</script>
+{% endblock %}

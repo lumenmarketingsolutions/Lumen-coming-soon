@@ -25,7 +25,7 @@
 
 {% if recent %}
 <h3 style="font-size:14px; font-weight:600; margin-bottom:16px; color:var(--text-dim);">Recent Activity</h3>
-<div class="table-wrap">
+<div class="table-wrap" style="margin-bottom:32px;">
   <table>
     <thead>
       <tr>
@@ -38,19 +38,47 @@
     <tbody>
       {% for r in recent %}
       <tr>
-        <td style="text-transform:uppercase; font-size:11px; font-weight:600; letter-spacing:1px;">{{ r[3] }}</td>
-        <td>{{ r[4] }}</td>
-        <td><span class="badge badge-{{ r[5] }}">{{ r[5] }}</span></td>
-        <td style="font-size:12px;">{{ r[7][:16] }}</td>
+        <td style="text-transform:uppercase; font-size:11px; font-weight:600; letter-spacing:1px;">{{ r['channel'] }}</td>
+        <td>{{ r['recipient'] }}</td>
+        <td><span class="badge badge-{{ r['status'] }}">{{ r['status'] }}</span></td>
+        <td style="font-size:12px;">{{ r['sent_at'][:16] }}</td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
 </div>
 {% else %}
-<div style="text-align:center; padding:60px 20px; color:var(--text-muted);">
+<div style="text-align:center; padding:60px 20px; color:var(--text-muted); margin-bottom:32px;">
   <p style="font-size:15px; margin-bottom:8px;">No activity yet.</p>
   <p style="font-size:13px;">Upload some leads and send your first campaign.</p>
+</div>
+{% endif %}
+
+{% if recent_leads %}
+<h3 style="font-size:14px; font-weight:600; margin-bottom:16px; color:var(--text-dim);">Recent Leads</h3>
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Batch</th>
+        <th>Added</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in recent_leads %}
+      <tr>
+        <td style="font-weight:500;">
+          <a href="/marykate/lead/{{ l['id'] }}" style="color:var(--text); text-decoration:none;">{{ l['name'] or '(no name)' }}</a>
+        </td>
+        <td>{{ l['email'] or '—' }}</td>
+        <td style="font-size:12px; color:var(--text-muted);">{{ l['batch_name'] or '—' }}</td>
+        <td style="font-size:12px;">{{ l['created_at'][:10] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 </div>
 {% endif %}
 {% endblock %}
