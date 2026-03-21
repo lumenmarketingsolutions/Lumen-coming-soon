@@ -662,6 +662,53 @@ def funnel_signup():
     conn.close()
     return jsonify({"ok": True})
 
+@app.route("/api/funnel-beta", methods=["POST"])
+def funnel_beta():
+    data = request.get_json() or {}
+    name = data.get("name", "").strip()
+    email = data.get("email", "").strip().lower()
+    agency = data.get("agency", "").strip()
+    clients = data.get("clients", "")
+    spend = data.get("spend", "")
+    bottleneck = data.get("bottleneck", "").strip()
+    if not email or "@" not in email:
+        return jsonify({"ok": False})
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS funnel_beta (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT DEFAULT '',
+            email TEXT NOT NULL,
+            agency TEXT DEFAULT '',
+            clients TEXT DEFAULT '',
+            spend TEXT DEFAULT '',
+            bottleneck TEXT DEFAULT '',
+            created_at TEXT NOT NULL
+        )
+    """)
+    con.execute(
+        "INSERT INTO funnel_beta (name, email, agency, clients, spend, bottleneck, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (name, email, agency, clients, spend, bottleneck, now),
+    )
+    con.commit()
+    con.close()
+
+    # Notify
+    if RESEND_API_KEY:
+        send_email(
+            NOTIFY_EMAIL,
+            f"LumenFunnel Beta Application — {agency}",
+            f"<h2>New Beta Application</h2>"
+            f"<p><b>Name:</b> {name}</p>"
+            f"<p><b>Email:</b> {email}</p>"
+            f"<p><b>Agency:</b> {agency}</p>"
+            f"<p><b>Clients:</b> {clients}</p>"
+            f"<p><b>Monthly Spend:</b> {spend}</p>"
+            f"<p><b>Bottleneck:</b> {bottleneck}</p>",
+        )
+    return jsonify({"ok": True})
+
 @app.route("/apply", methods=["POST"])
 def apply_submit():
     data = request.get_json() or {}
