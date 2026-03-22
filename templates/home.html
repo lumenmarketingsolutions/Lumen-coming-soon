@@ -121,17 +121,20 @@
       z-index: 0;
       overflow: hidden;
       pointer-events: none;
+      will-change: transform;
+      transform: translateZ(0);
     }
 
     .bg-grid::before {
       content: '';
       position: absolute;
-      inset: -50%;
+      inset: -10%;
       background-image:
         linear-gradient(rgba(97,40,219,0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(97,40,219,0.03) 1px, transparent 1px);
       background-size: 60px 60px;
       animation: gridDrift 20s linear infinite;
+      will-change: transform;
     }
 
     @keyframes gridDrift {
@@ -146,6 +149,8 @@
       opacity: 0.4;
       z-index: 0;
       pointer-events: none;
+      will-change: transform;
+      transform: translateZ(0);
     }
 
     .orb-1 {
@@ -179,6 +184,7 @@
       inset: 0;
       z-index: 0;
       pointer-events: none;
+      will-change: contents;
     }
 
     /* ══════════════════════════════════════════
@@ -361,10 +367,11 @@
     /* Scroll reveal */
     .reveal {
       opacity: 0;
-      transform: translateY(30px);
+      transform: translateY(30px) translateZ(0);
       transition-property: opacity, transform;
       transition-duration: 1s;
       transition-timing-function: ease;
+      backface-visibility: hidden;
     }
 
     .reveal.visible {
@@ -1329,7 +1336,7 @@
       var canvas = document.getElementById('particles');
       var ctx = canvas.getContext('2d');
       var particles = [];
-      var count = window.innerWidth < 768 ? 30 : 60;
+      var count = window.innerWidth < 768 ? 20 : 40;
 
       function resize() {
         canvas.width = window.innerWidth;
