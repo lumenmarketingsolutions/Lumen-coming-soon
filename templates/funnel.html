@@ -105,9 +105,61 @@
       .nav-menu-btn { display: block; }
     }
 
-    /* ── Canvas ── */
-    #stars-canvas {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    /* ── Background ── */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0;
+      overflow: hidden; pointer-events: none;
+    }
+
+    .bg-grid::before {
+      content: '';
+      position: absolute; inset: -50%;
+      background-image:
+        linear-gradient(rgba(97,40,219,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(97,40,219,0.03) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridDrift 20s linear infinite;
+    }
+
+    @keyframes gridDrift {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      100% { transform: translate(30px, 60px) rotate(0.5deg); }
+    }
+
+    .orb {
+      position: fixed; border-radius: 50%;
+      filter: blur(80px); opacity: 0.4;
+      z-index: 0; pointer-events: none;
+    }
+
+    .orb-1 {
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, var(--purple-glow), transparent 70%);
+      top: -10%; left: -10%;
+      animation: orbFloat1 12s ease-in-out infinite;
+    }
+
+    .orb-2 {
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(124,77,255,0.2), transparent 70%);
+      bottom: -5%; right: -8%;
+      animation: orbFloat2 15s ease-in-out infinite;
+    }
+
+    @keyframes orbFloat1 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(40px, 30px) scale(1.1); }
+      66% { transform: translate(-20px, 50px) scale(0.95); }
+    }
+
+    @keyframes orbFloat2 {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      33% { transform: translate(-30px, -40px) scale(1.05); }
+      66% { transform: translate(20px, -20px) scale(0.9); }
+    }
+
+    canvas#particles {
+      position: fixed; inset: 0;
       z-index: 0; pointer-events: none;
     }
 
@@ -345,7 +397,10 @@
 </head>
 <body>
 
-  <canvas id="stars-canvas"></canvas>
+  <div class="bg-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <canvas id="particles"></canvas>
 
   <!-- Nav -->
   <nav>
@@ -459,33 +514,44 @@
   </footer>
 
   <script>
-    // ── Stars ──
+    // ── Particle canvas (matches home/about) ──
     (function() {
-      var canvas = document.getElementById('stars-canvas');
+      var canvas = document.getElementById('particles');
       var ctx = canvas.getContext('2d');
-      function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-      resize();
-      window.addEventListener('resize', resize);
+      var particles = [];
+      var count = window.innerWidth < 768 ? 30 : 60;
 
-      var stars = [];
-      for (var i = 0; i < 120; i++) {
-        stars.push({
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+
+      for (var i = 0; i < count; i++) {
+        particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          r: Math.random() * 1.2 + 0.3,
-          o: Math.random() * 0.5 + 0.1,
-          speed: Math.random() * 0.3 + 0.05
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
+          r: Math.random() * 1.5 + 0.5,
+          o: Math.random() * 0.3 + 0.05
         });
       }
 
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        stars.forEach(function(s) {
-          var flicker = s.o + Math.sin(Date.now() * 0.001 * s.speed) * 0.15;
-          ctx.globalAlpha = Math.max(0, Math.min(1, flicker));
-          ctx.fillStyle = '#ffffff';
+        particles.forEach(function(p) {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (p.x < 0) p.x = canvas.width;
+          if (p.x > canvas.width) p.x = 0;
+          if (p.y < 0) p.y = canvas.height;
+          if (p.y > canvas.height) p.y = 0;
           ctx.beginPath();
-          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(124,77,255,' + p.o + ')';
           ctx.fill();
         });
         requestAnimationFrame(draw);
