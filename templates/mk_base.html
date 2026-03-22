@@ -241,6 +241,12 @@
       background: none; border: none; color: var(--text); cursor: pointer; padding: 8px;
     }
 
+    .sidebar-backdrop {
+      display: none; position: fixed; inset: 0; z-index: 45;
+      background: rgba(0,0,0,0.5);
+    }
+    .sidebar-backdrop.show { display: block; }
+
     @media (max-width: 768px) {
       .sidebar { transform: translateX(-100%); transition: transform 0.3s; width: 280px; }
       .sidebar.open { transform: translateX(0); }
@@ -290,10 +296,12 @@
   <!-- Mobile header -->
   <div class="mobile-header">
     <img src="/static/logo-white.png" alt="Lumen">
-    <button class="mobile-menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
       <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
     </button>
   </div>
+
+  <div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
 
   <div class="layout">
     <!-- Sidebar -->
@@ -362,10 +370,17 @@
     function hideSending() {
       document.getElementById('sending-overlay').classList.remove('show');
     }
+    function toggleSidebar() {
+      var sb = document.querySelector('.sidebar');
+      var bd = document.querySelector('.sidebar-backdrop');
+      sb.classList.toggle('open');
+      bd.classList.toggle('show');
+    }
     // Close mobile sidebar on nav click
     document.querySelectorAll('.sidebar-nav a').forEach(function(a) {
       a.addEventListener('click', function() {
         document.querySelector('.sidebar').classList.remove('open');
+        document.querySelector('.sidebar-backdrop').classList.remove('show');
       });
     });
   </script>
