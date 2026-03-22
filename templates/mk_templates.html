@@ -1,6 +1,39 @@
 {% extends "mk_base.html" %}
 {% block title %}Templates{% endblock %}
 {% block content %}
+<style>
+  .var-insert { position:relative; display:inline-block; }
+  .var-insert-btn {
+    display:inline-flex; align-items:center; gap:4px;
+    padding:4px 10px; font-size:11px; font-weight:600;
+    color:var(--teal); background:rgba(18,143,196,0.1);
+    border:1px solid rgba(18,143,196,0.25); border-radius:6px;
+    cursor:pointer; transition:background 0.15s;
+  }
+  .var-insert-btn:hover { background:rgba(18,143,196,0.2); }
+  .var-insert-btn svg { width:12px; height:12px; }
+  .var-dropdown {
+    display:none; position:absolute; top:100%; left:0; margin-top:4px;
+    background:var(--dark-card); border:1px solid var(--dark-border);
+    border-radius:8px; min-width:160px; z-index:100;
+    box-shadow:0 8px 24px rgba(0,0,0,0.4); overflow:hidden;
+  }
+  .var-dropdown.show { display:block; }
+  .var-dropdown-item {
+    padding:8px 14px; font-size:12px; color:var(--text-dim);
+    cursor:pointer; display:flex; align-items:center; gap:8px;
+  }
+  .var-dropdown-item:hover { background:rgba(255,255,255,0.04); color:var(--text); }
+  .var-dropdown-item code { color:var(--teal); font-size:11px; }
+  .var-dropdown-sep { border-top:1px solid var(--dark-border); margin:4px 0; }
+  .var-dropdown-custom { padding:8px; }
+  .var-dropdown-custom input {
+    width:100%; padding:6px 10px; font-size:11px;
+    background:var(--dark); border:1px solid var(--dark-border);
+    border-radius:6px; color:var(--text); outline:none;
+  }
+  .var-dropdown-custom input:focus { border-color:var(--teal); }
+</style>
 <div class="page-header">
   <div>
     <h1 class="page-title">Templates</h1>
@@ -57,12 +90,26 @@
       <input type="text" class="form-input" id="tpl-subject" placeholder="Email subject">
     </div>
     <div class="form-group">
-      <label class="form-label">Body</label>
-      <textarea class="form-textarea" id="tpl-body" placeholder="Write your template here...&#10;&#10;Use {{name}} to personalize."></textarea>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+        <label class="form-label" style="margin-bottom:0;">Body</label>
+        <div class="var-insert">
+          <button type="button" class="var-insert-btn" onclick="toggleVarDropdown('tpl-vars')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            Personalize
+          </button>
+          <div class="var-dropdown" id="tpl-vars">
+            <div class="var-dropdown-item" onclick="insertVar('tpl-body','tpl-vars','name')">Name <code>{% raw %}{{name}}{% endraw %}</code></div>
+            <div class="var-dropdown-item" onclick="insertVar('tpl-body','tpl-vars','email')">Email <code>{% raw %}{{email}}{% endraw %}</code></div>
+            <div class="var-dropdown-item" onclick="insertVar('tpl-body','tpl-vars','phone')">Phone <code>{% raw %}{{phone}}{% endraw %}</code></div>
+            <div class="var-dropdown-sep"></div>
+            <div class="var-dropdown-custom">
+              <input type="text" placeholder="Custom field..." onkeydown="if(event.key==='Enter'){insertVar('tpl-body','tpl-vars',this.value);this.value=''}">
+            </div>
+          </div>
+        </div>
+      </div>
+      <textarea class="form-textarea" id="tpl-body" placeholder="Write your template here..."></textarea>
     </div>
-    <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">
-      Use <code style="color:var(--teal);">{% raw %}{{name}}{% endraw %}</code> to insert the lead's name.
-    </p>
     <div style="display:flex; gap:12px; justify-content:flex-end;">
       <button class="btn btn-outline btn-sm" onclick="closeTplModal()">Cancel</button>
       <button class="btn btn-teal btn-sm" onclick="saveTemplate()">Save Template</button>
@@ -131,5 +178,28 @@ function deleteTemplate(id) {
       if (d.ok) location.reload();
     });
 }
+
+function toggleVarDropdown(id) {
+  var dd = document.getElementById(id);
+  dd.classList.toggle('show');
+}
+
+function insertVar(textareaId, dropdownId, field) {
+  if (!field) return;
+  var ta = document.getElementById(textareaId);
+  var tag = '{% raw %}{{' + field + '}}{% endraw %}';
+  var start = ta.selectionStart;
+  var end = ta.selectionEnd;
+  ta.value = ta.value.substring(0, start) + tag + ta.value.substring(end);
+  ta.selectionStart = ta.selectionEnd = start + tag.length;
+  ta.focus();
+  document.getElementById(dropdownId).classList.remove('show');
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.var-insert')) {
+    document.querySelectorAll('.var-dropdown.show').forEach(function(d) { d.classList.remove('show'); });
+  }
+});
 </script>
 {% endblock %}
