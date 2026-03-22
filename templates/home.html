@@ -894,6 +894,19 @@
 
     .mobile-menu a:hover { color: var(--purple-light); }
 
+    .mobile-menu .btn-primary {
+      font-size: 15px;
+      padding: 14px 40px;
+      width: auto;
+      margin-top: 12px;
+    }
+
+    .nav-funnel {
+      color: var(--purple-light) !important;
+      font-style: italic;
+      letter-spacing: 0.3px;
+    }
+
     .mobile-menu-close {
       position: absolute;
       top: 20px;
@@ -997,7 +1010,7 @@
       <a href="#punch">Results</a>
       <a href="#process">Process</a>
       <a href="/preview/home/about">About</a>
-      <a href="/preview/home/funnel">LumenFunnel</a>
+      <a href="/preview/home/funnel" class="nav-funnel">LumenFunnel</a>
       <a href="https://calendly.com/lumenmarketingco/lumen" target="_blank" class="nav-cta">Book a Call</a>
     </div>
     <button class="nav-menu-btn" onclick="toggleMobileMenu()">
@@ -1012,7 +1025,7 @@
     <a href="#punch" onclick="toggleMobileMenu()">Results</a>
     <a href="#process" onclick="toggleMobileMenu()">Process</a>
     <a href="/preview/home/about" onclick="toggleMobileMenu()">About</a>
-    <a href="/preview/home/funnel" onclick="toggleMobileMenu()">LumenFunnel</a>
+    <a href="/preview/home/funnel" onclick="toggleMobileMenu()" class="nav-funnel">LumenFunnel</a>
     <a href="https://calendly.com/lumenmarketingco/lumen" target="_blank" class="btn-primary" onclick="toggleMobileMenu()" style="margin-top:8px;">Book a Call</a>
   </div>
 
