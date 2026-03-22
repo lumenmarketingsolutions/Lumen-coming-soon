@@ -121,8 +121,6 @@
       z-index: 0;
       overflow: hidden;
       pointer-events: none;
-      will-change: transform;
-      transform: translateZ(0);
     }
 
     .bg-grid::before {
@@ -134,7 +132,6 @@
         linear-gradient(90deg, rgba(97,40,219,0.03) 1px, transparent 1px);
       background-size: 60px 60px;
       animation: gridDrift 20s linear infinite;
-      will-change: transform;
     }
 
     @keyframes gridDrift {
@@ -149,8 +146,6 @@
       opacity: 0.4;
       z-index: 0;
       pointer-events: none;
-      will-change: transform;
-      transform: translateZ(0);
     }
 
     .orb-1 {
@@ -184,7 +179,6 @@
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      will-change: contents;
     }
 
     /* ══════════════════════════════════════════
@@ -367,11 +361,10 @@
     /* Scroll reveal */
     .reveal {
       opacity: 0;
-      transform: translateY(30px) translateZ(0);
+      transform: translateY(30px);
       transition-property: opacity, transform;
       transition-duration: 1s;
       transition-timing-function: ease;
-      backface-visibility: hidden;
     }
 
     .reveal.visible {
