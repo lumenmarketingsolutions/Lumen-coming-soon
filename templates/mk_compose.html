@@ -83,6 +83,15 @@
 <div style="display:grid; grid-template-columns:1fr 320px; gap:24px;">
   <!-- Compose form -->
   <div>
+    {% if channel == 'sms' %}
+    <div style="margin-bottom:20px;">
+      <div style="display:flex; align-items:center; gap:12px; padding:14px 18px; background:rgba(245,158,11,0.06); border:1px solid rgba(245,158,11,0.2); border-radius:12px;">
+        <div style="width:8px; height:8px; border-radius:50%; background:#f59e0b;"></div>
+        <span style="font-size:13px; color:#f59e0b;">SMS is being verified by Twilio and will be ready in the next few days.</span>
+      </div>
+    </div>
+    {% endif %}
+
     {% if channel == 'email' %}
     <div id="gmail-status" style="margin-bottom:20px;">
       <div style="display:flex; align-items:center; gap:12px; padding:14px 18px; background:var(--dark-card); border:1px solid var(--dark-border); border-radius:12px;">
