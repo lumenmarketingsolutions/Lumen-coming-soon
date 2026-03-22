@@ -7,6 +7,7 @@
   <meta property="og:title" content="Marykate, your agent">
   <meta property="og:description" content="Built by Lumen">
   <meta property="og:image" content="/static/og-marykate.png">
+  <link rel="preload" href="/static/logo-mk.png" as="image">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -44,7 +45,7 @@
       position: fixed; left: 0; top: 0; bottom: 0;
       z-index: 50;
     }
-    .sidebar-logo { height: 18px; opacity: 0.9; margin-bottom: 8px; }
+    .sidebar-logo { height: 28px; width: 168px; opacity: 0.9; margin-bottom: 8px; }
     .sidebar-header {
       background: rgba(255,255,255,0.03);
       margin: -24px -16px 0;
@@ -283,7 +284,7 @@
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="sidebar-header">
-        <img src="/static/logo-mk.png" alt="Lumen x BeyondAds" class="sidebar-logo" style="height:28px;">
+        <img src="/static/logo-mk.png" alt="Lumen x BeyondAds" class="sidebar-logo" width="168" height="28">
       </div>
       <nav class="sidebar-nav">
         <a href="/marykate" class="{% if active == 'dashboard' %}active{% endif %}">

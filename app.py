@@ -4,6 +4,7 @@ from email.mime.text import MIMEText
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "lumen-wl-key-2026")
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # cache static files 1 year
 
 ADMIN_PIN = "112501"
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
