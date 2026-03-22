@@ -245,9 +245,18 @@
       .sidebar { transform: translateX(-100%); transition: transform 0.3s; width: 280px; }
       .sidebar.open { transform: translateX(0); }
       .mobile-header { display: flex; }
-      .main { margin-left: 0; padding: 72px 20px 32px; }
-      .stat-grid { grid-template-columns: 1fr 1fr; }
-      .page-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .main { margin-left: 0; padding: 72px 16px 32px; }
+      .stat-grid { grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 24px; }
+      .stat-card { padding: 14px 16px; border-radius: 10px; }
+      .stat-label { font-size: 10px; letter-spacing: 1px; margin-bottom: 4px; }
+      .stat-value { font-size: 20px; }
+      .page-header { flex-direction: column; align-items: flex-start; gap: 8px; margin-bottom: 20px; }
+      .page-title { font-size: 20px; }
+      .page-sub { font-size: 12px; }
+      th { padding: 10px 14px; font-size: 10px; }
+      td { padding: 10px 14px; font-size: 12px; }
+      .table-wrap { border-radius: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .m-hide { display: none !important; }
     }
 
     /* ── Sending overlay ── */
