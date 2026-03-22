@@ -70,7 +70,8 @@
     .mobile-menu {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
       background: var(--dark); z-index: 200;
-      flex-direction: column; align-items: center; justify-content: center; gap: 32px;
+      flex-direction: column; align-items: flex-start; justify-content: center;
+      gap: 28px; padding: 0 40px;
     }
 
     .mobile-menu.open { display: flex; }
@@ -360,6 +361,22 @@
       .beta-field input,
       .beta-field select,
       .beta-field textarea { font-size: 16px !important; }
+
+      .beta-form { gap: 24px; }
+
+      .beta-field label {
+        font-size: 10px;
+        letter-spacing: 1.5px;
+        margin-bottom: 10px;
+      }
+
+      .beta-section { padding: 0 20px 80px; }
+
+      .beta-headline { margin-bottom: 12px; }
+
+      .beta-sub { margin-bottom: 36px; }
+
+      .beta-submit { margin-top: 12px; }
     }
 
     /* ── Footer ── */
