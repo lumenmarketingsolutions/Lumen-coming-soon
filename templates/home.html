@@ -967,11 +967,13 @@
       .m-hide { display: none !important; }
 
       .reveal {
-        transform: none;
+        transform: none !important;
+        transition-property: opacity !important;
+        transition-duration: 0.8s !important;
       }
 
       .reveal.visible {
-        transform: none;
+        transform: none !important;
       }
 
       @keyframes fadeUp {
