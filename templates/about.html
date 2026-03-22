@@ -278,6 +278,7 @@
       background: rgba(10,10,15,0.96);
       backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
       flex-direction: column; align-items: flex-start; justify-content: center; gap: 28px; padding: 0 40px;
+      overflow: hidden; overscroll-behavior: none; touch-action: none;
     }
 
     .mobile-menu.open { display: flex; }
@@ -536,7 +537,11 @@
     function toggleMobileMenu() {
       var menu = document.getElementById('mobile-menu');
       menu.classList.toggle('open');
-      document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+      var isOpen = menu.classList.contains('open');
+      document.body.style.overflow = isOpen ? 'hidden' : '';
+      document.documentElement.style.overflow = isOpen ? 'hidden' : '';
+      document.body.style.position = isOpen ? 'fixed' : '';
+      document.body.style.width = isOpen ? '100%' : '';
     }
 
     // Nav scroll
