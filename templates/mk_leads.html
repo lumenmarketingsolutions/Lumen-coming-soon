@@ -37,23 +37,23 @@
 
 <!-- Filter bar -->
 {% if leads %}
-<div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap; align-items:center;">
-  <select id="filter-batch" class="form-select" style="width:auto; min-width:160px; padding:8px 14px; font-size:12px; border-radius:8px;" onchange="filterLeads()">
+<div class="leads-filter-bar">
+  <select id="filter-batch" class="form-select" style="min-width:120px; padding:8px 14px; font-size:12px; border-radius:8px;" onchange="filterLeads()">
     <option value="">All Batches</option>
     {% for b in batch_names %}
     <option value="{{ b }}">{{ b }}</option>
     {% endfor %}
   </select>
-  <select id="filter-date" class="form-select" style="width:auto; min-width:140px; padding:8px 14px; font-size:12px; border-radius:8px;" onchange="filterLeads()">
+  <select id="filter-date" class="form-select" style="min-width:110px; padding:8px 14px; font-size:12px; border-radius:8px;" onchange="filterLeads()">
     <option value="">All Dates</option>
     <option value="today">Today</option>
     <option value="yesterday">Yesterday</option>
     <option value="week">This Week</option>
   </select>
-  <input type="text" id="filter-tag" class="form-input" placeholder="Filter by tag..." style="width:160px; padding:8px 14px; font-size:12px; border-radius:8px;" oninput="filterLeads()">
-  <input type="text" id="filter-search" class="form-input" placeholder="Search name or email..." style="width:200px; padding:8px 14px; font-size:12px; border-radius:8px;" oninput="filterLeads()">
-  <button id="bulk-delete-btn" class="btn btn-danger btn-sm" style="display:none; margin-left:auto;" onclick="bulkDelete()">
-    Delete Selected (<span id="bulk-count">0</span>)
+  <input type="text" id="filter-tag" class="form-input m-hide" placeholder="Filter by tag..." style="width:160px; padding:8px 14px; font-size:12px; border-radius:8px;" oninput="filterLeads()">
+  <input type="text" id="filter-search" class="form-input" placeholder="Search..." style="flex:1; min-width:100px; padding:8px 14px; font-size:12px; border-radius:8px;" oninput="filterLeads()">
+  <button id="bulk-delete-btn" class="btn btn-danger btn-sm" style="display:none;" onclick="bulkDelete()">
+    Delete (<span id="bulk-count">0</span>)
   </button>
 </div>
 
@@ -78,13 +78,13 @@
         </th>
         <th>Name</th>
         <th>Email</th>
-        <th>Phone</th>
-        <th>Tags</th>
-        <th>Batch</th>
-        <th>Uploaded</th>
-        <th>Sent</th>
-        <th>Last Contacted</th>
-        <th></th>
+        <th class="m-hide">Phone</th>
+        <th class="m-hide">Tags</th>
+        <th class="m-hide">Batch</th>
+        <th class="m-hide">Uploaded</th>
+        <th class="m-hide">Sent</th>
+        <th class="m-hide">Last Contacted</th>
+        <th class="m-hide"></th>
       </tr>
     </thead>
     <tbody id="leads-tbody">
@@ -99,20 +99,20 @@
             {{ l['name'] or '(no name)' }}
           </a>
         </td>
-        <td>{{ l['email'] or '—' }}</td>
-        <td>{{ l['phone'] or '—' }}</td>
-        <td style="font-size:12px;">{{ l['tags'] or '' }}</td>
-        <td style="font-size:12px; color:var(--text-muted);">{{ l['batch_name'] or '' }}</td>
-        <td style="font-size:12px; color:var(--text-muted);">{{ l['batch_date'] or (l['created_at'][:10] if l['created_at'] else '—') }}</td>
-        <td style="text-align:center;">
+        <td style="max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ l['email'] or '—' }}</td>
+        <td class="m-hide">{{ l['phone'] or '—' }}</td>
+        <td class="m-hide" style="font-size:12px;">{{ l['tags'] or '' }}</td>
+        <td class="m-hide" style="font-size:12px; color:var(--text-muted);">{{ l['batch_name'] or '' }}</td>
+        <td class="m-hide" style="font-size:12px; color:var(--text-muted);">{{ l['batch_date'] or (l['created_at'][:10] if l['created_at'] else '—') }}</td>
+        <td class="m-hide" style="text-align:center;">
           {% if l['send_count'] %}
           <span style="font-size:11px; color:var(--teal); font-weight:600;">{{ l['send_count'] }}x</span>
           {% else %}
           <span style="font-size:11px; color:var(--text-muted);">0</span>
           {% endif %}
         </td>
-        <td style="font-size:12px; color:var(--text-muted);">{{ l['last_contacted'][:10] if l['last_contacted'] else '—' }}</td>
-        <td style="text-align:right;">
+        <td class="m-hide" style="font-size:12px; color:var(--text-muted);">{{ l['last_contacted'][:10] if l['last_contacted'] else '—' }}</td>
+        <td class="m-hide" style="text-align:right;">
           <button class="btn btn-danger btn-sm" onclick="deleteLead({{ l['id'] }}, this)">Remove</button>
         </td>
       </tr>
@@ -222,10 +222,21 @@
     color: var(--text-muted);
   }
 
+  .leads-filter-bar {
+    display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;
+  }
+
   @media (max-width: 768px) {
-    .drop-zone { padding: 28px 16px; }
-    .drop-icon { width: 32px; height: 32px; }
-    #drop-batch-name { width: 160px !important; }
+    .leads-filter-bar { gap: 8px; margin-bottom: 12px; }
+    .leads-filter-bar select, .leads-filter-bar input { font-size: 11px !important; padding: 6px 10px !important; }
+    .drop-zone { padding: 24px 16px; margin-bottom: 16px; }
+    .drop-icon { width: 28px; height: 28px; margin-bottom: 8px; }
+    .drop-title { font-size: 13px; }
+    .drop-sub { font-size: 11px; margin-bottom: 12px; }
+    #drop-batch-name { width: 140px !important; font-size: 11px !important; padding: 6px 10px !important; }
+    .batch-card { padding: 8px 12px; }
+    .batch-card-name { font-size: 12px; }
+    .batch-card-meta { font-size: 10px; }
   }
 </style>
 

@@ -18,7 +18,7 @@
         <th>Channel</th>
         <th>Sent</th>
         <th>Status</th>
-        <th>Date</th>
+        <th class="m-hide">Date</th>
       </tr>
     </thead>
     <tbody>
@@ -28,7 +28,7 @@
         <td style="text-transform:uppercase; font-size:11px; font-weight:600; letter-spacing:1px;">{{ c[2] }}</td>
         <td>{{ c[6] }}</td>
         <td><span class="badge badge-{{ c[5] }}">{{ c[5] }}</span></td>
-        <td style="font-size:12px;">{{ c[7][:16] }}</td>
+        <td class="m-hide" style="font-size:12px;">{{ c[7][:16] }}</td>
       </tr>
       {% endfor %}
     </tbody>

@@ -54,6 +54,15 @@
     border-radius:6px; color:var(--text); outline:none;
   }
   .var-dropdown-custom input:focus { border-color:var(--teal); }
+  .compose-grid { display:grid; grid-template-columns:1fr 320px; gap:24px; }
+  @media (max-width: 768px) {
+    .compose-grid { grid-template-columns:1fr; gap:16px; }
+    .compose-tabs { gap:6px !important; margin-bottom:16px !important; }
+    .compose-tabs .btn-sm { padding:6px 12px; font-size:11px; }
+    .compose-tabs select { font-size:11px !important; padding:6px 10px !important; min-width:120px !important; }
+    .dup-modal { padding:24px; margin:0 16px; }
+    .var-dropdown { right:0; left:auto; }
+  }
 </style>
 
 <div class="page-header">
@@ -64,7 +73,7 @@
 </div>
 
 <!-- Channel tabs + template selector -->
-<div style="display:flex; gap:8px; margin-bottom:20px; align-items:center; flex-wrap:wrap;">
+<div class="compose-tabs" style="display:flex; gap:8px; margin-bottom:20px; align-items:center; flex-wrap:wrap;">
   <a href="/marykate/compose?channel=email" class="btn btn-sm {% if channel == 'email' %}btn-teal{% else %}btn-outline{% endif %}">Email</a>
   <a href="/marykate/compose?channel=sms" class="btn btn-sm {% if channel == 'sms' %}btn-teal{% else %}btn-outline{% endif %}">SMS</a>
   <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
@@ -80,7 +89,7 @@
   </div>
 </div>
 
-<div style="display:grid; grid-template-columns:1fr 320px; gap:24px;">
+<div class="compose-grid">
   <!-- Compose form -->
   <div>
     {% if channel == 'sms' %}

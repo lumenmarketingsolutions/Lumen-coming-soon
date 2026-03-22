@@ -1,6 +1,16 @@
 {% extends "mk_base.html" %}
 {% block title %}{{ lead['name'] or 'Lead' }}{% endblock %}
 {% block content %}
+<style>
+  @media (max-width: 768px) {
+    .lead-info-card { padding:20px !important; }
+    .lead-info-card h1 { font-size:18px !important; }
+    .lead-meta { gap:12px !important; font-size:11px !important; }
+    .lead-section { padding:20px !important; margin-bottom:16px !important; }
+    .timeline-item { gap:10px !important; }
+    .timeline-item .timeline-ts { font-size:10px !important; }
+  }
+</style>
 <div style="margin-bottom:24px;">
   <a href="/marykate/leads" style="color:var(--text-dim); text-decoration:none; font-size:13px; display:inline-flex; align-items:center; gap:6px; transition:color 0.2s;"
      onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">
@@ -10,7 +20,7 @@
 </div>
 
 <!-- Lead info card -->
-<div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:14px; padding:28px; margin-bottom:24px;">
+<div class="lead-info-card" style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:14px; padding:28px; margin-bottom:24px;">
   <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px;">
     <div>
       <h1 style="font-size:22px; font-weight:700; margin-bottom:6px;">{{ lead['name'] or '(no name)' }}</h1>
@@ -31,7 +41,7 @@
       {% endif %}
     </div>
   </div>
-  <div style="display:flex; gap:24px; margin-top:16px; flex-wrap:wrap; font-size:12px; color:var(--text-muted);">
+  <div class="lead-meta" style="display:flex; gap:24px; margin-top:16px; flex-wrap:wrap; font-size:12px; color:var(--text-muted);">
     {% if lead['batch_name'] %}
     <span>Batch: <strong style="color:var(--text-dim);">{{ lead['batch_name'] }}</strong></span>
     {% endif %}
@@ -44,7 +54,7 @@
 </div>
 
 <!-- Notes -->
-<div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:14px; padding:28px; margin-bottom:24px;">
+<div class="lead-section" style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:14px; padding:28px; margin-bottom:24px;">
   <h3 style="font-size:14px; font-weight:600; margin-bottom:16px; color:var(--text-dim);">Notes</h3>
   <textarea class="form-textarea" id="lead-notes" placeholder="Add notes about this lead..." style="min-height:100px;">{{ lead['notes'] or '' }}</textarea>
   <div style="margin-top:12px; text-align:right;">
@@ -53,12 +63,12 @@
 </div>
 
 <!-- Activity timeline -->
-<div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:14px; padding:28px;">
+<div class="lead-section" style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:14px; padding:28px;">
   <h3 style="font-size:14px; font-weight:600; margin-bottom:16px; color:var(--text-dim);">Activity Timeline</h3>
   {% if send_logs %}
   <div style="display:flex; flex-direction:column; gap:0;">
     {% for log in send_logs %}
-    <div style="display:flex; align-items:flex-start; gap:16px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.03);{% if loop.last %} border-bottom:none;{% endif %}">
+    <div class="timeline-item" style="display:flex; align-items:flex-start; gap:16px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.03);{% if loop.last %} border-bottom:none;{% endif %}">
       <div style="width:32px; height:32px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
         {% if log['channel'] == 'email' %}background:rgba(18,143,196,0.12);{% else %}background:rgba(128,47,222,0.12);{% endif %}">
         {% if log['channel'] == 'email' %}
@@ -77,7 +87,7 @@
         <p style="font-size:12px; color:var(--red); margin-top:4px;">{{ log['error'] }}</p>
         {% endif %}
       </div>
-      <span style="font-size:11px; color:var(--text-muted); white-space:nowrap;">{{ log['sent_at'][:16] }}</span>
+      <span class="timeline-ts" style="font-size:11px; color:var(--text-muted); white-space:nowrap;">{{ log['sent_at'][:16] }}</span>
     </div>
     {% endfor %}
   </div>

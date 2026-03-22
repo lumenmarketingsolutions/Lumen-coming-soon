@@ -33,6 +33,11 @@
     border-radius:6px; color:var(--text); outline:none;
   }
   .var-dropdown-custom input:focus { border-color:var(--teal); }
+  @media (max-width: 768px) {
+    .tpl-grid { grid-template-columns:1fr !important; gap:12px !important; }
+    .tpl-grid .stat-card { padding:18px; }
+    .var-dropdown { right:0; left:auto; }
+  }
 </style>
 <div class="page-header">
   <div>
@@ -43,7 +48,7 @@
 </div>
 
 {% if templates %}
-<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px;">
+<div class="tpl-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px;">
   {% for t in templates %}
   <div class="stat-card" style="position:relative;">
     <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
