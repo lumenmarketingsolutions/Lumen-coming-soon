@@ -306,10 +306,24 @@
       .nav-menu-btn { display: block; }
       section { padding: 80px 20px; }
       .values-grid { grid-template-columns: 1fr; }
-      .about-hero { min-height: 60vh; padding-top: calc(env(safe-area-inset-top, 0px) + 56px); }
+      .about-hero {
+        min-height: auto;
+        padding: calc(env(safe-area-inset-top, 0px) + 80px) 20px 60px;
+      }
+      .about-headline {
+        font-size: 32px;
+        line-height: 1.2;
+        letter-spacing: -1px;
+        margin-bottom: 20px;
+      }
+      .about-intro {
+        font-size: 15px;
+        line-height: 1.7;
+      }
       .pull-quote { padding: 80px 20px; }
       .about-cta { padding: 80px 20px; }
       .footer-inner { flex-direction: column; gap: 20px; text-align: center; }
+      input, select, textarea { font-size: 16px !important; }
     }
   </style>
 </head>
