@@ -45,7 +45,7 @@
       {% endfor %}
     </select>
     {% endif %}
-    <button class="btn btn-outline btn-sm" onclick="document.getElementById('save-tpl-modal').style.display='flex'">Save as Template</button>
+    <button class="btn btn-outline btn-sm" onclick="openNewTemplate()">+ New Template</button>
   </div>
 </div>
 
@@ -126,17 +126,35 @@
   </div>
 </div>
 
-<!-- Save as Template modal -->
-<div id="save-tpl-modal" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(8,8,9,0.85); align-items:center; justify-content:center;">
-  <div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:16px; padding:32px; width:100%; max-width:420px;">
-    <h3 style="font-size:16px; font-weight:700; margin-bottom:24px;">Save as Template</h3>
+<!-- New Template modal -->
+<div id="tpl-modal" style="display:none; position:fixed; inset:0; z-index:200; background:rgba(8,8,9,0.85); align-items:center; justify-content:center;">
+  <div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:16px; padding:32px; width:100%; max-width:520px;">
+    <h3 style="font-size:16px; font-weight:700; margin-bottom:24px;">New Template</h3>
     <div class="form-group">
       <label class="form-label">Template Name</label>
-      <input type="text" class="form-input" id="save-tpl-name" placeholder="e.g. Cold Intro, Follow Up">
+      <input type="text" class="form-input" id="tpl-name" placeholder="e.g. Cold Intro, Follow Up, Re-engagement">
     </div>
+    <div class="form-group">
+      <label class="form-label">Channel</label>
+      <select class="form-select" id="tpl-channel" onchange="toggleSubject()">
+        <option value="email">Email</option>
+        <option value="sms">SMS</option>
+      </select>
+    </div>
+    <div class="form-group" id="tpl-subject-group">
+      <label class="form-label">Subject Line</label>
+      <input type="text" class="form-input" id="tpl-subject" placeholder="Email subject">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Body</label>
+      <textarea class="form-textarea" id="tpl-body" placeholder="Write your template here...&#10;&#10;Use {{name}} to personalize."></textarea>
+    </div>
+    <p style="font-size:11px; color:var(--text-muted); margin-bottom:20px;">
+      Use <code style="color:var(--teal);">{% raw %}{{name}}{% endraw %}</code> to insert the lead's name.
+    </p>
     <div style="display:flex; gap:12px; justify-content:flex-end;">
-      <button class="btn btn-outline btn-sm" onclick="document.getElementById('save-tpl-modal').style.display='none'">Cancel</button>
-      <button class="btn btn-teal btn-sm" onclick="saveAsTemplate()">Save</button>
+      <button class="btn btn-outline btn-sm" onclick="closeTplModal()">Cancel</button>
+      <button class="btn btn-teal btn-sm" onclick="saveTemplate()">Save Template</button>
     </div>
   </div>
 </div>
@@ -322,23 +340,39 @@ function loadTemplate(id) {
   window.location.href = '/marykate/compose?channel=' + channel + '&template=' + id;
 }
 
-function saveAsTemplate() {
-  var name = document.getElementById('save-tpl-name').value.trim();
-  if (!name) { showToast('Give it a name'); return; }
-  var body = document.getElementById('compose-body').value.trim();
-  if (!body) { showToast('Write a message first'); return; }
-  var data = { name: name, channel: channel, body: body, subject: '' };
-  if (channel === 'email') {
-    var subj = document.getElementById('compose-subject');
-    if (subj) data.subject = subj.value.trim();
-  }
+function openNewTemplate() {
+  document.getElementById('tpl-name').value = '';
+  document.getElementById('tpl-channel').value = channel;
+  document.getElementById('tpl-subject').value = '';
+  document.getElementById('tpl-body').value = '';
+  toggleSubject();
+  document.getElementById('tpl-modal').style.display = 'flex';
+}
+
+function closeTplModal() {
+  document.getElementById('tpl-modal').style.display = 'none';
+}
+
+function toggleSubject() {
+  var ch = document.getElementById('tpl-channel').value;
+  document.getElementById('tpl-subject-group').style.display = ch === 'email' ? '' : 'none';
+}
+
+function saveTemplate() {
+  var data = {
+    name: document.getElementById('tpl-name').value.trim(),
+    channel: document.getElementById('tpl-channel').value,
+    subject: document.getElementById('tpl-subject').value.trim(),
+    body: document.getElementById('tpl-body').value.trim(),
+  };
+  if (!data.name || !data.body) { showToast('Name and body required'); return; }
   fetch('/marykate/api/templates', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
   }).then(function(r) { return r.json(); })
     .then(function(d) {
-      document.getElementById('save-tpl-modal').style.display = 'none';
+      closeTplModal();
       if (d.ok) {
         showToast('Template saved', 'success');
         setTimeout(function() { location.reload(); }, 500);
