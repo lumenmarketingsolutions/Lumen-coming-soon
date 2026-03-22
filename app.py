@@ -12,7 +12,7 @@ NOTIFY_EMAIL = "kendall@lumenmarketing.co"
 OWNER_IPS = {"209.127.238.130"}
 
 # ── Marykate Agent Config ──
-MK_PIN = os.environ.get("MK_PIN", "112501")
+MK_PIN = os.environ.get("MK_PIN", "091005")
 GMAIL_CLIENT_ID = os.environ.get("GMAIL_CLIENT_ID", "")
 GMAIL_CLIENT_SECRET = os.environ.get("GMAIL_CLIENT_SECRET", "")
 GMAIL_REDIRECT_URI = os.environ.get("GMAIL_REDIRECT_URI", "https://lumenmarketing.co/marykate/gmail/callback")
