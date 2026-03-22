@@ -7,7 +7,7 @@
     <p class="page-sub"><span id="filtered-count">{{ leads|length }}</span> of {{ leads|length }} leads</p>
   </div>
   <div style="display:flex; gap:10px;">
-    <button class="btn btn-outline btn-sm" onclick="document.getElementById('add-modal').style.display='flex'">+ Add Lead</button>
+    <button class="btn btn-outline btn-sm d-add-lead" onclick="document.getElementById('add-modal').style.display='flex'">+ Add Lead</button>
   </div>
 </div>
 
@@ -27,10 +27,11 @@
     {% endif %}
     <div style="display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap;">
       <input type="text" class="form-input" id="drop-batch-name" placeholder="Batch name (optional)" style="width:220px; padding:8px 14px; font-size:12px; border-radius:8px; text-align:center;">
-      <label class="btn btn-teal btn-sm" style="cursor:pointer; margin:0;">
+      <label class="btn btn-outline btn-sm" style="cursor:pointer; margin:0;">
         Browse Files
         <input type="file" accept=".csv,.xlsx,.xls" style="display:none;" onchange="handleFileSelect(this.files[0])">
       </label>
+      <button class="btn btn-teal m-add-lead" style="display:none; width:100%; justify-content:center; padding:12px;" onclick="document.getElementById('add-modal').style.display='flex'">+ Add Lead</button>
     </div>
   </div>
 </div>
@@ -229,14 +230,19 @@
   @media (max-width: 768px) {
     .leads-filter-bar { gap: 8px; margin-bottom: 12px; }
     .leads-filter-bar select, .leads-filter-bar input { font-size: 11px !important; padding: 6px 10px !important; }
-    .drop-zone { padding: 24px 16px; margin-bottom: 16px; }
-    .drop-icon { width: 28px; height: 28px; margin-bottom: 8px; }
-    .drop-title { font-size: 13px; }
-    .drop-sub { font-size: 11px; margin-bottom: 12px; }
-    #drop-batch-name { width: 140px !important; font-size: 11px !important; padding: 6px 10px !important; }
+    .drop-zone { padding: 20px 16px; margin-bottom: 16px; border-style: solid; border-width: 1px; border-color: var(--dark-border); }
+    .drop-icon, .drop-title, .drop-sub { display: none; }
+    .drop-zone-inner { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
+    .drop-zone-inner > div { margin: 0; width: 100%; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    #drop-batch-name { flex: 1; min-width: 0; font-size: 12px !important; padding: 10px 14px !important; width: auto !important; text-align: left !important; }
+    .m-add-lead { display: flex !important; }
+    .d-add-lead { display: none !important; }
     .batch-card { padding: 8px 12px; }
     .batch-card-name { font-size: 12px; }
     .batch-card-meta { font-size: 10px; }
+  }
+  @media (min-width: 769px) {
+    .m-add-lead { display: none !important; }
   }
 </style>
 
