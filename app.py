@@ -754,6 +754,42 @@ def test_sequence_email():
     except Exception as e:
         return f"Error: {e}"
 
+@app.route("/admin/blast-sequence-1")
+def blast_sequence_1():
+    """One-time blast of sequence email 1 to waitlist."""
+    recipients = [
+        "zachloos160@gmail.com",
+        "allierich65@gmail.com",
+        "marykatezarehghazarian@gmail.com",
+        "alphonzolmajor@gmail.com",
+        "kobidodd2@gmail.com",
+        "n.wilkinson@launchpoint.dev",
+        "kendallwdavis11@gmail.com",
+        "darbimckean@gmail.com",
+        "jaredponce2603@gmail.com",
+    ]
+    html = render_template("sequence_email_1.html")
+    results = []
+    for email in recipients:
+        try:
+            resp = requests.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {RESEND_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "from": "Lumen <kendall@lumenmarketing.co>",
+                    "to": [email],
+                    "subject": "The light always wins.",
+                    "html": html,
+                },
+            )
+            results.append(f"{email}: {resp.status_code}")
+        except Exception as e:
+            results.append(f"{email}: ERROR - {e}")
+    return "<br>".join(results)
+
 @app.route("/api/funnel-signup", methods=["POST"])
 def funnel_signup():
     data = request.get_json() or {}
