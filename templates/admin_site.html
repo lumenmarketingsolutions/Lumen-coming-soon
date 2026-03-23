@@ -42,7 +42,7 @@
 
     /* Stats grid */
     .stats-grid {
-      display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:28px;
+      display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:28px;
     }
     .stat-card {
       background:#111118; border:1px solid #1a1a25;
@@ -177,6 +177,10 @@
         <p class="stat-label">Avg Time</p>
       </div>
       <div class="stat-card">
+        <p class="stat-val green" id="s-return">&mdash;</p>
+        <p class="stat-label">Returning</p>
+      </div>
+      <div class="stat-card">
         <p class="stat-val" id="s-apps">&mdash;</p>
         <p class="stat-label">Applications</p>
       </div>
@@ -262,6 +266,7 @@ function loadData() {
     document.getElementById('s-views').textContent = d.total_views;
     document.getElementById('s-unique').textContent = d.unique_visitors;
     document.getElementById('s-time').textContent = fmtTime(d.total_avg_time);
+    document.getElementById('s-return').textContent = d.return_visitors;
     document.getElementById('s-apps').textContent = d.total_apps;
 
     // Page breakdown

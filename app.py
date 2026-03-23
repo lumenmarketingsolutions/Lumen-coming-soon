@@ -1484,6 +1484,13 @@ def api_main_site_analytics():
     ).fetchone()
     unique_visitors = unique_row[0]
 
+    # Return visitors (IPs that have visited more than once)
+    return_row = con.execute(
+        f"SELECT COUNT(*) FROM (SELECT ip, COUNT(*) as cnt FROM page_views WHERE ip NOT IN ({owner_ph}) AND ip != ''" + date_filter + " GROUP BY ip HAVING cnt > 1)",
+        (*OWNER_IPS, *date_params)
+    ).fetchone()
+    return_visitors = return_row[0] if return_row else 0
+
     # Device breakdown
     devices = {"mobile": 0, "desktop": 0}
     device_rows = con.execute(
@@ -1497,9 +1504,9 @@ def api_main_site_analytics():
         else:
             devices["desktop"] += 1
 
-    # Top referrers
+    # Top referrers (exclude internal navigation)
     ref_rows = con.execute(
-        f"SELECT referrer, COUNT(*) as cnt FROM page_views WHERE referrer != '' AND ip NOT IN ({owner_ph})" + date_filter + " GROUP BY referrer ORDER BY cnt DESC LIMIT 10",
+        f"SELECT referrer, COUNT(*) as cnt FROM page_views WHERE referrer != '' AND referrer NOT LIKE '%lumenmarketing.co%' AND ip NOT IN ({owner_ph})" + date_filter + " GROUP BY referrer ORDER BY cnt DESC LIMIT 10",
         (*OWNER_IPS, *date_params)
     ).fetchall()
     referrers = [{"referrer": r[0], "count": r[1]} for r in ref_rows]
@@ -1540,6 +1547,7 @@ def api_main_site_analytics():
         "total_views": total_views,
         "total_avg_time": total_avg_time,
         "unique_visitors": unique_visitors,
+        "return_visitors": return_visitors,
         "page_stats": page_stats,
         "daily": daily,
         "daily_pages": daily_pages,
