@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LumenFunnel Beta — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family:'Inter',-apple-system,sans-serif;
+      background:#0a0a0f; color:#e8e8f0;
+      min-height:100vh; -webkit-font-smoothing:antialiased;
+    }
+    .container { max-width:700px; margin:0 auto; padding:40px 20px 80px; }
+
+    .back {
+      display:inline-flex; align-items:center; gap:6px;
+      font-size:12px; color:#6b6b80; text-decoration:none;
+      margin-bottom:24px; transition:color 0.2s;
+    }
+    .back:hover { color:#e8e8f0; }
+
+    h1 { font-size:22px; font-weight:800; letter-spacing:-0.5px; margin-bottom:4px; }
+    .sub { font-size:13px; color:#6b6b80; margin-bottom:28px; }
+
+    .count {
+      font-size:12px; font-weight:600; color:#7c4dff;
+      background:rgba(97,40,219,0.1); padding:3px 10px;
+      border-radius:6px; display:inline-block; margin-bottom:20px;
+    }
+
+    .entry {
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:14px; padding:20px 24px; margin-bottom:10px;
+    }
+    .entry-header {
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:10px;
+    }
+    .entry-name { font-size:15px; font-weight:700; }
+    .entry-date { font-size:11px; color:#6b6b80; }
+    .entry-email {
+      font-size:13px; color:#7c4dff; margin-bottom:10px;
+      text-decoration:none; display:inline-block;
+    }
+    .entry-field { margin-bottom:6px; }
+    .entry-label {
+      font-size:10px; font-weight:700; letter-spacing:1px;
+      text-transform:uppercase; color:#44445a; margin-bottom:2px;
+    }
+    .entry-val { font-size:13px; color:#a0a0b0; line-height:1.5; }
+
+    .empty {
+      text-align:center; padding:60px 20px;
+      font-size:14px; color:#44445a;
+    }
+
+    @media(max-width:768px) {
+      .entry { padding:16px 18px; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <a href="/admin" class="back">&larr; Back to Command Center</a>
+  <h1>LumenFunnel Beta</h1>
+  <p class="sub">Beta access applications</p>
+  <span class="count">{{ entries|length }} signup{{ 's' if entries|length != 1 }}</span>
+
+  {% if entries %}
+    {% for e in entries %}
+    <div class="entry">
+      <div class="entry-header">
+        <span class="entry-name">{{ e.name or 'No name' }}</span>
+        <span class="entry-date">{{ e.date }}</span>
+      </div>
+      <a href="mailto:{{ e.email }}" class="entry-email">{{ e.email }}</a>
+      {% if e.agency %}
+      <div class="entry-field">
+        <p class="entry-label">Agency</p>
+        <p class="entry-val">{{ e.agency }}</p>
+      </div>
+      {% endif %}
+      {% if e.clients %}
+      <div class="entry-field">
+        <p class="entry-label">Clients</p>
+        <p class="entry-val">{{ e.clients }}</p>
+      </div>
+      {% endif %}
+      {% if e.spend %}
+      <div class="entry-field">
+        <p class="entry-label">Monthly Spend</p>
+        <p class="entry-val">{{ e.spend }}</p>
+      </div>
+      {% endif %}
+      {% if e.bottleneck %}
+      <div class="entry-field">
+        <p class="entry-label">Bottleneck</p>
+        <p class="entry-val">{{ e.bottleneck }}</p>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty">No beta applications yet.</div>
+  {% endif %}
+</div>
+</body>
+</html>

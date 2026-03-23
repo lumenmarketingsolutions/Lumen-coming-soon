@@ -209,6 +209,19 @@
       </div>
       <span class="card-arrow">&rsaquo;</span>
     </a>
+    <a class="card" href="/admin/funnel-beta">
+      <div class="card-icon">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3h12l-3 5v5l-6 2V8z"/></svg>
+      </div>
+      <div class="card-body">
+        <p class="card-title">LumenFunnel Beta</p>
+        <p class="card-desc">Beta access applications and signups</p>
+        <div class="card-stats">
+          <span class="stat-tag" id="fb-count">&mdash;</span>
+        </div>
+      </div>
+      <span class="card-arrow">&rsaquo;</span>
+    </a>
   </div>
 
   <!-- Tools -->
@@ -340,6 +353,8 @@ function loadOverview(){
 
     var avEl=document.getElementById('av-onboard');
     if(avEl) avEl.textContent=(d.avalon_onboard_count||0)+' response'+((d.avalon_onboard_count||0)!==1?'s':'');
+    var fbEl=document.getElementById('fb-count');
+    if(fbEl) fbEl.textContent=(d.funnel_beta_count||0)+' signup'+((d.funnel_beta_count||0)!==1?'s':'');
 
     if(d.dashboards&&d.dashboards.length){
       d.dashboards.forEach(function(db){

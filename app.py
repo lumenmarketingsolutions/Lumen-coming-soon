@@ -667,6 +667,28 @@ def admin_main_site():
         return redirect(url_for("admin_landing"))
     return render_template("admin_site.html")
 
+@app.route("/admin/funnel-beta")
+def admin_funnel_beta():
+    if not session.get("wl_auth"):
+        return redirect(url_for("admin_landing"))
+    con = sqlite3.connect(DB_PATH)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS funnel_beta (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT DEFAULT '',
+            email TEXT NOT NULL,
+            agency TEXT DEFAULT '',
+            clients TEXT DEFAULT '',
+            spend TEXT DEFAULT '',
+            bottleneck TEXT DEFAULT '',
+            created_at TEXT NOT NULL
+        )
+    """)
+    rows = con.execute("SELECT name, email, agency, clients, spend, bottleneck, created_at FROM funnel_beta ORDER BY id DESC").fetchall()
+    con.close()
+    entries = [{"name": r[0], "email": r[1], "agency": r[2], "clients": r[3], "spend": r[4], "bottleneck": r[5], "date": r[6][:10]} for r in rows]
+    return render_template("admin_funnel_beta.html", authed=True, entries=entries)
+
 @app.route("/admin/crm")
 def admin_crm():
     if not session.get("wl_auth"):
@@ -1309,6 +1331,11 @@ def api_los_overview():
     except Exception:
         avalon_onboard_count = 0
 
+    try:
+        funnel_beta_count = con.execute("SELECT COUNT(*) FROM funnel_beta").fetchone()[0]
+    except Exception:
+        funnel_beta_count = 0
+
     dashboards = []
     try:
         dbs = con.execute("SELECT name, slug, url FROM client_dashboards ORDER BY id").fetchall()
@@ -1334,6 +1361,7 @@ def api_los_overview():
         "lead_count": lead_count, "pipeline_value": pipeline_value,
         "won_value": won_value, "daily": daily, "dashboards": dashboards,
         "avalon_onboard_count": avalon_onboard_count,
+        "funnel_beta_count": funnel_beta_count,
     })
 
 @app.route("/api/main-site-analytics")
