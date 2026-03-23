@@ -1368,15 +1368,118 @@ def api_los_overview():
 def api_main_site_analytics():
     if not session.get("wl_auth"):
         return jsonify({"ok": False}), 401
+    date_from = request.args.get("from", "")
+    date_to = request.args.get("to", "")
     con = sqlite3.connect(DB_PATH)
+
+    # Build date filter
+    date_filter = ""
+    date_params = []
+    if date_from:
+        date_filter += " AND timestamp >= ?"
+        date_params.append(date_from + "T00:00:00")
+    if date_to:
+        date_filter += " AND timestamp < ?"
+        # Add one day to make it inclusive
+        date_params.append(date_to + "T23:59:59")
+
+    # Per-page views and avg time (exclude owner IPs)
+    owner_ph = ",".join("?" for _ in OWNER_IPS)
+    pages = ["home", "about", "funnel", "coming-soon"]
+    page_stats = []
+    for p in pages:
+        row = con.execute(
+            f"SELECT COUNT(*), COALESCE(AVG(CASE WHEN time_on_page > 0 THEN time_on_page END), 0) FROM page_views WHERE page = ? AND ip NOT IN ({owner_ph})" + date_filter,
+            (p, *OWNER_IPS, *date_params)
+        ).fetchone()
+        page_stats.append({"page": p, "views": row[0], "avg_time": round(row[1], 1)})
+
+    # Total views (exclude owner)
+    total_row = con.execute(
+        f"SELECT COUNT(*), COALESCE(AVG(CASE WHEN time_on_page > 0 THEN time_on_page END), 0) FROM page_views WHERE ip NOT IN ({owner_ph})" + date_filter,
+        (*OWNER_IPS, *date_params)
+    ).fetchone()
+    total_views = total_row[0]
+    total_avg_time = round(total_row[1], 1)
+
+    # Daily breakdown for chart
+    daily = []
+    for i in range(13, -1, -1):
+        d = (datetime.datetime.utcnow() - datetime.timedelta(days=i)).strftime("%Y-%m-%d")
+        if date_from and d < date_from:
+            continue
+        if date_to and d > date_to:
+            continue
+        cnt = con.execute(
+            f"SELECT COUNT(*) FROM page_views WHERE timestamp LIKE ? AND ip NOT IN ({owner_ph})",
+            (d + "%", *OWNER_IPS)
+        ).fetchone()[0]
+        daily.append({"date": d, "views": cnt})
+
+    # Daily per-page breakdown
+    daily_pages = {}
+    for p in ["home", "about", "funnel"]:
+        dp = []
+        for i in range(13, -1, -1):
+            d = (datetime.datetime.utcnow() - datetime.timedelta(days=i)).strftime("%Y-%m-%d")
+            if date_from and d < date_from:
+                continue
+            if date_to and d > date_to:
+                continue
+            cnt = con.execute(
+                f"SELECT COUNT(*) FROM page_views WHERE page = ? AND timestamp LIKE ? AND ip NOT IN ({owner_ph})",
+                (p, d + "%", *OWNER_IPS)
+            ).fetchone()[0]
+            dp.append({"date": d, "views": cnt})
+        daily_pages[p] = dp
+
+    # Unique visitors (by IP, exclude owner)
+    unique_row = con.execute(
+        f"SELECT COUNT(DISTINCT ip) FROM page_views WHERE ip NOT IN ({owner_ph})" + date_filter,
+        (*OWNER_IPS, *date_params)
+    ).fetchone()
+    unique_visitors = unique_row[0]
+
+    # Device breakdown
+    devices = {"mobile": 0, "desktop": 0}
+    device_rows = con.execute(
+        f"SELECT user_agent FROM page_views WHERE ip NOT IN ({owner_ph})" + date_filter,
+        (*OWNER_IPS, *date_params)
+    ).fetchall()
+    for dr in device_rows:
+        ua = (dr[0] or "").lower()
+        if any(m in ua for m in ["iphone", "android", "mobile"]):
+            devices["mobile"] += 1
+        else:
+            devices["desktop"] += 1
+
+    # Top referrers
+    ref_rows = con.execute(
+        f"SELECT referrer, COUNT(*) as cnt FROM page_views WHERE referrer != '' AND ip NOT IN ({owner_ph})" + date_filter + " GROUP BY referrer ORDER BY cnt DESC LIMIT 10",
+        (*OWNER_IPS, *date_params)
+    ).fetchall()
+    referrers = [{"referrer": r[0], "count": r[1]} for r in ref_rows]
+
+    # Applications
     try:
+        app_filter = ""
+        app_params = []
+        if date_from:
+            app_filter += " AND created_at >= ?"
+            app_params.append(date_from)
+        if date_to:
+            app_filter += " AND created_at <= ?"
+            app_params.append(date_to + "T23:59:59")
         apps = con.execute(
-            "SELECT email, business, revenue, marketing, challenge, created_at FROM applications ORDER BY id DESC"
+            "SELECT email, business, revenue, marketing, challenge, created_at FROM applications WHERE 1=1" + app_filter + " ORDER BY id DESC",
+            app_params
         ).fetchall()
         applications = [{"email": a[0], "business": a[1], "revenue": a[2],
                          "marketing": a[3], "challenge": a[4], "created_at": a[5]} for a in apps]
     except Exception:
         applications = []
+
+    # Funnel events
     try:
         funnel = con.execute(
             "SELECT event, step, value, COUNT(*) as cnt FROM funnel_events GROUP BY event, step, value ORDER BY cnt DESC"
@@ -1384,8 +1487,21 @@ def api_main_site_analytics():
         funnel_stats = [{"event": f[0], "step": f[1], "value": f[2], "count": f[3]} for f in funnel]
     except Exception:
         funnel_stats = []
+
     con.close()
-    return jsonify({"applications": applications, "funnel": funnel_stats, "total_apps": len(applications)})
+    return jsonify({
+        "applications": applications,
+        "funnel": funnel_stats,
+        "total_apps": len(applications),
+        "total_views": total_views,
+        "total_avg_time": total_avg_time,
+        "unique_visitors": unique_visitors,
+        "page_stats": page_stats,
+        "daily": daily,
+        "daily_pages": daily_pages,
+        "devices": devices,
+        "referrers": referrers,
+    })
 
 @app.route("/api/dashboard/<slug>/analytics")
 def api_dashboard_analytics(slug):

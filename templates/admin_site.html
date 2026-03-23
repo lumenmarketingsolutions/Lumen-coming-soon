@@ -18,28 +18,99 @@
       position:sticky; top:0; background:#0a0a0f; z-index:100;
     }
     .back { font-size:13px; color:#6b6b80; text-decoration:none; font-weight:500; }
-    .topbar-title { font-size:16px; font-weight:700; }
-    .container { max-width:600px; margin:0 auto; padding:24px 20px 80px; }
+    .topbar-title { font-size:16px; font-weight:700; flex:1; }
+    .container { max-width:700px; margin:0 auto; padding:24px 20px 80px; }
 
+    /* Date picker */
+    .date-bar {
+      display:flex; gap:8px; align-items:center; margin-bottom:24px; flex-wrap:wrap;
+    }
+    .date-bar input[type="date"] {
+      background:#111118; border:1px solid #1a1a25; border-radius:8px;
+      color:#e8e8f0; padding:8px 12px; font-family:inherit; font-size:13px;
+      outline:none;
+    }
+    .date-bar input:focus { border-color:#6128DB; }
+    .date-btn {
+      padding:8px 16px; background:rgba(97,40,219,0.15); border:1px solid rgba(97,40,219,0.3);
+      border-radius:8px; color:#7c4dff; font-size:12px; font-weight:600;
+      cursor:pointer; font-family:inherit;
+    }
+    .date-btn:hover { background:rgba(97,40,219,0.25); }
+    .date-btn.active { background:#6128DB; color:white; border-color:#6128DB; }
+    .date-presets { display:flex; gap:6px; }
+
+    /* Stats grid */
     .stats-grid {
-      display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:32px;
+      display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:28px;
     }
     .stat-card {
       background:#111118; border:1px solid #1a1a25;
-      border-radius:12px; padding:16px; text-align:center;
+      border-radius:12px; padding:14px; text-align:center;
     }
-    .stat-val { font-size:22px; font-weight:800; color:#7c4dff; margin-bottom:2px; }
+    .stat-val { font-size:20px; font-weight:800; color:#7c4dff; margin-bottom:2px; }
+    .stat-val.green { color:#22c55e; }
     .stat-label {
       font-size:9px; font-weight:600; color:#6b6b80;
       text-transform:uppercase; letter-spacing:1px;
     }
 
+    /* Section labels */
     .sec-label {
       font-size:10px; font-weight:700; letter-spacing:2px;
-      text-transform:uppercase; color:#333; margin-bottom:12px;
+      text-transform:uppercase; color:#44445a; margin-bottom:12px;
     }
     .section { margin-bottom:32px; }
 
+    /* Page breakdown */
+    .page-grid { display:flex; flex-direction:column; gap:8px; }
+    .page-row {
+      display:flex; align-items:center; gap:16px;
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:12px; padding:14px 18px;
+    }
+    .page-name { font-size:13px; font-weight:700; width:80px; flex-shrink:0; }
+    .page-bar-wrap { flex:1; background:#1a1a25; border-radius:4px; height:8px; overflow:hidden; }
+    .page-bar { height:100%; background:#7c4dff; border-radius:4px; transition:width 0.4s ease; }
+    .page-nums { display:flex; gap:16px; flex-shrink:0; }
+    .page-num { text-align:right; min-width:50px; }
+    .page-num-val { font-size:14px; font-weight:700; }
+    .page-num-label { font-size:9px; color:#6b6b80; text-transform:uppercase; letter-spacing:0.5px; }
+
+    /* Chart */
+    .chart-wrap { background:#111118; border:1px solid #1a1a25; border-radius:12px; padding:16px; }
+    .chart { display:flex; align-items:flex-end; gap:3px; height:80px; }
+    .chart-bar {
+      flex:1; background:rgba(97,40,219,0.3); border-radius:2px;
+      min-height:2px; transition:height 0.4s ease; position:relative;
+    }
+    .chart-bar:hover { background:rgba(97,40,219,0.6); }
+    .chart-labels {
+      display:flex; justify-content:space-between;
+      font-size:9px; color:#44445a; margin-top:6px;
+    }
+
+    /* Device breakdown */
+    .device-row { display:flex; gap:12px; }
+    .device-card {
+      flex:1; background:#111118; border:1px solid #1a1a25;
+      border-radius:12px; padding:14px; text-align:center;
+    }
+    .device-val { font-size:18px; font-weight:800; margin-bottom:2px; }
+    .device-pct { font-size:11px; color:#7c4dff; font-weight:600; }
+    .device-label { font-size:9px; color:#6b6b80; text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+
+    /* Referrers */
+    .ref-list { display:flex; flex-direction:column; gap:6px; }
+    .ref-row {
+      display:flex; align-items:center; justify-content:space-between;
+      background:#111118; border:1px solid #1a1a25;
+      border-radius:10px; padding:10px 16px;
+    }
+    .ref-url { font-size:12px; color:#a0a0b0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; flex:1; }
+    .ref-count { font-size:13px; font-weight:700; color:#7c4dff; flex-shrink:0; margin-left:12px; }
+
+    /* Applications */
     .app-list { display:flex; flex-direction:column; gap:8px; }
     .app-card {
       background:#111118; border:1px solid #1a1a25;
@@ -50,20 +121,6 @@
     .app-meta span { display:inline-block; margin-right:12px; }
     .app-date { font-size:10px; color:#44445a; margin-top:6px; }
 
-    .funnel-list { display:flex; flex-direction:column; gap:6px; }
-    .funnel-row {
-      display:flex; align-items:center; gap:12px;
-      background:#111118; border:1px solid #1a1a25;
-      border-radius:10px; padding:12px 16px;
-    }
-    .funnel-bar {
-      height:6px; border-radius:3px; background:#7c4dff;
-      transition:width 0.4s ease;
-    }
-    .funnel-event { font-size:12px; font-weight:600; flex:1; min-width:0; }
-    .funnel-step { font-size:10px; color:#6b6b80; }
-    .funnel-count { font-size:13px; font-weight:700; color:#7c4dff; flex-shrink:0; }
-
     .empty { text-align:center; padding:32px; font-size:12px; color:#44445a; }
 
     @media(max-width:768px) {
@@ -71,40 +128,88 @@
       .topbar { padding:14px 16px; }
       .container { padding:20px 16px 80px; }
       input,select,textarea { font-size:16px !important; }
+      .page-row { flex-wrap:wrap; }
+      .page-name { width:100%; }
     }
   </style>
 </head>
 <body>
   <div class="topbar">
     <a class="back" href="/admin">&lsaquo;</a>
-    <span class="topbar-title">Main Site</span>
+    <span class="topbar-title">Main Site Analytics</span>
   </div>
   <div class="container">
+
+    <!-- Date picker -->
+    <div class="date-bar">
+      <div class="date-presets">
+        <button class="date-btn active" onclick="setRange('all',this)">All</button>
+        <button class="date-btn" onclick="setRange('today',this)">Today</button>
+        <button class="date-btn" onclick="setRange('7d',this)">7 Days</button>
+        <button class="date-btn" onclick="setRange('30d',this)">30 Days</button>
+      </div>
+      <input type="date" id="date-from" onchange="loadData()">
+      <span style="color:#44445a;">to</span>
+      <input type="date" id="date-to" onchange="loadData()">
+    </div>
+
+    <!-- Top stats -->
     <div class="stats-grid">
+      <div class="stat-card">
+        <p class="stat-val" id="s-views">&mdash;</p>
+        <p class="stat-label">Page Views</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-val" id="s-unique">&mdash;</p>
+        <p class="stat-label">Unique Visitors</p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-val" id="s-time">&mdash;</p>
+        <p class="stat-label">Avg Time</p>
+      </div>
       <div class="stat-card">
         <p class="stat-val" id="s-apps">&mdash;</p>
         <p class="stat-label">Applications</p>
       </div>
-      <div class="stat-card">
-        <p class="stat-val" id="s-funnel">&mdash;</p>
-        <p class="stat-label">Funnel Events</p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-val" id="s-conv">&mdash;</p>
-        <p class="stat-label">Conversion</p>
-      </div>
     </div>
 
+    <!-- Page breakdown -->
     <div class="section">
-      <p class="sec-label">Applications</p>
-      <div class="app-list" id="app-list">
+      <p class="sec-label">Page Breakdown</p>
+      <div class="page-grid" id="page-grid">
         <div class="empty">Loading...</div>
       </div>
     </div>
 
+    <!-- Views chart -->
     <div class="section">
-      <p class="sec-label">Funnel Breakdown</p>
-      <div class="funnel-list" id="funnel-list">
+      <p class="sec-label">Daily Views</p>
+      <div class="chart-wrap">
+        <div class="chart" id="daily-chart"></div>
+        <div class="chart-labels"><span id="chart-start"></span><span id="chart-end"></span></div>
+      </div>
+    </div>
+
+    <!-- Device breakdown -->
+    <div class="section">
+      <p class="sec-label">Devices</p>
+      <div class="device-row" id="device-row">
+        <div class="empty">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Top referrers -->
+    <div class="section">
+      <p class="sec-label">Top Referrers</p>
+      <div class="ref-list" id="ref-list">
+        <div class="empty">Loading...</div>
+      </div>
+    </div>
+
+    <!-- Applications -->
+    <div class="section">
+      <p class="sec-label">Applications</p>
+      <div class="app-list" id="app-list">
         <div class="empty">Loading...</div>
       </div>
     </div>
@@ -112,58 +217,123 @@
 
 <script>
 function esc(s){if(!s)return'';var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
+function fmtTime(s){
+  if(s>=60)return Math.floor(s/60)+'m '+Math.round(s%60)+'s';
+  return Math.round(s)+'s';
+}
 
-fetch('/api/main-site-analytics').then(function(r){return r.json();}).then(function(d){
-  document.getElementById('s-apps').textContent=d.total_apps;
-
-  var totalFunnel=0;
-  d.funnel.forEach(function(f){totalFunnel+=f.count;});
-  document.getElementById('s-funnel').textContent=totalFunnel;
-
-  // Simple conversion: applications / funnel page_view events
-  var pageViews=d.funnel.filter(function(f){return f.event==='page_view';}).reduce(function(a,f){return a+f.count;},0);
-  var convRate=pageViews>0?((d.total_apps/pageViews)*100).toFixed(1)+'%':'—';
-  document.getElementById('s-conv').textContent=convRate;
-
-  // Applications
-  var al=document.getElementById('app-list');
-  if(d.applications.length===0){
-    al.innerHTML='<div class="empty">No applications yet</div>';
-  } else {
-    al.innerHTML=d.applications.map(function(a){
-      return'<div class="app-card">'+
-        '<p class="app-email">'+esc(a.email)+'</p>'+
-        '<p class="app-meta">'+
-          (a.business?'<span>'+esc(a.business)+'</span>':'')+
-          (a.revenue?'<span>'+esc(a.revenue)+'</span>':'')+
-        '</p>'+
-        (a.challenge?'<p class="app-meta" style="color:#6b6b80;font-style:italic;">"'+esc(a.challenge)+'"</p>':'')+
-        '<p class="app-date">'+(a.created_at||'').slice(0,10)+'</p>'+
-      '</div>';
-    }).join('');
+function setRange(range, btn) {
+  var now = new Date();
+  var from = '', to = '';
+  if (range === 'today') {
+    from = to = now.toISOString().slice(0,10);
+  } else if (range === '7d') {
+    to = now.toISOString().slice(0,10);
+    var d = new Date(now); d.setDate(d.getDate()-6);
+    from = d.toISOString().slice(0,10);
+  } else if (range === '30d') {
+    to = now.toISOString().slice(0,10);
+    var d = new Date(now); d.setDate(d.getDate()-29);
+    from = d.toISOString().slice(0,10);
   }
+  document.getElementById('date-from').value = from;
+  document.getElementById('date-to').value = to;
+  document.querySelectorAll('.date-btn').forEach(function(b){b.classList.remove('active');});
+  if(btn) btn.classList.add('active');
+  loadData();
+}
 
-  // Funnel
-  var fl=document.getElementById('funnel-list');
-  if(d.funnel.length===0){
-    fl.innerHTML='<div class="empty">No funnel data yet</div>';
-  } else {
-    var maxCount=Math.max.apply(null,d.funnel.map(function(f){return f.count;}))||1;
-    fl.innerHTML=d.funnel.map(function(f){
-      var pct=Math.round((f.count/maxCount)*100);
-      return'<div class="funnel-row">'+
-        '<div style="flex:1;min-width:0;">'+
-          '<p class="funnel-event">'+esc(f.event)+'</p>'+
-          (f.step?'<p class="funnel-step">'+esc(f.step)+(f.value?' &middot; '+esc(f.value):'')+'</p>':'')+
-          '<div style="margin-top:6px;background:#1a1a25;border-radius:3px;height:6px;overflow:hidden;">'+
-            '<div class="funnel-bar" style="width:'+pct+'%"></div>'+
-          '</div>'+
-        '</div>'+
-        '<span class="funnel-count">'+f.count+'</span>'+
-      '</div>';
-    }).join('');
-  }
-});
+function loadData() {
+  var from = document.getElementById('date-from').value;
+  var to = document.getElementById('date-to').value;
+  var url = '/api/main-site-analytics?from=' + from + '&to=' + to;
+
+  fetch(url).then(function(r){return r.json();}).then(function(d){
+    // Top stats
+    document.getElementById('s-views').textContent = d.total_views;
+    document.getElementById('s-unique').textContent = d.unique_visitors;
+    document.getElementById('s-time').textContent = fmtTime(d.total_avg_time);
+    document.getElementById('s-apps').textContent = d.total_apps;
+
+    // Page breakdown
+    var pg = document.getElementById('page-grid');
+    var maxViews = Math.max.apply(null, d.page_stats.map(function(p){return p.views;})) || 1;
+    var pageNames = {home:'Home', about:'About', funnel:'Funnel', 'coming-soon':'Coming Soon'};
+    var filtered = d.page_stats.filter(function(p){return p.views > 0;});
+    if (filtered.length) {
+      pg.innerHTML = filtered.map(function(p){
+        var pct = Math.round((p.views / maxViews) * 100);
+        return '<div class="page-row">' +
+          '<span class="page-name">' + (pageNames[p.page] || p.page) + '</span>' +
+          '<div class="page-bar-wrap"><div class="page-bar" style="width:' + pct + '%"></div></div>' +
+          '<div class="page-nums">' +
+            '<div class="page-num"><p class="page-num-val">' + p.views + '</p><p class="page-num-label">Views</p></div>' +
+            '<div class="page-num"><p class="page-num-val">' + fmtTime(p.avg_time) + '</p><p class="page-num-label">Avg Time</p></div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    } else {
+      pg.innerHTML = '<div class="empty">No page views yet</div>';
+    }
+
+    // Daily chart
+    var ch = document.getElementById('daily-chart');
+    if (d.daily && d.daily.length) {
+      var mx = Math.max.apply(null, d.daily.map(function(x){return x.views;})) || 1;
+      ch.innerHTML = d.daily.map(function(x){
+        var h = Math.max((x.views / mx) * 100, 4);
+        return '<div class="chart-bar" style="height:' + h + '%" title="' + x.date.slice(5) + ': ' + x.views + ' views"></div>';
+      }).join('');
+      document.getElementById('chart-start').textContent = d.daily[0].date.slice(5);
+      document.getElementById('chart-end').textContent = d.daily[d.daily.length-1].date.slice(5);
+    } else {
+      ch.innerHTML = '';
+    }
+
+    // Devices
+    var dr = document.getElementById('device-row');
+    var totalDev = (d.devices.mobile || 0) + (d.devices.desktop || 0);
+    if (totalDev > 0) {
+      var mPct = Math.round((d.devices.mobile / totalDev) * 100);
+      var dPct = 100 - mPct;
+      dr.innerHTML =
+        '<div class="device-card"><p class="device-val">' + d.devices.mobile + '</p><p class="device-pct">' + mPct + '%</p><p class="device-label">Mobile</p></div>' +
+        '<div class="device-card"><p class="device-val">' + d.devices.desktop + '</p><p class="device-pct">' + dPct + '%</p><p class="device-label">Desktop</p></div>';
+    } else {
+      dr.innerHTML = '<div class="empty">No device data yet</div>';
+    }
+
+    // Referrers
+    var rl = document.getElementById('ref-list');
+    if (d.referrers && d.referrers.length) {
+      rl.innerHTML = d.referrers.map(function(r){
+        return '<div class="ref-row"><span class="ref-url">' + esc(r.referrer) + '</span><span class="ref-count">' + r.count + '</span></div>';
+      }).join('');
+    } else {
+      rl.innerHTML = '<div class="empty">No referrer data yet</div>';
+    }
+
+    // Applications
+    var al = document.getElementById('app-list');
+    if (d.applications.length === 0) {
+      al.innerHTML = '<div class="empty">No applications yet</div>';
+    } else {
+      al.innerHTML = d.applications.map(function(a){
+        return '<div class="app-card">' +
+          '<p class="app-email">' + esc(a.email) + '</p>' +
+          '<p class="app-meta">' +
+            (a.business ? '<span>' + esc(a.business) + '</span>' : '') +
+            (a.revenue ? '<span>' + esc(a.revenue) + '</span>' : '') +
+          '</p>' +
+          (a.challenge ? '<p class="app-meta" style="color:#6b6b80;font-style:italic;">"' + esc(a.challenge) + '"</p>' : '') +
+          '<p class="app-date">' + (a.created_at || '').slice(0,10) + '</p>' +
+        '</div>';
+      }).join('');
+    }
+  });
+}
+
+loadData();
 </script>
 </body>
 </html>

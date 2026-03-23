@@ -637,5 +637,20 @@
     }
   </script>
 
+    // Page view tracking
+    (function() {
+      var pvSid = null, pvStart = Date.now();
+      fetch('/t/view', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ page: 'funnel', screen: screen.width + 'x' + screen.height,
+          language: navigator.language || '', timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+          platform: navigator.platform || '' })
+      }).then(function(r) { return r.json(); }).then(function(d) { pvSid = d.sid; });
+      setInterval(function() {
+        if (pvSid) { fetch('/t/ping', { method: 'POST', headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({sid: pvSid, t: Math.round((Date.now() - pvStart) / 1000)})}); }
+      }, 5000);
+    })();
+  </script>
 </body>
 </html>
