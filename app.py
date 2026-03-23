@@ -732,6 +732,13 @@ def preview_about():
 def preview_funnel():
     return render_template("funnel.html")
 
+@app.route("/admin/test-sequence-email")
+def test_sequence_email():
+    """Send sequence email 1 test to kendallwdavis11@gmail.com."""
+    html = render_template("sequence_email_1.html")
+    send_email("kendallwdavis11@gmail.com", "The light always wins.", html)
+    return "Sequence email 1 sent to kendallwdavis11@gmail.com"
+
 @app.route("/api/funnel-signup", methods=["POST"])
 def funnel_signup():
     data = request.get_json() or {}
