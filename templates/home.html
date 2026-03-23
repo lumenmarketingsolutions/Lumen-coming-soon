@@ -62,9 +62,11 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(10,10,15,0.95);
+      background: rgba(10,10,15,0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid rgba(255,255,255,0.04);
-      will-change: transform;
+      transition: background 0.3s;
     }
 
     .nav-logo { height: 20px; opacity: 0.9; }
@@ -120,7 +122,6 @@
       z-index: 0;
       overflow: hidden;
       pointer-events: none;
-      will-change: transform;
     }
 
     .bg-grid::before {
@@ -133,33 +134,11 @@
       background-size: 60px 60px;
     }
 
-    .orb {
-      position: fixed;
-      border-radius: 50%;
-      opacity: 0.4;
-      z-index: 0;
-      pointer-events: none;
-      will-change: transform;
-    }
-
-    .orb-1 {
-      width: 600px; height: 600px;
-      background: radial-gradient(circle, rgba(97,40,219,0.18), transparent 60%);
-      top: -10%; left: -10%;
-    }
-
-    .orb-2 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, rgba(124,77,255,0.1), transparent 60%);
-      bottom: -5%; right: -8%;
-    }
-
     canvas#particles {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      will-change: transform;
     }
 
     /* ══════════════════════════════════════════
@@ -991,8 +970,6 @@
 
   <!-- Background -->
   <div class="bg-grid"></div>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
   <canvas id="particles"></canvas>
 
   <!-- Navigation -->
@@ -1426,14 +1403,15 @@
       document.body.style.width = isOpen ? '100%' : '';
     }
 
-    // ── Nav border on scroll ──
+    // ── Nav background on scroll ──
     (function() {
       var nav = document.querySelector('nav');
       var scrolled = false;
       window.addEventListener('scroll', function() {
-        var now = window.scrollY > 50;
+        var now = window.scrollY > 100;
         if (now !== scrolled) {
           scrolled = now;
+          nav.style.background = scrolled ? 'rgba(10,10,15,0.95)' : 'rgba(10,10,15,0.8)';
           nav.style.borderBottomColor = scrolled ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.04)';
         }
       }, {passive: true});
