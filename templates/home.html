@@ -38,7 +38,7 @@
       --green: #22c55e;
     }
 
-    html { background: var(--dark); }
+    html { scroll-behavior: smooth; background: var(--dark); }
 
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -66,7 +66,6 @@
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-bottom: 1px solid rgba(255,255,255,0.04);
-      transition: background 0.3s;
     }
 
     .nav-logo { height: 20px; opacity: 0.9; }
@@ -127,11 +126,17 @@
     .bg-grid::before {
       content: '';
       position: absolute;
-      inset: 0;
+      inset: -10%;
       background-image:
         linear-gradient(rgba(97,40,219,0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(97,40,219,0.03) 1px, transparent 1px);
       background-size: 60px 60px;
+      animation: gridDrift 20s linear infinite;
+    }
+
+    @keyframes gridDrift {
+      0% { transform: translate(0, 0) rotate(0deg); }
+      100% { transform: translate(30px, 60px) rotate(0.5deg); }
     }
 
     canvas#particles {
@@ -146,12 +151,13 @@
     ══════════════════════════════════════════ */
     .hero {
       position: relative;
-      min-height: 100vh;
+      min-height: 100svh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: calc(env(safe-area-inset-top, 0px) + 24px) 24px 80px;
+      overflow: hidden;
     }
 
     .hero-content {
@@ -1294,44 +1300,12 @@
       window.scrollTo(0, 0);
     };
 
-    // ── Disable heavy effects in in-app browsers (Instagram, Facebook, etc.) ──
-    (function() {
-      var ua = navigator.userAgent || '';
-      if (/Instagram|FBAN|FBAV|Twitter|LinkedIn/i.test(ua)) {
-        var nav = document.querySelector('nav');
-        if (nav) {
-          nav.style.backdropFilter = 'none';
-          nav.style.webkitBackdropFilter = 'none';
-          nav.style.background = 'rgba(10,10,15,0.97)';
-        }
-        var grid = document.querySelector('.bg-grid');
-        if (grid) grid.style.display = 'none';
-      }
-    })();
-
-    // ── Particle canvas (disabled in in-app browsers) ──
+    // ── Particle canvas ──
     (function() {
       var canvas = document.getElementById('particles');
-      var ua = navigator.userAgent || '';
-      var inApp = /Instagram|FBAN|FBAV|Twitter|LinkedIn/i.test(ua);
-      if (inApp) { canvas.style.display = 'none'; return; }
-
       var ctx = canvas.getContext('2d');
       var particles = [];
-      var count = window.innerWidth < 768 ? 15 : 30;
-      var rafId = null;
-      var scrolling = false;
-      var scrollTimer = null;
-
-      window.addEventListener('scroll', function() {
-        scrolling = true;
-        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-        clearTimeout(scrollTimer);
-        scrollTimer = setTimeout(function() {
-          scrolling = false;
-          if (!rafId && !document.hidden) draw();
-        }, 150);
-      }, {passive: true});
+      var count = window.innerWidth < 768 ? 20 : 40;
 
       function resize() {
         canvas.width = window.innerWidth;
@@ -1345,18 +1319,16 @@
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.2,
-          vy: (Math.random() - 0.5) * 0.2,
+          vx: (Math.random() - 0.5) * 0.3,
+          vy: (Math.random() - 0.5) * 0.3,
           r: Math.random() * 1.5 + 0.5,
           o: Math.random() * 0.3 + 0.05
         });
       }
 
       function draw() {
-        if (scrolling) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        for (var i = 0; i < particles.length; i++) {
-          var p = particles[i];
+        particles.forEach(function(p) {
           p.x += p.vx;
           p.y += p.vy;
           if (p.x < 0) p.x = canvas.width;
@@ -1367,16 +1339,11 @@
           ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
           ctx.fillStyle = 'rgba(124,77,255,' + p.o + ')';
           ctx.fill();
-        }
-        rafId = requestAnimationFrame(draw);
+        });
+        requestAnimationFrame(draw);
       }
 
       draw();
-
-      document.addEventListener('visibilitychange', function() {
-        if (document.hidden) { if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
-        else if (!scrolling && !rafId) { draw(); }
-      });
     })();
 
     // ── Scroll reveal ──
@@ -1421,20 +1388,6 @@
       document.body.style.position = isOpen ? 'fixed' : '';
       document.body.style.width = isOpen ? '100%' : '';
     }
-
-    // ── Nav background on scroll ──
-    (function() {
-      var nav = document.querySelector('nav');
-      var scrolled = false;
-      window.addEventListener('scroll', function() {
-        var now = window.scrollY > 100;
-        if (now !== scrolled) {
-          scrolled = now;
-          nav.style.background = scrolled ? 'rgba(10,10,15,0.95)' : 'rgba(10,10,15,0.8)';
-          nav.style.borderBottomColor = scrolled ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.04)';
-        }
-      }, {passive: true});
-    })();
 
     // ── Smooth scroll for anchor links ──
     document.querySelectorAll('a[href^="#"]').forEach(function(link) {
