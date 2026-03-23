@@ -153,6 +153,15 @@
       <input type="date" id="date-to" onchange="loadData()">
     </div>
 
+    <!-- Live visitors -->
+    <div style="background:#111118;border:1px solid rgba(34,197,94,0.2);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:10px;">
+      <span style="width:8px;height:8px;border-radius:50%;background:#22c55e;animation:pulse 2s infinite;flex-shrink:0;"></span>
+      <span style="font-size:13px;font-weight:700;" id="live-count">0</span>
+      <span style="font-size:12px;color:#6b6b80;">live right now</span>
+      <span style="font-size:11px;color:#44445a;margin-left:auto;" id="live-pages"></span>
+    </div>
+    <style>@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}</style>
+
     <!-- Top stats -->
     <div class="stats-grid">
       <div class="stat-card">
@@ -334,6 +343,21 @@ function loadData() {
 }
 
 loadData();
+
+// Live visitors polling
+function loadLive() {
+  fetch('/t/live').then(function(r){return r.json();}).then(function(d){
+    document.getElementById('live-count').textContent = d.live;
+    var pages = [];
+    var pageNames = {home:'Home', about:'About', funnel:'Funnel'};
+    for (var p in d.by_page) {
+      if (d.by_page[p] > 0) pages.push((pageNames[p]||p) + ': ' + d.by_page[p]);
+    }
+    document.getElementById('live-pages').textContent = pages.join(' · ');
+  });
+}
+loadLive();
+setInterval(loadLive, 5000);
 </script>
 </body>
 </html>

@@ -583,6 +583,22 @@
         if (pvSid) { fetch('/t/ping', { method: 'POST', headers: {'Content-Type': 'application/json'},
           body: JSON.stringify({sid: pvSid, t: Math.round((Date.now() - pvStart) / 1000)})}); }
       }, 5000);
+
+      var lastActivity = Date.now(), isActive = true;
+      ['scroll','mousemove','touchstart','keydown','click'].forEach(function(evt) {
+        document.addEventListener(evt, function() { lastActivity = Date.now(); }, {passive:true});
+      });
+      function sendHeartbeat(active) {
+        if (pvSid) { fetch('/t/heartbeat', {method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({sid: pvSid, page: 'about', active: active})}); }
+      }
+      setInterval(function() {
+        var nowActive = !document.hidden && (Date.now() - lastActivity < 30000);
+        if (nowActive !== isActive) { isActive = nowActive; }
+        sendHeartbeat(isActive);
+      }, 5000);
+      document.addEventListener('visibilitychange', function() { if (document.hidden) { isActive = false; sendHeartbeat(false); } });
+      window.addEventListener('beforeunload', function() { sendHeartbeat(false); });
     })();
   </script>
 </body>

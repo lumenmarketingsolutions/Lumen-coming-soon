@@ -11,6 +11,19 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAIL = "kendall@lumenmarketing.co"
 OWNER_IPS = {"209.127.238.130"}
 
+# ── Live presence tracking (in-memory) ──
+# {session_id: {"page": "home", "last_seen": timestamp, "ip": "..."}}
+LIVE_VISITORS = {}
+LIVE_LOCK = threading.Lock()
+
+def clean_stale_visitors():
+    """Remove visitors who haven't sent a heartbeat in 15 seconds."""
+    cutoff = time.time() - 15
+    with LIVE_LOCK:
+        stale = [k for k, v in LIVE_VISITORS.items() if v["last_seen"] < cutoff]
+        for k in stale:
+            del LIVE_VISITORS[k]
+
 # ── Marykate Agent Config ──
 MK_PIN = os.environ.get("MK_PIN", "091005")
 GMAIL_CLIENT_ID = os.environ.get("GMAIL_CLIENT_ID", "")
@@ -581,6 +594,37 @@ def track_ping():
         con.commit()
         con.close()
     return jsonify({"ok": True})
+
+@app.route("/t/heartbeat", methods=["POST"])
+def track_heartbeat():
+    data = request.get_json() or {}
+    sid = data.get("sid", "")
+    page = data.get("page", "")
+    active = data.get("active", False)
+    if not sid:
+        return jsonify({"ok": False})
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    if "," in ip:
+        ip = ip.split(",")[0].strip()
+    with LIVE_LOCK:
+        if active:
+            LIVE_VISITORS[sid] = {"page": page, "last_seen": time.time(), "ip": ip}
+        else:
+            LIVE_VISITORS.pop(sid, None)
+    return jsonify({"ok": True})
+
+@app.route("/t/live")
+def track_live():
+    clean_stale_visitors()
+    with LIVE_LOCK:
+        # Exclude owner IPs
+        visitors = {k: v for k, v in LIVE_VISITORS.items() if v["ip"] not in OWNER_IPS}
+        total = len(visitors)
+        by_page = {}
+        for v in visitors.values():
+            p = v["page"]
+            by_page[p] = by_page.get(p, 0) + 1
+    return jsonify({"live": total, "by_page": by_page})
 
 @app.route("/t/stats")
 def track_stats():
