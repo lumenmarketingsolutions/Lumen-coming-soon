@@ -1294,9 +1294,28 @@
       window.scrollTo(0, 0);
     };
 
-    // ── Particle canvas (pauses during scroll) ──
+    // ── Disable heavy effects in in-app browsers (Instagram, Facebook, etc.) ──
+    (function() {
+      var ua = navigator.userAgent || '';
+      if (/Instagram|FBAN|FBAV|Twitter|LinkedIn/i.test(ua)) {
+        var nav = document.querySelector('nav');
+        if (nav) {
+          nav.style.backdropFilter = 'none';
+          nav.style.webkitBackdropFilter = 'none';
+          nav.style.background = 'rgba(10,10,15,0.97)';
+        }
+        var grid = document.querySelector('.bg-grid');
+        if (grid) grid.style.display = 'none';
+      }
+    })();
+
+    // ── Particle canvas (disabled in in-app browsers) ──
     (function() {
       var canvas = document.getElementById('particles');
+      var ua = navigator.userAgent || '';
+      var inApp = /Instagram|FBAN|FBAV|Twitter|LinkedIn/i.test(ua);
+      if (inApp) { canvas.style.display = 'none'; return; }
+
       var ctx = canvas.getContext('2d');
       var particles = [];
       var count = window.innerWidth < 768 ? 15 : 30;
