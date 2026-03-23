@@ -62,11 +62,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: rgba(10,10,15,0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: rgba(10,10,15,0.95);
       border-bottom: 1px solid rgba(255,255,255,0.04);
-      transition: background 0.3s;
+      will-change: transform;
     }
 
     .nav-logo { height: 20px; opacity: 0.9; }
@@ -122,6 +120,7 @@
       z-index: 0;
       overflow: hidden;
       pointer-events: none;
+      will-change: transform;
     }
 
     .bg-grid::before {
@@ -137,21 +136,21 @@
     .orb {
       position: fixed;
       border-radius: 50%;
-      filter: blur(80px);
       opacity: 0.4;
       z-index: 0;
       pointer-events: none;
+      will-change: transform;
     }
 
     .orb-1 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, var(--purple-glow), transparent 70%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(97,40,219,0.18), transparent 60%);
       top: -10%; left: -10%;
     }
 
     .orb-2 {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(124,77,255,0.2), transparent 70%);
+      width: 500px; height: 500px;
+      background: radial-gradient(circle, rgba(124,77,255,0.1), transparent 60%);
       bottom: -5%; right: -8%;
     }
 
@@ -160,6 +159,7 @@
       inset: 0;
       z-index: 0;
       pointer-events: none;
+      will-change: transform;
     }
 
     /* ══════════════════════════════════════════
@@ -167,13 +167,12 @@
     ══════════════════════════════════════════ */
     .hero {
       position: relative;
-      min-height: 100svh;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       padding: calc(env(safe-area-inset-top, 0px) + 24px) 24px 80px;
-      overflow: hidden;
     }
 
     .hero-content {
@@ -1318,12 +1317,25 @@
       window.scrollTo(0, 0);
     };
 
-    // ── Particle canvas ──
+    // ── Particle canvas (pauses during scroll) ──
     (function() {
       var canvas = document.getElementById('particles');
       var ctx = canvas.getContext('2d');
       var particles = [];
-      var count = window.innerWidth < 768 ? 20 : 40;
+      var count = window.innerWidth < 768 ? 15 : 30;
+      var rafId = null;
+      var scrolling = false;
+      var scrollTimer = null;
+
+      window.addEventListener('scroll', function() {
+        scrolling = true;
+        if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+        clearTimeout(scrollTimer);
+        scrollTimer = setTimeout(function() {
+          scrolling = false;
+          if (!rafId && !document.hidden) draw();
+        }, 150);
+      }, {passive: true});
 
       function resize() {
         canvas.width = window.innerWidth;
@@ -1337,16 +1349,18 @@
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3,
+          vx: (Math.random() - 0.5) * 0.2,
+          vy: (Math.random() - 0.5) * 0.2,
           r: Math.random() * 1.5 + 0.5,
           o: Math.random() * 0.3 + 0.05
         });
       }
 
       function draw() {
+        if (scrolling) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(function(p) {
+        for (var i = 0; i < particles.length; i++) {
+          var p = particles[i];
           p.x += p.vx;
           p.y += p.vy;
           if (p.x < 0) p.x = canvas.width;
@@ -1357,11 +1371,16 @@
           ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
           ctx.fillStyle = 'rgba(124,77,255,' + p.o + ')';
           ctx.fill();
-        });
-        requestAnimationFrame(draw);
+        }
+        rafId = requestAnimationFrame(draw);
       }
 
       draw();
+
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) { if (rafId) { cancelAnimationFrame(rafId); rafId = null; } }
+        else if (!scrolling && !rafId) { draw(); }
+      });
     })();
 
     // ── Scroll reveal ──
@@ -1407,18 +1426,17 @@
       document.body.style.width = isOpen ? '100%' : '';
     }
 
-    // ── Nav background on scroll ──
+    // ── Nav border on scroll ──
     (function() {
       var nav = document.querySelector('nav');
+      var scrolled = false;
       window.addEventListener('scroll', function() {
-        if (window.scrollY > 100) {
-          nav.style.background = 'rgba(10,10,15,0.95)';
-          nav.style.borderBottomColor = 'rgba(255,255,255,0.06)';
-        } else {
-          nav.style.background = 'rgba(10,10,15,0.8)';
-          nav.style.borderBottomColor = 'rgba(255,255,255,0.04)';
+        var now = window.scrollY > 50;
+        if (now !== scrolled) {
+          scrolled = now;
+          nav.style.borderBottomColor = scrolled ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.04)';
         }
-      });
+      }, {passive: true});
     })();
 
     // ── Smooth scroll for anchor links ──
