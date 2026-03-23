@@ -736,8 +736,23 @@ def preview_funnel():
 def test_sequence_email():
     """Send sequence email 1 test to kendallwdavis11@gmail.com."""
     html = render_template("sequence_email_1.html")
-    send_email("kendallwdavis11@gmail.com", "The light always wins.", html)
-    return "Sequence email 1 sent to kendallwdavis11@gmail.com"
+    try:
+        resp = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "from": "Lumen <kendall@lumenmarketing.co>",
+                "to": ["kendallwdavis11@gmail.com"],
+                "subject": "The light always wins.",
+                "html": html,
+            },
+        )
+        return f"Status: {resp.status_code} | Response: {resp.text}"
+    except Exception as e:
+        return f"Error: {e}"
 
 @app.route("/api/funnel-signup", methods=["POST"])
 def funnel_signup():
