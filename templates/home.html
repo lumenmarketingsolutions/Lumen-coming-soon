@@ -149,7 +149,6 @@
     ══════════════════════════════════════════ */
     .hero {
       position: relative;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -1290,6 +1289,12 @@
   </footer>
 
   <script>
+    // ── Lock hero height so WebView toolbar resize doesn't cause layout shift ──
+    (function() {
+      var hero = document.querySelector('.hero');
+      if (hero) hero.style.minHeight = window.innerHeight + 'px';
+    })();
+
     // ── Scroll restoration ──
     history.scrollRestoration = 'manual';
     window.onload = function() {
