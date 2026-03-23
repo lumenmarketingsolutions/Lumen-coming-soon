@@ -1416,16 +1416,19 @@ def api_main_site_analytics():
     date_to = request.args.get("to", "")
     con = sqlite3.connect(DB_PATH)
 
-    # Build date filter
+    # Build date filter (dates come in as MST, DB stores UTC, MST = UTC-7)
+    MST_OFFSET = 7  # hours
     date_filter = ""
     date_params = []
     if date_from:
         date_filter += " AND timestamp >= ?"
-        date_params.append(date_from + "T00:00:00")
+        # MST midnight = UTC 07:00
+        date_params.append(date_from + f"T{MST_OFFSET:02d}:00:00")
     if date_to:
         date_filter += " AND timestamp < ?"
-        # Add one day to make it inclusive
-        date_params.append(date_to + "T23:59:59")
+        # MST end of day = next day UTC 07:00
+        to_dt = datetime.datetime.strptime(date_to, "%Y-%m-%d") + datetime.timedelta(days=1)
+        date_params.append(to_dt.strftime("%Y-%m-%d") + f"T{MST_OFFSET:02d}:00:00")
 
     # Per-page views and avg time (exclude owner IPs)
     owner_ph = ",".join("?" for _ in OWNER_IPS)
@@ -1446,17 +1449,21 @@ def api_main_site_analytics():
     total_views = total_row[0]
     total_avg_time = round(total_row[1], 1)
 
-    # Daily breakdown for chart
+    # Daily breakdown for chart (MST days: count views between UTC 07:00 to next day 07:00)
+    mst_now = datetime.datetime.utcnow() - datetime.timedelta(hours=MST_OFFSET)
     daily = []
     for i in range(13, -1, -1):
-        d = (datetime.datetime.utcnow() - datetime.timedelta(days=i)).strftime("%Y-%m-%d")
+        d = (mst_now - datetime.timedelta(days=i)).strftime("%Y-%m-%d")
         if date_from and d < date_from:
             continue
         if date_to and d > date_to:
             continue
+        day_start = d + f"T{MST_OFFSET:02d}:00:00"
+        day_end_dt = datetime.datetime.strptime(d, "%Y-%m-%d") + datetime.timedelta(days=1)
+        day_end = day_end_dt.strftime("%Y-%m-%d") + f"T{MST_OFFSET:02d}:00:00"
         cnt = con.execute(
-            f"SELECT COUNT(*) FROM page_views WHERE timestamp LIKE ? AND ip NOT IN ({owner_ph})",
-            (d + "%", *OWNER_IPS)
+            f"SELECT COUNT(*) FROM page_views WHERE timestamp >= ? AND timestamp < ? AND ip NOT IN ({owner_ph})",
+            (day_start, day_end, *OWNER_IPS)
         ).fetchone()[0]
         daily.append({"date": d, "views": cnt})
 

@@ -235,19 +235,27 @@ function fmtTime(s){
   return Math.round(s)+'s';
 }
 
-function setRange(range, btn) {
+function mstNow() {
+  // Get current time in MST (UTC-7)
   var now = new Date();
+  var mst = new Date(now.getTime() - (7 * 60 * 60 * 1000));
+  return mst;
+}
+function mstDate(d) { return d.toISOString().slice(0,10); }
+
+function setRange(range, btn) {
+  var now = mstNow();
   var from = '', to = '';
   if (range === 'today') {
-    from = to = now.toISOString().slice(0,10);
+    from = to = mstDate(now);
   } else if (range === '7d') {
-    to = now.toISOString().slice(0,10);
+    to = mstDate(now);
     var d = new Date(now); d.setDate(d.getDate()-6);
-    from = d.toISOString().slice(0,10);
+    from = mstDate(d);
   } else if (range === '30d') {
-    to = now.toISOString().slice(0,10);
+    to = mstDate(now);
     var d = new Date(now); d.setDate(d.getDate()-29);
-    from = d.toISOString().slice(0,10);
+    from = mstDate(d);
   }
   document.getElementById('date-from').value = from;
   document.getElementById('date-to').value = to;
