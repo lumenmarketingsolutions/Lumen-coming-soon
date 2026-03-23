@@ -126,49 +126,31 @@
 
     .bg-grid::before {
       content: '';
-      position: absolute; inset: -50%;
+      position: absolute; inset: 0;
       background-image:
         linear-gradient(rgba(97,40,219,0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(97,40,219,0.03) 1px, transparent 1px);
       background-size: 60px 60px;
-      animation: gridDrift 20s linear infinite;
-    }
-
-    @keyframes gridDrift {
-      0% { transform: translate(0, 0) rotate(0deg); }
-      100% { transform: translate(30px, 60px) rotate(0.5deg); }
+      will-change: auto;
     }
 
     .orb {
       position: fixed; border-radius: 50%;
-      filter: blur(80px); opacity: 0.4;
+      filter: blur(80px); opacity: 0.3;
       z-index: 0; pointer-events: none;
+      will-change: transform;
     }
 
     .orb-1 {
       width: 500px; height: 500px;
       background: radial-gradient(circle, var(--purple-glow), transparent 70%);
       top: -10%; left: -10%;
-      animation: orbFloat1 12s ease-in-out infinite;
     }
 
     .orb-2 {
       width: 400px; height: 400px;
       background: radial-gradient(circle, rgba(124,77,255,0.2), transparent 70%);
       bottom: -5%; right: -8%;
-      animation: orbFloat2 15s ease-in-out infinite;
-    }
-
-    @keyframes orbFloat1 {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(40px, 30px) scale(1.1); }
-      66% { transform: translate(-20px, 50px) scale(0.95); }
-    }
-
-    @keyframes orbFloat2 {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      33% { transform: translate(-30px, -40px) scale(1.05); }
-      66% { transform: translate(20px, -20px) scale(0.9); }
     }
 
     canvas#particles {
@@ -547,12 +529,13 @@
     history.scrollRestoration = 'manual';
     window.onload = function() { window.scrollTo(0, 0); };
 
-    // ── Particle canvas (matches home/about) ──
+    // ── Particle canvas (lightweight) ──
     (function() {
       var canvas = document.getElementById('particles');
       var ctx = canvas.getContext('2d');
       var particles = [];
-      var count = window.innerWidth < 768 ? 30 : 60;
+      var count = window.innerWidth < 768 ? 20 : 40;
+      var rafId = null;
 
       function resize() {
         canvas.width = window.innerWidth;
@@ -566,8 +549,8 @@
         particles.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          vx: (Math.random() - 0.5) * 0.3,
-          vy: (Math.random() - 0.5) * 0.3,
+          vx: (Math.random() - 0.5) * 0.2,
+          vy: (Math.random() - 0.5) * 0.2,
           r: Math.random() * 1.5 + 0.5,
           o: Math.random() * 0.3 + 0.05
         });
@@ -575,7 +558,8 @@
 
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(function(p) {
+        for (var i = 0; i < particles.length; i++) {
+          var p = particles[i];
           p.x += p.vx;
           p.y += p.vy;
           if (p.x < 0) p.x = canvas.width;
@@ -586,11 +570,16 @@
           ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
           ctx.fillStyle = 'rgba(124,77,255,' + p.o + ')';
           ctx.fill();
-        });
-        requestAnimationFrame(draw);
+        }
+        rafId = requestAnimationFrame(draw);
       }
 
       draw();
+
+      document.addEventListener('visibilitychange', function() {
+        if (document.hidden) { cancelAnimationFrame(rafId); rafId = null; }
+        else if (!rafId) { draw(); }
+      });
     })();
 
     // ── Mobile menu ──
