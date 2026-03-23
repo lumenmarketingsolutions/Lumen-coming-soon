@@ -850,6 +850,19 @@ def test_live_email():
     except Exception as e:
         return f"Error: {e}"
 
+@app.route("/admin/send-live-nate")
+def send_live_nate():
+    html = render_template("email_live.html")
+    try:
+        resp = requests.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
+            json={"from": "Lumen <kendall@lumenmarketing.co>", "to": ["n.wilkinson@launchpoint.dev"], "subject": "We're live.", "html": html},
+        )
+        return f"Status: {resp.status_code} | Response: {resp.text}"
+    except Exception as e:
+        return f"Error: {e}"
+
 @app.route("/admin/blast-live-email")
 def blast_live_email():
     """Blast we're live email to all contacts."""
