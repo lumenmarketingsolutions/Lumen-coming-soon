@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-visual">
   <meta name="theme-color" content="#0a0a0f">
   <title>LumenFunnel</title>
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
@@ -39,8 +39,7 @@
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       padding: 0 32px; height: 64px;
       display: flex; align-items: center; justify-content: space-between;
-      background: rgba(10,10,15,0.8);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      background: rgba(10,10,15,0.97);
       border-bottom: 1px solid rgba(255,255,255,0.04);
     }
 
@@ -120,8 +119,8 @@
 
     /* ── Background ── */
     .bg-grid {
-      position: fixed; inset: 0; z-index: 0;
-      overflow: hidden; pointer-events: none;
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0; overflow: hidden; pointer-events: none;
     }
 
     .bg-grid::before {
@@ -131,37 +130,16 @@
         linear-gradient(rgba(97,40,219,0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(97,40,219,0.03) 1px, transparent 1px);
       background-size: 60px 60px;
-      will-change: auto;
-    }
-
-    .orb {
-      position: fixed; border-radius: 50%;
-      filter: blur(80px); opacity: 0.3;
-      z-index: 0; pointer-events: none;
-      will-change: transform;
-    }
-
-    .orb-1 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, var(--purple-glow), transparent 70%);
-      top: -10%; left: -10%;
-    }
-
-    .orb-2 {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(124,77,255,0.2), transparent 70%);
-      bottom: -5%; right: -8%;
     }
 
     canvas#particles {
-      position: fixed; inset: 0;
+      position: fixed; top: 0; left: 0;
       z-index: 0; pointer-events: none;
     }
 
     /* ── Page ── */
     .funnel-page {
       position: relative; z-index: 1;
-      min-height: 100vh;
       display: flex; align-items: center; justify-content: center;
       padding: calc(env(safe-area-inset-top, 0px) + 80px) 24px 80px;
       text-align: center;
@@ -409,8 +387,6 @@
 <body>
 
   <div class="bg-grid"></div>
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
   <canvas id="particles"></canvas>
 
   <!-- Nav -->
@@ -529,6 +505,12 @@
     history.scrollRestoration = 'manual';
     window.onload = function() { window.scrollTo(0, 0); };
 
+    // ── Lock page height for Instagram WebView ──
+    (function() {
+      var page = document.querySelector('.funnel-page');
+      if (page) page.style.minHeight = window.innerHeight + 'px';
+    })();
+
     // ── Particle canvas (lightweight) ──
     (function() {
       var canvas = document.getElementById('particles');
@@ -536,14 +518,22 @@
       var particles = [];
       var count = window.innerWidth < 768 ? 20 : 40;
       var rafId = null;
+      var lastWidth = window.innerWidth;
 
-      function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.style.width = canvas.width + 'px';
+      canvas.style.height = canvas.height + 'px';
 
-      window.addEventListener('resize', resize);
-      resize();
+      window.addEventListener('resize', function() {
+        if (window.innerWidth !== lastWidth) {
+          lastWidth = window.innerWidth;
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+          canvas.style.width = canvas.width + 'px';
+          canvas.style.height = canvas.height + 'px';
+        }
+      });
 
       for (var i = 0; i < count; i++) {
         particles.push({
