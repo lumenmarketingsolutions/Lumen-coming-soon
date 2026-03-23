@@ -828,6 +828,28 @@ def test_sequence_email():
     except Exception as e:
         return f"Error: {e}"
 
+@app.route("/admin/test-live-email")
+def test_live_email():
+    """Send we're live email test to kendallwdavis11@gmail.com."""
+    html = render_template("email_live.html")
+    try:
+        resp = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "from": "Lumen <kendall@lumenmarketing.co>",
+                "to": ["kendallwdavis11@gmail.com"],
+                "subject": "We're live.",
+                "html": html,
+            },
+        )
+        return f"Status: {resp.status_code} | Response: {resp.text}"
+    except Exception as e:
+        return f"Error: {e}"
+
 @app.route("/admin/blast-sequence-1")
 def blast_sequence_1():
     """One-time blast of sequence email 1 to waitlist."""
