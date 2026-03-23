@@ -850,6 +850,42 @@ def test_live_email():
     except Exception as e:
         return f"Error: {e}"
 
+@app.route("/admin/blast-live-email")
+def blast_live_email():
+    """Blast we're live email to all contacts."""
+    recipients = [
+        "zachloos160@gmail.com",
+        "allierich65@gmail.com",
+        "marykatezarehghazarian@gmail.com",
+        "alphonzolmajor@gmail.com",
+        "kobidodd2@gmail.com",
+        "n.wilkinson@launchpoint.dev",
+        "kendallwdavis11@gmail.com",
+        "darbimckean@gmail.com",
+        "jaredponce2603@gmail.com",
+    ]
+    html = render_template("email_live.html")
+    results = []
+    for email in recipients:
+        try:
+            resp = requests.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {RESEND_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "from": "Lumen <kendall@lumenmarketing.co>",
+                    "to": [email],
+                    "subject": "We're live.",
+                    "html": html,
+                },
+            )
+            results.append(f"{email}: {resp.status_code}")
+        except Exception as e:
+            results.append(f"{email}: ERROR {e}")
+    return "<br>".join(results)
+
 @app.route("/admin/blast-sequence-1")
 def blast_sequence_1():
     """One-time blast of sequence email 1 to waitlist."""
