@@ -139,7 +139,8 @@
 
     canvas#particles {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
       z-index: 0;
       pointer-events: none;
     }
@@ -1289,10 +1290,15 @@
   </footer>
 
   <script>
-    // ── Lock hero height so WebView toolbar resize doesn't cause layout shift ──
+    // ── Lock viewport height to prevent Instagram WebView toolbar resize jank ──
     (function() {
+      var ih = window.innerHeight;
+      document.documentElement.style.setProperty('--app-h', ih + 'px');
       var hero = document.querySelector('.hero');
-      if (hero) hero.style.minHeight = window.innerHeight + 'px';
+      if (hero) hero.style.minHeight = ih + 'px';
+      // Lock all fixed background elements to initial size so they never resize
+      var bg = document.querySelector('.bg-grid');
+      if (bg) { bg.style.position = 'absolute'; bg.style.height = Math.max(document.body.scrollHeight, ih * 3) + 'px'; bg.style.width = '100%'; bg.style.top = '0'; bg.style.left = '0'; }
     })();
 
     // ── Scroll restoration ──
@@ -1310,14 +1316,24 @@
       var ctx = canvas.getContext('2d');
       var particles = [];
       var count = window.innerWidth < 768 ? 20 : 40;
+      var lastWidth = window.innerWidth;
 
-      function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-      }
+      // Lock canvas size — only resize on width change (orientation), not toolbar height change
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.style.position = 'fixed';
+      canvas.style.width = canvas.width + 'px';
+      canvas.style.height = canvas.height + 'px';
 
-      window.addEventListener('resize', resize);
-      resize();
+      window.addEventListener('resize', function() {
+        if (window.innerWidth !== lastWidth) {
+          lastWidth = window.innerWidth;
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+          canvas.style.width = canvas.width + 'px';
+          canvas.style.height = canvas.height + 'px';
+        }
+      });
 
       for (var i = 0; i < count; i++) {
         particles.push({
