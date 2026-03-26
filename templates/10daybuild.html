@@ -124,12 +124,17 @@
       margin: 0 auto;
     }
 
-    .hero-logo {
-      height: 20px;
-      opacity: 0.8;
-      margin-bottom: 32px;
+    .top-bar {
+      position: absolute;
+      top: calc(env(safe-area-inset-top, 0px) + 20px);
+      left: 24px;
+      z-index: 10;
       opacity: 0;
       animation: fadeUp 0.8s ease 0.1s forwards;
+    }
+
+    .top-bar img {
+      height: 18px;
     }
 
     .hero-headline {
@@ -523,6 +528,12 @@
     .footer-links a:hover { color: var(--text-dim); }
 
     /* ── Scarcity ────────────────────────────── */
+    .scarcity-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
     .scarcity {
       display: inline-flex;
       align-items: center;
@@ -534,7 +545,6 @@
       font-size: 12px;
       font-weight: 600;
       color: var(--purple-light);
-      margin-bottom: 20px;
     }
 
     .scarcity-dot {
@@ -614,13 +624,17 @@
 <!-- ═══════════════════════════════════════════
      HERO
 ═══════════════════════════════════════════ -->
+<div class="top-bar">
+  <img src="/static/logo-white.png" alt="Lumen">
+</div>
+
 <section class="hero">
   <div class="hero-content">
-    <img src="/static/logo-lumen.svg" alt="Lumen" class="hero-logo">
-
-    <div class="scarcity" style="opacity:0; animation: fadeUp 0.8s ease 0.2s forwards;">
-      <span class="scarcity-dot"></span>
-      2 spots open for April
+    <div class="scarcity-wrap" style="opacity:0; animation: fadeUp 0.8s ease 0.2s forwards;">
+      <div class="scarcity">
+        <span class="scarcity-dot"></span>
+        2 spots open for April
+      </div>
     </div>
 
     <h1 class="hero-headline">
@@ -857,9 +871,11 @@
      FINAL CTA
 ═══════════════════════════════════════════ -->
 <section class="cta-section" id="apply">
-  <div class="scarcity reveal">
-    <span class="scarcity-dot"></span>
-    Limited to 4 builds per month
+  <div class="scarcity-wrap reveal">
+    <div class="scarcity">
+      <span class="scarcity-dot"></span>
+      Limited to 4 builds per month
+    </div>
   </div>
   <h2 class="cta-headline reveal">Ready to stop guessing?</h2>
   <p class="cta-sub reveal">If we're a fit, we'll walk you through exactly how the build works for your business.</p>
@@ -873,7 +889,7 @@
      FOOTER
 ═══════════════════════════════════════════ -->
 <footer>
-  <img src="/static/logo-lumen.svg" alt="Lumen" class="footer-logo">
+  <img src="/static/logo-white.png" alt="Lumen" class="footer-logo">
   <p class="footer-copy">&copy; 2026 Lumen Marketing Solutions</p>
   <div class="footer-links">
     <a href="/">Home</a>
