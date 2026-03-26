@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#0a0a0f">
   <title>The 10-Day Build | Lumen</title>
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-  <meta name="description" content="A custom marketing system built in 10 days that runs your ads, captures your leads, follows up automatically, and shows you exactly which ad made you money.">
+  <meta name="description" content="A custom AI marketing system built in 10 days that buys you back 15+ hours per week. Ads, leads, follow-up, revenue tracking — all handled.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://lumenmarketing.co/10daybuild">
   <meta property="og:title" content="The 10-Day Build | Lumen">
-  <meta property="og:description" content="A custom marketing system built in 10 days. Ads, leads, follow-up, tracking. All handled.">
+  <meta property="og:description" content="A custom AI marketing system built in 10 days. Ads, leads, follow-up, tracking. All handled.">
   <meta property="og:image" content="https://lumenmarketing.co/static/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -88,7 +88,7 @@
     section {
       position: relative;
       z-index: 1;
-      padding: 80px 20px;
+      padding: 64px 24px;
     }
 
     .section-inner {
@@ -111,40 +111,32 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: calc(env(safe-area-inset-top, 0px) + 72px) 20px 60px;
+      justify-content: center;
+      padding: calc(env(safe-area-inset-top, 0px) + 60px) 24px 48px;
     }
 
     .hero-content {
       position: relative;
       z-index: 1;
       text-align: center;
+      width: 100%;
       max-width: 560px;
+      margin: 0 auto;
     }
 
     .hero-logo {
-      height: 18px;
-      opacity: 0.7;
-      margin-bottom: 48px;
+      height: 20px;
+      opacity: 0.8;
+      margin-bottom: 32px;
       opacity: 0;
       animation: fadeUp 0.8s ease 0.1s forwards;
     }
 
-    .hero-label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--purple-light);
-      margin-bottom: 24px;
-      opacity: 0;
-      animation: fadeUp 0.8s ease 0.2s forwards;
-    }
-
     .hero-headline {
-      font-size: clamp(28px, 7vw, 44px);
+      font-size: clamp(26px, 6.5vw, 44px);
       font-weight: 800;
-      line-height: 1.12;
-      letter-spacing: -1.5px;
+      line-height: 1.15;
+      letter-spacing: -1px;
       color: var(--text);
       margin-bottom: 20px;
       opacity: 0;
@@ -163,8 +155,8 @@
       font-size: 15px;
       color: var(--text-dim);
       line-height: 1.7;
-      max-width: 460px;
-      margin: 0 auto 36px;
+      max-width: 440px;
+      margin: 0 auto 32px;
       opacity: 0;
       animation: fadeUp 0.8s ease 0.5s forwards;
     }
@@ -182,7 +174,7 @@
       gap: 8px;
       padding: 16px 36px;
       width: 100%;
-      max-width: 340px;
+      max-width: 320px;
       background: var(--purple);
       color: white;
       border: none;
@@ -209,36 +201,18 @@
       text-align: center;
     }
 
-    /* ── Conviction Lines ────────────────────── */
-    .conviction {
-      padding: 60px 20px;
-    }
-
-    .conviction-inner {
-      max-width: 560px;
-      margin: 0 auto;
-    }
-
-    .conviction-line {
-      font-size: clamp(20px, 5vw, 28px);
-      font-weight: 700;
-      line-height: 1.4;
-      letter-spacing: -0.5px;
-      color: var(--text-muted);
-      margin-bottom: 20px;
-      transition: color 0.6s ease;
-    }
-
-    .conviction-line.visible { color: var(--text); }
-    .conviction-line.accent { color: var(--purple-light); font-weight: 800; }
-
     /* ── What You Get Cards ──────────────────── */
+    .deliverables-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
     .deliverable-card {
       background: var(--dark-card);
       border: 1px solid var(--dark-border);
       border-radius: 14px;
-      padding: 24px;
-      margin-bottom: 12px;
+      padding: 22px 20px;
       transition: border-color 0.3s, opacity 0.8s ease, transform 0.8s ease;
     }
 
@@ -254,7 +228,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
 
     .deliverable-icon svg {
@@ -280,12 +254,12 @@
     }
 
     .deliverable-card.reveal:nth-child(1) { transition-delay: 0s; }
-    .deliverable-card.reveal:nth-child(2) { transition-delay: 0.1s; }
-    .deliverable-card.reveal:nth-child(3) { transition-delay: 0.2s; }
-    .deliverable-card.reveal:nth-child(4) { transition-delay: 0.3s; }
-    .deliverable-card.reveal:nth-child(5) { transition-delay: 0.4s; }
-    .deliverable-card.reveal:nth-child(6) { transition-delay: 0.5s; }
-    .deliverable-card.reveal:nth-child(7) { transition-delay: 0.6s; }
+    .deliverable-card.reveal:nth-child(2) { transition-delay: 0.08s; }
+    .deliverable-card.reveal:nth-child(3) { transition-delay: 0.16s; }
+    .deliverable-card.reveal:nth-child(4) { transition-delay: 0.24s; }
+    .deliverable-card.reveal:nth-child(5) { transition-delay: 0.32s; }
+    .deliverable-card.reveal:nth-child(6) { transition-delay: 0.4s; }
+    .deliverable-card.reveal:nth-child(7) { transition-delay: 0.48s; }
 
     /* ── Timeline ────────────────────────────── */
     .timeline {
@@ -352,7 +326,7 @@
     /* ── Guarantee ───────────────────────────── */
     .guarantee {
       text-align: center;
-      padding: 80px 20px;
+      padding: 64px 24px;
     }
 
     .guarantee-inner {
@@ -375,7 +349,7 @@
     }
 
     .guarantee-headline {
-      font-size: clamp(24px, 6vw, 36px);
+      font-size: clamp(22px, 5.5vw, 36px);
       font-weight: 800;
       letter-spacing: -1px;
       line-height: 1.15;
@@ -393,7 +367,7 @@
     /* ── Proof / Stat ────────────────────────── */
     .proof {
       text-align: center;
-      padding: 60px 20px;
+      padding: 48px 24px;
     }
 
     .proof-stat {
@@ -415,6 +389,15 @@
     }
 
     /* ── Deep Dive Section ───────────────────── */
+    .deep-dive-heading {
+      font-size: clamp(22px, 5.5vw, 32px);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+
     .deep-dive-text {
       font-size: 15px;
       color: var(--text-dim);
@@ -427,6 +410,10 @@
       font-weight: 600;
     }
 
+    .deep-dive-text:last-child {
+      margin-bottom: 0;
+    }
+
     /* ── FAQ ─────────────────────────────────── */
     .faq-item {
       border-bottom: 1px solid var(--dark-border);
@@ -437,6 +424,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
       cursor: pointer;
       background: none;
       border: none;
@@ -483,11 +471,11 @@
     /* ── CTA Section ─────────────────────────── */
     .cta-section {
       text-align: center;
-      padding: 80px 20px 120px;
+      padding: 64px 24px 120px;
     }
 
     .cta-headline {
-      font-size: clamp(24px, 6vw, 36px);
+      font-size: clamp(22px, 5.5vw, 36px);
       font-weight: 800;
       letter-spacing: -1px;
       line-height: 1.15;
@@ -506,7 +494,7 @@
     footer {
       position: relative;
       z-index: 1;
-      padding: 32px 20px;
+      padding: 32px 24px;
       border-top: 1px solid var(--dark-border);
       text-align: center;
     }
@@ -562,28 +550,37 @@
       50% { opacity: 1; }
     }
 
-    /* ── Divider ─────────────────────────────── */
-    .divider {
-      width: 40px;
-      height: 1px;
-      background: var(--dark-border);
+    /* ── Truth Quote ─────────────────────────── */
+    .truth-quote {
+      font-size: clamp(17px, 4.2vw, 22px);
+      font-weight: 600;
+      color: var(--text-dim);
+      line-height: 1.6;
+      text-align: center;
+      max-width: 480px;
       margin: 0 auto;
+    }
+
+    .truth-quote strong {
+      color: var(--text);
+      font-weight: 700;
     }
 
     /* ── Desktop ─────────────────────────────── */
     @media (min-width: 768px) {
-      section { padding: 120px 24px; }
+      section { padding: 100px 32px; }
 
       .hero {
         padding-top: calc(env(safe-area-inset-top, 0px) + 120px);
-        padding-bottom: 100px;
+        padding-bottom: 80px;
       }
 
       .hero-headline {
-        font-size: 48px;
+        font-size: 46px;
         letter-spacing: -2px;
       }
 
+      .hero-content { max-width: 620px; }
       .section-inner { max-width: 640px; }
 
       .btn-primary {
@@ -597,13 +594,15 @@
         gap: 12px;
       }
 
-      .deliverable-card { margin-bottom: 0; }
-
       .deliverable-card.full-width {
         grid-column: 1 / -1;
         background: linear-gradient(135deg, var(--dark-card), rgba(97,40,219,0.04));
         border-color: rgba(97,40,219,0.15);
       }
+
+      .guarantee { padding: 100px 32px; }
+      .cta-section { padding: 100px 32px 140px; }
+      .proof { padding: 60px 32px; }
     }
   </style>
 </head>
@@ -625,10 +624,7 @@
     </div>
 
     <h1 class="hero-headline">
-      A custom AI marketing system,<br>
-      built in <em>10 days</em>,<br>
-      that buys you back<br>
-      <em>15+ hours per week</em>
+      A custom AI marketing system, built in <em>10 days</em>, that buys you back <em>15+ hours per week</em>
     </h1>
 
     <p class="hero-sub">
@@ -648,8 +644,8 @@
 <section>
   <div class="section-inner">
     <p class="section-label reveal">Before we build anything</p>
-    <h2 class="hero-headline reveal" style="text-align:left; font-size: clamp(22px, 5.5vw, 32px); margin-bottom: 20px;">
-      We spend 48 hours inside<br>your business first.
+    <h2 class="deep-dive-heading reveal">
+      We spend 48 hours inside your business first.
     </h2>
 
     <p class="deep-dive-text reveal">We research your competitors. We study your customers. We analyze your market, your offers, your numbers. <strong>We rip up the carpets and look at the foundation.</strong></p>
@@ -700,7 +696,7 @@
           <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
         </div>
         <div class="deliverable-title">Automatic lead follow-up</div>
-        <div class="deliverable-desc">Leads get contacted instantly. No more "I forgot to text them back." SMS sequences, appointment reminders, and no-show recovery — all running without you touching it.</div>
+        <div class="deliverable-desc">Leads get contacted instantly. No more "I forgot to text them back." SMS sequences, appointment reminders, and no-show recovery — all running without you.</div>
       </div>
 
       <div class="deliverable-card reveal">
@@ -802,7 +798,7 @@
 ═══════════════════════════════════════════ -->
 <section>
   <div class="section-inner" style="text-align: center;">
-    <p class="deep-dive-text reveal" style="font-size: clamp(18px, 4.5vw, 24px); font-weight: 600; color: var(--text-dim); max-width: 480px; margin: 0 auto;">
+    <p class="truth-quote reveal">
       Anyone who tells you they know what will work for your business <strong>without looking under the hood first</strong> is guessing with your money.
     </p>
   </div>
@@ -950,8 +946,10 @@
 
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    particles.forEach(function(p) {
-      p.x += p.vx; p.y += p.vy;
+    for (var i = 0; i < particles.length; i++) {
+      var p = particles[i];
+      p.x += p.vx;
+      p.y += p.vy;
       if (p.x < 0) p.x = canvas.width;
       if (p.x > canvas.width) p.x = 0;
       if (p.y < 0) p.y = canvas.height;
@@ -960,22 +958,11 @@
       ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(124,77,255,' + p.o + ')';
       ctx.fill();
-    });
+    }
     requestAnimationFrame(draw);
   }
   draw();
 })();
-
-/* Smooth scroll */
-document.querySelectorAll('a[href^="#"]').forEach(function(link) {
-  link.addEventListener('click', function(e) {
-    var target = document.querySelector(this.getAttribute('href'));
-    if (target) {
-      e.preventDefault();
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  });
-});
 </script>
 
 </body>
