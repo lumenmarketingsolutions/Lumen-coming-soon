@@ -806,6 +806,10 @@ def preview_about():
 def preview_funnel():
     return render_template("funnel.html")
 
+@app.route("/10daybuild")
+def ten_day_build():
+    return render_template("10daybuild.html")
+
 @app.route("/admin/test-sequence-email")
 def test_sequence_email():
     """Send sequence email 1 test to kendallwdavis11@gmail.com."""
