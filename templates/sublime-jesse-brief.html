@@ -13,12 +13,12 @@
       background: #fafaf9;
       color: #1a1a1a;
       -webkit-font-smoothing: antialiased;
-      line-height: 1.7;
+      line-height: 1.75;
       font-size: 15px;
     }
 
     .container {
-      max-width: 600px;
+      max-width: 560px;
       margin: 0 auto;
       padding: 48px 24px 60px;
     }
@@ -33,23 +33,24 @@
     }
 
     h1 {
-      font-size: 26px;
+      font-size: clamp(22px, 5vw, 28px);
       font-weight: 800;
-      letter-spacing: -1px;
-      line-height: 1.2;
-      margin-bottom: 20px;
+      letter-spacing: -0.8px;
+      line-height: 1.25;
+      margin-bottom: 24px;
     }
 
     h2 {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
-      margin-top: 36px;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
+      padding-top: 32px;
+      border-top: 1px solid #e8e5e0;
     }
 
     p {
       color: #555;
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
     p strong {
@@ -61,28 +62,79 @@
       background: #f8f6ff;
       border-left: 3px solid #6128DB;
       padding: 16px 20px;
-      margin: 24px 0;
+      margin: 28px 0;
       border-radius: 0 8px 8px 0;
     }
 
     .highlight p {
       color: #1a1a1a;
       font-weight: 500;
+      font-size: 14px;
       margin-bottom: 0;
     }
 
-    ul {
-      padding-left: 20px;
-      margin-bottom: 14px;
+    .points {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 16px;
     }
 
-    ul li {
+    .points li {
       color: #555;
-      margin-bottom: 8px;
+      padding: 12px 0;
+      border-bottom: 1px solid #f0ede8;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .points li:last-child {
+      border-bottom: none;
+    }
+
+    .points li strong {
+      color: #1a1a1a;
+      display: block;
+      font-size: 15px;
+      margin-bottom: 2px;
+    }
+
+    .pricing-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .pricing-card {
+      background: #fff;
+      border: 1px solid #e8e5e0;
+      border-radius: 10px;
+      padding: 18px 20px;
+    }
+
+    .pricing-card .label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #6128DB;
+      margin-bottom: 6px;
+    }
+
+    .pricing-card .amount {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .pricing-card .detail {
+      font-size: 13px;
+      color: #777;
+      line-height: 1.6;
     }
 
     .footer {
-      margin-top: 40px;
+      margin-top: 36px;
       padding-top: 20px;
       border-top: 1px solid #e8e5e0;
       font-size: 13px;
@@ -95,61 +147,59 @@
 <div class="container">
 
   <div class="tag">For Jesse</div>
-  <h1>Here's what I found on Sublime, and what they need to hear.</h1>
+  <h1>What I found on Sublime, and what they need to hear.</h1>
 
-  <p>I went through their entire brand. Website, products, pricing, positioning. The good news is that the product is solid and the price points are right. They are genuinely close to their $100K goal. The things holding them back are fixable and most of them are fast.</p>
+  <p>Product is solid. Price points are right. They are close to their $100K goal. Everything holding them back is fixable and fast.</p>
 
   <h2>What to tell them</h2>
 
-  <p>Keep it simple. The core message is: <strong>your product is good, but the way it's being presented online is not doing it justice, and that gap is where all the lost revenue is sitting.</strong></p>
+  <p><strong>The product is good. The way it's presented online is not doing it justice, and that gap is where the lost revenue is.</strong></p>
 
-  <p>Here are the main points to hit:</p>
-
-  <ul>
-    <li><strong>The website needs to match the product.</strong> Their logo is great. The site around it is not. Their buyers have shopped on Sephora and Ulta. That is the bar, whether they realize it or not. The current site is leaving money on the table every single day.</li>
-    <li><strong>The path from seeing the product to buying it has too many steps.</strong> When someone clicks a link from a video, they need to be 1-2 taps from checkout. Right now there is too much in between.</li>
-    <li><strong>The domain name is hurting them.</strong> "Tallow" means nothing to most people. Something like "Sublime Apothecary" would click immediately. Simple change, big impact.</li>
-    <li><strong>Product photos need to be elevated.</strong> In skincare, the image is the product. The current photos are inconsistent and don't communicate the quality that's actually in the bottle.</li>
-    <li><strong>There is a specific play with UGC creators</strong> that would put their products in front of millions of people within the first few weeks. This is how unknown brands break through the trust barrier.</li>
+  <ul class="points">
+    <li><strong>Website doesn't match the product.</strong> Logo is great. Site is not. Their buyers shop on Sephora and Ulta. That's the bar.</li>
+    <li><strong>Too many steps from ad to checkout.</strong> Someone clicks a link from a video, they need to be 1-2 taps from buying. Too much in between right now.</li>
+    <li><strong>Domain name is adding confusion.</strong> "Tallow" means nothing to most people. "Sublime Apothecary" clicks immediately.</li>
+    <li><strong>Product photos need work.</strong> In skincare, the image is the product. Current photos don't match the quality in the bottle.</li>
+    <li><strong>UGC creator campaign is the move.</strong> Puts their products in front of millions of people within weeks. This is how unknown brands break through.</li>
   </ul>
 
   <div class="highlight">
-    <p>The tone to use: confident, direct, and encouraging. They are close. This is not a "your brand is broken" conversation. It's a "you're a few changes away from where you want to be, and here's exactly what those changes are" conversation.</p>
+    <p>Tone to use: confident, direct, encouraging. They are close. This is a "you're a few changes away" conversation, not a "your brand is broken" one.</p>
   </div>
 
   <h2>How to frame it</h2>
 
-  <p>Don't get into the technical details. That's for when they talk to me directly. Just let them know:</p>
+  <p>Don't go deep on the technical side. Let them know Kendall reviewed their brand personally, found specific things that need to change, and the $100K goal is realistic on a fast timeline. <strong>The full report holds nothing back. It's simply explained, but not simply executed, and that's the point.</strong></p>
 
-  <ul>
-    <li>Kendall reviewed their brand personally and put together a full breakdown</li>
-    <li>There are specific, concrete things that need to change</li>
-    <li>None of it is a product problem, it's all presentation and funnel</li>
-    <li>The $100K goal is realistic and the timeline is fast</li>
-    <li>The full report holds nothing back. Everything they need to know is in there. It's simply explained, but not simply executed, and that's the point</li>
-  </ul>
+  <h2>Pricing</h2>
 
-  <h2>Pricing for the conversation</h2>
+  <p>Not final. I want to work with them. Use your judgement, but here's the framework:</p>
 
-  <p>Here's where I'm at on numbers. These are not final, and I want to work with them on this, so use your judgement. But here's the framework:</p>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="label">Upfront Build</div>
+      <div class="amount">$7,500</div>
+      <div class="detail">Full rebuild: site, photos, funnel mechanics, UGC campaign setup. Already cut in half from what this normally costs. Minimum $3,500.</div>
+    </div>
+    <div class="pricing-card">
+      <div class="label">Ongoing — Option A</div>
+      <div class="amount">$3,500/mo</div>
+      <div class="detail">Flat rate. Ads, creative, optimization, email sequences. Everything managed.</div>
+    </div>
+    <div class="pricing-card">
+      <div class="label">Ongoing — Option B</div>
+      <div class="amount">$1,500/mo + 8%</div>
+      <div class="detail">Lower base, 8% of gross revenue. I eat the risk with them and get paid when they win.</div>
+    </div>
+  </div>
 
-  <ul>
-    <li><strong>Upfront build:</strong> I would like to see $7,500 for the full rebuild (site, photos, funnel mechanics, UGC campaign setup). I am bringing this down by half from what this would normally cost because I know what I can do for them and I want to get in the door. Minimum I need to see is $3,500.</li>
-    <li><strong>Ongoing management, two options:</strong>
-      <ul style="margin-top: 8px;">
-        <li>$3,500/mo flat to manage everything (ads, creative, optimization, email sequences)</li>
-        <li>$1,500/mo + 8% of gross revenue. This one means I eat the risk with them and get paid when they win.</li>
-      </ul>
-    </li>
-  </ul>
+  <p><strong>The guarantee: if they don't make their money back and then some within the first month after launch, I work for free until they do.</strong> They will see returns within the first few hours of going live.</p>
 
-  <p>Get what you can on the upfront. I am flexible and I want this to work for everyone. <strong>The guarantee I am putting on this: if they do not make their money back and then some within the first month after launch, I will work for free until they do.</strong> I am that confident in what this will do for them. They will see returns within the first few hours of going live. I have zero doubt about that.</p>
+  <h2>The report</h2>
 
-  <h2>What I put together for them</h2>
+  <p>Full audit covering what's working, what's not, five friction points on their site, and a step-by-step strategy for $100K months. Hand-written after reviewing their brand. Not a template.</p>
 
-  <p>I wrote a full audit report that covers everything: what's working, what's not, the five biggest friction points on their site, and a step-by-step strategy for how to hit $100K months. It is specific to their brand. Every word was hand-written after going through their site. It is not a template and it will be obvious that it isn't.</p>
-
-  <p><strong>Send them the report whenever you're ready. I'm here when they want to move.</strong></p>
+  <p><strong>Send it whenever you're ready. I'm here when they want to move.</strong></p>
 
   <div class="footer">
     Kendall Davis, Lumen Marketing Solutions
