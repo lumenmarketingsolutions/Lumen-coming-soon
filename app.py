@@ -1003,11 +1003,13 @@ def funnel_beta():
 @app.route("/apply", methods=["POST"])
 def apply_submit():
     data = request.get_json() or {}
-    business = data.get("business", "")
+    name = (data.get("name") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    phone = (data.get("phone") or "").strip()
+    industry = data.get("industry", "")
     revenue = data.get("revenue", "")
     marketing = data.get("marketing", "")
-    challenge = data.get("challenge", "")
-    email = (data.get("email") or "").strip().lower()
+    goal = data.get("goal", "")
     if not email or "@" not in email:
         return jsonify({"ok": False, "error": "Valid email required"})
 
@@ -1019,16 +1021,20 @@ def apply_submit():
         CREATE TABLE IF NOT EXISTS applications (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             email TEXT NOT NULL,
-            business TEXT DEFAULT '',
+            name TEXT DEFAULT '',
+            phone TEXT DEFAULT '',
+            industry TEXT DEFAULT '',
             revenue TEXT DEFAULT '',
             marketing TEXT DEFAULT '',
+            goal TEXT DEFAULT '',
+            business TEXT DEFAULT '',
             challenge TEXT DEFAULT '',
             created_at TEXT NOT NULL
         )
     """)
     con.execute(
-        "INSERT INTO applications (email, business, revenue, marketing, challenge, created_at) VALUES (?, ?, ?, ?, ?, ?)",
-        (email, business, revenue, marketing, challenge, now),
+        "INSERT INTO applications (email, name, phone, industry, revenue, marketing, goal, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (email, name, phone, industry, revenue, marketing, goal, now),
     )
 
     # Auto-create CRM lead
@@ -1037,12 +1043,12 @@ def apply_submit():
         cur = con.execute(
             """INSERT INTO leads (name, email, phone, business, revenue, marketing, challenge,
                stage, source, deal_value, follow_up_date, tags, created_at, updated_at)
-               VALUES (?, ?, '', ?, ?, ?, ?, 'new', 'application', 0, '', '', ?, ?)""",
-            ("", email, business, revenue, marketing, challenge, now, now),
+               VALUES (?, ?, ?, ?, ?, ?, ?, 'new', '10daybuild', 0, '', ?, ?, ?)""",
+            (name, email, phone, industry, revenue, marketing, goal, industry, now, now),
         )
         lead_id = cur.lastrowid
         con.execute(
-            "INSERT INTO lead_activity (lead_id, type, content, metadata, created_at) VALUES (?, 'auto', 'Lead created from application', '', ?)",
+            "INSERT INTO lead_activity (lead_id, type, content, metadata, created_at) VALUES (?, 'auto', 'Lead created from 10-day build application', '', ?)",
             (lead_id, now),
         )
     con.commit()
@@ -1052,15 +1058,17 @@ def apply_submit():
     if RESEND_API_KEY:
         notify_html = f"""
         <div style="font-family:Inter,sans-serif;background:#0a0a0f;color:#e8e8f0;padding:40px;">
-            <h2 style="color:#7c4dff;">New Application</h2>
+            <h2 style="color:#7c4dff;">New 10-Day Build Application</h2>
+            <p><strong>Name:</strong> {name}</p>
             <p><strong>Email:</strong> {email}</p>
-            <p><strong>Business:</strong> {business}</p>
+            <p><strong>Phone:</strong> {phone or 'Not provided'}</p>
+            <p><strong>Industry:</strong> {industry}</p>
             <p><strong>Revenue:</strong> {revenue}</p>
             <p><strong>Current Marketing:</strong> {marketing}</p>
-            <p><strong>Biggest Challenge:</strong> {challenge}</p>
+            <p><strong>Goal:</strong> {goal}</p>
         </div>
         """
-        send_email(NOTIFY_EMAIL, f"New application: {email}", notify_html)
+        send_email(NOTIFY_EMAIL, f"10-Day Build Application: {name or email}", notify_html)
 
     return jsonify({"ok": True})
 
