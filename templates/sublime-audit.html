@@ -28,7 +28,7 @@
       background: var(--bg);
       color: var(--text);
       -webkit-font-smoothing: antialiased;
-      line-height: 1.7;
+      line-height: 1.8;
       font-size: 15px;
     }
 
@@ -40,7 +40,7 @@
 
     /* Header */
     .header {
-      margin-bottom: 48px;
+      margin-bottom: 56px;
     }
 
     .header-brand {
@@ -49,30 +49,31 @@
       letter-spacing: 3px;
       text-transform: uppercase;
       color: var(--accent);
-      margin-bottom: 16px;
+      margin-bottom: 20px;
     }
 
     .header h1 {
-      font-size: clamp(28px, 5vw, 38px);
+      font-size: clamp(26px, 5vw, 36px);
       font-weight: 800;
       letter-spacing: -1.5px;
-      line-height: 1.15;
-      margin-bottom: 16px;
+      line-height: 1.2;
+      margin-bottom: 20px;
     }
 
     .header-sub {
       font-size: 16px;
       color: var(--text-dim);
-      line-height: 1.7;
-      max-width: 520px;
+      line-height: 1.8;
+      max-width: 540px;
     }
 
     .header-meta {
-      margin-top: 24px;
+      margin-top: 28px;
       padding-top: 20px;
       border-top: 1px solid var(--border);
       font-size: 13px;
       color: var(--text-dim);
+      line-height: 1.8;
     }
 
     .header-meta span {
@@ -82,7 +83,7 @@
 
     /* Sections */
     .section {
-      margin-bottom: 48px;
+      margin-bottom: 56px;
     }
 
     .section-label {
@@ -91,19 +92,20 @@
       letter-spacing: 3px;
       text-transform: uppercase;
       color: var(--accent);
-      margin-bottom: 12px;
+      margin-bottom: 14px;
     }
 
     .section h2 {
       font-size: 22px;
       font-weight: 700;
       letter-spacing: -0.5px;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
+      line-height: 1.3;
     }
 
     .section p {
       color: var(--text-dim);
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
 
     .section p strong {
@@ -116,15 +118,15 @@
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 12px;
+      padding: 28px;
+      margin-bottom: 16px;
     }
 
     .finding-header {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .finding-tag {
@@ -132,7 +134,7 @@
       font-weight: 700;
       letter-spacing: 1.5px;
       text-transform: uppercase;
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 4px;
     }
 
@@ -154,13 +156,20 @@
     .finding h3 {
       font-size: 16px;
       font-weight: 700;
+      line-height: 1.35;
     }
 
     .finding p {
       font-size: 14px;
       color: var(--text-dim);
-      margin-top: 8px;
+      margin-top: 12px;
       margin-bottom: 0;
+      line-height: 1.8;
+    }
+
+    .finding p strong {
+      color: var(--text);
+      font-weight: 600;
     }
 
     /* Callout */
@@ -168,15 +177,15 @@
       background: linear-gradient(135deg, #f8f6ff, #f0ebff);
       border: 1px solid rgba(97,40,219,0.12);
       border-radius: 12px;
-      padding: 28px 24px;
-      margin: 40px 0;
+      padding: 32px 28px;
+      margin: 48px 0;
     }
 
     .callout p {
       color: var(--text);
       font-weight: 500;
       font-size: 16px;
-      line-height: 1.7;
+      line-height: 1.8;
       margin-bottom: 0;
     }
 
@@ -188,10 +197,10 @@
 
     .strategy-list li {
       counter-increment: strategy;
-      padding: 20px 0;
+      padding: 24px 0;
       border-bottom: 1px solid var(--border);
       display: flex;
-      gap: 16px;
+      gap: 18px;
     }
 
     .strategy-list li:last-child {
@@ -201,12 +210,12 @@
     .strategy-list li::before {
       content: counter(strategy);
       flex-shrink: 0;
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       background: rgba(97,40,219,0.08);
       color: var(--accent);
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700;
       display: flex;
       align-items: center;
@@ -217,25 +226,38 @@
     .strategy-title {
       font-weight: 700;
       font-size: 15px;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      line-height: 1.4;
     }
 
     .strategy-desc {
       font-size: 14px;
       color: var(--text-dim);
+      line-height: 1.8;
+    }
+
+    /* Phase Label */
+    .phase-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      padding: 28px 0 8px;
+      display: block;
     }
 
     /* Divider */
     .divider {
       height: 1px;
       background: var(--border);
-      margin: 48px 0;
+      margin: 56px 0;
     }
 
     /* Footer */
     .footer {
       text-align: center;
-      padding-top: 32px;
+      padding-top: 36px;
       border-top: 1px solid var(--border);
     }
 
@@ -253,7 +275,7 @@
     .footer p {
       font-size: 12px;
       color: var(--text-dim);
-      margin-top: 8px;
+      margin-top: 10px;
     }
 
     /* Print */
@@ -271,7 +293,7 @@
   <div class="header">
     <div class="header-brand">Brand Audit</div>
     <h1>Sublime is closer to $100K months than you think.</h1>
-    <p class="header-sub">This is a breakdown of what we found after reviewing your brand, your website, your product line, and your market position. Everything in here is fixable, and most of it is fast.</p>
+    <p class="header-sub">This is a breakdown of what we found after reviewing your brand, your website, your product pages, and your market position. Everything in here is fixable, and most of it is fast.</p>
     <div class="header-meta">
       Prepared by <span>Kendall Davis</span>, Lumen Marketing Solutions<br>
       Every word in this report was hand-written after reviewing your brand. This is not a template.
@@ -283,21 +305,29 @@
     <div class="section-label">The Product</div>
     <h2>You have something real here.</h2>
     <p>Beef tallow skincare is a growing category with strong word-of-mouth demand. The science backs it up. The ingredient profile is genuinely different from what's on the shelves at Ulta or Sephora. <strong>That is your edge, and it is a significant one.</strong></p>
-    <p>Your product line is priced well. Most items in the $20-30 range, with entry points as low as $5 and higher-value bundles up to $114. <strong>That range gives us everything we need to build a high-converting funnel with real average order value.</strong></p>
+    <p>Your product line is priced well. Most items in the $20-30 range, with entry points as low as $5 and higher-value bundles up to $114. <strong>That range gives us everything we need to build a high-converting store with real average order value.</strong></p>
     <p>The product is not the problem. The packaging around it is.</p>
   </div>
 
-  <!-- ─── FINDINGS ─── -->
+  <!-- ─── FINDINGS: HOMEPAGE ─── -->
   <div class="section">
-    <div class="section-label">What We Found</div>
-    <h2>Five friction points identified in the first 10 seconds.</h2>
+    <div class="section-label">The Homepage</div>
+    <h2>The first thing a buyer sees is working against you.</h2>
 
     <div class="finding">
       <div class="finding-header">
         <span class="finding-tag critical">Critical</span>
       </div>
-      <h3>The domain name is creating confusion.</h3>
-      <p>"sublimetallow.com" requires education before someone will click. Most buyers don't know what tallow is. Compare that to something like "sublimeapothecary.com" where the word alone triggers familiarity, trust, and an existing association with skincare. <strong>The URL is the very first impression, and right now it's adding a question mark instead of removing one.</strong> A domain swap is simple, fast, and will immediately improve click-through rates from every channel.</p>
+      <h3>The banner is creating confusion, not conversions.</h3>
+      <p>"20% Off Your First Order" is a strong hook. But the call to action next to it says "Sign up now." To a buyer, "sign up" does not mean "shop." It means "give me your email before I give you anything." That is the opposite of what a discount banner should do. A buyer sees 20% off, gets excited, and then gets stopped by a signup wall instead of being dropped into the store with the discount already applied. <strong>The banner should drive people straight to the product, not into an email capture form.</strong></p>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-tag high">High Impact</span>
+      </div>
+      <h3>The "Learn" link in the navigation is sending the wrong message.</h3>
+      <p>When a buyer sees "Learn" in the nav bar, the subconscious read is "you won't understand this product without doing homework first." That is not the energy a skincare brand should give off. Nobody browsing Sephora has to click "Learn" before they feel confident enough to buy. <strong>A short product description on the product page should do all the educating.</strong> That nav slot should be pointing to something that helps people buy, not something that implies they need to study first.</p>
     </div>
 
     <div class="finding">
@@ -307,13 +337,57 @@
       <h3>The website does not match the quality of the product.</h3>
       <p>Your logo is beautiful. It communicates elegance and confidence. But the website around it does not carry that same energy. Your buyers have shopped on Sephora, Ulta, Glossier. That is the subconscious standard they hold every skincare brand to. <strong>The gap between your logo and your site is the single biggest thing holding back conversions.</strong> A brand with a worse product but a better website would outsell this store today, and that needs to change.</p>
     </div>
+  </div>
+
+  <!-- ─── FINDINGS: PRODUCT PAGES ─── -->
+  <div class="section">
+    <div class="section-label">The Product Pages</div>
+    <h2>Where the actual buying decision happens.</h2>
 
     <div class="finding">
       <div class="finding-header">
         <span class="finding-tag critical">Critical</span>
       </div>
-      <h3>Too many steps between landing and checkout.</h3>
-      <p>When someone sees your product in a video, clicks the link, and lands on your site, they should be one or two taps from entering their credit card. Right now, that path has too many steps and too many distractions. <strong>Within 1-2 seconds of landing, a buyer has already decided whether they will continue.</strong> The current site makes them work to find what they came for, and most will leave before they get there. Every extra click between landing on the page and checkout is a place where you lose money.</p>
+      <h3>There is no product description above the fold.</h3>
+      <p>When someone lands on a product page, they see the product name, a size selector, a price, and an Add to Cart button. What they do not see is any explanation of what the product actually does or why they should care. "BEE-Natural Botox" is a clever name, but it does not tell a first-time buyer what they are buying. <strong>The product description needs to be visible before the purchase buttons, not buried below the fold.</strong> If a buyer has to scroll down to find out what they are looking at, most of them will not scroll.</p>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-tag critical">Critical</span>
+      </div>
+      <h3>Too many competing calls to action on one screen.</h3>
+      <p>On a single product page, there is an Add to Cart button, a Buy with Shop Pay button, a Subscribe and Save option, and a "Get 20% Off" popup floating in the corner. That is four different things asking for the buyer's attention at the same time. <strong>When everything is asking for a click, nothing gets clicked.</strong> The path from landing to checkout should be one clear decision, not four competing ones. Simplify this down to one primary action and remove everything that creates hesitation.</p>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-tag high">High Impact</span>
+      </div>
+      <h3>The subscription option is adding friction to first-time buyers.</h3>
+      <p>A "Subscribe and Save" option on the first purchase creates hesitation. A new customer who has never tried your product is being asked to commit to recurring charges before they even know if they like it. <strong>Remove this from the initial purchase flow entirely.</strong> Let the product speak for itself. Follow up with well-written email sequences after they have tried it, and they will come back on their own. Retention is built through experience, not forced commitment.</p>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-tag high">High Impact</span>
+      </div>
+      <h3>No social proof anywhere on the site.</h3>
+      <p>There are no reviews, no testimonials, and no user-generated content on any product page. For a brand that most buyers have never heard of, this is a significant trust gap. <strong>A first-time buyer needs to see that other real people have tried this product and loved it before they will enter their credit card.</strong> Even a handful of genuine reviews with photos will dramatically change the conversion rate. Without social proof, every visitor is making a leap of faith, and most people will not take that leap on a brand they just discovered.</p>
+    </div>
+  </div>
+
+  <!-- ─── FINDINGS: BRAND ─── -->
+  <div class="section">
+    <div class="section-label">The Brand</div>
+    <h2>The identity is strong but fragmented.</h2>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-tag critical">Critical</span>
+      </div>
+      <h3>The brand name is split across three different identities.</h3>
+      <p>The URL says "sublimetallow.com." The logo says "Sublime Apothecary &amp; Co." The Instagram handle is @sublimeapothecary. The copyright in the footer says "Sublime Apothecary." You are already using the better name everywhere except the one place that matters most, the domain. "Tallow" in the URL requires education. "Apothecary" triggers instant familiarity with skincare. <strong>This is not a rebrand. This is just finishing what you already started.</strong> A domain swap is simple, fast, and will immediately improve click-through rates from every channel.</p>
     </div>
 
     <div class="finding">
@@ -321,15 +395,7 @@
         <span class="finding-tag high">High Impact</span>
       </div>
       <h3>Product photography is inconsistent.</h3>
-      <p>We can see what you're going for with the current images. The intention is there. But the execution is not at the level the product deserves. <strong>In skincare, the product photos are the product.</strong> Your buyer cannot touch it, smell it, or try it before they buy. The image is everything. Studio-quality product shots, consistent lighting, and a cohesive visual identity across every product page will change how people perceive the entire brand.</p>
-    </div>
-
-    <div class="finding">
-      <div class="finding-header">
-        <span class="finding-tag high">High Impact</span>
-      </div>
-      <h3>The subscription model is adding friction to first-time buyers.</h3>
-      <p>Subscription options on the first purchase create hesitation. A new customer who has never tried your product is being asked to commit to recurring charges before they even know if they like it. <strong>Remove this from the initial purchase flow.</strong> Let the product speak for itself, follow up with well-written email sequences, and they will come back on their own. Retention is built through experience, not forced commitment.</p>
+      <p>We can see what you are going for with the current images. The intention is there. But the execution is not at the level the product deserves. <strong>In skincare, the product photos are the product.</strong> Your buyer cannot touch it, smell it, or try it before they buy. The image is everything. Studio-quality product shots, consistent lighting, and a cohesive visual identity across every product page will change how people perceive the entire brand.</p>
     </div>
 
     <div class="finding">
@@ -337,7 +403,7 @@
         <span class="finding-tag opportunity">Opportunity</span>
       </div>
       <h3>No upsell or bundle mechanics in place.</h3>
-      <p>There are no strategic product bundles, no post-add-to-cart upsells, and the "you may also like" section appears to be random. <strong>Upsells should only appear after a buyer has initiated checkout, not before.</strong> Let them commit to the decision first, then offer a complementary product at a discount while they're already in buying mode. Even a $5 increase in average order value at scale changes everything. These mechanics are standard on every high-performing ecom store, and they are completely absent here.</p>
+      <p>There are no strategic product bundles, no post-checkout upsells, and the product recommendations appear to be random. <strong>Upsells should only appear after a buyer has initiated checkout, not before.</strong> Let them commit to the decision first, then offer a complementary product at a discount while they are already in buying mode. Even a $5 increase in average order value at scale changes everything. These mechanics are standard on every high-performing ecom store, and they are completely absent here.</p>
     </div>
   </div>
 
@@ -350,13 +416,15 @@
   <div class="section">
     <div class="section-label">The Play</div>
     <h2>What $100K months actually look like for this brand.</h2>
-    <p>Two phases. First, rebuild the store so it converts. Then, launch the campaign that sends it traffic. This is what we would do, in order, starting immediately.</p>
+    <p>Two phases. First, rebuild the store so it converts. Then, launch the campaign that sends it traffic.</p>
+
+    <div class="phase-label">Phase 1: Prepare the store</div>
 
     <ol class="strategy-list">
       <li>
         <div>
           <div class="strategy-title">Rebuild the store for conversion.</div>
-          <div class="strategy-desc">Design the entire site around the identity your logo already communicates. High-end, refined, confident. Every page built to move a visitor toward a purchase with the shortest possible path. Product-specific landing pages that take someone from click to checkout in under 3 taps. Mobile-first, because that's where your buyers are. This is what has to happen first. Before any traffic is driven, the store needs to be ready to convert it.</div>
+          <div class="strategy-desc">Design the entire site around the identity your logo already communicates. High-end, refined, confident. Every page built to move a visitor toward a purchase with the shortest possible path. Product-specific landing pages that take someone from click to checkout in under 3 taps. Clean product descriptions above the fold. One clear call to action per page. Mobile-first, because that is where your buyers are.</div>
         </div>
       </li>
       <li>
@@ -368,25 +436,30 @@
       <li>
         <div>
           <div class="strategy-title">Build the conversion mechanics into the store.</div>
-          <div class="strategy-desc">Strategic product bundles designed around how the products actually complement each other. Post-checkout upsells that increase average order value without adding friction to the initial decision. One-click checkout initiation from every product page. These are the invisible systems that separate a $30K month from a $100K month.</div>
+          <div class="strategy-desc">Strategic product bundles designed around how the products actually complement each other. Post-checkout upsells that increase average order value without adding friction to the initial decision. One-click checkout initiation from every product page. Remove the subscription option from first purchases. These are the invisible systems that separate a $30K month from a $100K month.</div>
         </div>
       </li>
       <li>
         <div>
+          <div class="strategy-title">Unify the brand and change the domain.</div>
+          <div class="strategy-desc">Move to sublimeapothecary.com or a similar keyword that your buyers already associate with skincare. Align the URL with what the logo, Instagram, and footer already say. This is a 30-minute change that will improve click-through rates from every single channel, starting immediately.</div>
+        </div>
+      </li>
+    </ol>
+
+    <div class="phase-label">Phase 2: Send the traffic</div>
+
+    <ol class="strategy-list" style="counter-reset: strategy 4;">
+      <li>
+        <div>
           <div class="strategy-title">Launch a UGC creator campaign. This is the slingshot.</div>
-          <div class="strategy-desc">Once the store is rebuilt and the conversion mechanics are in place, this is how you flood it with high-intent buyers. Reach out to 100-200 creators across TikTok, Instagram, and Facebook. Offer product plus commission on their unique links. Provide them with exactly how the videos need to be made, what to say, what to show, and how to frame the product. Each creator gets a specific product, and every video drives traffic to a product-specific landing page. This is how unknown brands break through the trust barrier overnight. Your buyers will feel like they already know you before they ever visit the site. Steps 1 through 3 prepare the store to receive this traffic. This step is what sends it.</div>
+          <div class="strategy-desc">Once the store is rebuilt and the conversion mechanics are in place, this is how you flood it with high-intent buyers. Reach out to 100-200 creators across TikTok, Instagram, and Facebook. Offer product plus commission on their unique links. Provide them with exactly how the videos need to be made, what to say, what to show, and how to frame the product. Each creator gets a specific product, and every video drives traffic to a product-specific landing page. This is how unknown brands break through the trust barrier overnight. Your buyers will feel like they already know you before they ever visit the site. Phase 1 prepares the store to receive this traffic. This is what sends it.</div>
         </div>
       </li>
       <li>
         <div>
           <div class="strategy-title">Email sequences that continue the conversation.</div>
-          <div class="strategy-desc">If someone saw a video about your whipped tallow moisturizer and started checking out but didn't finish, the follow-up email three days later needs to pick up exactly where that video left off. Same language, same framing, same energy. When you do this, they think "oh yeah, I wanted that." When you don't, you're starting from zero again and they're already onto the next brand. This is how you recover abandoned carts at a rate that actually moves revenue.</div>
-        </div>
-      </li>
-      <li>
-        <div>
-          <div class="strategy-title">Change the domain.</div>
-          <div class="strategy-desc">Move to sublimeapothecary.com or a similar keyword that your buyers already associate with skincare. This is a 30-minute change that will improve click-through rates from every single channel, starting immediately.</div>
+          <div class="strategy-desc">If someone saw a video about your whipped tallow moisturizer and started checking out but did not finish, the follow-up email three days later needs to pick up exactly where that video left off. Same language, same framing, same energy. When you do this, they think "oh yeah, I wanted that." When you do not, you are starting from zero again and they are already onto the next brand. This is how you recover abandoned carts at a rate that actually moves revenue.</div>
         </div>
       </li>
     </ol>
