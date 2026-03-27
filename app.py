@@ -810,6 +810,14 @@ def preview_funnel():
 def ten_day_build():
     return render_template("10daybuild.html")
 
+@app.route("/audit/sublime")
+def sublime_audit():
+    return render_template("sublime-audit.html")
+
+@app.route("/audit/sublime/jesse")
+def sublime_jesse():
+    return render_template("sublime-jesse-brief.html")
+
 @app.route("/admin/test-sequence-email")
 def test_sequence_email():
     """Send sequence email 1 test to kendallwdavis11@gmail.com."""
