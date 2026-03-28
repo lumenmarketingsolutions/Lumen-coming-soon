@@ -828,7 +828,7 @@ def ten_day_build():
 
 @app.route("/robots.txt")
 def robots_txt():
-    return "User-agent: *\nDisallow: /audit/\nDisallow: /admin/\nDisallow: /jared\nDisallow: /jaredcasados\n", 200, {"Content-Type": "text/plain"}
+    return "User-agent: *\nDisallow: /audit/\nDisallow: /admin/\nDisallow: /jaredcasados\n", 200, {"Content-Type": "text/plain"}
 
 @app.route("/audit/sublime")
 def sublime_audit():
@@ -846,7 +846,6 @@ def cap_hardware_audit():
 def cap_hardware_jesse():
     return render_template("cap-hardware-jesse.html")
 
-@app.route("/jared")
 @app.route("/jaredcasados")
 def jared_scope_review():
     return render_template("brian-scope-review.html")
