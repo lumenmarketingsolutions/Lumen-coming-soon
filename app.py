@@ -328,12 +328,19 @@ def init_db():
         )
     """)
 
-    # One-time: clear Gmail token to force re-auth with send scope
-    con.execute("DELETE FROM mk_gmail_tokens")
-
     # Migrate mk_send_log: add gmail_msg_id column
     try:
         con.execute("ALTER TABLE mk_send_log ADD COLUMN gmail_msg_id TEXT DEFAULT ''")
+    except Exception:
+        pass
+
+    # One-time migration: clear stale Gmail token missing send scope (v2)
+    try:
+        con.execute("CREATE TABLE IF NOT EXISTS mk_migrations (name TEXT PRIMARY KEY)")
+        done = con.execute("SELECT 1 FROM mk_migrations WHERE name = 'gmail_scope_fix_v2'").fetchone()
+        if not done:
+            con.execute("DELETE FROM mk_gmail_tokens")
+            con.execute("INSERT INTO mk_migrations (name) VALUES ('gmail_scope_fix_v2')")
     except Exception:
         pass
 
