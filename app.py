@@ -328,6 +328,9 @@ def init_db():
         )
     """)
 
+    # One-time: clear Gmail token to force re-auth with send scope
+    con.execute("DELETE FROM mk_gmail_tokens")
+
     # Migrate mk_send_log: add gmail_msg_id column
     try:
         con.execute("ALTER TABLE mk_send_log ADD COLUMN gmail_msg_id TEXT DEFAULT ''")
