@@ -1786,10 +1786,11 @@ def mk_dashboard():
     recent_leads = con.execute("SELECT * FROM mk_leads ORDER BY created_at DESC LIMIT 5").fetchall()
     con.close()
     show_notice = session.pop("mk_show_notice", False)
+    notice_until = datetime.datetime.utcnow().date() <= datetime.date(2026, 4, 2)
     return render_template("mk_dashboard.html", active="dashboard",
         lead_count=lead_count, campaign_count=campaign_count,
         sent_count=sent_count, recent=recent, recent_leads=recent_leads,
-        show_notice=show_notice)
+        show_notice=show_notice, notice_until=notice_until)
 
 
 @app.route("/marykate/leads")

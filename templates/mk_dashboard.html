@@ -82,7 +82,7 @@
 </div>
 {% endif %}
 
-{% if show_notice %}
+{% if show_notice or notice_until %}
 <div id="mk-notice-overlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.6); display:flex; align-items:center; justify-content:center; z-index:9999; padding:24px;">
   <div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:16px; padding:32px; max-width:400px; width:100%; text-align:center;">
     <p style="font-size:16px; font-weight:600; margin-bottom:12px;">Hey Marykate</p>
