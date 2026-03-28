@@ -2235,8 +2235,31 @@ def mk_gmail_disconnect():
 
 
 # ── Marykate: Background send helpers ──
-def _mk_send_emails_bg(campaign_id, subject, body, lead_ids, creds_token, creds_refresh, sender_email):
-    """Send emails in background thread so request doesn't time out."""
+def _mk_refresh_gmail_token(creds_refresh):
+    """Refresh Gmail OAuth token and return new access token."""
+    resp = requests.post("https://oauth2.googleapis.com/token", data={
+        "client_id": GMAIL_CLIENT_ID,
+        "client_secret": GMAIL_CLIENT_SECRET,
+        "refresh_token": creds_refresh,
+        "grant_type": "refresh_token",
+    })
+    td = resp.json()
+    if "access_token" in td:
+        new_token = td["access_token"]
+        new_exp = (datetime.datetime.utcnow() + datetime.timedelta(seconds=td.get("expires_in", 3600))).isoformat()
+        try:
+            con = sqlite3.connect(DB_PATH)
+            con.execute("UPDATE mk_gmail_tokens SET access_token = ?, expires_at = ? WHERE id = 1", (new_token, new_exp))
+            con.commit()
+            con.close()
+        except Exception:
+            pass
+        return new_token
+    return None
+
+
+def _mk_build_gmail_service(creds_token, creds_refresh):
+    """Build a fresh Gmail service with current credentials."""
     from google.oauth2.credentials import Credentials
     from googleapiclient.discovery import build
     creds = Credentials(
@@ -2244,11 +2267,18 @@ def _mk_send_emails_bg(campaign_id, subject, body, lead_ids, creds_token, creds_
         token_uri="https://oauth2.googleapis.com/token",
         client_id=GMAIL_CLIENT_ID, client_secret=GMAIL_CLIENT_SECRET,
     )
-    service = build("gmail", "v1", credentials=creds)
+    return build("gmail", "v1", credentials=creds)
+
+
+def _mk_send_emails_bg(campaign_id, subject, body, lead_ids, creds_token, creds_refresh, sender_email):
+    """Send emails in background thread so request doesn't time out."""
+    service = _mk_build_gmail_service(creds_token, creds_refresh)
     con = sqlite3.connect(DB_PATH)
     sent = 0
     errors = 0
-    for lid in lead_ids:
+    consecutive_failures = 0
+    batch_size = len(lead_ids)
+    for i, lid in enumerate(lead_ids):
         lead = con.execute("SELECT id, name, email FROM mk_leads WHERE id = ?", (lid,)).fetchone()
         if not lead or not lead[2]:
             continue
@@ -2259,23 +2289,46 @@ def _mk_send_emails_bg(campaign_id, subject, body, lead_ids, creds_token, creds_
         msg["to"] = lead[2]
         msg["from"] = sender_email
         msg["subject"] = personalized_subject
-        try:
-            raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
-            service.users().messages().send(userId="me", body={"raw": raw}).execute()
-            con.execute(
-                "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, sent_at) VALUES (?, ?, 'email', ?, 'sent', ?)",
-                (campaign_id, lead[0], lead[2], now))
-            con.execute(
-                "UPDATE mk_leads SET last_contacted = ?, send_count = send_count + 1 WHERE id = ?",
-                (now, lead[0]))
-            sent += 1
-        except Exception as e:
-            con.execute(
-                "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, error, sent_at) VALUES (?, ?, 'email', ?, 'failed', ?, ?)",
-                (campaign_id, lead[0], lead[2], str(e)[:200], now))
-            errors += 1
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
+                service.users().messages().send(userId="me", body={"raw": raw}).execute()
+                con.execute(
+                    "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, sent_at) VALUES (?, ?, 'email', ?, 'sent', ?)",
+                    (campaign_id, lead[0], lead[2], now))
+                con.execute(
+                    "UPDATE mk_leads SET last_contacted = ?, send_count = send_count + 1 WHERE id = ?",
+                    (now, lead[0]))
+                sent += 1
+                consecutive_failures = 0
+                break
+            except Exception as e:
+                error_str = str(e)
+                if attempt < max_retries - 1:
+                    if "invalid_grant" in error_str.lower() or "token" in error_str.lower() or "401" in error_str or "403" in error_str:
+                        new_token = _mk_refresh_gmail_token(creds_refresh)
+                        if new_token:
+                            creds_token = new_token
+                            service = _mk_build_gmail_service(creds_token, creds_refresh)
+                    time.sleep(3 * (attempt + 1))
+                else:
+                    con.execute(
+                        "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, error, sent_at) VALUES (?, ?, 'email', ?, 'failed', ?, ?)",
+                        (campaign_id, lead[0], lead[2], error_str[:200], now))
+                    errors += 1
+                    consecutive_failures += 1
         con.commit()
-        time.sleep(1)
+        if consecutive_failures >= 10:
+            con.execute(
+                "UPDATE mk_campaigns SET status = 'failed', sent_count = ? WHERE id = ?", (sent, campaign_id))
+            con.commit()
+            con.close()
+            return
+        if batch_size > 50:
+            time.sleep(2)
+        else:
+            time.sleep(1)
     con.execute("UPDATE mk_campaigns SET status = 'sent', sent_count = ? WHERE id = ?", (sent, campaign_id))
     con.commit()
     con.close()
