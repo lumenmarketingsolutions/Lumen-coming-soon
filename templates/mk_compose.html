@@ -165,7 +165,7 @@
       {% if (channel == 'email' and l['email']) or (channel == 'sms' and l['phone']) %}
       <label class="lead-select-item" data-batch="{{ l['batch_name'] or '' }}" data-name="{{ l['name'] or '' }}" data-email="{{ l['email'] or '' }}">
         <input type="checkbox" name="lead" value="{{ l['id'] }}">
-        <span class="lead-name">{{ l['name'] or 'No name' }}</span>
+        <span class="lead-name">{{ l['name'] or l['email'] or '(no info)' }}</span>
         {% if l['send_count'] %}
         <span style="font-size:10px; color:var(--text-muted); margin-left:4px;">sent {{ l['send_count'] }}x</span>
         {% endif %}

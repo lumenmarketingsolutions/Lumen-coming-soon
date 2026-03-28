@@ -23,7 +23,7 @@
 <div class="lead-info-card" style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:14px; padding:28px; margin-bottom:24px;">
   <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px;">
     <div>
-      <h1 style="font-size:22px; font-weight:700; margin-bottom:6px;">{{ lead['name'] or '(no name)' }}</h1>
+      <h1 style="font-size:22px; font-weight:700; margin-bottom:6px;">{{ lead['name'] or lead['email'] or '(no info)' }}</h1>
       <div style="display:flex; gap:20px; flex-wrap:wrap; font-size:13px; color:var(--text-dim);">
         {% if lead['email'] %}
         <span>{{ lead['email'] }}</span>

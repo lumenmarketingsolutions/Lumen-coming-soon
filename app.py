@@ -1746,6 +1746,7 @@ def mk_login():
         pin = request.form.get("pin", "")
         if pin == MK_PIN:
             session["mk_auth"] = True
+            session["mk_show_notice"] = True
             return redirect("/marykate")
         return render_template("mk_login.html", error="Wrong pin")
     return render_template("mk_login.html")
@@ -1768,9 +1769,11 @@ def mk_dashboard():
     recent = con.execute("SELECT * FROM mk_send_log ORDER BY sent_at DESC LIMIT 10").fetchall()
     recent_leads = con.execute("SELECT * FROM mk_leads ORDER BY created_at DESC LIMIT 5").fetchall()
     con.close()
+    show_notice = session.pop("mk_show_notice", False)
     return render_template("mk_dashboard.html", active="dashboard",
         lead_count=lead_count, campaign_count=campaign_count,
-        sent_count=sent_count, recent=recent, recent_leads=recent_leads)
+        sent_count=sent_count, recent=recent, recent_leads=recent_leads,
+        show_notice=show_notice)
 
 
 @app.route("/marykate/leads")

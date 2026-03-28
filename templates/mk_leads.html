@@ -97,7 +97,7 @@
         <td style="font-weight:500;">
           <a href="/marykate/lead/{{ l['id'] }}" style="color:var(--text); text-decoration:none; border-bottom:1px solid transparent; transition:border-color 0.2s;"
              onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='transparent'">
-            {{ l['name'] or '(no name)' }}
+            {{ l['name'] or l['email'] or '(no info)' }}
           </a>
         </td>
         <td style="max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ l['email'] or '—' }}</td>
