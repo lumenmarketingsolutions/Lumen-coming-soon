@@ -208,9 +208,9 @@
 <div class="container">
 
   <div class="tag">Scope Review</div>
-  <h1>I went through Brian's full list. Here's where it actually lands.</h1>
+  <h1>Brian's list. Here's the real breakdown.</h1>
 
-  <p>He sent over 53 tasks. I went through every one of them, looked at what each one actually requires to build, what integrations are involved, and what it takes to make this stuff work reliably in production. Not just demo well. Actually work, every day, without breaking.</p>
+  <p>53 tasks. 15+ integrations. 6 separate AI pipelines. This is not one build, it's eight different products wired together.</p>
 
   <div class="stat-row">
     <div class="stat-box">
@@ -227,64 +227,56 @@
     </div>
   </div>
 
-  <h2>Why this doesn't happen at $10K</h2>
-
-  <p>This is not an app. This is a full AI-powered business operating system. CRM automation, content generation engine, lead management, email marketing, social media automation, paid ad management, direct mail coordination, team dashboards, and a daily AI briefing system. That is not one project. That is eight different products wired together.</p>
+  <h2>Why $10K doesn't work</h2>
 
   <ul class="issue-list">
     <li>
-      <strong>15+ integrations that each need to work reliably.</strong>
-      Lofty CRM, Slack, Todoist, Trello, Gmail or Outlook, YouTube, Instagram, Facebook, Google Business Profile, Meta Ads API, Google Ads API, HeyGen, MLS/IDX, Reddit, and a direct mail vendor. Every single one of those is a connection that needs authentication, error handling, and monitoring. When one breaks, the whole workflow that depends on it stops.
+      <strong>15+ integrations.</strong>
+      Lofty, Slack, Todoist, Trello, email, YouTube, Instagram, Facebook, Google Business, Meta Ads API, Google Ads API, HeyGen, MLS/IDX, Reddit, direct mail vendor. Every one needs auth, error handling, and monitoring. One breaks, everything downstream stops.
     </li>
     <li>
-      <strong>Lofty CRM has a limited API.</strong>
-      Half the tasks on this list depend on syncing with Lofty. Creating contacts, moving pipeline stages, triggering automations, doing a full data migration. Lofty does not make all of that easy or even possible through their API. You would not know that until you are already deep into the build. That alone could burn 20+ hours of dev time just discovering what you can and cannot do.
+      <strong>Lofty's API is limited.</strong>
+      Half the list depends on Lofty sync. A lot of what he wants may not even be possible through their API. You won't know until you're deep in it. That alone could burn 20+ hours just figuring out what works and what doesn't.
     </li>
     <li>
-      <strong>Meta and Google ad automation requires API approval.</strong>
-      You cannot just plug into Meta Ads or Google Ads and start building audiences and rotating creatives. Both platforms have approval processes, rate limits, and compliance requirements. This is its own project, not a line item.
+      <strong>Ad automation is its own project.</strong>
+      Meta and Google both require API approval, have rate limits, and compliance hoops. Not a line item.
     </li>
     <li>
-      <strong>Daily AI content generation has real ongoing costs.</strong>
-      Generating posts, emails, captions, briefs, and follow-ups every single day across multiple platforms means hundreds of LLM API calls daily. That runs $200 to $500 per month just in token costs before you even talk about the engineering to keep it running.
+      <strong>Daily AI content costs real money.</strong>
+      Hundreds of API calls a day across platforms. $200 to $500/mo just in token costs, before engineering.
     </li>
     <li>
-      <strong>A voice-to-content pipeline is a product, not a feature.</strong>
-      Voice note in, transcribe, detect intent, output emails, social posts, captions, YouTube ideas, stories. That is speech-to-text, intent classification, multi-format content generation, platform-specific formatting, and an approval queue. Companies charge $50 to $200 per month just for this one capability.
+      <strong>Voice-to-content is a product, not a feature.</strong>
+      Speech-to-text, intent detection, multi-format output, approval queue. Companies charge $50 to $200/mo for just this.
     </li>
   </ul>
 
   <div class="callout-red callout">
-    <p>At $10,000, whoever takes this on is either planning to build something that demos well and breaks in production, or they do not understand the scope of what they are agreeing to. Either way, Brian is the one holding the risk.</p>
+    <p>At $10K, whoever takes this is either building something that demos well and breaks in a week, or they don't know what they're agreeing to. Either way Brian holds the bag.</p>
   </div>
 
-  <h2>What this actually costs at market rate</h2>
-
-  <p><strong>For the full 53-task scope, built correctly:</strong></p>
+  <h2>What this costs for real</h2>
 
   <div class="pricing-card">
-    <div class="card-label">Full Build</div>
+    <div class="card-label">Full Build (all 53 tasks)</div>
     <div class="amount">$80,000 to $120,000</div>
-    <div class="detail">4 to 6 month build with a team of 2 to 3 engineers. All 53 tasks, all integrations, all AI pipelines, all dashboards. Built to run reliably in production.</div>
+    <div class="detail">4 to 6 months, 2 to 3 engineers. Everything on the list, built to actually run in production.</div>
   </div>
 
   <div class="pricing-card">
     <div class="card-label">Ongoing</div>
     <div class="amount">$3,000 to $5,000/mo</div>
-    <div class="detail">Maintenance, API costs, monitoring, updates when integrations break. AI token costs for daily content generation alone run $200 to $500/mo.</div>
+    <div class="detail">Maintenance, API costs, monitoring, fixing integrations when they break.</div>
   </div>
 
-  <p>That is where this scope lives. $10,000 is roughly 10 cents on the dollar for what he is asking for.</p>
+  <p>$10K is about 10 cents on the dollar for what he's asking.</p>
 
   <h2>What $10K actually gets him</h2>
 
-  <p>If we do this, we scope it down to the things that actually move his business and build those well. No half-built integrations. No features that break after a week. A tight, focused system that works.</p>
+  <p>We pick the 8 things that move his business the most, build those right, and everything else is Phase 2.</p>
 
-  <div class="pricing-card">
-    <div class="card-label">Realistic $10K Scope</div>
-    <div class="amount">6 to 8 core systems, built to last</div>
-    <div class="detail">These are the items from his list that generate the most value with the least integration risk. Everything else becomes Phase 2 once the foundation is solid.</div>
-  </div>
+  <p><strong>Included:</strong></p>
 
   <div style="margin-bottom: 28px;">
     <div class="scope-item">
@@ -321,7 +313,7 @@
     </div>
   </div>
 
-  <p><strong>Not included at $10K:</strong></p>
+  <p><strong>Not included:</strong></p>
 
   <div style="margin-bottom: 28px;">
     <div class="scope-item">
@@ -354,13 +346,9 @@
     </div>
   </div>
 
-  <div class="callout">
-    <p>The play here is to build the core right, prove it works, and expand from there. He gets a system that actually runs his lead flow and daily operations on day one. Everything else is Phase 2 at additional cost once the foundation is proven.</p>
-  </div>
+  <p><strong>$10K upfront, $500/mo after.</strong> The $500 covers hosting, API costs, and keeping it running. Anything past the core scope gets priced separately.</p>
 
-  <p><strong>$10K upfront, $500/mo licensing after that.</strong> The $500 covers hosting, API costs, monitoring, and minor updates. Anything beyond the core scope is scoped and priced separately.</p>
-
-  <p>This way he is not out $10K with a broken system. He is out $10K with something that works, and a clear path to add everything else when he is ready.</p>
+  <p>He gets something that works on day one. Not a half-built system he's out $10K on. Everything else gets added once the foundation is solid.</p>
 
   <div class="footer">
     <span style="color: #555; font-weight: 500;">Kendall Davis</span><br>Owner, Engineer<br>Lumen Marketing Solutions
