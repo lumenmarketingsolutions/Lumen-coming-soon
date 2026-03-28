@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brand Audit: CAP Hardware Supply | Lumen</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #fafaf9;
+      --card: #ffffff;
+      --border: #e8e5e0;
+      --text: #1a1a1a;
+      --text-dim: #6b6b6b;
+      --accent: #6128DB;
+      --accent-light: #7c4dff;
+      --green: #16a34a;
+      --red: #dc2626;
+      --amber: #d97706;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 60px 24px 80px;
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 56px;
+    }
+
+    .header-brand {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: clamp(26px, 5vw, 36px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.2;
+      margin-bottom: 20px;
+    }
+
+    .header-sub {
+      font-size: 16px;
+      color: var(--text-dim);
+      line-height: 1.8;
+      max-width: 540px;
+    }
+
+    .header-meta {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.8;
+    }
+
+    .header-meta span {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* Sections */
+    .section {
+      margin-bottom: 56px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 20px;
+      line-height: 1.3;
+    }
+
+    .section p {
+      color: var(--text-dim);
+      margin-bottom: 16px;
+    }
+
+    .section p strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* Finding Cards */
+    .finding {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      margin-bottom: 16px;
+    }
+
+    .finding-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .finding-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 4px;
+    }
+
+    .finding-tag.critical {
+      background: rgba(220,38,38,0.08);
+      color: var(--red);
+    }
+
+    .finding-tag.high {
+      background: rgba(217,119,6,0.08);
+      color: var(--amber);
+    }
+
+    .finding-tag.opportunity {
+      background: rgba(22,163,74,0.08);
+      color: var(--green);
+    }
+
+    .finding h3 {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .finding p {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-top: 12px;
+      margin-bottom: 0;
+      line-height: 1.8;
+    }
+
+    .finding p strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* Callout */
+    .callout {
+      background: linear-gradient(135deg, #f8f6ff, #f0ebff);
+      border: 1px solid rgba(97,40,219,0.12);
+      border-radius: 12px;
+      padding: 32px 28px;
+      margin: 48px 0;
+    }
+
+    .callout p {
+      color: var(--text);
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 1.8;
+      margin-bottom: 0;
+    }
+
+    /* Strategy List */
+    .strategy-list {
+      list-style: none;
+      counter-reset: strategy;
+    }
+
+    .strategy-list li {
+      counter-increment: strategy;
+      padding: 24px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 18px;
+    }
+
+    .strategy-list li:last-child {
+      border-bottom: none;
+    }
+
+    .strategy-list li::before {
+      content: counter(strategy);
+      flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(97,40,219,0.08);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .strategy-title {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .strategy-desc {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.8;
+    }
+
+    /* Phase Label */
+    .phase-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      padding: 28px 0 8px;
+      display: block;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 56px 0;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding-top: 36px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-logo {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: -0.3px;
+    }
+
+    .footer-logo span {
+      color: var(--accent);
+    }
+
+    .footer p {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 10px;
+    }
+
+    /* Print */
+    @media print {
+      body { font-size: 13px; }
+      .container { padding: 20px; max-width: none; }
+      .finding, .callout { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="header-brand">Brand Audit</div>
+    <h1>CAP Hardware has the inventory. Now it needs the infrastructure to move it.</h1>
+    <p class="header-sub">This is a breakdown of what we found after reviewing your website, your product catalog, and your market positioning across both DTC and B2B channels. Everything in here is actionable.</p>
+    <div class="header-meta">
+      Prepared by <span>Kendall Davis</span><br>
+      Owner, Engineer<br>
+      Lumen Marketing Solutions
+      <br><br>
+      Every word in this report was hand-written after reviewing your brand. This is not a template.
+    </div>
+  </div>
+
+  <!-- ─── THE BUSINESS ─── -->
+  <div class="section">
+    <div class="section-label">The Business</div>
+    <h2>You are sitting on something most companies spend years trying to build.</h2>
+    <p>Over 100,000 SKUs in inventory. Custom band saw blades made in house. Military and aerospace grade clamps and fasteners. A family-owned operation with real people answering the phone. <strong>That combination of depth, capability, and personal service is rare in industrial supply, and it is a real competitive advantage.</strong></p>
+    <p>You have both a DTC channel and a B2B channel, with the aviation division being the highest-margin vertical. You specialize in custom hardware and custom packaging. These are strong differentiators that should be front and center in everything a potential buyer sees. Right now, they are not.</p>
+    <p>The product catalog is there. The capabilities are there. What is missing is the infrastructure to make sure the right buyers can find you, trust you, and buy from you without friction.</p>
+  </div>
+
+  <!-- ─── FINDINGS: VISIBILITY ─── -->
+  <div class="section">
+    <div class="section-label">Visibility</div>
+    <h2>Your strongest offerings are invisible to the people who need them most.</h2>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-tag critical">Critical</span>
+      </div>
+      <h3>Custom hardware and custom packaging are nowhere on the site.</h3>
+      <p>This was described to us as one of your core specialties for DTC buyers. A customer looking for custom-made hardware or custom packaging for their parts would have no idea you offer this service. It is not in the navigation, not on the homepage, not on the about page, and not mentioned in any product category. <strong>Your most differentiating service is completely invisible.</strong> A dedicated landing page with a clear inquiry form would immediately open up an entire segment of buyers who currently have no way to find you.</p>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-tag critical">Critical</span>
+      </div>
+      <h3>There is no dedicated page for aviation and aerospace buyers.</h3>
+      <p>You carry military and aerospace grade clamps and fasteners. You stock A286, titanium, and monel. This is the highest-margin vertical in your business, and there is nothing on the site that speaks directly to an aviation procurement team. No certifications displayed, no CAGE code, no mil-spec compliance callouts, no case studies showing what you have supplied. <strong>An aviation buyer evaluating suppliers will move on in seconds if they do not see the credentials they are looking for.</strong> A single industry-specific page with the right language and the right trust signals would change that entirely.</p>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-tag critical">Critical</span>
+      </div>
+      <h3>SEO is completely untouched.</h3>
+      <p>The homepage meta description is empty. The page title is "Home Page." The blog has two posts, neither of which have dates or substance. For a company with over 100,000 SKUs, there should be hundreds of long-tail product searches driving organic traffic to the site every single day. <strong>Right now, someone searching for "custom band saw blades" or "aerospace hose clamps" or "mil-spec fasteners" has no way to find you through Google.</strong> That is traffic that is actively looking to buy, and it is going to your competitors instead.</p>
+    </div>
+  </div>
+
+  <!-- ─── FINDINGS: TRUST ─── -->
+  <div class="section">
+    <div class="section-label">Trust</div>
+    <h2>B2B buyers need proof before they spend serious money.</h2>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-tag critical">Critical</span>
+      </div>
+      <h3>The quote request goes to a restricted Google Form.</h3>
+      <p>For a B2B company where the quote is the primary conversion action, this is the equivalent of a broken checkout button on an ecommerce store. A procurement manager requesting a quote on a $50,000 order of aerospace fasteners should not be landing on a Google Form. <strong>This needs to be a clean, branded, on-site form that captures company name, industry, part numbers, and volume.</strong> It needs to feel like a professional operation, because that is what your buyers expect when they are evaluating a new supplier.</p>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-tag high">High Impact</span>
+      </div>
+      <h3>Zero social proof anywhere on the site.</h3>
+      <p>There are no customer reviews, no testimonials, no client logos, and no case studies on any page. The about page mentions family-owned values and 100,000 products in inventory, but there is nothing from an actual customer validating that experience. <strong>B2B buyers making large purchasing decisions need to see that other companies have trusted you before they will.</strong> Even three or four strong testimonials from real clients would dramatically change how a new visitor perceives the business.</p>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-tag high">High Impact</span>
+      </div>
+      <h3>No certifications or compliance credentials are displayed.</h3>
+      <p>You sell military and aerospace grade products, but the site does not display any ISO certifications, CAGE codes, or mil-spec compliance documentation. For aviation procurement teams, these are not optional. They are requirements. If a buyer cannot find your certifications within a few seconds of landing on your site, they will assume you do not have them. <strong>These need to be visible and prominent, especially on any page targeting aerospace or defense buyers.</strong></p>
+    </div>
+  </div>
+
+  <!-- ─── FINDINGS: CONVERSION ─── -->
+  <div class="section">
+    <div class="section-label">Conversion</div>
+    <h2>The site is built to browse but not to buy.</h2>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-tag high">High Impact</span>
+      </div>
+      <h3>There is no B2B onboarding path.</h3>
+      <p>B2B buyers do not shop the way consumers do. They need a dedicated "Open a Business Account" flow, information on net terms, volume pricing tiers, and a fast way to talk to a human. None of that exists on the site. The FAQ mentions bulk discounts and ACH/wire for B2B orders, but there is no clear entry point for a business buyer to start that relationship. <strong>A company looking to set up an ongoing supply account should be able to do that in under two minutes from your homepage.</strong></p>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-tag high">High Impact</span>
+      </div>
+      <h3>The homepage is not prioritizing the right products.</h3>
+      <p>The featured products on the homepage are split lock washers and hex cap screws. These are commodity items that every hardware supplier carries. Your homepage should be leading with what makes you different. Custom band saw blades made in house. Mil-spec fasteners. Custom hardware and packaging. <strong>The first thing a visitor sees should be the thing that no one else can offer.</strong> That is what stops them from clicking back to the next search result.</p>
+    </div>
+
+    <div class="finding">
+      <div class="finding-header">
+        <span class="finding-tag opportunity">Opportunity</span>
+      </div>
+      <h3>The blog and content strategy are dormant.</h3>
+      <p>There are two blog posts, neither with a date, and neither with the depth to rank for anything on search. For a company with this much product expertise, there is a massive opportunity to create content that answers the exact questions your buyers are already searching for. "What clamp type do I need for fuel injection?" "A286 vs 316 stainless for aerospace applications." "How to spec a custom band saw blade." <strong>Every one of those articles is a page that can rank on Google and bring a buyer directly to your site who is ready to purchase.</strong></p>
+    </div>
+  </div>
+
+  <!-- ─── CALLOUT ─── -->
+  <div class="callout">
+    <p>The foundation of this business is strong. Over 100,000 products, in-house manufacturing capability, and the expertise to serve aerospace and defense. What is missing is the digital infrastructure to match. The buyers are out there searching for exactly what you sell. They just cannot find you yet.</p>
+  </div>
+
+  <!-- ─── THE PLAY ─── -->
+  <div class="section">
+    <div class="section-label">The Play</div>
+    <h2>What a real growth engine looks like for this business.</h2>
+    <p>Two tracks running at the same time. Fix the site so it converts, and build the visibility so the right buyers can find you.</p>
+
+    <div class="phase-label">Track 1: Fix the conversion path</div>
+
+    <ol class="strategy-list">
+      <li>
+        <div>
+          <div class="strategy-title">Replace the Google Form with a real quote system.</div>
+          <div class="strategy-desc">Build a branded, on-site quote request form that captures company name, industry, part numbers, quantities, and timeline. This form should send an instant confirmation to the buyer and a notification to your sales team with everything they need to respond. The quote request is the most important conversion action on this site and it needs to work like it.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="strategy-title">Build a custom hardware and packaging landing page.</div>
+          <div class="strategy-desc">A dedicated page that explains your custom capabilities, shows examples of past work, and has a clear inquiry form for buyers to describe what they need. This page becomes the entry point for an entire segment of DTC customers who currently have no idea you offer this. It also gives you a page to drive traffic to from search, social, and direct outreach.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="strategy-title">Build an aviation and aerospace industry page.</div>
+          <div class="strategy-desc">A dedicated page that speaks directly to procurement teams. Display certifications, materials capabilities, compliance documentation, and any past contracts or case studies you can share. Use the language that aerospace buyers expect to see. This page is how you win the highest-margin accounts in your business.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="strategy-title">Create a B2B account onboarding flow.</div>
+          <div class="strategy-desc">An "Open a Business Account" page that outlines net terms, volume pricing, dedicated support, and a fast application process. Make it easy for a business to start buying from you on an ongoing basis. This is the page that turns a one-time order into a recurring revenue relationship.</div>
+        </div>
+      </li>
+    </ol>
+
+    <div class="phase-label">Track 2: Build the visibility</div>
+
+    <ol class="strategy-list" style="counter-reset: strategy 4;">
+      <li>
+        <div>
+          <div class="strategy-title">SEO and content that ranks for buyer-intent searches.</div>
+          <div class="strategy-desc">Fix the meta descriptions, page titles, and product schema across the entire site. Then build out content that answers the questions your buyers are already typing into Google. Product comparison guides, material specification articles, and use-case breakdowns. Each piece of content is a page that ranks and brings in a buyer who is actively looking for what you sell. With 100,000+ SKUs, the long-tail search opportunity here is enormous.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="strategy-title">Collect and display social proof.</div>
+          <div class="strategy-desc">Reach out to your existing customers and ask for testimonials. Get Google reviews. If you have worked with recognizable companies, get permission to display their logos. Add a "Trusted By" section to the homepage and the aerospace page. Social proof is what turns a visitor who is evaluating into a buyer who commits.</div>
+        </div>
+      </li>
+      <li>
+        <div>
+          <div class="strategy-title">Targeted outreach to aviation procurement teams.</div>
+          <div class="strategy-desc">Once the aerospace page is built and the credentials are displayed, you have something worth putting in front of the right people. A direct outreach campaign to aviation maintenance companies, MRO facilities, and defense contractors with a link to your capabilities page and a clear quote request path. This is where the high-value B2B contracts come from.</div>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ─── CLOSING ─── -->
+  <div class="section">
+    <h2>Where this goes from here.</h2>
+    <p>Everything in this report was written by hand after reviewing your site and your market. This is not a generated template, and these are not guesses. <strong>These are the specific things standing between where you are now and the growth this business is capable of.</strong></p>
+    <p>The inventory is there. The expertise is there. The product quality is there. What is missing is the digital infrastructure to put it in front of the right buyers and make it easy for them to say yes. And that infrastructure can be built fast.</p>
+    <p><strong>If you want to move on this, we are ready to start.</strong></p>
+  </div>
+
+  <div class="footer">
+    <div class="footer-logo"><span>lumen</span> marketing solutions</div>
+    <p>Confidential. Prepared exclusively for CAP Hardware Supply.</p>
+  </div>
+
+</div>
+
+</body>
+</html>

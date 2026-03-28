@@ -810,6 +810,10 @@ def preview_funnel():
 def ten_day_build():
     return render_template("10daybuild.html")
 
+@app.route("/robots.txt")
+def robots_txt():
+    return "User-agent: *\nDisallow: /audit/\nDisallow: /admin/\n", 200, {"Content-Type": "text/plain"}
+
 @app.route("/audit/sublime")
 def sublime_audit():
     return render_template("sublime-audit.html")
@@ -817,6 +821,10 @@ def sublime_audit():
 @app.route("/audit/sublime/jesse")
 def sublime_jesse():
     return render_template("sublime-jesse-brief.html")
+
+@app.route("/audit/caphardware")
+def cap_hardware_audit():
+    return render_template("cap-hardware-audit.html")
 
 @app.route("/admin/test-sequence-email")
 def test_sequence_email():
