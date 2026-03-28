@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Brian's AI Build | Scope Review</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: #fafaf9;
+      color: #1a1a1a;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .container {
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 48px 24px 60px;
+    }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #6128DB;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: clamp(22px, 5vw, 28px);
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      line-height: 1.3;
+      margin-bottom: 28px;
+    }
+
+    h2 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 18px;
+      padding-top: 40px;
+      border-top: 1px solid #e8e5e0;
+    }
+
+    p {
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    p strong {
+      color: #1a1a1a;
+      font-weight: 600;
+    }
+
+    .callout {
+      background: #f8f6ff;
+      border-left: 3px solid #6128DB;
+      padding: 22px 24px;
+      margin: 32px 0;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .callout p {
+      color: #1a1a1a;
+      font-weight: 500;
+      font-size: 14px;
+      margin-bottom: 0;
+      line-height: 1.8;
+    }
+
+    .callout-red {
+      background: #fff5f5;
+      border-left: 3px solid #e53e3e;
+    }
+
+    .stat-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin: 28px 0 32px;
+    }
+
+    .stat-box {
+      flex: 1;
+      min-width: 140px;
+      background: #fff;
+      border: 1px solid #e8e5e0;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .stat-box .num {
+      font-size: 28px;
+      font-weight: 800;
+      color: #1a1a1a;
+      letter-spacing: -1px;
+    }
+
+    .stat-box .label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #999;
+      margin-top: 6px;
+    }
+
+    .issue-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 24px;
+    }
+
+    .issue-list li {
+      color: #555;
+      padding: 18px 0;
+      border-bottom: 1px solid #f0ede8;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .issue-list li:last-child { border-bottom: none; }
+
+    .issue-list li strong {
+      color: #1a1a1a;
+      display: block;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .pricing-card {
+      background: #fff;
+      border: 1px solid #e8e5e0;
+      border-radius: 10px;
+      padding: 24px 24px 28px;
+      margin-bottom: 20px;
+    }
+
+    .pricing-card .card-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #6128DB;
+      margin-bottom: 10px;
+    }
+
+    .pricing-card .amount {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .pricing-card .detail {
+      font-size: 13px;
+      color: #777;
+      line-height: 1.8;
+    }
+
+    .scope-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 0;
+      font-size: 14px;
+      color: #555;
+      line-height: 1.7;
+      border-bottom: 1px solid #f0ede8;
+    }
+
+    .scope-item:last-child { border-bottom: none; }
+
+    .scope-item .check {
+      color: #38a169;
+      font-weight: 700;
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .scope-item .x-mark {
+      color: #e53e3e;
+      font-weight: 700;
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #e8e5e0;
+      font-size: 13px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="tag">Scope Review</div>
+  <h1>I went through Brian's full list. Here's where it actually lands.</h1>
+
+  <p>He sent over 53 tasks. I went through every one of them, looked at what each one actually requires to build, what integrations are involved, and what it takes to make this stuff work reliably in production. Not just demo well. Actually work, every day, without breaking.</p>
+
+  <div class="stat-row">
+    <div class="stat-box">
+      <div class="num">53</div>
+      <div class="label">Tasks</div>
+    </div>
+    <div class="stat-box">
+      <div class="num">15+</div>
+      <div class="label">Integrations</div>
+    </div>
+    <div class="stat-box">
+      <div class="num">6</div>
+      <div class="label">AI Pipelines</div>
+    </div>
+  </div>
+
+  <h2>Why this doesn't happen at $10K</h2>
+
+  <p>This is not an app. This is a full AI-powered business operating system. CRM automation, content generation engine, lead management, email marketing, social media automation, paid ad management, direct mail coordination, team dashboards, and a daily AI briefing system. That is not one project. That is eight different products wired together.</p>
+
+  <ul class="issue-list">
+    <li>
+      <strong>15+ integrations that each need to work reliably.</strong>
+      Lofty CRM, Slack, Todoist, Trello, Gmail or Outlook, YouTube, Instagram, Facebook, Google Business Profile, Meta Ads API, Google Ads API, HeyGen, MLS/IDX, Reddit, and a direct mail vendor. Every single one of those is a connection that needs authentication, error handling, and monitoring. When one breaks, the whole workflow that depends on it stops.
+    </li>
+    <li>
+      <strong>Lofty CRM has a limited API.</strong>
+      Half the tasks on this list depend on syncing with Lofty. Creating contacts, moving pipeline stages, triggering automations, doing a full data migration. Lofty does not make all of that easy or even possible through their API. You would not know that until you are already deep into the build. That alone could burn 20+ hours of dev time just discovering what you can and cannot do.
+    </li>
+    <li>
+      <strong>Meta and Google ad automation requires API approval.</strong>
+      You cannot just plug into Meta Ads or Google Ads and start building audiences and rotating creatives. Both platforms have approval processes, rate limits, and compliance requirements. This is its own project, not a line item.
+    </li>
+    <li>
+      <strong>Daily AI content generation has real ongoing costs.</strong>
+      Generating posts, emails, captions, briefs, and follow-ups every single day across multiple platforms means hundreds of LLM API calls daily. That runs $200 to $500 per month just in token costs before you even talk about the engineering to keep it running.
+    </li>
+    <li>
+      <strong>A voice-to-content pipeline is a product, not a feature.</strong>
+      Voice note in, transcribe, detect intent, output emails, social posts, captions, YouTube ideas, stories. That is speech-to-text, intent classification, multi-format content generation, platform-specific formatting, and an approval queue. Companies charge $50 to $200 per month just for this one capability.
+    </li>
+  </ul>
+
+  <div class="callout-red callout">
+    <p>At $10,000, whoever takes this on is either planning to build something that demos well and breaks in production, or they do not understand the scope of what they are agreeing to. Either way, Brian is the one holding the risk.</p>
+  </div>
+
+  <h2>What this actually costs at market rate</h2>
+
+  <p><strong>For the full 53-task scope, built correctly:</strong></p>
+
+  <div class="pricing-card">
+    <div class="card-label">Full Build</div>
+    <div class="amount">$80,000 to $120,000</div>
+    <div class="detail">4 to 6 month build with a team of 2 to 3 engineers. All 53 tasks, all integrations, all AI pipelines, all dashboards. Built to run reliably in production.</div>
+  </div>
+
+  <div class="pricing-card">
+    <div class="card-label">Ongoing</div>
+    <div class="amount">$3,000 to $5,000/mo</div>
+    <div class="detail">Maintenance, API costs, monitoring, updates when integrations break. AI token costs for daily content generation alone run $200 to $500/mo.</div>
+  </div>
+
+  <p>That is where this scope lives. $10,000 is roughly 10 cents on the dollar for what he is asking for.</p>
+
+  <h2>What $10K actually gets him</h2>
+
+  <p>If we do this, we scope it down to the things that actually move his business and build those well. No half-built integrations. No features that break after a week. A tight, focused system that works.</p>
+
+  <div class="pricing-card">
+    <div class="card-label">Realistic $10K Scope</div>
+    <div class="amount">6 to 8 core systems, built to last</div>
+    <div class="detail">These are the items from his list that generate the most value with the least integration risk. Everything else becomes Phase 2 once the foundation is solid.</div>
+  </div>
+
+  <div style="margin-bottom: 28px;">
+    <div class="scope-item">
+      <span class="check">&#10003;</span>
+      <span><strong>Lead intake and auto-response</strong> — instant reply, qualify, capture info, hot lead alerts</span>
+    </div>
+    <div class="scope-item">
+      <span class="check">&#10003;</span>
+      <span><strong>Smart follow-up sequences</strong> — day 1, 3, 7 cadence, long-term nurture, re-engage cold leads</span>
+    </div>
+    <div class="scope-item">
+      <span class="check">&#10003;</span>
+      <span><strong>CRM sync</strong> — create and update contacts, tag, log conversations (limited to what Lofty API allows)</span>
+    </div>
+    <div class="scope-item">
+      <span class="check">&#10003;</span>
+      <span><strong>Daily priority dashboard</strong> — hot leads, follow-ups due, approvals needed, who to call</span>
+    </div>
+    <div class="scope-item">
+      <span class="check">&#10003;</span>
+      <span><strong>Voice-to-content engine</strong> — voice note in, transcribe, generate email drafts and social captions</span>
+    </div>
+    <div class="scope-item">
+      <span class="check">&#10003;</span>
+      <span><strong>Email system</strong> — weekly sends, subject lines, segmented lists, tracking</span>
+    </div>
+    <div class="scope-item">
+      <span class="check">&#10003;</span>
+      <span><strong>Daily market briefs</strong> — national and local summary, reusable talking points</span>
+    </div>
+    <div class="scope-item">
+      <span class="check">&#10003;</span>
+      <span><strong>Birthday and quick touch system</strong> — detect, draft message, keep the sphere warm</span>
+    </div>
+  </div>
+
+  <p><strong>What this does NOT include at $10K:</strong></p>
+
+  <div style="margin-bottom: 28px;">
+    <div class="scope-item">
+      <span class="x-mark">&#10007;</span>
+      <span>Meta or Google ad automation (requires separate API approval and is its own engagement)</span>
+    </div>
+    <div class="scope-item">
+      <span class="x-mark">&#10007;</span>
+      <span>Full multi-platform daily content generation (API costs and engineering scope too large)</span>
+    </div>
+    <div class="scope-item">
+      <span class="x-mark">&#10007;</span>
+      <span>Video generation (HeyGen or similar)</span>
+    </div>
+    <div class="scope-item">
+      <span class="x-mark">&#10007;</span>
+      <span>Full Lofty data migration (high risk, hard to scope)</span>
+    </div>
+    <div class="scope-item">
+      <span class="x-mark">&#10007;</span>
+      <span>Direct mail automation and postcard creation</span>
+    </div>
+    <div class="scope-item">
+      <span class="x-mark">&#10007;</span>
+      <span>IDX workaround and MLS scraping</span>
+    </div>
+    <div class="scope-item">
+      <span class="x-mark">&#10007;</span>
+      <span>Reddit, Facebook group monitoring</span>
+    </div>
+  </div>
+
+  <div class="callout">
+    <p>The play here is to build the core right, prove it works, and expand from there. He gets a system that actually runs his lead flow and daily operations on day one. Everything else is Phase 2 at additional cost once the foundation is proven.</p>
+  </div>
+
+  <p><strong>$10K upfront, $500/mo licensing after that.</strong> The $500 covers hosting, API costs, monitoring, and minor updates. Anything beyond the core scope is scoped and priced separately.</p>
+
+  <p>This way he is not out $10K with a broken system. He is out $10K with something that works, and a clear path to add everything else when he is ready.</p>
+
+  <div class="footer">
+    <span style="color: #555; font-weight: 500;">Kendall Davis</span><br>Owner, Engineer<br>Lumen Marketing Solutions
+  </div>
+
+</div>
+
+</body>
+</html>
