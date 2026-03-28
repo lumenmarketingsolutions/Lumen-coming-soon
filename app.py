@@ -826,6 +826,10 @@ def sublime_jesse():
 def cap_hardware_audit():
     return render_template("cap-hardware-audit.html")
 
+@app.route("/audit/caphardware/jesse")
+def cap_hardware_jesse():
+    return render_template("cap-hardware-jesse.html")
+
 @app.route("/admin/test-sequence-email")
 def test_sequence_email():
     """Send sequence email 1 test to kendallwdavis11@gmail.com."""
