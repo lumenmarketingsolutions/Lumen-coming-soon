@@ -68,7 +68,7 @@
   {% if send_logs %}
   <div style="display:flex; flex-direction:column; gap:0;">
     {% for log in send_logs %}
-    <div class="timeline-item" style="display:flex; align-items:flex-start; gap:16px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.03);{% if loop.last %} border-bottom:none;{% endif %}">
+    <a href="/marykate/campaign/{{ log['campaign_id'] }}" class="timeline-item" style="display:flex; align-items:flex-start; gap:16px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,0.03); text-decoration:none; color:inherit;{% if loop.last %} border-bottom:none;{% endif %}">
       <div style="width:32px; height:32px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center;
         {% if log['channel'] == 'email' %}background:rgba(18,143,196,0.12);{% else %}background:rgba(128,47,222,0.12);{% endif %}">
         {% if log['channel'] == 'email' %}
@@ -88,7 +88,7 @@
         {% endif %}
       </div>
       <span class="timeline-ts" style="font-size:11px; color:var(--text-muted); white-space:nowrap;">{{ log['sent_at'][:16] }}</span>
-    </div>
+    </a>
     {% endfor %}
   </div>
   {% else %}

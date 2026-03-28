@@ -328,6 +328,12 @@ def init_db():
         )
     """)
 
+    # Migrate mk_send_log: add gmail_msg_id column
+    try:
+        con.execute("ALTER TABLE mk_send_log ADD COLUMN gmail_msg_id TEXT DEFAULT ''")
+    except Exception:
+        pass
+
     # Migrate mk_leads: add new columns if they don't exist
     mk_leads_cols = [r[1] for r in con.execute("PRAGMA table_info(mk_leads)").fetchall()]
     mk_new_cols = {
@@ -1821,6 +1827,27 @@ def mk_campaigns_page():
     return render_template("mk_campaigns.html", active="campaigns", campaigns=campaigns)
 
 
+@app.route("/marykate/campaign/<int:campaign_id>")
+@mk_auth_required
+def mk_campaign_detail(campaign_id):
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    campaign = con.execute("SELECT * FROM mk_campaigns WHERE id = ?", (campaign_id,)).fetchone()
+    if not campaign:
+        con.close()
+        return redirect("/marykate/campaigns")
+    logs = con.execute("""
+        SELECT sl.*, l.name as lead_name, l.email as lead_email
+        FROM mk_send_log sl
+        LEFT JOIN mk_leads l ON sl.lead_id = l.id
+        WHERE sl.campaign_id = ?
+        ORDER BY sl.sent_at DESC
+    """, (campaign_id,)).fetchall()
+    con.close()
+    return render_template("mk_campaign_detail.html", active="campaigns",
+        campaign=campaign, logs=logs)
+
+
 @app.route("/marykate/whatsapp")
 @mk_auth_required
 def mk_whatsapp_page():
@@ -2293,10 +2320,11 @@ def _mk_send_emails_bg(campaign_id, subject, body, lead_ids, creds_token, creds_
         for attempt in range(max_retries):
             try:
                 raw = base64.urlsafe_b64encode(msg.as_bytes()).decode()
-                service.users().messages().send(userId="me", body={"raw": raw}).execute()
+                result = service.users().messages().send(userId="me", body={"raw": raw}).execute()
+                gmail_msg_id = result.get("id", "")
                 con.execute(
-                    "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, sent_at) VALUES (?, ?, 'email', ?, 'sent', ?)",
-                    (campaign_id, lead[0], lead[2], now))
+                    "INSERT INTO mk_send_log (campaign_id, lead_id, channel, recipient, status, sent_at, gmail_msg_id) VALUES (?, ?, 'email', ?, 'sent', ?, ?)",
+                    (campaign_id, lead[0], lead[2], now, gmail_msg_id))
                 con.execute(
                     "UPDATE mk_leads SET last_contacted = ?, send_count = send_count + 1 WHERE id = ?",
                     (now, lead[0]))

@@ -1,0 +1,93 @@
+{% extends "mk_base.html" %}
+{% block title %}{{ campaign['name'] or 'Campaign' }}{% endblock %}
+{% block content %}
+<style>
+  .email-preview {
+    background: #0c0c0e;
+    border: 1px solid var(--dark-border);
+    border-radius: 12px;
+    padding: 24px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text-dim);
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  .email-preview img { max-width: 100%; }
+  @media (max-width: 768px) {
+    .email-preview { padding: 16px; font-size: 13px; }
+    .detail-meta { gap: 12px !important; }
+  }
+</style>
+
+<div style="margin-bottom:24px;">
+  <a href="/marykate/campaigns" style="color:var(--text-dim); text-decoration:none; font-size:13px; display:inline-flex; align-items:center; gap:6px; transition:color 0.2s;"
+     onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-dim)'">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+    Back to Sent
+  </a>
+</div>
+
+<!-- Campaign header -->
+<div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:14px; padding:28px; margin-bottom:24px;">
+  <div style="display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:16px;">
+    <div>
+      <h1 style="font-size:22px; font-weight:700; margin-bottom:6px;">{{ campaign['name'] }}</h1>
+      {% if campaign['subject'] %}
+      <p style="font-size:14px; color:var(--text-dim);">Subject: {{ campaign['subject'] }}</p>
+      {% endif %}
+    </div>
+    <span class="badge badge-{{ campaign['status'] }}">{{ campaign['status'] }}</span>
+  </div>
+  <div class="detail-meta" style="display:flex; gap:24px; margin-top:16px; flex-wrap:wrap; font-size:12px; color:var(--text-muted);">
+    <span>Channel: <strong style="color:var(--text-dim); text-transform:uppercase;">{{ campaign['channel'] }}</strong></span>
+    <span>Sent: <strong style="color:var(--text-dim);">{{ campaign['sent_count'] or 0 }}</strong></span>
+    <span>Date: <strong style="color:var(--text-dim);">{{ campaign['created_at'][:16] }}</strong></span>
+  </div>
+</div>
+
+<!-- Email body preview -->
+<div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:14px; padding:28px; margin-bottom:24px;">
+  <h3 style="font-size:14px; font-weight:600; margin-bottom:16px; color:var(--text-dim);">Message Content</h3>
+  <div class="email-preview">{{ campaign['body'] | safe }}</div>
+</div>
+
+<!-- Recipients -->
+<div style="background:var(--dark-card); border:1px solid var(--dark-border); border-radius:14px; padding:28px;">
+  <h3 style="font-size:14px; font-weight:600; margin-bottom:16px; color:var(--text-dim);">Recipients ({{ logs | length }})</h3>
+  {% if logs %}
+  <div class="table-wrap" style="border:none; background:transparent;">
+    <table>
+      <thead>
+        <tr>
+          <th>Recipient</th>
+          <th>Status</th>
+          <th class="m-hide">Gmail ID</th>
+          <th class="m-hide">Time</th>
+          <th>Error</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+            {% if log['lead_id'] %}
+            <a href="/marykate/lead/{{ log['lead_id'] }}" style="color:var(--text); text-decoration:none;">{{ log['lead_name'] or log['recipient'] }}</a>
+            {% else %}
+            {{ log['recipient'] }}
+            {% endif %}
+          </td>
+          <td><span class="badge badge-{{ log['status'] }}">{{ log['status'] }}</span></td>
+          <td class="m-hide" style="font-size:11px; color:var(--text-muted); max-width:120px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ log['gmail_msg_id'] or '—' }}</td>
+          <td class="m-hide" style="font-size:12px;">{{ log['sent_at'][:16] }}</td>
+          <td style="font-size:12px; color:var(--red); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ log['error'] or '' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="font-size:13px; color:var(--text-muted); text-align:center; padding:24px 0;">No send logs for this campaign.</p>
+  {% endif %}
+</div>
+{% endblock %}
