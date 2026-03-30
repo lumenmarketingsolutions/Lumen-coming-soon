@@ -466,6 +466,10 @@ def story():
 def avalon_crm():
     return render_template("avalon_crm.html")
 
+@app.route("/avaloncrm/feedback")
+def avalon_crm_feedback():
+    return redirect("https://avalon-crm-production-eeaa.up.railway.app/feedback")
+
 @app.route("/avaloncrm/onboarding")
 def avalon_onboarding():
     return render_template("avalon_onboarding.html")
