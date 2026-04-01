@@ -462,6 +462,10 @@ def funnel():
 def story():
     return render_template("story.html")
 
+@app.route("/jeremiah-newby")
+def jeremiah_newby():
+    return render_template("jeremiah_newby.html")
+
 @app.route("/avaloncrm")
 def avalon_crm():
     return render_template("avalon_crm.html")

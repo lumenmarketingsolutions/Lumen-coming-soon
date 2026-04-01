@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Strategy Brief | Jeremiah Newby</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a;
+      color: #e5e5e5;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 60px 24px 100px;
+    }
+
+    /* Header */
+    .brand {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 48px;
+    }
+
+    .hero-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #3b82f6;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #888;
+      margin-bottom: 48px;
+      line-height: 1.7;
+    }
+
+    .date {
+      font-size: 13px;
+      color: #555;
+      margin-bottom: 64px;
+    }
+
+    /* Sections */
+    .section {
+      margin-bottom: 64px;
+    }
+
+    .section-number {
+      font-size: 12px;
+      font-weight: 700;
+      color: #3b82f6;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 20px;
+      letter-spacing: -0.3px;
+    }
+
+    p {
+      font-size: 15px;
+      color: #b0b0b0;
+      margin-bottom: 20px;
+      line-height: 1.85;
+    }
+
+    .highlight {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .blue { color: #3b82f6; }
+
+    /* Callout boxes */
+    .callout {
+      background: #111;
+      border-left: 3px solid #3b82f6;
+      padding: 24px 28px;
+      margin: 28px 0;
+      border-radius: 0 12px 12px 0;
+    }
+
+    .callout p {
+      margin-bottom: 0;
+      color: #ccc;
+      font-size: 15px;
+    }
+
+    .callout .label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #3b82f6;
+      margin-bottom: 10px;
+    }
+
+    /* Lists */
+    .step-list {
+      list-style: none;
+      padding: 0;
+      margin: 24px 0;
+    }
+
+    .step-list li {
+      position: relative;
+      padding: 16px 0 16px 48px;
+      border-bottom: 1px solid #1a1a1a;
+      font-size: 15px;
+      color: #b0b0b0;
+      line-height: 1.7;
+    }
+
+    .step-list li:last-child { border-bottom: none; }
+
+    .step-list li .num {
+      position: absolute;
+      left: 0;
+      top: 16px;
+      width: 32px;
+      height: 32px;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #3b82f6;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, #333, transparent);
+      margin: 64px 0;
+    }
+
+    /* Pricing */
+    .pricing-section {
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 16px;
+      padding: 40px 32px;
+      margin: 48px 0;
+    }
+
+    .pricing-section h2 {
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .pricing-subtitle {
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 36px;
+    }
+
+    .price-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 0;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .price-row:last-child { border-bottom: none; }
+
+    .price-label {
+      font-size: 15px;
+      color: #999;
+    }
+
+    .price-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .price-note {
+      font-size: 13px;
+      color: #555;
+      text-align: center;
+      margin-top: 24px;
+    }
+
+    /* CTA */
+    .cta-block {
+      text-align: center;
+      margin: 64px 0 48px;
+    }
+
+    .cta-block p {
+      color: #888;
+      margin-bottom: 24px;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      padding: 16px 48px;
+      background: #3b82f6;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 12px;
+      transition: background 0.2s;
+    }
+
+    .cta-btn:hover { background: #2563eb; }
+
+    /* Download button */
+    .download-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(10, 10, 10, 0.95);
+      backdrop-filter: blur(10px);
+      border-top: 1px solid #222;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .download-btn {
+      padding: 12px 32px;
+      background: #fff;
+      color: #000;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: opacity 0.2s;
+    }
+
+    .download-btn:hover { opacity: 0.85; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 48px 0 120px;
+    }
+
+    .footer p {
+      font-size: 12px;
+      color: #444;
+    }
+
+    /* Print styles for download */
+    @media print {
+      body {
+        background: #fff;
+        color: #111;
+      }
+
+      .container { padding: 40px 32px; }
+
+      .brand { color: #999; }
+      .hero-label { color: #2563eb; }
+      h1 { color: #000; }
+      .subtitle { color: #666; }
+      .date { color: #999; }
+      .section-number { color: #2563eb; }
+      h2 { color: #000; }
+      p { color: #444; }
+      .highlight { color: #000; }
+      .blue { color: #2563eb; }
+
+      .callout {
+        background: #f8f9fa;
+        border-left-color: #2563eb;
+      }
+      .callout p { color: #444; }
+      .callout .label { color: #2563eb; }
+
+      .step-list li { border-bottom-color: #eee; color: #444; }
+      .step-list li .num {
+        background: #f0f4ff;
+        border-color: #d0d8e8;
+        color: #2563eb;
+      }
+
+      .divider { background: #eee; }
+
+      .pricing-section {
+        background: #f8f9fa;
+        border-color: #e5e5e5;
+      }
+
+      .price-row { border-bottom-color: #eee; }
+      .price-label { color: #666; }
+      .price-value { color: #000; }
+      .price-note { color: #999; }
+      .pricing-subtitle { color: #999; }
+
+      .download-bar { display: none; }
+      .cta-block { display: none; }
+
+      .footer p { color: #999; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="brand">Lumen Marketing Solutions</div>
+
+  <div class="hero-label">Strategy Brief</div>
+  <h1>The Playbook for Positioning Yourself as the Go To Source for Private Funding</h1>
+  <p class="subtitle">A full breakdown of the strategy, the funnel, the content, and the execution plan to build authority in the private lending space and generate qualified deal flow consistently.</p>
+  <p class="date">Prepared for Jeremiah Newby / March 2026</p>
+
+  <div class="divider"></div>
+
+  <!-- SECTION 1 -->
+  <div class="section">
+    <div class="section-number">01 / The Situation</div>
+    <h2>Where You Are Right Now</h2>
+
+    <p>You have access to a private fund with real financing options. Business loans, real estate loans, lines of credit, bridge loans, revolvers, MCA, crypto backed loans. Rates starting at 7%. Terms from 12 months. You can beat bank rates on almost any deal with healthy financials.</p>
+
+    <p>That is a strong product. Most people in business or real estate would kill for those terms if they knew they existed.</p>
+
+    <p>The problem is not the product. <span class="highlight">The problem is that nobody knows you are the guy with the access.</span></p>
+
+    <p>Right now you are sitting at about a 6.5 to 7 out of 10 on your own confidence in the space. You can hold a conversation. You can steer someone in the right direction. You know enough to be dangerous. But you are not yet positioned publicly as someone people come to when they need funding.</p>
+
+    <p>That is what we are going to fix.</p>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section">
+    <div class="section-number">02 / The Strategy</div>
+    <h2>What Needs to Happen</h2>
+
+    <p>This is not complicated. But it requires commitment and consistency to pull off the right way.</p>
+
+    <p>The entire play is built on three things:</p>
+
+    <ol class="step-list">
+      <li>
+        <span class="num">1</span>
+        <span class="highlight">Build an offer that positions you as the insider.</span> You are not a lender. You are the connector. The person who knows where the best rates are, how to access them, and how to actually get approved. That is the angle. You are the guy with the playbook.
+      </li>
+      <li>
+        <span class="num">2</span>
+        <span class="highlight">Run a free weekly webinar that delivers real value.</span> Not a pitch fest. Not a teaser. You get on camera and you teach people how private funding works, what rates actually look like, how to position themselves to get approved, and what most people get wrong. You give them 90% of the sauce. The 10% they cannot do alone is the part where they need you.
+      </li>
+      <li>
+        <span class="num">3</span>
+        <span class="highlight">Run paid ads that fill that webinar every single week.</span> Meta ads, possibly YouTube, targeting small business owners, real estate investors, and developers. The ad gets them to register. The webinar does the selling. You just have to show up and know your stuff.
+      </li>
+    </ol>
+
+    <p>That is the entire engine. Ads bring people in. The webinar builds trust and positions you. The people who are serious book a call and you connect them with the lending team to close the deal.</p>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section">
+    <div class="section-number">03 / The Offer</div>
+    <h2>What You Are Actually Selling</h2>
+
+    <p>You are not selling loans. You are not selling financial advice. You are selling <span class="highlight">access and clarity</span> in a space where most people are confused, overwhelmed, or getting ripped off by their current lender.</p>
+
+    <div class="callout">
+      <div class="label">The Offer Angle</div>
+      <p>"Learn how small business owners and real estate investors are accessing private funding at rates most banks cannot touch. No brokers. No runaround. Just direct access to a fund that actually wants to work with you."</p>
+    </div>
+
+    <p>That is the hook. The webinar is the proof. And you are the bridge between the audience and the fund.</p>
+
+    <p>The reason this works is because most people in this space have no idea these options exist. They are going to their bank, getting denied or getting trash rates, and assuming that is just how it is. You are the one who shows them it does not have to be that way. That is the entire value proposition.</p>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section">
+    <div class="section-number">04 / The Funnel</div>
+    <h2>How It All Connects</h2>
+
+    <p>Here is the flow from start to finish. Every piece has a purpose.</p>
+
+    <ol class="step-list">
+      <li>
+        <span class="num">1</span>
+        <span class="highlight">The Ad.</span> A short, direct ad on Meta or YouTube. Targeting business owners, investors, and developers. The ad says something like "Most business owners are overpaying on their loans and they do not even know it. Register for this free training and I will show you how to access rates starting at 7% from a private fund most people have never heard of." Simple. Direct. No fluff.
+      </li>
+      <li>
+        <span class="num">2</span>
+        <span class="highlight">The Registration Page.</span> Clean landing page. Name, email, phone. One clear message about what they are going to learn. Countdown to the next live session. Social proof if you have it. No distractions.
+      </li>
+      <li>
+        <span class="num">3</span>
+        <span class="highlight">The Email Sequence.</span> After they register, they get 2 to 3 emails before the webinar. A confirmation, a reminder the day before, and a reminder the day of. These are not sales emails. They are just making sure the person shows up. Show rate is everything.
+      </li>
+      <li>
+        <span class="num">4</span>
+        <span class="highlight">The Webinar.</span> This is where the magic happens. 45 to 60 minutes. You teach. You share real numbers. You walk through examples. You answer questions. You give them enough that they understand the opportunity and trust that you know what you are talking about. At the end, the CTA is simple. If you want help accessing this, book a call with me and I will personally walk you through the next steps.
+      </li>
+      <li>
+        <span class="num">5</span>
+        <span class="highlight">The Booking Page.</span> After the webinar, the call to action takes them to a booking page where they can schedule a call with you directly. This is where you qualify them and connect the serious ones with the lending team.
+      </li>
+      <li>
+        <span class="num">6</span>
+        <span class="highlight">The Follow Up.</span> Anyone who registered but did not attend gets a replay link. Anyone who attended but did not book gets a follow up sequence. No one falls through the cracks.
+      </li>
+    </ol>
+
+    <p>One funnel. Running every week. The webinar ends, the next one fires up. It becomes a machine.</p>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="section">
+    <div class="section-number">05 / The Content</div>
+    <h2>Building Authority Between Webinars</h2>
+
+    <p>The webinar is the main event. But between webinars, you need to be showing up consistently on social media with short form content that positions you as someone who knows this space inside and out.</p>
+
+    <p>This does not need to be complicated. Three to five short videos per week. Here is the type of content that works:</p>
+
+    <ol class="step-list">
+      <li>
+        <span class="num">1</span>
+        <span class="highlight">Myth busting.</span> "Most people think you need perfect credit to get private funding. Here is why that is not true." Quick, punchy, educational. Challenges what people think they know.
+      </li>
+      <li>
+        <span class="num">2</span>
+        <span class="highlight">Behind the scenes.</span> "Just got off the phone with a developer who was paying 14% on his bridge loan. We got him down to 7%. Here is how." Real stories. Real numbers. That is what builds trust.
+      </li>
+      <li>
+        <span class="num">3</span>
+        <span class="highlight">Hot takes.</span> "Banks do not want you to know about private funds. Here is why." Slightly polarizing. Gets engagement. Gets shares. Gets people talking.
+      </li>
+      <li>
+        <span class="num">4</span>
+        <span class="highlight">Educational breakdowns.</span> "The difference between a bridge loan and a line of credit, explained in 60 seconds." Simple, clear, valuable. The kind of thing someone saves or sends to a friend.
+      </li>
+      <li>
+        <span class="num">5</span>
+        <span class="highlight">Webinar promos.</span> "I am doing a free live training this Thursday where I am breaking down exactly how to access private funding at rates most banks cannot compete with. Link in bio." Direct. No games.
+      </li>
+    </ol>
+
+    <p>The goal is simple. Every piece of content should make someone think one of two things. Either "I did not know that" or "I need to talk to this guy." That is it.</p>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section">
+    <div class="section-number">06 / The Webinar</div>
+    <h2>What to Actually Say for 45 Minutes</h2>
+
+    <p>This is the part that scares most people. It should not scare you. You are not giving a TED talk. You are just having a conversation with a room full of people who want to know what you know.</p>
+
+    <p>Here is the structure:</p>
+
+    <ol class="step-list">
+      <li>
+        <span class="num">1</span>
+        <span class="highlight">Introduction. (5 min)</span> Who you are. Why you are doing this. Quick version of how you got connected to this fund and why you believe in it. Be real. Be human. Do not read from a script.
+      </li>
+      <li>
+        <span class="num">2</span>
+        <span class="highlight">The problem. (10 min)</span> Walk through why traditional lending is broken for most small businesses and investors. High rates. Slow approval. Rigid requirements. Red tape. Most people in the room will be nodding because they have lived it.
+      </li>
+      <li>
+        <span class="num">3</span>
+        <span class="highlight">The solution. (15 min)</span> This is where you lay it out. What private funding is. How it works. What the rates look like. What the terms look like. Real examples. Real numbers. Be specific. Specificity builds trust. Do not just say "better rates." Say "7% starting, 12 month terms, and we look at every deal individually." That is what makes people lean in.
+      </li>
+      <li>
+        <span class="num">4</span>
+        <span class="highlight">The process. (10 min)</span> Walk them through exactly what happens when they work with you. Step one, you hop on a call. Step two, you look at their situation. Step three, you connect them with the lending team. Step four, they get their terms. Make it feel easy. Because it is.
+      </li>
+      <li>
+        <span class="num">5</span>
+        <span class="highlight">Q and A. (5 to 10 min)</span> Open the floor. Answer questions honestly. If you do not know something, say so and tell them you will find out. That builds more trust than pretending to know everything.
+      </li>
+      <li>
+        <span class="num">6</span>
+        <span class="highlight">The close. (5 min)</span> "If any of this sounds like something you want to explore, I have a link right now where you can book a call with me directly. No pressure. No obligation. We will just talk through your situation and see if this is a fit." Done.
+      </li>
+    </ol>
+
+    <p>That is 45 to 60 minutes of real, structured value. You are not selling. You are teaching. The selling happens naturally when people realize you actually know what you are talking about and you can connect them to something they need.</p>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section">
+    <div class="section-number">07 / The Timeline</div>
+    <h2>How Fast This Can Move</h2>
+
+    <ol class="step-list">
+      <li>
+        <span class="num">W1</span>
+        <span class="highlight">Week 1.</span> Lock in the offer angle. Finalize webinar topic and outline. Start building the registration page and email sequence.
+      </li>
+      <li>
+        <span class="num">W2</span>
+        <span class="highlight">Week 2.</span> Funnel build complete. Registration page, email sequence, booking page, follow up sequence all wired up and tested. Start recording first round of ad creatives.
+      </li>
+      <li>
+        <span class="num">W3</span>
+        <span class="highlight">Week 3.</span> Ads go live. First batch of social content goes out. Registrations start coming in for the first webinar.
+      </li>
+      <li>
+        <span class="num">W4</span>
+        <span class="highlight">Week 4.</span> First live webinar. Collect data. Review what worked, what did not, what needs to change. Optimize for week 5 and beyond.
+      </li>
+    </ol>
+
+    <p>Four weeks from go to live. That is the realistic timeline if we move on this and do not sit on it.</p>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section">
+    <div class="section-number">08 / What You Need to Do</div>
+    <h2>Your Part in This</h2>
+
+    <p>I am going to be straight with you. This strategy works. But it only works if you commit to a few things on your end.</p>
+
+    <ol class="step-list">
+      <li>
+        <span class="num">1</span>
+        <span class="highlight">Get your knowledge to a 9 out of 10.</span> You said you are at a 6.5 to 7 right now. That is good enough to start. But to really own this space, you need to be studying. Learn everything about the fund. Learn the products. Learn the objections. Know the numbers cold. When someone asks you a question on a webinar, you need to answer without hesitating.
+      </li>
+      <li>
+        <span class="num">2</span>
+        <span class="highlight">Show up every week.</span> The webinar is not optional. It is the engine. If you skip weeks, the momentum dies. Block one hour a week on your calendar and treat it like a meeting with your most important client. Because it is.
+      </li>
+      <li>
+        <span class="num">3</span>
+        <span class="highlight">Record content consistently.</span> Three to five short videos a week. They do not need to be perfect. They need to be real. Your phone is fine. Your face on camera talking about something you know is enough.
+      </li>
+      <li>
+        <span class="num">4</span>
+        <span class="highlight">Follow up fast.</span> When someone books a call after a webinar, you call them within 24 hours. Speed matters. The longer you wait, the colder they get. These are people who just sat through your entire presentation and said yes I want to talk. Do not let that energy die.
+      </li>
+    </ol>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- PRICING -->
+  <div class="section">
+    <div class="section-number">09 / Investment</div>
+    <h2>What It Costs to Make This Real</h2>
+
+    <p>Everything above is the strategy. You could take this document and run with it yourself if you wanted to. That is the whole point. I do not hold information hostage.</p>
+
+    <p>But if you want me to build it, manage it, and optimize it so you can focus on showing up and closing deals, here is what that looks like.</p>
+
+    <div class="pricing-section">
+      <h2>The Build</h2>
+      <p class="pricing-subtitle">One time. Everything from scratch.</p>
+
+      <div class="price-row">
+        <span class="price-label">Strategy and offer design</span>
+        <span class="price-value">Included</span>
+      </div>
+      <div class="price-row">
+        <span class="price-label">Webinar funnel build (registration, emails, booking, follow up)</span>
+        <span class="price-value">Included</span>
+      </div>
+      <div class="price-row">
+        <span class="price-label">Landing pages and all creative assets</span>
+        <span class="price-value">Included</span>
+      </div>
+      <div class="price-row">
+        <span class="price-label">Webinar presentation structure and script guidance</span>
+        <span class="price-value">Included</span>
+      </div>
+      <div class="price-row">
+        <span class="price-label">Ad campaign setup and targeting</span>
+        <span class="price-value">Included</span>
+      </div>
+      <div class="price-row">
+        <span class="price-label">First round of ad creatives</span>
+        <span class="price-value">Included</span>
+      </div>
+      <div class="price-row" style="padding-top: 24px; border-top: 1px solid #333;">
+        <span class="price-label" style="color: #fff; font-weight: 600;">Upfront Build Fee</span>
+        <span class="price-value" style="font-size: 24px;">$6,500</span>
+      </div>
+    </div>
+
+    <div class="pricing-section">
+      <h2>The Monthly</h2>
+      <p class="pricing-subtitle">Ongoing management after launch.</p>
+
+      <div class="price-row">
+        <span class="price-label">Ad campaign management and optimization</span>
+        <span class="price-value">Included</span>
+      </div>
+      <div class="price-row">
+        <span class="price-label">New ad creatives and split testing</span>
+        <span class="price-value">Included</span>
+      </div>
+      <div class="price-row">
+        <span class="price-label">Funnel optimization and conversion tracking</span>
+        <span class="price-value">Included</span>
+      </div>
+      <div class="price-row">
+        <span class="price-label">Content strategy guidance</span>
+        <span class="price-value">Included</span>
+      </div>
+      <div class="price-row">
+        <span class="price-label">Weekly performance reporting</span>
+        <span class="price-value">Included</span>
+      </div>
+      <div class="price-row" style="padding-top: 24px; border-top: 1px solid #333;">
+        <span class="price-label" style="color: #fff; font-weight: 600;">Monthly Retainer</span>
+        <span class="price-value" style="font-size: 24px;">$3,000/mo</span>
+      </div>
+    </div>
+
+    <div class="pricing-section" style="border-color: #333;">
+      <h2>Ad Spend</h2>
+      <p class="pricing-subtitle">Paid separately. Goes directly to the ad platform.</p>
+
+      <div class="price-row">
+        <span class="price-label">Recommended minimum</span>
+        <span class="price-value">$1,500/mo</span>
+      </div>
+      <div class="price-row">
+        <span class="price-label">Sweet spot for weekly webinars</span>
+        <span class="price-value">$2,000 to $3,000/mo</span>
+      </div>
+
+      <p class="price-note">This is not my money. This goes straight to Meta or YouTube. You control the budget and can adjust it at any time.</p>
+    </div>
+
+    <p>I am not going to pitch you on this. You have the full strategy in your hands right now. If you want to run with it yourself, go for it. Seriously. Everything you need is on this page.</p>
+
+    <p>If you want me to build it and make sure it actually works, you know where to find me.</p>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-block">
+    <p>Ready to move on this?</p>
+    <a href="https://lumenmarketing.co" class="cta-btn">Get in Touch</a>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>Lumen Marketing Solutions / lumenmarketing.co</p>
+    <p style="margin-top: 8px;">Prepared exclusively for Jeremiah Newby. Please do not distribute.</p>
+  </div>
+</div>
+
+<!-- Download bar -->
+<div class="download-bar">
+  <button class="download-btn" onclick="window.print()">Save This Strategy</button>
+</div>
+
+</body>
+</html>
