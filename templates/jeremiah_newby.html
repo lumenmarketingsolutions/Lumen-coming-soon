@@ -249,23 +249,27 @@
 
     /* Download button */
     .download-bar {
-      margin-bottom: 32px;
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 16px;
     }
 
     .download-btn {
-      padding: 12px 32px;
-      background: #fff;
-      color: #000;
-      font-size: 14px;
-      font-weight: 600;
+      background: none;
       border: none;
-      border-radius: 10px;
       cursor: pointer;
-      font-family: 'Inter', sans-serif;
-      transition: opacity 0.2s;
+      color: #555;
+      padding: 8px;
+      transition: color 0.2s;
     }
 
-    .download-btn:hover { opacity: 0.85; }
+    .download-btn:hover { color: #888; }
+
+    .download-btn svg {
+      width: 20px;
+      height: 20px;
+      display: block;
+    }
 
     /* Footer */
     .footer {
@@ -366,7 +370,9 @@
 
 <div class="container">
   <div class="download-bar">
-    <button class="download-btn" onclick="window.print()">Save This Strategy</button>
+    <button class="download-btn" onclick="window.print()" title="Save as PDF">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+    </button>
   </div>
 
   <div class="brand">Lumen Marketing Solutions</div>
