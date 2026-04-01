@@ -241,17 +241,7 @@
 
     /* Download button */
     .download-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(10, 10, 10, 0.95);
-      backdrop-filter: blur(10px);
-      border-top: 1px solid #222;
-      padding: 16px 24px;
-      display: flex;
-      justify-content: center;
-      z-index: 50;
+      margin-bottom: 32px;
     }
 
     .download-btn {
@@ -272,7 +262,7 @@
     /* Footer */
     .footer {
       text-align: center;
-      padding: 48px 0 120px;
+      padding: 48px 0;
     }
 
     .footer p {
@@ -330,6 +320,36 @@
       .download-bar { display: none; }
       .cta-block { display: none; }
 
+      .section {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      .pricing-section {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      .callout {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      .step-list li {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      h2 {
+        page-break-after: avoid;
+        break-after: avoid;
+      }
+
+      .section-number {
+        page-break-after: avoid;
+        break-after: avoid;
+      }
+
       .footer p { color: #999; }
     }
   </style>
@@ -337,6 +357,10 @@
 <body>
 
 <div class="container">
+  <div class="download-bar">
+    <button class="download-btn" onclick="window.print()">Save This Strategy</button>
+  </div>
+
   <div class="brand">Lumen Marketing Solutions</div>
 
   <div class="hero-label">Strategy Brief</div>
@@ -678,11 +702,6 @@
     <p>Lumen Marketing Solutions / lumenmarketing.co</p>
     <p style="margin-top: 8px;">Prepared exclusively for Jeremiah Newby. Please do not distribute.</p>
   </div>
-</div>
-
-<!-- Download bar -->
-<div class="download-bar">
-  <button class="download-btn" onclick="window.print()">Save This Strategy</button>
 </div>
 
 </body>
