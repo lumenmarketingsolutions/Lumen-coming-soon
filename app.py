@@ -466,6 +466,10 @@ def story():
 def jeremiah_newby():
     return render_template("jeremiah_newby.html")
 
+@app.route("/services")
+def services():
+    return render_template("services.html")
+
 @app.route("/avaloncrm")
 def avalon_crm():
     return render_template("avalon_crm.html")

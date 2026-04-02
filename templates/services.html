@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>What We Build | Lumen Marketing Solutions</title>
+  <meta property="og:title" content="What We Build | Lumen Marketing Solutions">
+  <meta property="og:description" content="Custom marketing systems that run your ads, capture your leads, follow up automatically, and show you exactly which ad made you money.">
+  <meta property="og:image" content="https://lumenmarketing.co/static/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="What We Build | Lumen Marketing Solutions">
+  <meta name="twitter:image" content="https://lumenmarketing.co/static/og-image.png">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0a;
+      color: #e5e5e5;
+      line-height: 1.8;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 60px 24px 100px;
+    }
+
+    .brand {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #666;
+      margin-bottom: 48px;
+    }
+
+    .hero-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #6128DB;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+    }
+
+    .subtitle {
+      font-size: 16px;
+      color: #888;
+      margin-bottom: 64px;
+      line-height: 1.7;
+    }
+
+    .section {
+      margin-bottom: 64px;
+    }
+
+    .section-number {
+      font-size: 12px;
+      font-weight: 700;
+      color: #6128DB;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 20px;
+      letter-spacing: -0.3px;
+    }
+
+    p {
+      font-size: 15px;
+      color: #b0b0b0;
+      margin-bottom: 20px;
+      line-height: 1.85;
+    }
+
+    .highlight {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .blue { color: #6128DB; }
+
+    .callout {
+      background: #111;
+      border-left: 3px solid #6128DB;
+      padding: 24px 28px;
+      margin: 28px 0;
+      border-radius: 0 12px 12px 0;
+    }
+
+    .callout p {
+      margin-bottom: 0;
+      color: #ccc;
+      font-size: 15px;
+    }
+
+    .callout .label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #6128DB;
+      margin-bottom: 10px;
+    }
+
+    .service-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      margin: 28px 0;
+    }
+
+    .service-card {
+      background: #111;
+      border: 1px solid #1a1a1a;
+      border-radius: 12px;
+      padding: 28px;
+      transition: border-color 0.2s;
+    }
+
+    .service-card:hover {
+      border-color: #333;
+    }
+
+    .service-card .card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+
+    .service-card p {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 0;
+      line-height: 1.75;
+    }
+
+    .service-card .card-icon {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #6128DB;
+      margin-bottom: 14px;
+    }
+
+    .step-list {
+      list-style: none;
+      padding: 0;
+      margin: 24px 0;
+    }
+
+    .step-list li {
+      position: relative;
+      padding: 16px 0 16px 48px;
+      border-bottom: 1px solid #1a1a1a;
+      font-size: 15px;
+      color: #b0b0b0;
+      line-height: 1.7;
+    }
+
+    .step-list li:last-child { border-bottom: none; }
+
+    .step-list li .num {
+      position: absolute;
+      left: 0;
+      top: 16px;
+      width: 32px;
+      height: 32px;
+      background: #111;
+      border: 1px solid #333;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #6128DB;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, #333, transparent);
+      margin: 64px 0;
+    }
+
+    .cta-block {
+      text-align: center;
+      margin: 64px 0 48px;
+    }
+
+    .cta-block p {
+      color: #888;
+      margin-bottom: 24px;
+    }
+
+    .cta-btn {
+      display: inline-block;
+      padding: 16px 48px;
+      background: #6128DB;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 12px;
+      transition: background 0.2s;
+    }
+
+    .cta-btn:hover { background: #7c4dff; }
+
+    .footer {
+      text-align: center;
+      padding: 48px 0;
+    }
+
+    .footer p {
+      font-size: 12px;
+      color: #444;
+    }
+
+    /* Scroll reveal */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 26px; }
+      .container { padding: 48px 20px 80px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="brand">Lumen Marketing Solutions</div>
+
+  <div class="hero-label">Services Overview</div>
+  <h1>We Find the Source of Truth in Your Business and Build a Marketing System Around It</h1>
+  <p class="subtitle">Custom marketing infrastructure. Not templates. Not cookie-cutter campaigns. A system built specifically for your business that brings the right person into your offer at the right time in the right way.</p>
+
+  <div class="divider"></div>
+
+  <!-- PHILOSOPHY -->
+  <div class="section reveal">
+    <div class="section-number">01 / Philosophy</div>
+    <h2>How We Think About Marketing</h2>
+
+    <p>Most agencies start with tactics. Run some ads, build a landing page, hope something sticks. We do not work that way.</p>
+
+    <p>Every business has a source of truth. Something at its core that actually drives revenue, that customers actually respond to, that makes the whole thing work. <span class="highlight">We find that first.</span> Then we build every piece of the marketing system around it.</p>
+
+    <p>That means before a single ad runs or a single page goes live, we have done the research. We know who your customer is, what they respond to, what your competitors are missing, and where the real opportunity sits. No two businesses get the same playbook because no two businesses have the same answer.</p>
+
+    <div class="callout">
+      <div class="label">The Standard</div>
+      <p>If someone says they know what works for your business without digging in first, they are lying to you. We do the work before we touch a single pixel.</p>
+    </div>
+  </div>
+
+  <!-- WHAT WE BUILD -->
+  <div class="section reveal">
+    <div class="section-number">02 / What We Build</div>
+    <h2>The Full Marketing System</h2>
+
+    <p>Everything below is built custom and integrated into one system. No disconnected tools. No spreadsheets. No guessing which ad made you money.</p>
+
+    <div class="service-grid">
+      <div class="service-card">
+        <div class="card-icon">Strategy + Offer Design</div>
+        <div class="card-title">Deep-Dive Research and Positioning</div>
+        <p>Full competitive analysis, audience psychology profiling, and offer design. We look at your market, your competitors, your pricing, your messaging, and we find what everyone else is missing. This is the foundation everything else is built on.</p>
+      </div>
+
+      <div class="service-card">
+        <div class="card-icon">Paid Advertising</div>
+        <div class="card-title">Ad Campaigns That Actually Convert</div>
+        <p>Meta ads, YouTube, paid search. Built on 4,000+ hours of campaign management. We write the creative, build the audiences, launch the campaigns, and optimize weekly based on real data. Not vanity metrics. Revenue.</p>
+      </div>
+
+      <div class="service-card">
+        <div class="card-icon">Landing Pages + Funnels</div>
+        <div class="card-title">Pages Built to Move People</div>
+        <p>High-converting landing pages, webinar funnels, multi-step flows. Every page is custom designed and written around your specific audience and offer. No templates. No drag-and-drop builders. Built from scratch because that is what converts.</p>
+      </div>
+
+      <div class="service-card">
+        <div class="card-icon">CRM + Lead Management</div>
+        <div class="card-title">Every Lead Tracked and Followed Up</div>
+        <p>Custom CRM with full lead pipeline, automated SMS and email follow-up, appointment reminders, no-show recovery. We do not hand you a spreadsheet of names. We nurture your leads like they are ours because they are.</p>
+      </div>
+
+      <div class="service-card">
+        <div class="card-icon">Automations + AI</div>
+        <div class="card-title">Systems That Work While You Sleep</div>
+        <p>Instant lead follow-up, appointment booking flows, nurture sequences, AI-powered agents that handle the repetitive work. Every touchpoint is automated so nothing falls through the cracks and you get your time back.</p>
+      </div>
+
+      <div class="service-card">
+        <div class="card-icon">Data + Attribution</div>
+        <div class="card-title">Know Exactly Which Ad Made You Money</div>
+        <p>Full data pipeline from ad click to closed revenue. Real-time dashboard with performance insights, revenue attribution, and every metric that matters. You will always know what is working, what is not, and where to put your next dollar.</p>
+      </div>
+
+      <div class="service-card">
+        <div class="card-icon">Content Strategy</div>
+        <div class="card-title">Authority-Building Content That Compounds</div>
+        <p>Content strategy, scripting guidance, and distribution planning for social, email, and video. Positioned to build authority in your space and drive organic traffic alongside paid campaigns. We make sure everything you put out reinforces the system.</p>
+      </div>
+
+      <div class="service-card">
+        <div class="card-icon">Webinar Funnels</div>
+        <div class="card-title">Turn Expertise Into Deal Flow</div>
+        <p>Full webinar infrastructure. Registration pages, email sequences, reminder flows, replay distribution, booking pages, and post-webinar follow-up. For businesses that sell through education and trust, this is the engine that fills the room every week.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- HOW IT WORKS -->
+  <div class="section reveal">
+    <div class="section-number">03 / How It Works</div>
+    <h2>From Conversation to Live System</h2>
+
+    <ol class="step-list">
+      <li>
+        <span class="num">1</span>
+        <span class="highlight">The Deep Dive.</span> We go deep on your business. Your market, your competitors, your customers, your numbers. We ask the questions nobody else asks and we come back with a full strategic report. You can take that report and run with it if you want. That is how confident we are in the work.
+      </li>
+      <li>
+        <span class="num">2</span>
+        <span class="highlight">The Build.</span> We take the strategy and build the entire system. Ads, landing pages, CRM, automations, tracking, dashboard. Everything wired together and tested before anything goes live.
+      </li>
+      <li>
+        <span class="num">3</span>
+        <span class="highlight">Launch.</span> Ads go live. Traffic starts flowing. Leads start coming in. The system is running. You will see real data in your dashboard from day one.
+      </li>
+      <li>
+        <span class="num">4</span>
+        <span class="highlight">Optimize.</span> We watch the data like it is our own business. Weekly ad optimization, creative refresh, conversion analysis. Every variable, every friction point, every opportunity. We do not set it and forget it. We make it better every single week.
+      </li>
+    </ol>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- WHAT MAKES US DIFFERENT -->
+  <div class="section reveal">
+    <div class="section-number">04 / What Makes This Different</div>
+    <h2>Why This Is Not Like Hiring an Agency</h2>
+
+    <p>Most agencies hand you a spreadsheet of leads and call it a day. We build the infrastructure that turns those leads into revenue and shows you exactly how it happened.</p>
+
+    <ol class="step-list">
+      <li>
+        <span class="num">1</span>
+        <span class="highlight">Custom built, not resold.</span> Your CRM, your dashboard, your tracking. Not a white-labeled SaaS tool with your logo slapped on it. Built specifically for your business and how it operates.
+      </li>
+      <li>
+        <span class="num">2</span>
+        <span class="highlight">Full pipeline, not just leads.</span> We do not stop at getting you a name and a phone number. We nurture, follow up, book appointments, recover no-shows, and track every lead from first click to closed revenue.
+      </li>
+      <li>
+        <span class="num">3</span>
+        <span class="highlight">Real attribution.</span> You will know exactly which ad, which creative, and which audience generated each dollar. No guessing. No "brand awareness" hand-waving. Revenue tied to source.
+      </li>
+      <li>
+        <span class="num">4</span>
+        <span class="highlight">AI efficiency passed to you.</span> We leverage AI at every layer of the process. That means 10 to 20x the output at a fraction of the cost of a traditional agency or in-house team. The savings go to you, not our margins.
+      </li>
+      <li>
+        <span class="num">5</span>
+        <span class="highlight">We look at the whole business.</span> Most marketers only see the marketing. We look at your sales process, your offer, your operations, your follow-up. If something is broken upstream, we will tell you. Because the best ads in the world cannot fix a broken offer.
+      </li>
+    </ol>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- ONGOING -->
+  <div class="section reveal">
+    <div class="section-number">05 / Ongoing</div>
+    <h2>What Happens After Launch</h2>
+
+    <p>The build gets you live. The ongoing management is what makes it compound.</p>
+
+    <p><span class="highlight">Weekly ad optimization.</span> New creatives, audience refinement, budget reallocation based on what the data is telling us.</p>
+
+    <p><span class="highlight">CRM and lead management.</span> Every lead nurtured, every follow-up automated, every no-show recovered. Your pipeline stays warm without you touching it.</p>
+
+    <p><span class="highlight">Monthly revenue attribution.</span> A clear report showing exactly what your marketing spend produced. Which campaigns drove revenue. Which ones need to change. No fluff.</p>
+
+    <p><span class="highlight">Strategic guidance.</span> As your data grows, so does our insight into your business. We bring recommendations, not just reports. New opportunities, new angles, new offers, all informed by what we are actually seeing in the numbers.</p>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-block reveal">
+    <p>If any of this sounds like what you have been looking for, let's talk.</p>
+    <a href="https://lumenmarketing.co" class="cta-btn">Get in Touch</a>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <p>Lumen Marketing Solutions / lumenmarketing.co</p>
+  </div>
+</div>
+
+<script>
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
