@@ -466,6 +466,10 @@ def story():
 def jeremiah_newby():
     return render_template("jeremiah_newby.html")
 
+@app.route("/tristandare")
+def tristan_dare():
+    return render_template("tristan_dare.html")
+
 @app.route("/services")
 def services():
     return render_template("services.html")
