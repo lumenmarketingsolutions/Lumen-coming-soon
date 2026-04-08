@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session, redirect, url_for
+from flask import Flask, render_template, request, jsonify, session, redirect, url_for, make_response
 import os, sqlite3, datetime, uuid, json, threading, requests, csv, io, time, base64, re
 from email.mime.text import MIMEText
 
@@ -861,6 +861,12 @@ def cap_hardware_audit():
 @app.route("/audit/caphardware/jesse")
 def cap_hardware_jesse():
     return render_template("cap-hardware-jesse.html")
+
+@app.route("/berryclean")
+def berryclean_report():
+    resp = make_response(render_template("berryclean-report.html"))
+    resp.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"
+    return resp
 
 @app.route("/jaredcasados")
 def jared_scope_review():

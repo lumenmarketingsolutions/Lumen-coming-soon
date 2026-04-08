@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Berry Clean | Ad Performance Report</title>
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="googlebot" content="noindex, nofollow">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #fafaf9;
+      --card: #ffffff;
+      --border: #e8e5e0;
+      --text: #1a1a1a;
+      --text-dim: #6b6b6b;
+      --accent: #c62828;
+      --accent-light: #e53935;
+      --green: #16a34a;
+      --green-bg: rgba(22,163,74,0.08);
+      --red: #dc2626;
+      --red-bg: rgba(220,38,38,0.08);
+      --amber: #d97706;
+      --amber-bg: rgba(217,119,6,0.08);
+      --blue: #2563eb;
+      --blue-bg: rgba(37,99,235,0.06);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.8;
+      font-size: 15px;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    /* Header */
+    .header { margin-bottom: 48px; }
+
+    .header-brand {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .header h1 {
+      font-size: clamp(24px, 5vw, 34px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .header-sub {
+      font-size: 16px;
+      color: var(--text-dim);
+      line-height: 1.8;
+      max-width: 540px;
+    }
+
+    .header-meta {
+      margin-top: 24px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 2;
+    }
+
+    .header-meta span {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* Sections */
+    .section { margin-bottom: 48px; }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 18px;
+      line-height: 1.3;
+    }
+
+    .section p {
+      color: var(--text-dim);
+      margin-bottom: 16px;
+    }
+
+    .section p strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* Stat Cards */
+    .stat-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 22px 20px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.2;
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .stat-card.highlight {
+      background: var(--green-bg);
+      border-color: rgba(22,163,74,0.2);
+    }
+
+    .stat-card.highlight .stat-value {
+      color: var(--green);
+    }
+
+    .stat-card.full {
+      grid-column: 1 / -1;
+    }
+
+    /* Comparison */
+    .compare {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 24px 0;
+    }
+
+    .compare-header {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: #fafaf9;
+    }
+
+    .compare-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      padding: 14px 20px;
+      border-bottom: 1px solid #f3f2ef;
+      font-size: 14px;
+      align-items: center;
+    }
+
+    .compare-row:last-child { border-bottom: none; }
+
+    .compare-label {
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    .compare-val {
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .compare-val.win {
+      color: var(--green);
+    }
+
+    .compare-val.lose {
+      color: var(--text-dim);
+    }
+
+    /* Funnel Visual */
+    .funnel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px 20px;
+      margin: 24px 0;
+    }
+
+    .funnel-step {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 0;
+    }
+
+    .funnel-bar-wrap {
+      flex: 1;
+    }
+
+    .funnel-bar {
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      position: relative;
+      min-width: 48px;
+    }
+
+    .funnel-bar.old {
+      background: #e8e5e0;
+      color: var(--text-dim);
+    }
+
+    .funnel-bar.new {
+      background: var(--accent);
+    }
+
+    .funnel-step-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-weight: 500;
+      width: 70px;
+      flex-shrink: 0;
+    }
+
+    .funnel-pct {
+      font-size: 12px;
+      font-weight: 700;
+      width: 44px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .funnel-legend {
+      display: flex;
+      gap: 20px;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .funnel-legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      display: inline-block;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    /* Insight Cards */
+    .insight {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 14px;
+    }
+
+    .insight-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .insight-tag.win { background: var(--green-bg); color: var(--green); }
+    .insight-tag.key { background: var(--blue-bg); color: var(--blue); }
+    .insight-tag.action { background: var(--amber-bg); color: var(--amber); }
+
+    .insight h3 {
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.35;
+      margin-bottom: 10px;
+    }
+
+    .insight p {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.8;
+      margin-bottom: 0;
+    }
+
+    .insight p strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* Callout */
+    .callout {
+      background: linear-gradient(135deg, #fff5f5, #ffe8e8);
+      border: 1px solid rgba(198,40,40,0.12);
+      border-radius: 12px;
+      padding: 28px 24px;
+      margin: 40px 0;
+    }
+
+    .callout p {
+      color: var(--text);
+      font-weight: 500;
+      font-size: 16px;
+      line-height: 1.8;
+      margin-bottom: 0;
+    }
+
+    /* Strategy List */
+    .strategy-list {
+      list-style: none;
+      counter-reset: strategy;
+    }
+
+    .strategy-list li {
+      counter-increment: strategy;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      gap: 16px;
+    }
+
+    .strategy-list li:last-child { border-bottom: none; }
+
+    .strategy-list li::before {
+      content: counter(strategy);
+      flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(198,40,40,0.08);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 2px;
+    }
+
+    .strategy-title {
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 4px;
+      line-height: 1.4;
+    }
+
+    .strategy-desc {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.8;
+    }
+
+    /* Ad Table */
+    .ad-table {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 24px 0;
+    }
+
+    .ad-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f3f2ef;
+      gap: 12px;
+    }
+
+    .ad-row:last-child { border-bottom: none; }
+
+    .ad-name {
+      font-size: 14px;
+      font-weight: 600;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .ad-name small {
+      display: block;
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .ad-stat {
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .ad-stat-val {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .ad-stat-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .ad-row.winner {
+      background: var(--green-bg);
+    }
+
+    .ad-row.winner .ad-stat-val {
+      color: var(--green);
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 48px 0;
+    }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-logo {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-dim);
+      letter-spacing: -0.3px;
+    }
+
+    .footer-logo span { color: var(--accent); }
+
+    .footer p {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .stat-row { grid-template-columns: 1fr; }
+      .compare-header, .compare-row { grid-template-columns: 2fr 1fr 1fr; font-size: 12px; }
+      .container { padding: 36px 18px 60px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <div class="header-brand">Lumen Marketing</div>
+      <h1>Berry Clean Ad Report</h1>
+      <p class="header-sub">
+        Here's what the data is telling us after our first month of ads, and what it means for the next round.
+      </p>
+      <div class="header-meta">
+        <span>Client</span> Berry Clean &mdash; Treasure Valley, ID<br>
+        <span>Date Range</span> March 11 &ndash; April 8, 2026<br>
+        <span>Prepared by</span> Kendall Davis, Lumen Marketing
+      </div>
+    </div>
+
+    <!-- Big Picture -->
+    <div class="section">
+      <div class="section-label">The Big Picture</div>
+      <h2>We nearly tripled the conversion rate</h2>
+      <p>
+        When we launched, the landing page people saw after clicking your ad was a long, scrollable page with pricing, testimonials, and a lot of information. It looked good on paper, but <strong>most people never made it past the first scroll</strong>. They clicked the ad, hit the page, and left.
+      </p>
+      <p>
+        So we rebuilt it. Instead of asking people to read through everything, we dropped them straight into a quick, interactive experience. Pick your home type, answer a couple of questions, and you're done. Simpler, faster, and it worked.
+      </p>
+
+      <div class="compare">
+        <div class="compare-header">
+          <div></div>
+          <div style="text-align:center">Before</div>
+          <div style="text-align:center">After</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-label">Visitors</div>
+          <div class="compare-val lose">937</div>
+          <div class="compare-val">229</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-label">Leads</div>
+          <div class="compare-val lose">23</div>
+          <div class="compare-val win">16</div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-label">Conversion Rate</div>
+          <div class="compare-val lose">2.5%</div>
+          <div class="compare-val win">7.0%</div>
+        </div>
+      </div>
+
+      <p>
+        The new page has only been live for about a week and it already generated <strong>16 leads at a 7% conversion rate</strong>. The old page ran for five weeks and converted at 2.5%. That is a significant improvement with a much smaller window of time.
+      </p>
+    </div>
+
+    <!-- Where People Were Dropping -->
+    <div class="section">
+      <div class="section-label">What We Fixed</div>
+      <h2>People were bouncing before they even started</h2>
+      <p>
+        On the old landing page, <strong>94% of visitors left before answering the first question</strong>. They clicked your ad, saw a wall of text, and bounced. The new page gets them doing something immediately, and that changes everything.
+      </p>
+      <p>
+        Once someone answers that first question, they're in. The rest of the funnel holds strong in both versions. The difference is just how many people we get through the front door.
+      </p>
+
+      <div class="funnel">
+        <div style="font-size:13px;font-weight:600;margin-bottom:16px;color:var(--text-dim);">How far people get through the funnel</div>
+
+        <div class="funnel-step">
+          <div class="funnel-step-label">Landing</div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar new" style="width:100%;">229</div>
+          </div>
+          <div class="funnel-pct">100%</div>
+        </div>
+
+        <div class="funnel-step">
+          <div class="funnel-step-label">Question 1</div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar new" style="width:18%;">41</div>
+          </div>
+          <div class="funnel-pct">18%</div>
+        </div>
+
+        <div class="funnel-step">
+          <div class="funnel-step-label">Contact</div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar new" style="width:16%;">36</div>
+          </div>
+          <div class="funnel-pct">88%</div>
+        </div>
+
+        <div class="funnel-step">
+          <div class="funnel-step-label">Address</div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar new" style="width:8%;">18</div>
+          </div>
+          <div class="funnel-pct">51%</div>
+        </div>
+
+        <div class="funnel-step">
+          <div class="funnel-step-label">Complete</div>
+          <div class="funnel-bar-wrap">
+            <div class="funnel-bar new" style="width:7%;">16</div>
+          </div>
+          <div class="funnel-pct">89%</div>
+        </div>
+
+        <div class="funnel-legend">
+          <div><span class="funnel-legend-dot" style="background:var(--accent);"></span> New funnel (7.0% CVR)</div>
+          <div style="color:var(--text-dim);font-size:11px;">Old funnel was 2.5%</div>
+        </div>
+      </div>
+
+      <p>
+        The percentages on the right show how many people move from one step to the next. 88% of people who answer the first question go on to enter their name. 89% of people who enter their address complete the form. <strong>The leak is at the top, not in the middle.</strong> Getting more people to engage with that first question is where the leverage is.
+      </p>
+    </div>
+
+    <!-- Which Ads Are Working -->
+    <div class="section">
+      <div class="section-label">Your Ads</div>
+      <h2>Take 1 is outperforming everything</h2>
+      <p>
+        Out of 16 leads on the new funnel, <strong>11 of them came from Take 1</strong>. That is the ad where you just talked naturally, the first take, before you tried to clean it up. The second take, where you re-did it to sound more polished, only brought in 1 lead.
+      </p>
+
+      <div class="ad-table">
+        <div class="ad-row winner">
+          <div class="ad-name">
+            Take 1
+            <small>Natural delivery, first attempt</small>
+          </div>
+          <div class="ad-stat">
+            <div class="ad-stat-val">11</div>
+            <div class="ad-stat-label">leads</div>
+          </div>
+          <div class="ad-stat">
+            <div class="ad-stat-val">$15</div>
+            <div class="ad-stat-label">per lead</div>
+          </div>
+        </div>
+        <div class="ad-row">
+          <div class="ad-name">
+            Take 2
+            <small>Re-recorded, more polished</small>
+          </div>
+          <div class="ad-stat">
+            <div class="ad-stat-val">1</div>
+            <div class="ad-stat-label">lead</div>
+          </div>
+          <div class="ad-stat">
+            <div class="ad-stat-val">$16</div>
+            <div class="ad-stat-label">per lead</div>
+          </div>
+        </div>
+        <div class="ad-row">
+          <div class="ad-name">
+            Instagram Reels
+            <small>Existing content repurposed</small>
+          </div>
+          <div class="ad-stat">
+            <div class="ad-stat-val">1</div>
+            <div class="ad-stat-label">lead</div>
+          </div>
+          <div class="ad-stat">
+            <div class="ad-stat-val">$18</div>
+            <div class="ad-stat-label">per lead</div>
+          </div>
+        </div>
+        <div class="ad-row">
+          <div class="ad-name">
+            Previous ads (S1, S2a, S2b)
+            <small>Running on the old landing page</small>
+          </div>
+          <div class="ad-stat">
+            <div class="ad-stat-val">8</div>
+            <div class="ad-stat-label">leads</div>
+          </div>
+          <div class="ad-stat">
+            <div class="ad-stat-val">$62</div>
+            <div class="ad-stat-label">per lead</div>
+          </div>
+        </div>
+      </div>
+
+      <p>
+        The previous ads were not bad. They got plenty of clicks. The issue was that they were pointing to the old landing page that wasn't converting. <strong>The combination of the natural talking style plus the new funnel is what's working.</strong>
+      </p>
+    </div>
+
+    <!-- The Takeaway on Content -->
+    <div class="callout">
+      <p>
+        The data is clear on this: <strong>the version of you that just talks, like you would to a neighbor, outperforms the scripted version every time.</strong> People scroll past polished content all day. What stops them is someone who sounds real. That first take, the one you probably thought wasn't good enough, is the one bringing in leads at $15 each.
+      </p>
+    </div>
+
+    <div class="section">
+      <div class="section-label">The Biggest Takeaway</div>
+      <h2>Authenticity sells more than any offer ever will</h2>
+      <p>
+        When you filmed those two versions, you said almost the exact same thing. Same message, same offer. The difference was the delivery. Take 1 had some "ums" in it and wasn't perfectly smooth, but it felt like you were just talking to someone. Take 2 was cleaner on paper, but it felt rehearsed.
+      </p>
+      <p>
+        People can feel the difference even if they can't name what it is. They don't care about a perfectly delivered pitch. They care about whether they trust the person talking to them. <strong>And that trust comes through when you just talk like yourself.</strong>
+      </p>
+      <p>
+        Here is the thing that matters most in all of this data: no discount, no special offer, no clever headline performed better than you just being you on camera. That is not a small insight. That is the entire strategy. The businesses that win long-term, the ones that become the name people think of first, they don't get there because they had the best deal. <strong>They get there because people felt like they knew them.</strong>
+      </p>
+      <p>
+        You want to be the biggest window cleaning company in the Treasure Valley. A good offer won't get you there. Every competitor can match a price. But nobody can copy the way you show up and talk to your community. That is the thing that scales. That is the thing that compounds over time. And the more you do it, the easier and more natural it gets.
+      </p>
+
+      <div class="insight" style="margin-top:24px;">
+        <div class="insight-tag key">What To Do</div>
+        <h3>Just start yapping</h3>
+        <p>
+          Pick up the phone, hit record, and talk about whatever is on your mind. A job you just finished. Something funny that happened on a call. A tip about window maintenance. A thought you had driving between jobs. <strong>Don't write it out. Don't rehearse it. Don't do a second take.</strong> Just say what comes to mind and stop recording.
+        </p>
+        <p style="margin-top:12px;">
+          Not every clip will become an ad. That's fine. The point is to build the habit of just talking to the camera the way you'd talk to a customer standing in front of you. The clips that come out of that are the ones that perform. And you'll be surprised how quickly you get comfortable with it. The first few feel awkward. After that, it's just you talking.
+        </p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Overall Numbers -->
+    <div class="section">
+      <div class="section-label">By the Numbers</div>
+      <h2>Full campaign snapshot</h2>
+
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-label">Total Spend</div>
+          <div class="stat-value">$772</div>
+          <div class="stat-sub">Since March 11</div>
+        </div>
+        <div class="stat-card highlight">
+          <div class="stat-label">Total Leads</div>
+          <div class="stat-value">39</div>
+          <div class="stat-sub">Across all ads</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Avg Cost / Lead</div>
+          <div class="stat-value">$19.79</div>
+          <div class="stat-sub">All campaigns combined</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Total Clicks</div>
+          <div class="stat-value">1,436</div>
+          <div class="stat-sub">People who tapped the ad</div>
+        </div>
+      </div>
+
+      <p>
+        86% of your audience is seeing this on their phone. Every decision we make about how the page looks and how the ad feels is built around that. This is a thumb-scrolling experience, and it needs to feel that way.
+      </p>
+    </div>
+
+    <!-- Traffic Breakdown -->
+    <div class="section">
+      <div class="section-label">Where Traffic Comes From</div>
+      <h2>Instagram and Facebook are both pulling</h2>
+      <div class="stat-row">
+        <div class="stat-card">
+          <div class="stat-label">Instagram</div>
+          <div class="stat-value">35%</div>
+          <div class="stat-sub">406 visitors total</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Facebook</div>
+          <div class="stat-value">30%</div>
+          <div class="stat-sub">349 visitors total</div>
+        </div>
+      </div>
+      <p>
+        Both platforms are driving real traffic. Instagram is slightly ahead in volume, and the conversion rates are similar across both. We are not leaning too far into one platform, which is good. It means we have room to scale on either side.
+      </p>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- What's Next -->
+    <div class="section">
+      <div class="section-label">What's Next</div>
+      <h2>Where we go from here</h2>
+      <p>
+        The system is working. The funnel is converting. Now it is about putting more fuel on the fire with the right content, and letting the data tell us what to double down on.
+      </p>
+
+      <ol class="strategy-list">
+        <li>
+          <div>
+            <div class="strategy-title">Film more content the way you filmed Take 1</div>
+            <div class="strategy-desc">
+              No scripts, no teleprompter. Just the topic and then you talk. First take, ship it. If you stumble over a word and correct yourself, leave it in. That is what makes it feel real. We have a few more talking points lined up and I want to get those filmed the same way.
+            </div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <div class="strategy-title">Push the new ads that are ready to go</div>
+            <div class="strategy-desc">
+              We have some additional creatives that haven't been launched yet. Now that the funnel is dialed in and converting at 7%, every new ad that goes live has a much better chance of bringing back leads at a strong cost.
+            </div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <div class="strategy-title">Scale spend on what's working</div>
+            <div class="strategy-desc">
+              Take 1 is running at $15 per lead. That is a strong number for a home service. As we add more content and let the algorithm learn, we can start increasing the daily budget and let it run. More of the same, not more complexity.
+            </div>
+          </div>
+        </li>
+        <li>
+          <div>
+            <div class="strategy-title">Keep testing the landing page</div>
+            <div class="strategy-desc">
+              We tried an A/B test on the landing page but it didn't split the traffic correctly. We are going to re-run that test with a version that includes more social proof and customer reviews right on the first page. I think that will push the conversion rate even higher.
+            </div>
+          </div>
+        </li>
+      </ol>
+    </div>
+
+    <div class="callout">
+      <p>
+        Bottom line: the ads are working, the funnel is converting, and your natural delivery is the strongest creative asset we have. We are in a good spot. Now we keep building on it.
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <div class="footer-logo">Lumen <span>Marketing</span></div>
+      <p>Prepared April 2026 &mdash; Confidential</p>
+    </div>
+
+  </div>
+</body>
+</html>
