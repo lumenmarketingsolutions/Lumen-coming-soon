@@ -571,9 +571,18 @@ def admin_avalon_onboarding():
     con.close()
     return render_template("admin_avalon_onboarding.html", submissions=rows)
 
+PREFILLS = {
+    "ridge": {"name": "Ridge Krauss", "email": "ridge@cinemarketer.io", "business": "Cinemarketer.io"},
+}
+
 @app.route("/agentonboarding")
 def agent_onboarding():
-    return render_template("agent_onboarding.html")
+    return render_template("agent_onboarding.html", prefill={})
+
+@app.route("/agentonboarding/<slug>")
+def agent_onboarding_prefilled(slug):
+    prefill = PREFILLS.get(slug.lower(), {})
+    return render_template("agent_onboarding.html", prefill=prefill)
 
 @app.route("/agentonboarding/submit", methods=["POST"])
 def agent_onboarding_submit():

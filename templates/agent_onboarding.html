@@ -269,16 +269,16 @@
                 <div class="row">
                     <div class="field-group">
                         <label>Your name</label>
-                        <input type="text" name="name" placeholder="First and last">
+                        <input type="text" name="name" placeholder="First and last" value="{{ prefill.name or '' }}">
                     </div>
                     <div class="field-group">
                         <label>Best email</label>
-                        <input type="email" name="email" placeholder="you@company.com">
+                        <input type="email" name="email" placeholder="you@company.com" value="{{ prefill.email or '' }}">
                     </div>
                 </div>
                 <div class="field-group">
                     <label>Business name</label>
-                    <input type="text" name="business" placeholder="What you call it">
+                    <input type="text" name="business" placeholder="What you call it" value="{{ prefill.business or '' }}">
                 </div>
                 <div class="field-group">
                     <label>In one sentence, what does your business actually do?</label>
