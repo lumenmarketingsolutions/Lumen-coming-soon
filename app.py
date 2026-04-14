@@ -584,6 +584,47 @@ def agent_onboarding_prefilled(slug):
     prefill = PREFILLS.get(slug.lower(), {})
     return render_template("agent_onboarding.html", prefill=prefill)
 
+def build_ridge_intake_email():
+    return """
+    <div style="margin:0; padding:0; background:#0a0a0f; font-family: -apple-system, 'Inter', Segoe UI, sans-serif;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#0a0a0f; padding:40px 20px;">
+        <tr><td align="center">
+          <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px; width:100%;">
+            <tr><td style="padding:0 0 32px 0;" align="left">
+              <img src="https://lumenmarketing.co/static/logo-white.png" alt="Lumen" height="26" style="display:block; height:26px;">
+            </td></tr>
+            <tr><td style="background:#111118; border:1px solid #1a1a25; border-radius:16px; padding:44px 40px;">
+              <p style="margin:0 0 14px 0; font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#a78bfa;">Before we get on the call</p>
+              <h1 style="margin:0 0 24px 0; font-size:26px; font-weight:700; color:#ffffff; line-height:1.25; letter-spacing:-0.4px;">Quick thing before we meet.</h1>
+              <p style="margin:0 0 18px 0; font-size:15px; color:#c8c8d8; line-height:1.7;">Hey Ridge,</p>
+              <p style="margin:0 0 18px 0; font-size:15px; color:#c8c8d8; line-height:1.7;">Excited for our session. Before we hop on, I put together a short intake form I'd love for you to fill out. Takes about four minutes and it's already got your info plugged in so you can jump straight to the questions.</p>
+              <p style="margin:0 0 28px 0; font-size:15px; color:#c8c8d8; line-height:1.7;">The whole point of this is simple. I don't want to show up to our call and spend the first twenty minutes figuring out where you're at, what you've tried, and what you actually want to walk away with. I want to show up already knowing. Whatever you fill out is exactly what I'll be studying beforehand so the guidance you get is specific to Cinemarketer.io, your goals, and the way you learn.</p>
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 32px 0;">
+                <tr><td align="left">
+                  <a href="https://lumenmarketing.co/agentonboarding/ridge" style="display:inline-block; background:linear-gradient(135deg, #7c4dff, #6128DB); color:#ffffff; text-decoration:none; font-size:15px; font-weight:600; padding:16px 32px; border-radius:12px; letter-spacing:0.2px;">Open your intake form &rarr;</a>
+                </td></tr>
+              </table>
+              <p style="margin:0 0 18px 0; font-size:15px; color:#c8c8d8; line-height:1.7;">Be honest with it. There are no wrong answers. The more real you are on this form, the more useful our time together is going to be.</p>
+              <p style="margin:0 0 4px 0; font-size:15px; color:#c8c8d8; line-height:1.7;">Talk soon,</p>
+              <p style="margin:0; font-size:15px; font-weight:600; color:#ffffff; line-height:1.7;">Kendall Davis</p>
+              <p style="margin:2px 0 0 0; font-size:13px; color:#8b8ba0;">Founder, Lumen Marketing Solutions</p>
+            </td></tr>
+            <tr><td style="padding:28px 0 0 0;" align="center">
+              <p style="margin:0; font-size:12px; color:#5a5a70; line-height:1.6;">Lumen Marketing Solutions &nbsp;·&nbsp; <a href="https://lumenmarketing.co" style="color:#7c4dff; text-decoration:none;">lumenmarketing.co</a></p>
+            </td></tr>
+          </table>
+        </td></tr>
+      </table>
+    </div>
+    """
+
+@app.route("/admin/preview-ridge-email")
+def preview_ridge_email():
+    if not session.get("wl_auth"):
+        return redirect(url_for("admin"))
+    send_email(NOTIFY_EMAIL, "[PREVIEW] Ridge — Before our call", build_ridge_intake_email())
+    return "Preview sent to " + NOTIFY_EMAIL + ". <a href='/admin'>Back</a>"
+
 @app.route("/agentonboarding/submit", methods=["POST"])
 def agent_onboarding_submit():
     data = request.get_json() or {}
