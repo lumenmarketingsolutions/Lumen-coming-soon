@@ -252,6 +252,34 @@ def init_db():
                     ("Berry Clean", "berry-clean", "", now))
         con.commit()
 
+    # Agent consulting onboarding form submissions
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS agent_onboarding (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT DEFAULT '',
+            email TEXT DEFAULT '',
+            business TEXT DEFAULT '',
+            business_oneliner TEXT DEFAULT '',
+            role TEXT DEFAULT '',
+            ai_level TEXT DEFAULT '',
+            claude_experience TEXT DEFAULT '',
+            tools_tried TEXT DEFAULT '',
+            where_stuck TEXT DEFAULT '',
+            repetitive_work TEXT DEFAULT '',
+            first_handoff TEXT DEFAULT '',
+            hours_lost TEXT DEFAULT '',
+            snap_vision TEXT DEFAULT '',
+            top_three_agents TEXT DEFAULT '',
+            tech_level TEXT DEFAULT '',
+            learning_style TEXT DEFAULT '',
+            call_outcome TEXT DEFAULT '',
+            biggest_question TEXT DEFAULT '',
+            anything_else TEXT DEFAULT '',
+            created_at TEXT NOT NULL
+        )
+    """)
+    con.commit()
+
     # Avalon CRM onboarding form submissions
     con.execute("""
         CREATE TABLE IF NOT EXISTS avalon_onboarding (
@@ -542,6 +570,101 @@ def admin_avalon_onboarding():
     rows = con.execute("SELECT * FROM avalon_onboarding ORDER BY created_at DESC").fetchall()
     con.close()
     return render_template("admin_avalon_onboarding.html", submissions=rows)
+
+@app.route("/agentonboarding")
+def agent_onboarding():
+    return render_template("agent_onboarding.html")
+
+@app.route("/agentonboarding/submit", methods=["POST"])
+def agent_onboarding_submit():
+    data = request.get_json() or {}
+    name = (data.get("name") or "").strip() or "Anonymous"
+    email = (data.get("email") or "").strip()
+    business = (data.get("business") or "").strip()
+
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    con.execute("""
+        INSERT INTO agent_onboarding (
+            name, email, business, business_oneliner, role,
+            ai_level, claude_experience, tools_tried, where_stuck,
+            repetitive_work, first_handoff, hours_lost,
+            snap_vision, top_three_agents,
+            tech_level, learning_style,
+            call_outcome, biggest_question, anything_else, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        name, email, business,
+        data.get("business_oneliner", ""),
+        data.get("role", ""),
+        data.get("ai_level", ""),
+        data.get("claude_experience", ""),
+        data.get("tools_tried", ""),
+        data.get("where_stuck", ""),
+        data.get("repetitive_work", ""),
+        data.get("first_handoff", ""),
+        data.get("hours_lost", ""),
+        data.get("snap_vision", ""),
+        data.get("top_three_agents", ""),
+        data.get("tech_level", ""),
+        data.get("learning_style", ""),
+        data.get("call_outcome", ""),
+        data.get("biggest_question", ""),
+        data.get("anything_else", ""),
+        now
+    ))
+    con.commit()
+    con.close()
+
+    def row(label, value):
+        if not value:
+            return ""
+        safe = str(value).replace("\n", "<br>")
+        return f'<tr><td style="padding:12px 0; border-bottom:1px solid #1a1a25; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#7c4dff; width:40%; vertical-align:top;">{label}</td><td style="padding:12px 0 12px 16px; border-bottom:1px solid #1a1a25; font-size:14px; color:#e8e8f0; line-height:1.6;">{safe}</td></tr>'
+
+    body = f"""
+    <div style="font-family: -apple-system, Inter, sans-serif; background:#0a0a0f; padding:32px 20px; color:#e8e8f0;">
+      <div style="max-width:620px; margin:0 auto; background:#111118; border:1px solid #1a1a25; border-radius:14px; padding:32px;">
+        <div style="font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#7c4dff; margin-bottom:10px;">New Intake</div>
+        <h2 style="font-size:22px; font-weight:700; margin:0 0 6px 0; color:#fff;">Agent Consulting Submission</h2>
+        <p style="font-size:13px; color:#8b8ba0; margin:0 0 24px 0;">{name}{' at ' + business if business else ''}{' · ' + email if email else ''}</p>
+        <table style="width:100%; border-collapse:collapse;">
+          {row("Name", name)}
+          {row("Email", email)}
+          {row("Business", business)}
+          {row("What they do", data.get("business_oneliner",""))}
+          {row("Role", data.get("role",""))}
+          {row("AI comfort", data.get("ai_level",""))}
+          {row("Claude experience", data.get("claude_experience",""))}
+          {row("Tools tried", data.get("tools_tried",""))}
+          {row("Where they got stuck", data.get("where_stuck",""))}
+          {row("Repetitive work", data.get("repetitive_work",""))}
+          {row("First handoff", data.get("first_handoff",""))}
+          {row("Hours lost/week", data.get("hours_lost",""))}
+          {row("Snap-fingers vision", data.get("snap_vision",""))}
+          {row("Top 3 agents", data.get("top_three_agents",""))}
+          {row("Tech comfort", data.get("tech_level",""))}
+          {row("Learning style", data.get("learning_style",""))}
+          {row("Call outcome", data.get("call_outcome",""))}
+          {row("Biggest question", data.get("biggest_question",""))}
+          {row("Anything else", data.get("anything_else",""))}
+        </table>
+      </div>
+    </div>
+    """
+    send_email(NOTIFY_EMAIL, f"Agent Consulting Intake: {name}{' — ' + business if business else ''}", body)
+
+    return jsonify({"ok": True})
+
+@app.route("/admin/agent-onboarding")
+def admin_agent_onboarding():
+    if not session.get("wl_auth"):
+        return redirect(url_for("admin"))
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    rows = con.execute("SELECT * FROM agent_onboarding ORDER BY created_at DESC").fetchall()
+    con.close()
+    return render_template("admin_agent_onboarding.html", submissions=rows)
 
 @app.route("/proposal")
 def proposal():

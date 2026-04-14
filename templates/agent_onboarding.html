@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Building Consulting — Intake</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0f;
+            color: #e8e8f0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        .page {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 60px 24px 100px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 44px;
+        }
+        .header img {
+            height: 26px;
+            margin-bottom: 28px;
+        }
+        .header .eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #7c4dff;
+            margin-bottom: 14px;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        .header p {
+            font-size: 15px;
+            color: #8b8ba0;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+        .step.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #7c4dff;
+            margin-bottom: 12px;
+        }
+        .step h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.3px;
+        }
+        .step .hint {
+            font-size: 14px;
+            color: #8b8ba0;
+            margin-bottom: 26px;
+            line-height: 1.65;
+        }
+
+        input[type="text"], input[type="email"], textarea, select {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            color: #e8e8f0;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+            resize: vertical;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: rgba(124, 77, 255, 0.55);
+            background: rgba(255,255,255,0.06);
+        }
+        textarea { min-height: 120px; }
+        ::placeholder { color: #4a4a5a; }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 32px;
+        }
+        .btn {
+            padding: 13px 30px;
+            border-radius: 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-next {
+            background: #7c4dff;
+            color: #fff;
+        }
+        .btn-next:hover { background: #9069ff; transform: translateY(-1px); }
+        .btn-back {
+            background: none;
+            color: #6b6b80;
+            padding: 13px 0;
+        }
+        .btn-back:hover { color: #e8e8f0; }
+        .btn-submit {
+            background: linear-gradient(135deg, #7c4dff, #6128DB);
+            color: #fff;
+            width: 100%;
+            padding: 16px;
+            font-size: 15px;
+        }
+        .btn-submit:hover { filter: brightness(1.1); }
+
+        .progress {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 44px;
+        }
+        .progress-dot {
+            flex: 1;
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.06);
+            transition: background 0.3s;
+        }
+        .progress-dot.filled { background: #7c4dff; }
+
+        .thank-you {
+            display: none;
+            text-align: center;
+            padding: 80px 0;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .thank-you .checkmark {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: rgba(124, 77, 255, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 30px;
+            color: #7c4dff;
+        }
+        .thank-you h2 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            letter-spacing: -0.3px;
+        }
+        .thank-you p {
+            font-size: 15px;
+            color: #8b8ba0;
+            max-width: 440px;
+            margin: 0 auto;
+        }
+
+        .field-group {
+            margin-bottom: 18px;
+        }
+        .field-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #b0b0c0;
+            margin-bottom: 8px;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .choice-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .choice {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: #d0d0dd;
+        }
+        .choice:hover {
+            background: rgba(124, 77, 255, 0.06);
+            border-color: rgba(124, 77, 255, 0.25);
+        }
+        .choice.selected {
+            background: rgba(124, 77, 255, 0.12);
+            border-color: rgba(124, 77, 255, 0.6);
+            color: #fff;
+        }
+        .choice .choice-title {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        .choice .choice-sub {
+            font-size: 12px;
+            color: #8b8ba0;
+        }
+        .choice.selected .choice-sub { color: #b0a0ff; }
+
+        @media (max-width: 768px) {
+            .page { padding: 40px 20px 80px; }
+            .header h1 { font-size: 24px; }
+            input[type="text"], input[type="email"], textarea, select { font-size: 16px !important; }
+            .row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <img src="/static/logo-white.png" alt="Lumen">
+            <div class="eyebrow">Consulting Intake</div>
+            <h1>Before we jump on the call</h1>
+            <p>A few quick questions so I can show up to our session already knowing where you are, where you want to go, and exactly how to get you there. Takes about 4 minutes.</p>
+        </div>
+
+        <div class="progress" id="progress">
+            <div class="progress-dot filled"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+        </div>
+
+        <form id="onboarding-form">
+
+            <!-- Step 1: Who you are -->
+            <div class="step active" data-step="1">
+                <div class="step-label">Step 1 of 7</div>
+                <h2>Who I'm building with</h2>
+                <p class="hint">The basics. I'll use these to pull up context on your business before we get on the Zoom.</p>
+                <div class="row">
+                    <div class="field-group">
+                        <label>Your name</label>
+                        <input type="text" name="name" placeholder="First and last">
+                    </div>
+                    <div class="field-group">
+                        <label>Best email</label>
+                        <input type="email" name="email" placeholder="you@company.com">
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label>Business name</label>
+                    <input type="text" name="business" placeholder="What you call it">
+                </div>
+                <div class="field-group">
+                    <label>In one sentence, what does your business actually do?</label>
+                    <input type="text" name="business_oneliner" placeholder="Pretend you're explaining it to a friend at dinner.">
+                </div>
+                <div class="field-group">
+                    <label>Your role in it</label>
+                    <input type="text" name="role" placeholder="Founder, operator, partner, doing-it-all...">
+                </div>
+                <div class="nav">
+                    <span></span>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Honest starting point -->
+            <div class="step" data-step="2">
+                <div class="step-label">Step 2 of 7</div>
+                <h2>Where you're really at with this</h2>
+                <p class="hint">Be honest here. There's no wrong answer and I'd rather over prepare than walk in assuming you know something you don't.</p>
+                <div class="field-group">
+                    <label>How would you describe your comfort level with AI right now?</label>
+                    <div class="choice-group" data-name="ai_level">
+                        <div class="choice" data-value="curious">
+                            <div class="choice-title">Curious but green</div>
+                            <div class="choice-sub">I've played with ChatGPT. That's about it.</div>
+                        </div>
+                        <div class="choice" data-value="user">
+                            <div class="choice-title">Regular user</div>
+                            <div class="choice-sub">I use AI tools every week for real work.</div>
+                        </div>
+                        <div class="choice" data-value="builder">
+                            <div class="choice-title">Starting to build</div>
+                            <div class="choice-sub">I've tried to wire up automations, GPTs, or agents myself.</div>
+                        </div>
+                        <div class="choice" data-value="advanced">
+                            <div class="choice-title">Already building</div>
+                            <div class="choice-sub">I ship things with AI. I just want to get sharper.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label>Have you used Claude specifically? What was your impression?</label>
+                    <textarea name="claude_experience" placeholder="Tell me what you've tried with Claude, if anything, and where you landed on it."></textarea>
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 3: What you've tried -->
+            <div class="step" data-step="3">
+                <div class="step-label">Step 3 of 7</div>
+                <h2>What you've already tried</h2>
+                <p class="hint">I want to know what you've poked at, what worked, and more importantly where you hit a wall. That wall is usually where the real session starts.</p>
+                <div class="field-group">
+                    <label>What tools or platforms have you already tried to build agents or automations with?</label>
+                    <textarea name="tools_tried" placeholder="Zapier, Make, custom GPTs, ChatGPT projects, n8n, Claude Desktop, Claude Code, nothing yet, whatever comes to mind..."></textarea>
+                </div>
+                <div class="field-group">
+                    <label>Where did you get stuck or give up?</label>
+                    <textarea name="where_stuck" placeholder="Was it the setup, the prompting, connecting it to your real tools, trusting the output, or something else entirely?"></textarea>
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 4: The business today -->
+            <div class="step" data-step="4">
+                <div class="step-label">Step 4 of 7</div>
+                <h2>What's eating your week</h2>
+                <p class="hint">The fastest way to find where an agent pays for itself is to look at whatever's pulling you away from the work only you can do.</p>
+                <div class="field-group">
+                    <label>What repetitive work do you or your team do every single week that you wish you didn't?</label>
+                    <textarea name="repetitive_work" placeholder="Think emails, reports, follow ups, data cleanup, content, admin, the stuff that shows up on a loop."></textarea>
+                </div>
+                <div class="field-group">
+                    <label>If you could hand off one task tomorrow and never think about it again, what would it be?</label>
+                    <textarea name="first_handoff" placeholder="Be specific. Pretend a smart assistant just showed up and asked what to take off your plate first."></textarea>
+                </div>
+                <div class="field-group">
+                    <label>Roughly how many hours a week do you lose to that kind of work?</label>
+                    <input type="text" name="hours_lost" placeholder="A rough number is fine. 5, 10, 30, whatever it is.">
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 5: Snap the fingers -->
+            <div class="step" data-step="5">
+                <div class="step-label">Step 5 of 7</div>
+                <h2>Snap your fingers</h2>
+                <p class="hint">This is the one I care about most. I'm asking you to stop being realistic for a minute and actually dream a little.</p>
+                <div class="field-group">
+                    <label>You snap your fingers. Agents are now running quietly through your business, doing the right things at the right time. Walk me through what that actually looks like on a normal Tuesday.</label>
+                    <textarea name="snap_vision" placeholder="Paint the picture. What's happening in the morning, what's happening while you're with clients, what's handled by the time you check in at night? Don't hold back."></textarea>
+                </div>
+                <div class="field-group">
+                    <label>If you had to name the top three agents you'd want running in your business, what would they be?</label>
+                    <textarea name="top_three_agents" placeholder="1. The one that... 2. The one that... 3. The one that..."></textarea>
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 6: Tech comfort + learning -->
+            <div class="step" data-step="6">
+                <div class="step-label">Step 6 of 7</div>
+                <h2>How you learn best</h2>
+                <p class="hint">This shapes how I run our time together. Some people want to watch me do it first. Some want their hands on the keys from minute one.</p>
+                <div class="field-group">
+                    <label>How comfortable are you with technical stuff? (Terminal, code, APIs, that kind of thing.)</label>
+                    <div class="choice-group" data-name="tech_level">
+                        <div class="choice" data-value="zero">
+                            <div class="choice-title">Zero technical</div>
+                            <div class="choice-sub">I'd rather not touch a terminal if I don't have to.</div>
+                        </div>
+                        <div class="choice" data-value="some">
+                            <div class="choice-title">Some exposure</div>
+                            <div class="choice-sub">I can copy paste commands and figure things out.</div>
+                        </div>
+                        <div class="choice" data-value="comfortable">
+                            <div class="choice-title">Pretty comfortable</div>
+                            <div class="choice-sub">I've coded, scripted, or built things before.</div>
+                        </div>
+                        <div class="choice" data-value="developer">
+                            <div class="choice-title">Actual developer background</div>
+                            <div class="choice-sub">I write code. Speak to me like one.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label>When you learn something new and it actually sticks, how did it stick?</label>
+                    <textarea name="learning_style" placeholder="Watching someone do it, doing it yourself, reading docs, having someone walk you through it live, trial and error..."></textarea>
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 7: What success looks like -->
+            <div class="step" data-step="7">
+                <div class="step-label">Step 7 of 7</div>
+                <h2>What makes this call worth it</h2>
+                <p class="hint">Last one. This tells me exactly what to make sure we cover so you walk away knowing it was worth every dollar.</p>
+                <div class="field-group">
+                    <label>When our call wraps, what do you want to be able to do that you can't do today?</label>
+                    <textarea name="call_outcome" placeholder="Be as specific as you can. I'd rather over deliver on one clear outcome than be vague on five."></textarea>
+                </div>
+                <div class="field-group">
+                    <label>What's the one question you're bringing into this that you want a clear answer on?</label>
+                    <textarea name="biggest_question" placeholder="The one that's been in the back of your head."></textarea>
+                </div>
+                <div class="field-group">
+                    <label>Anything else I should know before we get on the Zoom?</label>
+                    <textarea name="anything_else" placeholder="Context, constraints, things you've seen other people do that you want to copy, anything at all."></textarea>
+                </div>
+                <div style="margin-top: 34px;">
+                    <button type="button" class="btn btn-submit" onclick="submitForm()">Send it over</button>
+                </div>
+                <div style="text-align: center; margin-top: 14px;">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                </div>
+            </div>
+
+        </form>
+
+        <div class="thank-you" id="thank-you">
+            <div class="checkmark">&#10003;</div>
+            <h2>Got it. Thank you.</h2>
+            <p>I'm going to read through every word of this before we get on the call so I show up ready to actually move the needle. Talk soon.</p>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 7;
+
+        function updateProgress() {
+            document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+                dot.classList.toggle('filled', i < currentStep);
+            });
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+                currentStep++;
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+                updateProgress();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+                currentStep--;
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+                updateProgress();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // Choice group single-select
+        document.querySelectorAll('.choice-group').forEach(group => {
+            group.addEventListener('click', (e) => {
+                const choice = e.target.closest('.choice');
+                if (!choice) return;
+                group.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
+                choice.classList.add('selected');
+            });
+        });
+
+        function submitForm() {
+            const form = document.getElementById('onboarding-form');
+            const data = {};
+            form.querySelectorAll('input, textarea, select').forEach(el => {
+                data[el.name] = el.value;
+            });
+            document.querySelectorAll('.choice-group').forEach(group => {
+                const name = group.dataset.name;
+                const selected = group.querySelector('.choice.selected');
+                data[name] = selected ? selected.dataset.value : '';
+            });
+
+            const btn = document.querySelector('.btn-submit');
+            btn.textContent = 'Sending...';
+            btn.disabled = true;
+
+            fetch('/agentonboarding/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.ok) {
+                    form.style.display = 'none';
+                    document.getElementById('progress').style.display = 'none';
+                    document.getElementById('thank-you').style.display = 'block';
+                    window.scrollTo(0, 0);
+                } else {
+                    btn.textContent = 'Try again';
+                    btn.disabled = false;
+                }
+            })
+            .catch(() => {
+                btn.textContent = 'Try again';
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>

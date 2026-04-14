@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agent Consulting Intake</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0a0a0f;
+            color: #e8e8f0;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+        .topbar {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 24px; border-bottom: 1px solid #1a1a25;
+            position: sticky; top: 0; background: #0a0a0f; z-index: 100;
+        }
+        .topbar-left { display: flex; align-items: center; gap: 12px; }
+        .back-link { font-size: 13px; color: #6b6b80; text-decoration: none; font-weight: 500; }
+        .back-link:hover { color: #e8e8f0; }
+        .topbar-title { font-size: 16px; font-weight: 700; }
+        .topbar-count {
+            font-size: 12px; font-weight: 600; color: #a78bfa;
+            background: rgba(124,77,255,0.12); padding: 2px 10px;
+            border-radius: 6px;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 24px 20px 80px; }
+        .share {
+            background: rgba(124,77,255,0.08);
+            border: 1px solid rgba(124,77,255,0.25);
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .share-label {
+            font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+            text-transform: uppercase; color: #a78bfa;
+        }
+        .share input {
+            flex: 1; background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(124,77,255,0.3);
+            color: #d0d0dd; font-size: 12px; padding: 8px 12px;
+            border-radius: 8px; font-family: monospace; outline: none;
+        }
+        .share button {
+            background: #7c4dff; border: none; color: #fff;
+            font-size: 12px; font-weight: 600; padding: 8px 14px;
+            border-radius: 8px; cursor: pointer;
+        }
+        .empty-state { text-align: center; padding: 80px 20px; color: #44445a; font-size: 14px; }
+        .submission {
+            background: #111118; border: 1px solid #1a1a25;
+            border-radius: 14px; padding: 24px; margin-bottom: 16px;
+        }
+        .submission-header {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            margin-bottom: 20px; padding-bottom: 14px;
+            border-bottom: 1px solid #1a1a25;
+        }
+        .submission-name { font-size: 16px; font-weight: 700; }
+        .submission-meta { font-size: 12px; color: #6b6b80; margin-top: 3px; }
+        .submission-date { font-size: 11px; color: #44445a; }
+        .answer-group { margin-bottom: 16px; }
+        .answer-group:last-child { margin-bottom: 0; }
+        .answer-label {
+            font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+            text-transform: uppercase; color: #a78bfa; margin-bottom: 6px;
+        }
+        .answer-text {
+            font-size: 13px; color: #b0b0c0; line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        @media (max-width: 768px) {
+            .topbar { padding: 14px 16px; }
+            .container { padding: 16px 16px 60px; }
+            .submission { padding: 18px 16px; }
+            .submission-header { flex-direction: column; align-items: flex-start; gap: 4px; }
+            .share { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div class="topbar-left">
+            <a class="back-link" href="/admin">&lsaquo;</a>
+            <span class="topbar-title">Agent Consulting Intake</span>
+            <span class="topbar-count">{{ submissions|length }} response{{ 's' if submissions|length != 1 }}</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="share">
+            <div class="share-label">Form</div>
+            <input type="text" value="https://lumenmarketing.co/agentonboarding" readonly id="form-url" onclick="this.select()">
+            <button onclick="navigator.clipboard.writeText(document.getElementById('form-url').value); this.textContent='Copied'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+        </div>
+
+        {% if submissions|length == 0 %}
+        <div class="empty-state">No submissions yet</div>
+        {% endif %}
+
+        {% for s in submissions %}
+        <div class="submission">
+            <div class="submission-header">
+                <div>
+                    <div class="submission-name">{{ s.name }}</div>
+                    <div class="submission-meta">
+                        {% if s.business %}{{ s.business }}{% endif %}
+                        {% if s.role %} · {{ s.role }}{% endif %}
+                        {% if s.email %} · {{ s.email }}{% endif %}
+                    </div>
+                </div>
+                <div class="submission-date">{{ s.created_at[:16] }}</div>
+            </div>
+
+            {% set fields = [
+                ("What they do", s.business_oneliner),
+                ("AI comfort level", s.ai_level),
+                ("Claude experience", s.claude_experience),
+                ("Tools tried", s.tools_tried),
+                ("Where they got stuck", s.where_stuck),
+                ("Repetitive work eating the week", s.repetitive_work),
+                ("First thing they'd hand off", s.first_handoff),
+                ("Hours lost per week", s.hours_lost),
+                ("Snap-fingers vision", s.snap_vision),
+                ("Top three agents", s.top_three_agents),
+                ("Technical comfort", s.tech_level),
+                ("How they learn best", s.learning_style),
+                ("Desired call outcome", s.call_outcome),
+                ("Biggest question", s.biggest_question),
+                ("Anything else", s.anything_else)
+            ] %}
+
+            {% for label, value in fields %}
+            {% if value %}
+            <div class="answer-group">
+                <div class="answer-label">{{ label }}</div>
+                <div class="answer-text">{{ value }}</div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
