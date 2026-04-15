@@ -65,15 +65,6 @@ CLIENTS = [
         "keywords":    {"jared", "casados", "bryan hymas", "brian hymas"},
     },
     {
-        "slug": "marykate",
-        "name": "Marykate G.",
-        "active_list": "901712376573",  # Active Clients → Marykate G. → CRM & Outreach Agent
-        "kb_list":     "901712382743",  # KB → Client Intelligence → Marykate G.
-        "domains":     set(),
-        "emails":      set(),
-        "keywords":    {"marykate", "mary kate"},
-    },
-    {
         "slug": "jeremiah",
         "name": "Jeremiah Newby",
         "active_list": "901712440792",  # Active Clients → Jeremiah Newby → Webinar Funnel Build
@@ -81,6 +72,31 @@ CLIENTS = [
         "domains":     set(),
         "emails":      set(),
         "keywords":    {"jeremiah", "newby", "private funding"},
+    },
+    # MK7 Media is MaryKate's own business. These calls get logged into a
+    # dedicated MK7 Media Calls list so reports can filter independently from
+    # Lumen work. This rule MUST come before the marykate rule because her
+    # email is on every MK7 call.
+    {
+        "slug": "mk7-media",
+        "name": "MK7 Media",
+        "active_list": "901712965950",  # Active Clients → MK7 Media Calls
+        "kb_list":     "901712382751",  # KB → Agency Operations → Lumen Internal (tagged mk7-media)
+        "domains":     set(),
+        "emails":      set(),
+        "keywords":    {"mk7 media", "mk7media", "mk 7 media"},
+    },
+    # MaryKate is last. Her email catches internal Lumen syncs (e.g. weekly
+    # 1:1s with Kendall where no client is on the invite) that don't match
+    # any client rule above. Client calls she joins route to the client.
+    {
+        "slug": "marykate",
+        "name": "Marykate G.",
+        "active_list": "901712376573",  # Active Clients → Marykate G. → CRM & Outreach Agent
+        "kb_list":     "901712382743",  # KB → Client Intelligence → Marykate G.
+        "domains":     set(),
+        "emails":      {"marykatezarehghazarian@gmail.com"},
+        "keywords":    {"marykate", "mary kate"},
     },
 ]
 
