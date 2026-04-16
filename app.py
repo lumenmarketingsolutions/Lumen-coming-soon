@@ -501,6 +501,10 @@ def jeremiah_newby():
 def tristan_dare():
     return render_template("tristan_dare.html")
 
+@app.route("/abraj-developments")
+def abraj_proposal():
+    return render_template("abraj_proposal.html")
+
 @app.route("/services")
 def services():
     return render_template("services.html")
