@@ -2167,12 +2167,32 @@ def admin_grow_leads():
 def admin_funnels():
     if not session.get("wl_auth"):
         return redirect(url_for("admin_landing"))
+
     funnels = [
-        {"title": "Lebanon - Lead Quality", "market": "Lebanon", "url": "/grow/lb", "pricing": True},
-        {"title": "GCC/Dubai - Scale", "market": "GCC/Dubai", "url": "/grow/gcc", "pricing": False},
-        {"title": "America - General", "market": "America", "url": "/grow/us", "pricing": False},
+        {"id": "lb-quality", "title": "Stop Talking to Leads Who Never Buy", "market": "Lebanon", "brand": "MK7 Media", "offer": "Lead quality system", "pricing": "$1,000 + $600/mo", "url_lumen": "/grow/lb", "url_mk7": "https://mk7media.com/grow/lb", "cta": "WhatsApp", "flag": "🇱🇧", "color": "blue"},
+        {"id": "gcc-scale", "title": "Scale Your Business with Qualified Leads", "market": "GCC/Dubai", "brand": "MK7 Media", "offer": "B2B lead gen + content creators", "pricing": "Custom", "url_lumen": "/grow/gcc", "url_mk7": "https://mk7media.com/grow/gcc", "cta": "WhatsApp", "flag": "🇦🇪", "color": "pink"},
+        {"id": "us-general", "title": "Your Ads Should Be Making You Money", "market": "America", "brand": "Lumen", "offer": "Full system install", "pricing": "Custom", "url_lumen": "/grow/us", "url_mk7": None, "cta": "Calendly", "flag": "🇺🇸", "color": "purple"},
     ]
-    return render_template("admin_funnels.html", funnels=funnels)
+
+    con = sqlite3.connect(DB_PATH)
+    total_leads = con.execute("SELECT COUNT(*) FROM funnel_leads").fetchone()[0]
+    leads_by_market = {}
+    for row in con.execute("SELECT market, COUNT(*) FROM funnel_leads GROUP BY market").fetchall():
+        leads_by_market[row[0]] = row[1]
+    leads_today = con.execute("SELECT COUNT(*) FROM funnel_leads WHERE created_at >= date('now')").fetchone()[0]
+    leads_week = con.execute("SELECT COUNT(*) FROM funnel_leads WHERE created_at >= date('now', '-7 days')").fetchone()[0]
+    recent_leads = con.execute("SELECT whatsapp, name, market, source_page, created_at FROM funnel_leads ORDER BY id DESC LIMIT 5").fetchall()
+    con.close()
+
+    stats = {
+        "total": total_leads,
+        "today": leads_today,
+        "week": leads_week,
+        "by_market": leads_by_market,
+        "recent": [{"whatsapp": r[0], "name": r[1], "market": r[2], "source": r[3], "date": r[4][:16]} for r in recent_leads]
+    }
+
+    return render_template("admin_funnels.html", funnels=funnels, stats=stats)
 
 
 @app.route("/privacy")

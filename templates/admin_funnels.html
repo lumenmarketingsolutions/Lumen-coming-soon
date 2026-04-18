@@ -3,60 +3,366 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Funnels — Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>Ad Funnels — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family:'Inter',sans-serif; background:#0a0a0f; color:#e8e8f0; padding:24px; }
-  h1 { font-size:24px; font-weight:700; margin-bottom:24px; }
-  a { color:#6128DB; text-decoration:none; }
-  a:hover { text-decoration:underline; }
-  .nav { margin-bottom:24px; display:flex; gap:16px; font-size:13px; }
-  .funnel-list { display:flex; flex-direction:column; gap:12px; }
-  .funnel-card {
-    background:#111118; border:1px solid #1a1a25; border-radius:12px;
-    padding:24px; display:flex; align-items:center; justify-content:space-between;
+  body { font-family:'Inter',sans-serif; background:#0a0a0f; color:#e8e8f0; }
+
+  .layout { display:flex; min-height:100vh; }
+
+  /* Sidebar */
+  .sidebar {
+    width:220px; background:#0e0e16; border-right:1px solid #1a1a25;
+    padding:24px 16px; position:fixed; top:0; bottom:0; overflow-y:auto;
   }
-  .funnel-info h3 { font-size:16px; font-weight:700; margin-bottom:4px; }
-  .funnel-info p { font-size:13px; color:#6b6b80; }
-  .funnel-actions { display:flex; gap:12px; align-items:center; }
+  .sidebar h2 { font-size:13px; font-weight:700; color:#6128DB; letter-spacing:2px; text-transform:uppercase; margin-bottom:24px; }
+  .sidebar a {
+    display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px;
+    font-size:13px; font-weight:500; color:#6b6b80; text-decoration:none;
+    margin-bottom:4px; transition:all 0.2s;
+  }
+  .sidebar a:hover { color:#e8e8f0; background:rgba(97,40,219,0.08); }
+  .sidebar a.active { color:#e8e8f0; background:rgba(97,40,219,0.12); font-weight:600; }
+  .sidebar .divider { height:1px; background:#1a1a25; margin:16px 0; }
+  .sidebar .section-label { font-size:10px; font-weight:600; color:#44445a; letter-spacing:2px; text-transform:uppercase; padding:0 12px; margin-bottom:8px; }
+
+  /* Main content */
+  .main { margin-left:220px; flex:1; padding:32px; }
+
+  /* Header */
+  .page-header { margin-bottom:32px; }
+  .page-header h1 { font-size:28px; font-weight:800; letter-spacing:-1px; margin-bottom:4px; }
+  .page-header p { font-size:14px; color:#6b6b80; }
+
+  /* Stat cards row */
+  .stat-row { display:flex; gap:16px; margin-bottom:32px; flex-wrap:wrap; }
+  .stat-card {
+    background:#111118; border:1px solid #1a1a25; border-radius:12px;
+    padding:20px 24px; flex:1; min-width:160px;
+  }
+  .stat-card .sc-val {
+    font-size:32px; font-weight:800; letter-spacing:-1px;
+    background:linear-gradient(135deg, #6128DB, #7c4dff);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+    line-height:1; margin-bottom:4px;
+  }
+  .stat-card .sc-lbl { font-size:12px; color:#6b6b80; font-weight:500; }
+  .stat-card.green .sc-val {
+    background:linear-gradient(135deg, #22c55e, #4ade80);
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+
+  /* Market pills */
+  .market-pills { display:flex; gap:8px; margin-bottom:32px; flex-wrap:wrap; }
+  .market-pill {
+    display:flex; align-items:center; gap:6px; padding:6px 14px;
+    background:#111118; border:1px solid #1a1a25; border-radius:100px;
+    font-size:12px; font-weight:600; color:#6b6b80;
+  }
+  .market-pill .mp-count { color:#e8e8f0; }
+
+  /* Section titles */
+  .section-title {
+    font-size:18px; font-weight:700; margin-bottom:16px; letter-spacing:-0.5px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .section-title .badge {
+    font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px;
+    background:rgba(97,40,219,0.12); color:#6128DB;
+  }
+
+  /* Funnel cards */
+  .funnel-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:16px; margin-bottom:40px; }
+
+  .funnel-card {
+    background:#111118; border:1px solid #1a1a25; border-radius:14px;
+    padding:0; overflow:hidden; transition:border-color 0.2s;
+  }
+  .funnel-card:hover { border-color:rgba(97,40,219,0.3); }
+
+  .fc-header {
+    padding:20px 24px 16px; border-bottom:1px solid #1a1a25;
+    display:flex; justify-content:space-between; align-items:flex-start;
+  }
+  .fc-flag { font-size:24px; }
+  .fc-brand {
+    font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase;
+    padding:3px 8px; border-radius:4px;
+  }
+  .fc-brand.lumen { background:rgba(97,40,219,0.12); color:#7c4dff; }
+  .fc-brand.mk7 { background:rgba(77,124,245,0.12); color:#4d7cf5; }
+
+  .fc-body { padding:16px 24px 20px; }
+  .fc-title { font-size:15px; font-weight:700; margin-bottom:4px; letter-spacing:-0.3px; line-height:1.3; }
+  .fc-offer { font-size:13px; color:#6b6b80; margin-bottom:12px; }
+
+  .fc-meta { display:flex; gap:16px; margin-bottom:16px; flex-wrap:wrap; }
+  .fc-meta-item { font-size:12px; color:#44445a; display:flex; align-items:center; gap:4px; }
+  .fc-meta-item span { color:#6b6b80; font-weight:600; }
+
+  .fc-urls { display:flex; flex-direction:column; gap:6px; }
+  .fc-url-row {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 12px; background:rgba(255,255,255,0.02); border-radius:8px;
+    font-size:12px; color:#6b6b80;
+  }
+  .fc-url-row code { font-family:'SF Mono',monospace; font-size:11px; color:#8888a0; }
+
   .copy-btn {
-    padding:8px 16px; background:rgba(97,40,219,0.12); color:#6128DB;
-    border:none; border-radius:6px; font-family:inherit; font-size:12px;
-    font-weight:600; cursor:pointer;
+    padding:5px 12px; background:rgba(97,40,219,0.12); color:#6128DB;
+    border:none; border-radius:6px; font-family:inherit; font-size:11px;
+    font-weight:600; cursor:pointer; transition:background 0.2s;
   }
   .copy-btn:hover { background:rgba(97,40,219,0.2); }
-  .tag { display:inline-block; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600; margin-left:8px; }
-  .tag-lb { background:rgba(77,124,245,0.12); color:#4d7cf5; }
-  .tag-gcc { background:rgba(232,77,160,0.12); color:#e84da0; }
-  .tag-us { background:rgba(255,255,255,0.08); color:#8888a0; }
+
+  .preview-btn {
+    padding:5px 12px; background:rgba(255,255,255,0.04); color:#6b6b80;
+    border:none; border-radius:6px; font-family:inherit; font-size:11px;
+    font-weight:500; cursor:pointer; text-decoration:none;
+  }
+  .preview-btn:hover { color:#e8e8f0; }
+
+  /* Recent leads mini table */
+  .recent-table { width:100%; border-collapse:collapse; font-size:13px; margin-top:12px; }
+  .recent-table th {
+    text-align:left; padding:10px 12px; border-bottom:1px solid #1a1a25;
+    color:#44445a; font-weight:600; font-size:11px; letter-spacing:0.5px; text-transform:uppercase;
+  }
+  .recent-table td { padding:10px 12px; border-bottom:1px solid rgba(26,26,37,0.5); }
+  .recent-table tr:hover td { background:rgba(97,40,219,0.03); }
+
+  .wa-link { color:#25D366; font-weight:600; text-decoration:none; }
+  .wa-link:hover { text-decoration:underline; }
+
+  .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:600; letter-spacing:0.5px; }
+  .tag-lb { background:rgba(77,124,245,0.1); color:#4d7cf5; }
+  .tag-gcc { background:rgba(232,77,160,0.1); color:#e84da0; }
+  .tag-us { background:rgba(97,40,219,0.1); color:#7c4dff; }
+
+  /* Sites section */
+  .sites-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px; margin-bottom:40px; }
+  .site-card {
+    background:#111118; border:1px solid #1a1a25; border-radius:10px;
+    padding:16px 20px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .site-card h4 { font-size:14px; font-weight:600; margin-bottom:2px; }
+  .site-card p { font-size:12px; color:#44445a; }
+
+  .empty { text-align:center; padding:40px; color:#44445a; font-size:14px; }
+
+  @media (max-width:768px) {
+    .sidebar { display:none; }
+    .main { margin-left:0; padding:20px; }
+    .funnel-grid { grid-template-columns:1fr; }
+    .sites-grid { grid-template-columns:1fr; }
+  }
 </style>
 </head>
 <body>
-<div class="nav">
-  <a href="/admin">← Admin</a>
-  <a href="/admin/funnels">Funnels</a>
-  <a href="/admin/grow-leads">Leads</a>
+<div class="layout">
+
+<div class="sidebar">
+  <h2>Admin</h2>
+  <a href="/admin">← Dashboard</a>
+  <div class="divider"></div>
+  <div class="section-label">Funnels</div>
+  <a href="/admin/funnels" class="active">🎯 Ad Funnels</a>
+  <a href="/admin/grow-leads">📋 Leads</a>
+  <div class="divider"></div>
+  <div class="section-label">Sites</div>
+  <a href="https://lumenmarketing.co" target="_blank">🌐 Lumen</a>
+  <a href="https://mk7media.com" target="_blank">🌐 MK7 Media</a>
+  <div class="divider"></div>
+  <div class="section-label">Tools</div>
+  <a href="/admin/coming-soon">📧 Waitlist</a>
+  <a href="/admin/main-site">📊 Site Analytics</a>
 </div>
-<h1>Landing Pages</h1>
-<div class="funnel-list">
-  {% for f in funnels %}
-  <div class="funnel-card">
-    <div class="funnel-info">
-      <h3>{{ f.title }}
-        {% if 'Lebanon' in f.market %}<span class="tag tag-lb">🇱🇧 {{ f.market }}</span>
-        {% elif 'GCC' in f.market %}<span class="tag tag-gcc">🇦🇪 {{ f.market }}</span>
-        {% else %}<span class="tag tag-us">🇺🇸 {{ f.market }}</span>{% endif %}
-        {% if f.pricing %}<span class="tag" style="background:rgba(34,197,94,0.12);color:#22c55e;">Pricing</span>{% endif %}
-      </h3>
-      <p>lumenmarketing.co{{ f.url }}</p>
+
+<div class="main">
+
+  <div class="page-header">
+    <h1>Ad Funnels</h1>
+    <p>All landing pages, offers, and lead data in one place.</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stat-row">
+    <div class="stat-card">
+      <div class="sc-val">{{ stats.total }}</div>
+      <div class="sc-lbl">Total Leads</div>
     </div>
-    <div class="funnel-actions">
-      <a href="{{ f.url }}" target="_blank" style="font-size:13px;">Preview →</a>
-      <button class="copy-btn" onclick="navigator.clipboard.writeText('https://lumenmarketing.co{{ f.url }}');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy URL',1500)">Copy URL</button>
+    <div class="stat-card green">
+      <div class="sc-val">{{ stats.today }}</div>
+      <div class="sc-lbl">Today</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-val">{{ stats.week }}</div>
+      <div class="sc-lbl">This Week</div>
+    </div>
+    <div class="stat-card">
+      <div class="sc-val">{{ funnels|length * 2 }}</div>
+      <div class="sc-lbl">Active Pages</div>
     </div>
   </div>
-  {% endfor %}
+
+  <!-- Market breakdown -->
+  <div class="market-pills">
+    <div class="market-pill">🇱🇧 Lebanon <span class="mp-count">{{ stats.by_market.get('lb', 0) }}</span></div>
+    <div class="market-pill">🇦🇪 GCC <span class="mp-count">{{ stats.by_market.get('gcc', 0) }}</span></div>
+    <div class="market-pill">🇺🇸 America <span class="mp-count">{{ stats.by_market.get('us', 0) }}</span></div>
+  </div>
+
+  <!-- Landing Pages -->
+  <div class="section-title">Landing Pages <span class="badge">{{ funnels|length }} funnels</span></div>
+
+  <div class="funnel-grid">
+    {% for f in funnels %}
+    <div class="funnel-card">
+      <div class="fc-header">
+        <span class="fc-flag">{{ f.flag }}</span>
+        <span class="fc-brand {% if f.brand == 'Lumen' %}lumen{% else %}mk7{% endif %}">{{ f.brand }}</span>
+      </div>
+      <div class="fc-body">
+        <div class="fc-title">{{ f.title }}</div>
+        <div class="fc-offer">{{ f.offer }}</div>
+        <div class="fc-meta">
+          <div class="fc-meta-item">Market: <span>{{ f.market }}</span></div>
+          <div class="fc-meta-item">CTA: <span>{{ f.cta }}</span></div>
+          <div class="fc-meta-item">Pricing: <span>{{ f.pricing }}</span></div>
+        </div>
+        <div class="fc-urls">
+          <div class="fc-url-row">
+            <code>lumenmarketing.co{{ f.url_lumen }}</code>
+            <div style="display:flex;gap:6px;">
+              <a href="{{ f.url_lumen }}" target="_blank" class="preview-btn">Preview</a>
+              <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co{{ f.url_lumen }}')">Copy</button>
+            </div>
+          </div>
+          {% if f.url_mk7 %}
+          <div class="fc-url-row">
+            <code>mk7media.com{{ f.url_mk7.replace('https://mk7media.com','') }}</code>
+            <div style="display:flex;gap:6px;">
+              <a href="{{ f.url_mk7 }}" target="_blank" class="preview-btn">Preview</a>
+              <button class="copy-btn" onclick="copyUrl(this, '{{ f.url_mk7 }}')">Copy</button>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Live Sites -->
+  <div class="section-title">Live Sites</div>
+  <div class="sites-grid">
+    <div class="site-card">
+      <div>
+        <h4>Lumen Marketing</h4>
+        <p>lumenmarketing.co</p>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <a href="https://lumenmarketing.co" target="_blank" class="preview-btn">Open</a>
+        <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co')">Copy</button>
+      </div>
+    </div>
+    <div class="site-card">
+      <div>
+        <h4>MK7 Media</h4>
+        <p>mk7media.com</p>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <a href="https://mk7media.com" target="_blank" class="preview-btn">Open</a>
+        <button class="copy-btn" onclick="copyUrl(this, 'https://mk7media.com')">Copy</button>
+      </div>
+    </div>
+    <div class="site-card">
+      <div>
+        <h4>MK7 — Home Page</h4>
+        <p>mk7media.com (main site + quiz)</p>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <a href="https://mk7media.com" target="_blank" class="preview-btn">Open</a>
+        <button class="copy-btn" onclick="copyUrl(this, 'https://mk7media.com')">Copy</button>
+      </div>
+    </div>
+    <div class="site-card">
+      <div>
+        <h4>Lumen — Home Page</h4>
+        <p>lumenmarketing.co (main site)</p>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <a href="https://lumenmarketing.co/home" target="_blank" class="preview-btn">Open</a>
+        <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co/home')">Copy</button>
+      </div>
+    </div>
+    <div class="site-card">
+      <div>
+        <h4>Lumen — Services</h4>
+        <p>lumenmarketing.co/services</p>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <a href="https://lumenmarketing.co/services" target="_blank" class="preview-btn">Open</a>
+        <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co/services')">Copy</button>
+      </div>
+    </div>
+    <div class="site-card">
+      <div>
+        <h4>WhatsApp Connect</h4>
+        <p>lumenmarketing.co/whatsapp-connect</p>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <a href="https://lumenmarketing.co/whatsapp-connect" target="_blank" class="preview-btn">Open</a>
+        <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co/whatsapp-connect')">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Leads -->
+  <div class="section-title">Recent Leads <span class="badge">Last 5</span></div>
+  {% if stats.recent %}
+  <table class="recent-table">
+    <thead>
+      <tr><th>WhatsApp</th><th>Name</th><th>Market</th><th>Source</th><th>Date</th></tr>
+    </thead>
+    <tbody>
+      {% for l in stats.recent %}
+      <tr>
+        <td><a href="https://wa.me/{{ l.whatsapp|replace('+','')|replace(' ','') }}" target="_blank" class="wa-link">{{ l.whatsapp }}</a></td>
+        <td>{{ l.name or '—' }}</td>
+        <td>
+          {% if l.market == 'lb' %}<span class="tag tag-lb">🇱🇧 Lebanon</span>
+          {% elif l.market == 'gcc' %}<span class="tag tag-gcc">🇦🇪 GCC</span>
+          {% elif l.market == 'us' %}<span class="tag tag-us">🇺🇸 US</span>
+          {% else %}<span class="tag">{{ l.market }}</span>{% endif %}
+        </td>
+        <td style="font-size:12px;color:#44445a;">{{ l.source }}</td>
+        <td style="font-size:12px;color:#44445a;">{{ l.date }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No leads yet. They will appear here as they come in.</div>
+  {% endif %}
+
+  <div style="text-align:center;margin-top:24px;">
+    <a href="/admin/grow-leads" style="color:#6128DB;font-size:13px;font-weight:600;text-decoration:none;">View all leads →</a>
+  </div>
+
 </div>
+</div>
+
+<script>
+function copyUrl(btn, url) {
+  navigator.clipboard.writeText(url);
+  var orig = btn.textContent;
+  btn.textContent = 'Copied!';
+  btn.style.color = '#22c55e';
+  setTimeout(function() { btn.textContent = orig; btn.style.color = ''; }, 1500);
+}
+</script>
+
 </body>
 </html>
