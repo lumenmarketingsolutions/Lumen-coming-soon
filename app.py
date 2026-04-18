@@ -390,6 +390,21 @@ def init_db():
                 con.execute(f"ALTER TABLE mk_leads ADD COLUMN {col} {dtype}")
             except Exception:
                 pass
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS funnel_leads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            whatsapp TEXT DEFAULT '',
+            name TEXT DEFAULT '',
+            business TEXT DEFAULT '',
+            need TEXT DEFAULT '',
+            source_page TEXT DEFAULT '',
+            market TEXT DEFAULT '',
+            ip TEXT DEFAULT '',
+            status TEXT DEFAULT 'new',
+            created_at TEXT NOT NULL
+        )
+    """)
+
     con.commit()
 
     con.close()
@@ -2068,6 +2083,96 @@ def mk_campaign_detail(campaign_id):
 @app.route("/whatsapp-connect")
 def whatsapp_connect_page():
     return render_template("whatsapp_connect.html")
+
+
+# ── Grow / Landing Pages ──
+
+@app.route("/grow")
+@app.route("/grow/<market>")
+def grow_page(market=None):
+    valid = {"lb": "Lebanon", "gcc": "GCC", "us": "General"}
+    if market not in valid:
+        market = "lb"
+    return render_template("grow.html", market=market, market_name=valid[market])
+
+
+@app.route("/api/grow/lead", methods=["POST"])
+def grow_lead_submit():
+    data = request.get_json() or {}
+    whatsapp = (data.get("whatsapp") or "").strip()
+    name = (data.get("name") or "").strip()
+    business = (data.get("business") or "").strip()
+    need = (data.get("need") or "").strip()
+    source_page = (data.get("source_page") or "").strip()
+    market = (data.get("market") or "").strip()
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
+    if not whatsapp:
+        return jsonify({"error": "WhatsApp number is required"}), 400
+
+    con = sqlite3.connect(DB_PATH)
+    existing = con.execute("SELECT id FROM funnel_leads WHERE whatsapp = ? AND created_at > datetime('now', '-1 hour')", (whatsapp,)).fetchone()
+    if existing:
+        con.execute("UPDATE funnel_leads SET name=COALESCE(NULLIF(?,''),name), business=COALESCE(NULLIF(?,''),business), need=COALESCE(NULLIF(?,''),need) WHERE id=?",
+                     (name, business, need, existing[0]))
+        con.commit()
+        con.close()
+        return jsonify({"ok": True, "updated": True})
+
+    con.execute("INSERT INTO funnel_leads (whatsapp, name, business, need, source_page, market, ip, created_at) VALUES (?,?,?,?,?,?,?,?)",
+                (whatsapp, name, business, need, source_page, market, ip, now))
+    con.commit()
+    con.close()
+
+    market_labels = {"lb": "Lebanon", "gcc": "GCC/Dubai", "us": "America", "": "Unknown"}
+    ml = market_labels.get(market, market)
+
+    if RESEND_API_KEY:
+        subject = f"New Lead from Grow Page ({ml})"
+        body = f"""<div style="font-family:Inter,sans-serif;color:#1a1a1a;padding:20px;">
+<h2 style="margin:0 0 16px;">New Lead</h2>
+<p><strong>WhatsApp:</strong> {whatsapp}</p>
+<p><strong>Name:</strong> {name or 'Not provided'}</p>
+<p><strong>Business:</strong> {business or 'Not provided'}</p>
+<p><strong>Need:</strong> {need or 'Not provided'}</p>
+<p><strong>Market:</strong> {ml}</p>
+<p><strong>Source:</strong> {source_page}</p>
+<p><strong>Time:</strong> {now} UTC</p>
+</div>"""
+        try:
+            for email in [NOTIFY_EMAIL, "marykatezarehghazarian@gmail.com"]:
+                requests.post("https://api.resend.com/emails",
+                    headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
+                    json={"from": "MK7 Media <notifications@lumenmarketing.co>", "to": [email], "subject": subject, "html": body})
+        except Exception:
+            pass
+
+    return jsonify({"ok": True})
+
+
+@app.route("/admin/grow-leads")
+def admin_grow_leads():
+    if not session.get("wl_auth"):
+        return redirect(url_for("admin_landing"))
+    con = sqlite3.connect(DB_PATH)
+    leads = con.execute("SELECT * FROM funnel_leads ORDER BY id DESC").fetchall()
+    cols = [d[0] for d in con.execute("SELECT * FROM funnel_leads LIMIT 0").description]
+    con.close()
+    lead_list = [dict(zip(cols, r)) for r in leads]
+    return render_template("admin_grow_leads.html", leads=lead_list)
+
+
+@app.route("/admin/funnels")
+def admin_funnels():
+    if not session.get("wl_auth"):
+        return redirect(url_for("admin_landing"))
+    funnels = [
+        {"title": "Lebanon - Lead Quality", "market": "Lebanon", "url": "/grow/lb", "pricing": True},
+        {"title": "GCC/Dubai - Scale", "market": "GCC/Dubai", "url": "/grow/gcc", "pricing": False},
+        {"title": "America - General", "market": "America", "url": "/grow/us", "pricing": False},
+    ]
+    return render_template("admin_funnels.html", funnels=funnels)
 
 
 @app.route("/privacy")

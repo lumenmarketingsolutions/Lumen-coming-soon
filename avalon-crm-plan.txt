@@ -1,0 +1,133 @@
+AVALON CRM — ONBOARDING ANALYSIS & BUILD PLAN
+================================================
+
+WHO RESPONDED
+-------------
+1. Kristen Obeso-Theus — Manager/Marketing/Operations (strategic brain, multi-location oversight)
+2. Laleh Saeidi — Manager (front desk, patient-facing, sales closer)
+3. Jessica Stockwell — Manager of Carlsbad (operations, day-to-day clinic runner)
+4. Bre Yarnall — RDOO (Regional Director of Operations, high-level oversight)
+
+
+THE CORE PAIN
+-------------
+They are drowning in fragmented tools. Every single person said the same thing different ways:
+
+- Kristen: "scattered Google Docs... personal WhatsApp... can't find information... clicking in and out of platforms"
+- Laleh: "having to go back to Boulevard to send messages"
+- Jessica: "wish it had more integration and seamlessness... one all encompassing platform"
+- Bre: "notes and communication within profiles that you can see no matter what location"
+
+The #1 problem is not leads. It's operational fragmentation across locations. They're managing patient journeys, internal comms, lead follow-up, notes, quotes, and scheduling across Moxie, Boulevard, WhatsApp, Google Docs, email, and phone — separately per location.
+
+
+WHAT MOXIE FAILED AT
+---------------------
+- Leads were sparse and low quality
+- Platform was hard to navigate even for tech-savvy users (Kristen's words)
+- No real onboarding or training
+- Slow support, pushback when asked for help
+- No real Boulevard integration
+- GHL (Go High Level) was confusing, Moxie didn't help them learn it
+
+This is our biggest advantage. They've been burned by a platform that promised integration and delivered fragmentation. We deliver the opposite.
+
+
+DREAM FEATURES — RANKED BY FREQUENCY
+--------------------------------------
+
+CRITICAL
+- All-location visibility (one dashboard, cross-location) — Kristen, Bre, Jessica
+- Lead pipeline with stages (new > contacted > booked > closed) — Laleh, Jessica, Bre
+- Notes/communication history on patient profiles — Kristen, Laleh, Bre
+- Boulevard integration (lead > BLVD patient sync) — Everyone
+
+HIGH
+- SMS/text from platform — Laleh, Jessica, Bre
+- Internal team chat — Kristen, Bre
+- Task/follow-up reminders — Laleh, Bre
+- Auto first-touch text to new leads — Laleh, Bre
+
+MEDIUM
+- Email from platform — Laleh, Jessica
+- Quotes/invoicing (professional digital quotes, payment links) — Kristen, Laleh
+- Appointment reminders (auto) — Jessica, Bre
+- Calendar integration — Jessica, Kristen
+
+LOWER / NICE-TO-HAVE
+- Payment system integration — Jessica, Kristen
+- Photo gallery / charting — Jessica
+
+
+THE PERSONAS — WHAT EACH CARES ABOUT MOST
+-------------------------------------------
+
+Bre (RDOO)
+Needs the 30,000ft view. Dashboard showing all locations, lead counts, team activity. She doesn't need to text patients herself, she needs to see that it's happening.
+
+Kristen (Ops/Marketing)
+Needs internal comms fixed. WhatsApp and Google Docs are killing her. Wants Zoho-level organization. She referenced Zoho CRM twice — she's done her own research. She wants one platform for patient AND internal workflows.
+
+Laleh (Sales/Front Desk)
+Needs a lead pipeline she can work like Salesforce. Stages, tasks, notes, ability to message from the platform. She's the closer — the CRM needs to make her faster, not slower.
+
+Jessica (Clinic Ops)
+Needs everything in one place. She's running the day-to-day and can't afford to switch between 6 tabs. Wants it location-based, smooth, seamless.
+
+
+THE HARD PARTS
+--------------
+
+1. Boulevard Integration
+Everyone wants leads to flow into BLVD. We know API/Zapier is possible but this is the most technically complex piece. We need to nail the sync direction: leads come into our CRM > when booked, push to BLVD as a client.
+
+2. Multi-Location Architecture
+Every user needs to see their location's data AND cross-location data. Bre and Kristen need global views. Laleh and Jessica need location-scoped views. Role-based permissions are essential.
+
+3. SMS/Twilio
+Laleh specifically said she wants to text from the platform. We already have Twilio creds. But two-way SMS with conversation threading is a real build.
+
+4. Internal Chat
+Kristen and Bre want team messaging. This replaces WhatsApp. Needs to be per-location AND global. This is a significant feature but would be a massive differentiator.
+
+5. Quotes/Invoicing
+Kristen wants professional digital quotes. Laleh wants payment links. This is scope creep territory — plan for it but potentially Phase 2.
+
+
+WHAT WOULD BLOW THEM AWAY ON FIRST LOGIN
+------------------------------------------
+
+1. Dashboard that shows all 3+ locations at a glance — lead counts, pipeline stages, team activity, today's tasks. Bre sees this and immediately knows we understood her role.
+
+2. Lead pipeline with drag-and-drop stages — Laleh logs in, sees her leads in columns (New > Contacted > Consultation > Booked > Won), drags a card, adds a note. She feels like she's using Salesforce but it's clean and simple.
+
+3. Patient/lead profiles with full history — Every note, text, quote, touchpoint on one page. Cross-location visible. Kristen sees this and knows the Google Docs era is over.
+
+4. One-click text from a lead profile — Laleh hits "text" on a lead card, types, sends. It goes via Twilio. The conversation threads right there on the profile. She never leaves the CRM.
+
+5. Internal notes vs. patient-facing comms clearly separated — Team notes stay internal. Patient texts are patient texts. No more WhatsApp confusion.
+
+
+BUILD PLAN
+----------
+
+Phase 1 — Core (Week 1-2)
+- Auth system (role-based: RDOO, Manager, Staff)
+- Multi-location data model
+- Lead pipeline (stages, drag-drop, notes)
+- Patient/lead profiles with activity timeline
+- Dashboard (per-location + global view)
+- Task/follow-up system with reminders
+
+Phase 2 — Communication (Week 2-3)
+- SMS via Twilio (send from lead profile, conversation threading)
+- Auto first-touch text on new lead
+- Internal team notes on profiles
+- Basic internal messaging (location-scoped)
+
+Phase 3 — Integration & Polish (Week 3-4)
+- Boulevard sync (lead > client push)
+- Appointment reminders (auto)
+- Email from platform
+- Quotes/invoicing (basic)
+- Mobile-responsive polish

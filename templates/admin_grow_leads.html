@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grow Leads — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#0a0a0f; color:#e8e8f0; padding:24px; }
+  h1 { font-size:24px; font-weight:700; margin-bottom:8px; }
+  .count { font-size:14px; color:#6b6b80; margin-bottom:24px; }
+  a { color:#6128DB; text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .nav { margin-bottom:24px; display:flex; gap:16px; font-size:13px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; padding:12px 16px; border-bottom:2px solid #1a1a25; color:#6b6b80; font-weight:600; letter-spacing:0.5px; text-transform:uppercase; font-size:11px; }
+  td { padding:12px 16px; border-bottom:1px solid #1a1a25; vertical-align:top; }
+  tr:hover td { background:rgba(97,40,219,0.04); }
+  .tag { display:inline-block; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600; }
+  .tag-new { background:rgba(34,197,94,0.12); color:#22c55e; }
+  .tag-lb { background:rgba(77,124,245,0.12); color:#4d7cf5; }
+  .tag-gcc { background:rgba(232,77,160,0.12); color:#e84da0; }
+  .tag-us { background:rgba(255,255,255,0.08); color:#8888a0; }
+  .wa-link { color:#25D366; font-weight:600; }
+  .empty { text-align:center; padding:60px; color:#44445a; }
+</style>
+</head>
+<body>
+<div class="nav">
+  <a href="/admin">← Admin</a>
+  <a href="/admin/funnels">Funnels</a>
+  <a href="/admin/grow-leads">Leads</a>
+</div>
+<h1>Grow Page Leads</h1>
+<p class="count">{{ leads|length }} total leads</p>
+
+{% if leads %}
+<table>
+  <thead>
+    <tr>
+      <th>WhatsApp</th>
+      <th>Name</th>
+      <th>Business</th>
+      <th>Need</th>
+      <th>Market</th>
+      <th>Source</th>
+      <th>Status</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for l in leads %}
+    <tr>
+      <td><a href="https://wa.me/{{ l.whatsapp|replace('+','')|replace(' ','') }}" target="_blank" class="wa-link">{{ l.whatsapp }}</a></td>
+      <td>{{ l.name or '—' }}</td>
+      <td>{{ l.business or '—' }}</td>
+      <td>{{ l.need or '—' }}</td>
+      <td>
+        {% if l.market == 'lb' %}<span class="tag tag-lb">Lebanon</span>
+        {% elif l.market == 'gcc' %}<span class="tag tag-gcc">GCC</span>
+        {% elif l.market == 'us' %}<span class="tag tag-us">America</span>
+        {% else %}<span class="tag">{{ l.market }}</span>{% endif %}
+      </td>
+      <td>{{ l.source_page or '—' }}</td>
+      <td><span class="tag tag-new">{{ l.status }}</span></td>
+      <td>{{ l.created_at[:16] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="empty">No leads yet. They will show up here as people submit the grow pages.</div>
+{% endif %}
+</body>
+</html>

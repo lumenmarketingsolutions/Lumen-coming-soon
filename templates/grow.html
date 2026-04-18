@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MK7 Media — Grow Your Business</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #050507;
+    --bg-card: #0d0d12;
+    --bg-elevated: #111118;
+    --text: #f0f0f5;
+    --text-muted: #8888a0;
+    --text-dim: #55556a;
+    --blue: #4d7cf5;
+    --blue-bright: #6b93ff;
+    --pink: #e84da0;
+    --gradient: linear-gradient(135deg, #4d7cf5, #e84da0);
+    --gradient-text: linear-gradient(135deg, #6b93ff, #ff6bbf);
+    --gradient-soft: linear-gradient(135deg, rgba(77,124,245,0.08), rgba(232,77,160,0.08));
+    --border: rgba(255,255,255,0.06);
+    --border-hover: rgba(255,255,255,0.12);
+    --green-wa: #25D366;
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; background: var(--bg); }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    padding: 0 24px; height: 56px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(5,5,7,0.85);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-brand {
+    font-size: 15px; font-weight: 700; letter-spacing: -0.3px;
+    background: var(--gradient-text);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .nav-flags { display: flex; gap: 8px; align-items: center; }
+
+  .nav-flag {
+    font-size: 20px; cursor: pointer; opacity: 0.4;
+    transition: opacity 0.2s; padding: 4px 8px; border-radius: 6px;
+    text-decoration: none;
+  }
+
+  .nav-flag:hover, .nav-flag.active { opacity: 1; }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100svh;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 100px 24px 60px; text-align: center;
+    position: relative;
+  }
+
+  .hero-glow {
+    position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 400px; border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(77,124,245,0.08), transparent 70%);
+    pointer-events: none; filter: blur(60px);
+  }
+
+  .hero-tag {
+    font-size: 12px; font-weight: 600; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--blue);
+    margin-bottom: 24px; position: relative; z-index: 1;
+  }
+
+  .hero h1 {
+    font-size: clamp(36px, 7vw, 64px); font-weight: 900;
+    line-height: 1.05; letter-spacing: -2px;
+    max-width: 780px; margin-bottom: 24px; position: relative; z-index: 1;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    background: var(--gradient-text);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+
+  .hero-sub {
+    font-size: clamp(16px, 2.5vw, 19px); color: var(--text-muted);
+    line-height: 1.7; max-width: 540px; margin-bottom: 40px;
+    position: relative; z-index: 1;
+  }
+
+  .hero-ctas {
+    display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;
+    position: relative; z-index: 1;
+  }
+
+  .btn-wa {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 16px 32px; background: var(--green-wa); color: #fff;
+    border: none; border-radius: 12px; font-family: inherit;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+    text-decoration: none; transition: background 0.2s, transform 0.2s;
+  }
+
+  .btn-wa:hover { background: #20bd5a; transform: translateY(-2px); }
+
+  .btn-wa svg { width: 20px; height: 20px; fill: white; }
+
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 16px 28px; background: none; color: var(--text-muted);
+    border: 1px solid var(--border); border-radius: 12px;
+    font-family: inherit; font-size: 15px; font-weight: 500;
+    cursor: pointer; text-decoration: none;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .btn-secondary:hover { color: var(--text); border-color: var(--border-hover); }
+
+  /* ── STATS STRIP ── */
+  .stats {
+    padding: 0 24px 80px;
+    display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;
+  }
+
+  .stat {
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px 32px;
+    text-align: center; min-width: 200px; flex: 1; max-width: 280px;
+  }
+
+  .stat .num {
+    font-size: 36px; font-weight: 800; letter-spacing: -1px;
+    background: var(--gradient-text);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1; margin-bottom: 6px;
+  }
+
+  .stat .lbl {
+    font-size: 12px; font-weight: 600; color: var(--text-dim);
+    letter-spacing: 1.5px; text-transform: uppercase;
+  }
+
+  /* ── SECTIONS ── */
+  section { padding: 100px 24px; position: relative; }
+
+  .section-inner { max-width: 900px; margin: 0 auto; }
+
+  .section-tag {
+    font-size: 12px; font-weight: 600; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--blue); margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: clamp(28px, 4.5vw, 44px); font-weight: 800;
+    letter-spacing: -1px; margin-bottom: 16px; line-height: 1.1;
+  }
+
+  .section-sub {
+    font-size: 17px; color: var(--text-muted); line-height: 1.7;
+    max-width: 600px; margin-bottom: 48px;
+  }
+
+  /* ── WHAT WE DO ── */
+  .services-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .service-item {
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px 28px;
+    transition: border-color 0.3s;
+  }
+
+  .service-item:hover { border-color: var(--border-hover); }
+
+  .service-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    background: rgba(77,124,245,0.1);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px; color: var(--blue);
+  }
+
+  .service-item h3 {
+    font-size: 17px; font-weight: 700; margin-bottom: 8px;
+    letter-spacing: -0.3px;
+  }
+
+  .service-item p {
+    font-size: 14px; color: var(--text-muted); line-height: 1.6;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .steps {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+  }
+
+  .step {
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px 24px; text-align: center;
+  }
+
+  .step-num {
+    font-size: 32px; font-weight: 800;
+    background: var(--gradient-text);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 16px;
+  }
+
+  .step h3 { font-size: 16px; font-weight: 700; margin-bottom: 8px; }
+  .step p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+  /* ── CASE STUDIES ── */
+  .cases { display: flex; flex-direction: column; gap: 16px; }
+
+  .case-card {
+    background: var(--bg-elevated); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px;
+    display: flex; align-items: center; gap: 32px;
+  }
+
+  .case-num {
+    font-size: 48px; font-weight: 900; min-width: 140px;
+    background: var(--gradient-text);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1;
+  }
+
+  .case-body h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .case-body p { font-size: 14px; color: var(--text-muted); line-height: 1.6; }
+
+  .case-tag {
+    display: inline-block; font-size: 11px; font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 4px; margin-bottom: 8px;
+    background: rgba(77,124,245,0.1); color: var(--blue);
+  }
+
+  /* ── PRICING (Lebanon only) ── */
+  .pricing-card {
+    background: var(--gradient-soft); border: 1px solid rgba(77,124,245,0.15);
+    border-radius: 20px; padding: 48px 40px; text-align: center;
+    max-width: 520px; margin: 0 auto;
+  }
+
+  .pricing-card .price {
+    font-size: 56px; font-weight: 900;
+    background: var(--gradient-text);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    line-height: 1; margin-bottom: 4px;
+  }
+
+  .pricing-card .price-sub {
+    font-size: 15px; color: var(--text-muted); margin-bottom: 24px;
+  }
+
+  .pricing-card .price-then {
+    font-size: 14px; color: var(--text-dim); margin-bottom: 24px;
+  }
+
+  .pricing-list {
+    list-style: none; text-align: left; margin-bottom: 32px;
+  }
+
+  .pricing-list li {
+    font-size: 15px; color: var(--text-muted); padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  .pricing-list li::before {
+    content: '✓'; color: var(--blue); font-weight: 700;
+    font-size: 14px; min-width: 18px;
+  }
+
+  /* ── FORM ── */
+  .form-section {
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .form-wrap {
+    max-width: 480px; margin: 0 auto; text-align: center;
+  }
+
+  .form-wrap input, .form-wrap select {
+    width: 100%; padding: 16px 18px;
+    background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+    border-radius: 12px; font-family: inherit; font-size: 16px;
+    color: var(--text); margin-bottom: 12px;
+    transition: border-color 0.2s; outline: none;
+    -webkit-appearance: none;
+  }
+
+  .form-wrap input::placeholder { color: var(--text-dim); }
+
+  .form-wrap input:focus, .form-wrap select:focus {
+    border-color: var(--blue);
+  }
+
+  .form-wrap select { color: var(--text-dim); cursor: pointer; }
+  .form-wrap select option { background: var(--bg-elevated); color: var(--text); }
+
+  .btn-submit {
+    width: 100%; padding: 18px; background: var(--gradient);
+    color: #fff; border: none; border-radius: 12px;
+    font-family: inherit; font-size: 16px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s, transform 0.2s;
+    margin-top: 4px;
+  }
+
+  .btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  .form-note {
+    font-size: 13px; color: var(--text-dim); margin-top: 16px;
+  }
+
+  .form-success {
+    display: none; padding: 24px;
+    background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2);
+    border-radius: 12px; color: #22c55e; font-weight: 600; font-size: 16px;
+  }
+
+  /* ── FINAL CTA ── */
+  .final-cta {
+    text-align: center; padding: 100px 24px;
+  }
+
+  .final-cta h2 {
+    font-size: clamp(28px, 5vw, 48px); font-weight: 800;
+    letter-spacing: -1.5px; margin-bottom: 16px;
+  }
+
+  .final-cta p {
+    font-size: 17px; color: var(--text-muted); margin-bottom: 36px;
+    max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.7;
+  }
+
+  .response-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; background: rgba(37,211,102,0.1);
+    border: 1px solid rgba(37,211,102,0.2); border-radius: 100px;
+    font-size: 13px; font-weight: 500; color: var(--green-wa);
+    margin-top: 16px;
+  }
+
+  .response-badge .dot {
+    width: 8px; height: 8px; background: var(--green-wa);
+    border-radius: 50%;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 40px 24px; text-align: center;
+    font-size: 13px; color: var(--text-dim);
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    .services-grid { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr; }
+    .case-card { flex-direction: column; text-align: center; gap: 16px; }
+    .case-num { min-width: auto; }
+    .pricing-card { padding: 36px 24px; }
+  }
+
+  @media (max-width: 480px) {
+    .stat { min-width: 100%; }
+    .hero-ctas { flex-direction: column; align-items: stretch; }
+    .btn-wa, .btn-secondary { justify-content: center; }
+  }
+
+  /* ── ANIMATIONS ── */
+  .reveal {
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* ── HIDE SECTIONS BY MARKET ── */
+  .lb-only { display: none; }
+  .gcc-only { display: none; }
+  .us-only { display: none; }
+
+  body.market-lb .lb-only { display: block; }
+  body.market-gcc .gcc-only { display: block; }
+  body.market-us .us-only { display: block; }
+  body.market-lb .lb-only.pricing-card { display: block; }
+</style>
+</head>
+<body class="market-{{ market }}">
+
+<nav>
+  <div class="nav-brand">MK7 Media</div>
+  <div class="nav-flags">
+    <a href="/grow/lb" class="nav-flag {% if market == 'lb' %}active{% endif %}" title="Lebanon">🇱🇧</a>
+    <a href="/grow/gcc" class="nav-flag {% if market == 'gcc' %}active{% endif %}" title="GCC / Dubai">🇦🇪</a>
+    <a href="/grow/us" class="nav-flag {% if market == 'us' %}active{% endif %}" title="America">🇺🇸</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <p class="hero-tag reveal">
+    {% if market == 'lb' %}For businesses in Lebanon
+    {% elif market == 'gcc' %}For businesses in the GCC
+    {% else %}Meta Advertising Done Right{% endif %}
+  </p>
+  <h1 class="reveal">
+    {% if market == 'lb' %}Stop talking to leads<br>who <em>never buy.</em>
+    {% elif market == 'gcc' %}Scale your business<br>with <em>qualified leads.</em>
+    {% else %}Your ads should be<br><em>making you money.</em>{% endif %}
+  </h1>
+  <p class="hero-sub reveal">
+    {% if market == 'lb' %}We install a proven system that filters out the people who waste your time and puts qualified buyers in front of you every day.
+    {% elif market == 'gcc' %}We build Meta ad systems with local content creators that generate qualified B2B leads for your sales team across the GCC.
+    {% else %}We come in, set up the system the right way, and make sure every dollar you spend on ads comes back with a return you can actually measure.{% endif %}
+  </p>
+  <div class="hero-ctas reveal">
+    <a href="https://wa.me/96179018107?text=Hey%2C%20I%20saw%20your%20ad%20and%20I%20want%20to%20learn%20more" target="_blank" class="btn-wa">
+      <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      Message us on WhatsApp
+    </a>
+    <a href="#form" class="btn-secondary">Book a free call ↓</a>
+  </div>
+</section>
+
+<!-- ── STATS ── -->
+<div class="stats">
+  <div class="stat reveal">
+    <div class="num">4,328</div>
+    <div class="lbl">Leads Generated</div>
+  </div>
+  <div class="stat reveal">
+    <div class="num">$1.1M+</div>
+    <div class="lbl">Revenue Tracked</div>
+  </div>
+  <div class="stat reveal">
+    <div class="num">17+</div>
+    <div class="lbl">Industries Served</div>
+  </div>
+</div>
+
+<!-- ── WHAT WE DO ── -->
+<section>
+  <div class="section-inner">
+    <p class="section-tag reveal">What we do</p>
+    <h2 class="section-title reveal">We build the full system.</h2>
+    <p class="section-sub reveal">Not just ads. The entire machine from the first click to the closed sale.</p>
+    <div class="services-grid">
+      <div class="service-item reveal">
+        <div class="service-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        </div>
+        <h3>Meta Advertising</h3>
+        <p>Campaigns built to generate qualified leads and real sales. Not impressions. Not likes. Revenue.</p>
+      </div>
+      <div class="service-item reveal">
+        <div class="service-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3>Landing Pages</h3>
+        <p>Custom built for every campaign. Designed to continue the conversation the ad started and convert the traffic into leads.</p>
+      </div>
+      <div class="service-item reveal">
+        <div class="service-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        </div>
+        <h3>AI Agents + Automation</h3>
+        <p>Automated follow-up, lead qualification, and appointment booking. Your system works while you sleep.</p>
+      </div>
+      <div class="service-item reveal">
+        <div class="service-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+        </div>
+        <h3>Tracking + Attribution</h3>
+        <p>Every dollar you spend is tracked from the ad click to the closed deal. You will know exactly what your ads returned.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ── -->
+<section>
+  <div class="section-inner">
+    <p class="section-tag reveal">How it works</p>
+    <h2 class="section-title reveal">Three steps. That is it.</h2>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">01</div>
+        <h3>We talk</h3>
+        <p>45 minutes. We ask questions about your business, what is working, what is not. No pitch. Just clarity.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">02</div>
+        <h3>We build</h3>
+        <p>We install the system. Ads, landing pages, automations, tracking. Everything wired together.</p>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">03</div>
+        <h3>You grow</h3>
+        <p>Qualified leads come in every day. You talk to people who actually want to buy. We manage everything.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CASE STUDIES ── -->
+<section>
+  <div class="section-inner">
+    <p class="section-tag reveal">Results</p>
+    <h2 class="section-title reveal">This is not theory. This is data.</h2>
+    <p class="section-sub reveal">Real results from real clients across different industries and markets.</p>
+    <div class="cases">
+      <div class="case-card reveal">
+        <div class="case-num">$1.1M</div>
+        <div class="case-body">
+          <span class="case-tag">Lead Generation</span>
+          <h3>4,328 leads at $5.93 each</h3>
+          <p>$25,000 in ad spend returned over $1.1 million in tracked revenue. System built from scratch and running consistently.</p>
+        </div>
+      </div>
+      <div class="case-card reveal">
+        <div class="case-num">$179K</div>
+        <div class="case-body">
+          <span class="case-tag">E-Commerce</span>
+          <h3>143 conversions at 13% conversion rate</h3>
+          <p>Over $179,000 in sales generated in the first two months of launching the system.</p>
+        </div>
+      </div>
+      <div class="case-card reveal">
+        <div class="case-num">4.4x</div>
+        <div class="case-body">
+          <span class="case-tag">Small Budget</span>
+          <h3>$1,000 ad spend returned $4,500+</h3>
+          <p>Proof that the system works whether your budget is large or small. High ticket purchases at $15 per website purchase.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING (Lebanon only) ── -->
+<section class="lb-only">
+  <div class="section-inner" style="text-align:center;">
+    <p class="section-tag reveal">Investment</p>
+    <h2 class="section-title reveal" style="text-align:center;">Transparent pricing. No surprises.</h2>
+    <div class="pricing-card reveal">
+      <div class="price">$1,000</div>
+      <div class="price-sub">One-time system build</div>
+      <div class="price-then">Then $600/month for ad management + maintenance</div>
+      <ul class="pricing-list">
+        <li>Full Meta ad campaign setup</li>
+        <li>Custom landing pages</li>
+        <li>Lead automations built for you</li>
+        <li>Ad creative and copy</li>
+        <li>Monthly ad management</li>
+        <li>4-6 hours/month direct access</li>
+        <li>You own everything we build</li>
+      </ul>
+      <a href="#form" class="btn-wa" style="width:100%;justify-content:center;">Get started</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── FORM ── -->
+<section class="form-section" id="form">
+  <div class="section-inner">
+    <div class="form-wrap">
+      <p class="section-tag reveal">Get in touch</p>
+      <h2 class="section-title reveal" style="text-align:center;">Let us show you what this looks like for your business.</h2>
+      <p class="section-sub reveal" style="text-align:center;max-width:440px;margin:0 auto 36px;">Drop your WhatsApp below. We will reach out with more information and a way to book your free call.</p>
+      <form id="leadForm" class="reveal">
+        <input type="tel" name="whatsapp" id="f-whatsapp" placeholder="Your WhatsApp number" required autocomplete="tel">
+        <input type="text" name="name" id="f-name" placeholder="Your name" autocomplete="name">
+        <input type="text" name="business" id="f-business" placeholder="Your business name">
+        <select name="need" id="f-need">
+          <option value="" disabled selected>What do you need help with?</option>
+          <option value="More leads">More leads</option>
+          <option value="Better lead quality">Better lead quality</option>
+          <option value="Ecom sales">E-commerce sales</option>
+          <option value="Full ad management">Full ad management</option>
+          <option value="Website or landing pages">Website or landing pages</option>
+          <option value="Not sure yet">Not sure yet</option>
+        </select>
+        <button type="submit" class="btn-submit">Book My Free Call</button>
+      </form>
+      <div class="form-success" id="formSuccess">We got your info. We will reach out on WhatsApp shortly.</div>
+      <p class="form-note reveal">No obligations. The call is free and the information is yours to keep.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── FINAL CTA ── -->
+<div class="final-cta">
+  <h2 class="reveal">Rather just message us?</h2>
+  <p class="reveal">Tap below and start a conversation on WhatsApp. No forms, no waiting.</p>
+  <a href="https://wa.me/96179018107?text=Hey%2C%20I%20saw%20your%20ad%20and%20I%20want%20to%20learn%20more" target="_blank" class="btn-wa reveal">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    Message us on WhatsApp
+  </a>
+  <div class="response-badge reveal">
+    <span class="dot"></span> We typically reply within 5 minutes
+  </div>
+</div>
+
+<footer>MK7 Media — mk7.media</footer>
+
+<script>
+  // Scroll reveal
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }});
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // Form submission with partial save
+  const form = document.getElementById('leadForm');
+  const waInput = document.getElementById('f-whatsapp');
+  let partialSaved = false;
+
+  // Save WhatsApp on blur (partial capture)
+  waInput.addEventListener('blur', function() {
+    if (this.value.trim() && !partialSaved) {
+      partialSaved = true;
+      fetch('/api/grow/lead', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          whatsapp: this.value.trim(),
+          source_page: window.location.pathname,
+          market: '{{ market }}'
+        })
+      });
+    }
+  });
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const data = {
+      whatsapp: document.getElementById('f-whatsapp').value.trim(),
+      name: document.getElementById('f-name').value.trim(),
+      business: document.getElementById('f-business').value.trim(),
+      need: document.getElementById('f-need').value,
+      source_page: window.location.pathname,
+      market: '{{ market }}'
+    };
+
+    fetch('/api/grow/lead', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    }).then(r => r.json()).then(d => {
+      if (d.ok) {
+        form.style.display = 'none';
+        document.getElementById('formSuccess').style.display = 'block';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

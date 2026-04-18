@@ -1,0 +1,112 @@
+AVALON CRM — FULL BUILD TASK LIST
+===================================
+
+PHASE 0 — FOUNDATION (Before Any Code)
+---------------------------------------
+- Finalize tech stack decisions (Flask + SQLite vs PostgreSQL, frontend framework or server-rendered)
+- Design the full database schema (locations, users, roles, leads, contacts, conversations, messages, tasks, notes, activity log)
+- Design the multi-tenant architecture (how locations, roles, and permissions work at the data layer)
+- Design the API structure (RESTful endpoints, versioning — /api/v1/leads, /api/v1/contacts, etc.)
+- Set up new GitHub repo
+- Set up new Railway project with environment variables
+- Set up domain/subdomain (crm.lumenmarketing.co? app.avalonlaser.com? Needs decision)
+- Design the auth system (invite-only, role-based: Owner, Manager, Staff)
+
+PHASE 1 — CORE APP (Week 1)
+-----------------------------
+- Project scaffolding (Flask app, config, database init, migrations)
+- Auth system — login, session management, password reset
+- User management — invite flow, role assignment, location assignment
+- Location model — each location is a first-class entity with its own settings
+- Role-based access control middleware — every route checks role + location scope
+- Lead model — name, phone, email, source, stage, location, assigned_to, created_at
+- Lead pipeline stages — configurable per location (New > Contacted > Consultation > Booked > Won > Lost)
+- Lead CRUD — create, read, update, delete with full validation
+- Activity log — every action on a lead gets logged (stage change, note added, assignment change, message sent)
+- API layer — RESTful endpoints for all lead operations with API key auth for external consumers
+- API key management — generate, revoke, scope keys to specific locations or read-only
+
+PHASE 2 — UI (Week 1-2)
+-------------------------
+- Navigation — left sidebar, location selector, global search
+- Dashboard — KPI cards (total leads, leads by stage, conversion rate, tasks due today), filterable by location
+- Pipeline view — kanban board with drag-and-drop (SortableJS), cards show lead name, source, assigned staff, days in stage
+- Lead detail page — full profile with tabs (Overview, Communication, Notes, Tasks, Activity)
+- Lead detail: Overview tab — all lead info, inline editable, quick action buttons
+- Lead detail: Notes tab — internal team notes, timestamped, with author
+- Lead detail: Activity tab — chronological log of everything that's happened
+- Quick-create modal — add a lead from anywhere without leaving the page
+- Staff list view — see all team members, their roles, their assigned leads
+- Mobile responsive — every view works on phone (staff will use this at the front desk)
+
+PHASE 3 — COMMUNICATION / TWILIO (Week 2-3)
+---------------------------------------------
+- Twilio account setup — purchase numbers (one per location), configure webhooks
+- 10DLC brand registration — register Avalon's business with TCR (needs EIN from Reza)
+- 10DLC campaign registration — "Customer Care" use case, sample messages, approval
+- Phone number normalization — all numbers stored in E.164 format
+- Send SMS from lead profile — staff clicks "Text", types message, sends via Twilio
+- Inbound SMS webhook — receive replies, match to lead by phone number, store in conversation
+- Conversation threading — full message history displayed like iMessage (bubbles, timestamps, delivery status)
+- Delivery status webhook — track queued > sent > delivered > failed
+- Auto first-touch text — new lead comes in, auto-send welcome text (configurable template per location)
+- Opt-out handling — honor STOP/START, flag opted-out contacts, prevent sending
+- Lead detail: Communication tab — full SMS conversation history
+
+PHASE 4 — BOULEVARD INTEGRATION (Week 3)
+------------------------------------------
+- Boulevard OAuth setup — register app in Boulevard developer portal, get credentials
+- Boulevard GraphQL client — Python client for their Admin API
+- Webhook receiver — listen for Boulevard events (new client, appointment created/completed/cancelled)
+- Sync: Lead > Boulevard Client — when a lead books, push them to Boulevard as a client
+- Sync: Boulevard > CRM — appointment events update the lead's activity log and stage
+- Client matching — match Boulevard clients to CRM leads by phone/email to avoid duplicates
+- Manual sync button — "Push to Boulevard" on lead profile for edge cases
+- Sync status indicator — show on lead profile whether they exist in Boulevard and last sync time
+
+PHASE 5 — TASKS & AUTOMATION (Week 3)
+---------------------------------------
+- Task model — title, due date, assigned to, linked to lead, status (open/complete)
+- Task creation — from lead profile, from dashboard, from pipeline
+- Task dashboard — today's tasks, overdue tasks, upcoming tasks per staff member
+- Follow-up reminders — overdue tasks surface on dashboard and optionally notify via SMS/email
+- Stale lead detection — leads sitting in a stage too long get flagged visually
+- Stage-change automations — configurable rules (e.g., "When lead moves to Consultation, create task: Follow up in 3 days")
+- Assignment rules — new leads auto-assign based on location (round-robin optional later)
+
+PHASE 6 — INTERNAL MESSAGING (Week 3-4)
+-----------------------------------------
+- Internal notes on lead profiles — team-only, never patient-facing, clearly separated from SMS
+- Location message board — simple threaded messages per location (replaces WhatsApp)
+- Global announcements — owner/manager can post to all locations
+- @mentions — tag a team member on a note or message, they get notified
+- Notification system — in-app notification bell for mentions, task assignments, new leads
+
+PHASE 7 — API & INTEGRATIONS (Week 4)
+---------------------------------------
+- REST API documentation — auto-generated or manual docs for all endpoints
+- API key scoping — read-only vs. read-write, location-scoped vs. global
+- Rate limiting on API — prevent abuse from external consumers
+- Webhook system (outbound) — allow external systems to subscribe to CRM events (new lead, stage change, message received)
+- CSV export — leads, contacts, activity data exportable
+- Future-proofing: email integration endpoint (for when we add email sending)
+- Future-proofing: quotes/invoicing endpoint (for Phase 2 features)
+
+PHASE 8 — POLISH & DEPLOY (Week 4)
+------------------------------------
+- Error handling — graceful failures everywhere, user-friendly error messages
+- Loading states — skeleton screens, spinners where needed
+- Onboarding flow — first-login walkthrough for Avalon staff
+- Branding — Avalon's colors/logo as the default tenant theme, but themeable for future clients
+- Performance — query optimization, pagination on all list views, lazy loading
+- Security audit — CSRF protection, input sanitization, SQL injection prevention, API key encryption
+- Staging deploy — test environment on Railway before going live
+- Production deploy — go live, monitor, fix anything that breaks
+- Staff training session — walk Avalon's team through the platform
+
+ONGOING CONSIDERATIONS
+-----------------------
+- Database backups — automated daily backups from day one
+- Multi-tenant from the start — every query scoped by organization_id, not just location_id. Avalon is org #1. Next client is org #2. The schema supports this from day one.
+- The API is not an afterthought — it's the backbone. The UI consumes the same API that external partners would use. This means the API is always production-grade.
+- 10DLC registration has lead time — start this immediately, don't wait for the code to be ready

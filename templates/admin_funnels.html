@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Funnels — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#0a0a0f; color:#e8e8f0; padding:24px; }
+  h1 { font-size:24px; font-weight:700; margin-bottom:24px; }
+  a { color:#6128DB; text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  .nav { margin-bottom:24px; display:flex; gap:16px; font-size:13px; }
+  .funnel-list { display:flex; flex-direction:column; gap:12px; }
+  .funnel-card {
+    background:#111118; border:1px solid #1a1a25; border-radius:12px;
+    padding:24px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .funnel-info h3 { font-size:16px; font-weight:700; margin-bottom:4px; }
+  .funnel-info p { font-size:13px; color:#6b6b80; }
+  .funnel-actions { display:flex; gap:12px; align-items:center; }
+  .copy-btn {
+    padding:8px 16px; background:rgba(97,40,219,0.12); color:#6128DB;
+    border:none; border-radius:6px; font-family:inherit; font-size:12px;
+    font-weight:600; cursor:pointer;
+  }
+  .copy-btn:hover { background:rgba(97,40,219,0.2); }
+  .tag { display:inline-block; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600; margin-left:8px; }
+  .tag-lb { background:rgba(77,124,245,0.12); color:#4d7cf5; }
+  .tag-gcc { background:rgba(232,77,160,0.12); color:#e84da0; }
+  .tag-us { background:rgba(255,255,255,0.08); color:#8888a0; }
+</style>
+</head>
+<body>
+<div class="nav">
+  <a href="/admin">← Admin</a>
+  <a href="/admin/funnels">Funnels</a>
+  <a href="/admin/grow-leads">Leads</a>
+</div>
+<h1>Landing Pages</h1>
+<div class="funnel-list">
+  {% for f in funnels %}
+  <div class="funnel-card">
+    <div class="funnel-info">
+      <h3>{{ f.title }}
+        {% if 'Lebanon' in f.market %}<span class="tag tag-lb">🇱🇧 {{ f.market }}</span>
+        {% elif 'GCC' in f.market %}<span class="tag tag-gcc">🇦🇪 {{ f.market }}</span>
+        {% else %}<span class="tag tag-us">🇺🇸 {{ f.market }}</span>{% endif %}
+        {% if f.pricing %}<span class="tag" style="background:rgba(34,197,94,0.12);color:#22c55e;">Pricing</span>{% endif %}
+      </h3>
+      <p>lumenmarketing.co{{ f.url }}</p>
+    </div>
+    <div class="funnel-actions">
+      <a href="{{ f.url }}" target="_blank" style="font-size:13px;">Preview →</a>
+      <button class="copy-btn" onclick="navigator.clipboard.writeText('https://lumenmarketing.co{{ f.url }}');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy URL',1500)">Copy URL</button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+</body>
+</html>
