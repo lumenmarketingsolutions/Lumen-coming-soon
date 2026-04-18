@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Update Password — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family:'Inter',sans-serif; background:#0a0a0f; color:#e8e8f0;
+    min-height:100vh; display:flex; align-items:center; justify-content:center;
+  }
+  .card {
+    background:#111118; border:1px solid #1a1a25; border-radius:16px;
+    padding:40px; max-width:400px; width:90%; text-align:center;
+  }
+  h1 { font-size:22px; font-weight:800; margin-bottom:8px; }
+  p { font-size:14px; color:#6b6b80; margin-bottom:24px; line-height:1.6; }
+  input {
+    width:100%; padding:14px 16px; background:rgba(255,255,255,0.04);
+    border:1px solid #1a1a25; border-radius:10px; font-family:inherit;
+    font-size:15px; color:#e8e8f0; margin-bottom:12px; outline:none;
+  }
+  input:focus { border-color:#6128DB; }
+  input::placeholder { color:#44445a; }
+  button {
+    width:100%; padding:14px; background:#6128DB; color:white; border:none;
+    border-radius:10px; font-family:inherit; font-size:15px; font-weight:600;
+    cursor:pointer; margin-top:4px;
+  }
+  button:hover { background:#7c4dff; }
+  .error { color:#ef4444; font-size:13px; margin-bottom:12px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>Update Your Password</h1>
+  <p>Please set a new password to continue.</p>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <form method="POST">
+    <input type="password" name="new_password" placeholder="New password" required autofocus>
+    <button type="submit">Update Password</button>
+  </form>
+</div>
+</body>
+</html>

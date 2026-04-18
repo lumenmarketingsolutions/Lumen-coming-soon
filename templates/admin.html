@@ -142,12 +142,13 @@
   {% if not authed %}
   <div class="pin-card">
     <h1>Admin Access</h1>
-    <p>Enter your PIN to continue.</p>
-    <form class="pin-form" method="POST">
-      <input type="password" name="pin" placeholder="------" maxlength="6" autofocus required>
-      <button type="submit">Unlock</button>
+    <p>Sign in to continue.</p>
+    <form class="pin-form" method="POST" style="display:flex;flex-direction:column;gap:10px;">
+      <input type="email" name="email" placeholder="Email" autofocus required style="text-align:left;padding:14px 16px;letter-spacing:0;">
+      <input type="password" name="password" placeholder="Password" required style="text-align:left;padding:14px 16px;letter-spacing:0;">
+      <button type="submit">Sign In</button>
     </form>
-    {% if error %}<p class="pin-error">Incorrect PIN</p>{% endif %}
+    {% if error %}<p class="pin-error">Incorrect email or password</p>{% endif %}
   </div>
   {% else %}
 

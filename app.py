@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, make_response
-import os, sqlite3, datetime, uuid, json, threading, requests, csv, io, time, base64, re
+import os, sqlite3, datetime, uuid, json, threading, requests, csv, io, time, base64, re, hashlib
 from email.mime.text import MIMEText
 
 app = Flask(__name__)
@@ -390,6 +390,27 @@ def init_db():
                 con.execute(f"ALTER TABLE mk_leads ADD COLUMN {col} {dtype}")
             except Exception:
                 pass
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS admin_users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT UNIQUE NOT NULL,
+            password_hash TEXT NOT NULL,
+            role TEXT DEFAULT 'viewer',
+            must_change_password INTEGER DEFAULT 0,
+            created_at TEXT NOT NULL
+        )
+    """)
+
+    existing = con.execute("SELECT COUNT(*) FROM admin_users").fetchone()[0]
+    if existing == 0:
+        now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        k_hash = hashlib.sha256("Wifimoney420!".encode()).hexdigest()
+        m_hash = hashlib.sha256("Marykate2026".encode()).hexdigest()
+        con.execute("INSERT OR IGNORE INTO admin_users (email, password_hash, role, must_change_password, created_at) VALUES (?,?,?,?,?)",
+                    ("kendall@lumenmarketing.co", k_hash, "admin", 0, now))
+        con.execute("INSERT OR IGNORE INTO admin_users (email, password_hash, role, must_change_password, created_at) VALUES (?,?,?,?,?)",
+                    ("marykatezarehghazarian@gmail.com", m_hash, "funnels", 1, now))
+
     con.execute("""
         CREATE TABLE IF NOT EXISTS funnel_page_views (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -926,14 +947,67 @@ def track_stats():
 @app.route("/admin", methods=["GET", "POST"])
 def admin_landing():
     if request.method == "POST":
-        pin = (request.form.get("pin") or "").strip()
-        if pin == ADMIN_PIN:
-            session["wl_auth"] = True
-            return redirect(url_for("admin_landing"))
-        return render_template("admin.html", error=True, authed=False)
+        email = (request.form.get("email") or "").strip().lower()
+        password = (request.form.get("password") or request.form.get("pin") or "").strip()
+        pw_hash = hashlib.sha256(password.encode()).hexdigest()
+
+        con = sqlite3.connect(DB_PATH)
+        user = con.execute("SELECT id, email, role, must_change_password FROM admin_users WHERE email=? AND password_hash=?", (email, pw_hash)).fetchone()
+
+        if not user:
+            if password == ADMIN_PIN:
+                session["wl_auth"] = True
+                session["admin_role"] = "admin"
+                session["admin_email"] = "kendall@lumenmarketing.co"
+                con.close()
+                return redirect(url_for("admin_landing"))
+            con.close()
+            return render_template("admin.html", error=True, authed=False)
+
+        session["wl_auth"] = True
+        session["admin_role"] = user[2]
+        session["admin_email"] = user[1]
+        session["admin_user_id"] = user[0]
+        con.close()
+
+        if user[3] == 1:
+            return redirect("/admin/change-password")
+
+        if user[2] == "funnels":
+            return redirect("/admin/funnels")
+        return redirect(url_for("admin_landing"))
+
     if not session.get("wl_auth"):
         return render_template("admin.html", authed=False, error=False)
+
+    if session.get("admin_role") == "funnels":
+        return redirect("/admin/funnels")
     return render_template("admin.html", authed=True, error=False)
+
+
+@app.route("/admin/change-password", methods=["GET", "POST"])
+def admin_change_password():
+    if not session.get("wl_auth"):
+        return redirect("/admin")
+    if request.method == "POST":
+        new_pw = (request.form.get("new_password") or "").strip()
+        if len(new_pw) < 6:
+            return render_template("admin_change_pw.html", error="Password must be at least 6 characters")
+        new_hash = hashlib.sha256(new_pw.encode()).hexdigest()
+        con = sqlite3.connect(DB_PATH)
+        con.execute("UPDATE admin_users SET password_hash=?, must_change_password=0 WHERE id=?", (new_hash, session.get("admin_user_id")))
+        con.commit()
+        con.close()
+        if session.get("admin_role") == "funnels":
+            return redirect("/admin/funnels")
+        return redirect("/admin")
+    return render_template("admin_change_pw.html", error=None)
+
+
+@app.route("/admin/logout")
+def admin_logout():
+    session.clear()
+    return redirect("/admin")
 
 @app.route("/admin/coming-soon")
 def admin_coming_soon():
