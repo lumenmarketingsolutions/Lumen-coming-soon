@@ -143,14 +143,15 @@
   .tag-us { background:rgba(97,40,219,0.1); color:#7c4dff; }
 
   /* Sites section */
-  .sites-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:12px; margin-bottom:40px; }
+  .sites-grid { display:flex; flex-direction:column; gap:8px; margin-bottom:40px; }
   .site-card {
     background:#111118; border:1px solid #1a1a25; border-radius:10px;
-    padding:16px 20px; display:flex; align-items:center; justify-content:space-between;
-    gap:16px; min-height:64px;
+    padding:14px 20px; display:flex; align-items:center; justify-content:space-between;
+    gap:16px;
   }
-  .site-card h4 { font-size:13px; font-weight:600; margin-bottom:2px; white-space:nowrap; }
-  .site-card p { font-size:11px; color:#44445a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; }
+  .site-card h4 { font-size:13px; font-weight:600; margin-bottom:1px; }
+  .site-card p { font-size:11px; color:#44445a; }
+  .site-actions { display:flex; gap:6px; flex-shrink:0; }
 
   .empty { text-align:center; padding:40px; color:#44445a; font-size:14px; }
 
@@ -296,31 +297,22 @@
   </div>
   <div class="sites-grid">
     <div class="site-card" style="border-left:3px solid #6128DB;">
-      <div>
-        <h4>Home Page</h4>
-        <p>lumenmarketing.co/home</p>
-      </div>
-      <div style="display:flex;gap:6px;">
+      <div><h4>Home Page</h4><p>lumenmarketing.co/home</p></div>
+      <div class="site-actions">
         <a href="https://lumenmarketing.co/home" target="_blank" class="preview-btn">Open</a>
         <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co/home')">Copy</button>
       </div>
     </div>
     <div class="site-card" style="border-left:3px solid #6128DB;">
-      <div>
-        <h4>Services</h4>
-        <p>lumenmarketing.co/services</p>
-      </div>
-      <div style="display:flex;gap:6px;">
+      <div><h4>Services</h4><p>lumenmarketing.co/services</p></div>
+      <div class="site-actions">
         <a href="https://lumenmarketing.co/services" target="_blank" class="preview-btn">Open</a>
         <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co/services')">Copy</button>
       </div>
     </div>
     <div class="site-card" style="border-left:3px solid #6128DB;">
-      <div>
-        <h4>WhatsApp Connect</h4>
-        <p>lumenmarketing.co/whatsapp-connect</p>
-      </div>
-      <div style="display:flex;gap:6px;">
+      <div><h4>WhatsApp Connect</h4><p>lumenmarketing.co/whatsapp-connect</p></div>
+      <div class="site-actions">
         <a href="https://lumenmarketing.co/whatsapp-connect" target="_blank" class="preview-btn">Open</a>
         <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co/whatsapp-connect')">Copy</button>
       </div>
@@ -334,31 +326,22 @@
   </div>
   <div class="sites-grid">
     <div class="site-card" style="border-left:3px solid #e84da0;">
-      <div>
-        <h4>Home Page</h4>
-        <p>mk7media.com</p>
-      </div>
-      <div style="display:flex;gap:6px;">
+      <div><h4>Home Page</h4><p>mk7media.com</p></div>
+      <div class="site-actions">
         <a href="https://mk7media.com" target="_blank" class="preview-btn">Open</a>
         <button class="copy-btn" onclick="copyUrl(this, 'https://mk7media.com')">Copy</button>
       </div>
     </div>
     <div class="site-card" style="border-left:3px solid #e84da0;">
-      <div>
-        <h4>Grow — Lebanon</h4>
-        <p>mk7media.com/grow/lb</p>
-      </div>
-      <div style="display:flex;gap:6px;">
+      <div><h4>Grow — Lebanon</h4><p>mk7media.com/grow/lb</p></div>
+      <div class="site-actions">
         <a href="https://mk7media.com/grow/lb" target="_blank" class="preview-btn">Open</a>
         <button class="copy-btn" onclick="copyUrl(this, 'https://mk7media.com/grow/lb')">Copy</button>
       </div>
     </div>
     <div class="site-card" style="border-left:3px solid #e84da0;">
-      <div>
-        <h4>Grow — GCC</h4>
-        <p>mk7media.com/grow/gcc</p>
-      </div>
-      <div style="display:flex;gap:6px;">
+      <div><h4>Grow — GCC</h4><p>mk7media.com/grow/gcc</p></div>
+      <div class="site-actions">
         <a href="https://mk7media.com/grow/gcc" target="_blank" class="preview-btn">Open</a>
         <button class="copy-btn" onclick="copyUrl(this, 'https://mk7media.com/grow/gcc')">Copy</button>
       </div>
