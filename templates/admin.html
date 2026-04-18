@@ -140,15 +140,24 @@
 <body>
 <div class="container">
   {% if not authed %}
-  <div class="pin-card">
-    <h1>Admin Access</h1>
-    <p>Sign in to continue.</p>
-    <form class="pin-form" method="POST" style="display:flex;flex-direction:column;gap:10px;">
-      <input type="email" name="email" placeholder="Email" autofocus required style="text-align:left;padding:14px 16px;letter-spacing:0;">
-      <input type="password" name="password" placeholder="Password" required style="text-align:left;padding:14px 16px;letter-spacing:0;">
-      <button type="submit">Sign In</button>
+  <div class="pin-card" style="max-width:380px;padding:40px 36px;">
+    <div style="width:40px;height:40px;background:rgba(97,40,219,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 20px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6128DB" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+    </div>
+    <h1 style="font-size:22px;margin-bottom:6px;">Lumen OS</h1>
+    <p style="color:#44445a;font-size:13px;margin-bottom:28px;">Sign in to your account</p>
+    <form method="POST" autocomplete="on" style="display:flex;flex-direction:column;gap:12px;">
+      <div style="position:relative;">
+        <label style="position:absolute;top:10px;left:16px;font-size:11px;color:#44445a;font-weight:500;letter-spacing:0.5px;">EMAIL</label>
+        <input type="email" name="email" autocomplete="email" autofocus required style="text-align:left;padding:30px 16px 12px;letter-spacing:0;font-size:15px;width:100%;background:rgba(255,255,255,0.03);border:1px solid #1a1a25;border-radius:10px;color:#e8e8f0;font-family:inherit;outline:none;">
+      </div>
+      <div style="position:relative;">
+        <label style="position:absolute;top:10px;left:16px;font-size:11px;color:#44445a;font-weight:500;letter-spacing:0.5px;">PASSWORD</label>
+        <input type="password" name="password" autocomplete="current-password" required style="text-align:left;padding:30px 16px 12px;letter-spacing:0;font-size:15px;width:100%;background:rgba(255,255,255,0.03);border:1px solid #1a1a25;border-radius:10px;color:#e8e8f0;font-family:inherit;outline:none;">
+      </div>
+      <button type="submit" style="padding:14px;background:#6128DB;color:white;border:none;border-radius:10px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;">Sign In</button>
     </form>
-    {% if error %}<p class="pin-error">Incorrect email or password</p>{% endif %}
+    {% if error %}<p class="pin-error" style="margin-top:16px;font-size:13px;">Incorrect email or password</p>{% endif %}
   </div>
   {% else %}
 
