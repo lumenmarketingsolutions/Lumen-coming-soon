@@ -391,6 +391,19 @@ def init_db():
             except Exception:
                 pass
     con.execute("""
+        CREATE TABLE IF NOT EXISTS funnel_page_views (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            page TEXT NOT NULL,
+            ip TEXT DEFAULT '',
+            referrer TEXT DEFAULT '',
+            user_agent TEXT DEFAULT '',
+            device TEXT DEFAULT '',
+            time_on_page REAL DEFAULT 0,
+            created_at TEXT NOT NULL
+        )
+    """)
+
+    con.execute("""
         CREATE TABLE IF NOT EXISTS funnel_leads (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             whatsapp TEXT DEFAULT '',
@@ -2151,6 +2164,101 @@ def grow_lead_submit():
     return jsonify({"ok": True})
 
 
+@app.route("/api/grow/pageview", methods=["POST"])
+def grow_pageview():
+    data = request.get_json() or {}
+    page = (data.get("page") or "").strip()
+    time_on_page = float(data.get("time_on_page") or 0)
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    referrer = (data.get("referrer") or "")[:500]
+    ua = request.headers.get("User-Agent", "")[:500]
+    device = "mobile" if any(m in ua.lower() for m in ["iphone", "android", "mobile"]) else "desktop"
+    now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
+    if not page:
+        return jsonify({"ok": False}), 400
+
+    if ip in OWNER_IPS:
+        return jsonify({"ok": True, "skipped": True})
+
+    con = sqlite3.connect(DB_PATH)
+    if time_on_page > 0:
+        existing = con.execute("SELECT id FROM funnel_page_views WHERE ip=? AND page=? AND created_at > datetime('now','-1 hour') AND time_on_page=0 ORDER BY id DESC LIMIT 1", (ip, page)).fetchone()
+        if existing:
+            con.execute("UPDATE funnel_page_views SET time_on_page=? WHERE id=?", (time_on_page, existing[0]))
+            con.commit()
+            con.close()
+            return jsonify({"ok": True, "updated": True})
+
+    con.execute("INSERT INTO funnel_page_views (page, ip, referrer, user_agent, device, time_on_page, created_at) VALUES (?,?,?,?,?,?,?)",
+                (page, ip, referrer, ua, device, time_on_page, now))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
+
+
+@app.route("/admin/audiences")
+def admin_audiences():
+    if not session.get("wl_auth"):
+        return redirect(url_for("admin_landing"))
+    con = sqlite3.connect(DB_PATH)
+    pages = con.execute("SELECT DISTINCT page FROM funnel_page_views ORDER BY page").fetchall()
+    page_filter = request.args.get("page", "")
+    min_time = float(request.args.get("min_time", 0))
+
+    query = "SELECT ip, page, device, time_on_page, created_at FROM funnel_page_views WHERE 1=1"
+    params = []
+    if page_filter:
+        query += " AND page=?"
+        params.append(page_filter)
+    if min_time > 0:
+        query += " AND time_on_page>=?"
+        params.append(min_time)
+    query += " ORDER BY id DESC"
+    rows = con.execute(query, params).fetchall()
+
+    page_stats = {}
+    for row in con.execute("SELECT page, COUNT(*), COUNT(DISTINCT ip), AVG(CASE WHEN time_on_page>0 THEN time_on_page END) FROM funnel_page_views GROUP BY page").fetchall():
+        page_stats[row[0]] = {"views": row[1], "unique": row[2], "avg_time": round(row[3] or 0, 1)}
+
+    con.close()
+    viewers = [{"ip": r[0], "page": r[1], "device": r[2], "time": round(r[3], 1), "date": r[4][:16]} for r in rows]
+    return render_template("admin_audiences.html", viewers=viewers, pages=[p[0] for p in pages], page_filter=page_filter, min_time=min_time, page_stats=page_stats)
+
+
+@app.route("/admin/audiences/export")
+def admin_audiences_export():
+    if not session.get("wl_auth"):
+        return redirect(url_for("admin_landing"))
+    page_filter = request.args.get("page", "")
+    min_time = float(request.args.get("min_time", 0))
+    fmt = request.args.get("format", "csv")
+
+    con = sqlite3.connect(DB_PATH)
+    query = "SELECT DISTINCT ip, page, device, MAX(time_on_page) as max_time, MIN(created_at) as first_visit FROM funnel_page_views WHERE 1=1"
+    params = []
+    if page_filter:
+        query += " AND page=?"
+        params.append(page_filter)
+    if min_time > 0:
+        query += " AND time_on_page>=?"
+        params.append(min_time)
+    query += " GROUP BY ip, page ORDER BY first_visit DESC"
+    rows = con.execute(query, params).fetchall()
+    con.close()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["IP Address", "Page", "Device", "Max Time on Page", "First Visit"])
+    for r in rows:
+        writer.writerow([r[0], r[1], r[2], round(r[3], 1), r[4][:16]])
+
+    resp = make_response(output.getvalue())
+    resp.headers["Content-Type"] = "text/csv"
+    resp.headers["Content-Disposition"] = f"attachment; filename=audience_{page_filter or 'all'}_{datetime.datetime.utcnow().strftime('%Y%m%d')}.csv"
+    return resp
+
+
 @app.route("/admin/grow-leads")
 def admin_grow_leads():
     if not session.get("wl_auth"):
@@ -2169,9 +2277,12 @@ def admin_funnels():
         return redirect(url_for("admin_landing"))
 
     funnels = [
-        {"id": "lb-quality", "title": "Stop Talking to Leads Who Never Buy", "market": "Lebanon", "brand": "MK7 Media", "offer": "Lead quality system", "pricing": "$1,000 + $600/mo", "url_lumen": "/grow/lb", "url_mk7": "https://mk7media.com/grow/lb", "cta": "WhatsApp", "flag": "🇱🇧", "color": "blue"},
-        {"id": "gcc-scale", "title": "Scale Your Business with Qualified Leads", "market": "GCC/Dubai", "brand": "MK7 Media", "offer": "B2B lead gen + content creators", "pricing": "Custom", "url_lumen": "/grow/gcc", "url_mk7": "https://mk7media.com/grow/gcc", "cta": "WhatsApp", "flag": "🇦🇪", "color": "pink"},
-        {"id": "us-general", "title": "Your Ads Should Be Making You Money", "market": "America", "brand": "Lumen", "offer": "Full system install", "pricing": "Custom", "url_lumen": "/grow/us", "url_mk7": None, "cta": "Calendly", "flag": "🇺🇸", "color": "purple"},
+        {"id": "lumen-lb", "title": "Stop Talking to Leads Who Never Buy", "market": "Lebanon", "brand": "Lumen", "offer": "Lead quality system", "url": "/grow/lb", "domain": "lumenmarketing.co", "cta": "WhatsApp", "flag": "🇱🇧"},
+        {"id": "lumen-gcc", "title": "Scale Your Business with Qualified Leads", "market": "GCC/Dubai", "brand": "Lumen", "offer": "B2B lead gen", "url": "/grow/gcc", "domain": "lumenmarketing.co", "cta": "WhatsApp", "flag": "🇦🇪"},
+        {"id": "lumen-us", "title": "Your Ads Should Be Making You Money", "market": "America", "brand": "Lumen", "offer": "Full system install", "url": "/grow/us", "domain": "lumenmarketing.co", "cta": "Calendly", "flag": "🇺🇸"},
+        {"id": "mk7-lb", "title": "Stop Talking to Leads Who Never Buy", "market": "Lebanon", "brand": "MK7 Media", "offer": "Lead quality system + pricing", "url": "/grow/lb", "domain": "mk7media.com", "cta": "WhatsApp", "flag": "🇱🇧"},
+        {"id": "mk7-gcc", "title": "Scale Your Business with Qualified Leads", "market": "GCC/Dubai", "brand": "MK7 Media", "offer": "B2B lead gen + content creators", "url": "/grow/gcc", "domain": "mk7media.com", "cta": "WhatsApp", "flag": "🇦🇪"},
+        {"id": "mk7-home", "title": "Meta Ads That Deliver Qualified Buyers", "market": "All", "brand": "MK7 Media", "offer": "Main site + quiz funnel", "url": "/", "domain": "mk7media.com", "cta": "Quiz", "flag": "🌐"},
     ]
 
     con = sqlite3.connect(DB_PATH)

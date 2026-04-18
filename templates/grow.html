@@ -637,6 +637,19 @@
   }, { threshold: 0.1 });
   document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
+  // Page view tracking
+  var _pvStart = Date.now();
+  fetch('/api/grow/pageview', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({page: window.location.pathname, referrer: document.referrer})
+  });
+  window.addEventListener('beforeunload', function() {
+    var seconds = Math.round((Date.now() - _pvStart) / 1000);
+    navigator.sendBeacon('/api/grow/pageview', JSON.stringify({
+      page: window.location.pathname, time_on_page: seconds
+    }));
+  });
+
   // Form submission with partial save
   const form = document.getElementById('leadForm');
   const waInput = document.getElementById('f-whatsapp');

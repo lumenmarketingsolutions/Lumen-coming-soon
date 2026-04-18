@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audiences — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',sans-serif; background:#0a0a0f; color:#e8e8f0; }
+  .layout { display:flex; min-height:100vh; }
+
+  .sidebar {
+    width:220px; background:#0e0e16; border-right:1px solid #1a1a25;
+    padding:24px 16px; position:fixed; top:0; bottom:0; overflow-y:auto;
+  }
+  .sidebar h2 { font-size:13px; font-weight:700; color:#6128DB; letter-spacing:2px; text-transform:uppercase; margin-bottom:24px; }
+  .sidebar a {
+    display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:8px;
+    font-size:13px; font-weight:500; color:#6b6b80; text-decoration:none; margin-bottom:4px;
+  }
+  .sidebar a:hover { color:#e8e8f0; background:rgba(97,40,219,0.08); }
+  .sidebar a.active { color:#e8e8f0; background:rgba(97,40,219,0.12); font-weight:600; }
+  .sidebar .divider { height:1px; background:#1a1a25; margin:16px 0; }
+  .sidebar .section-label { font-size:10px; font-weight:600; color:#44445a; letter-spacing:2px; text-transform:uppercase; padding:0 12px; margin-bottom:8px; }
+
+  .main { margin-left:220px; flex:1; padding:32px; }
+
+  h1 { font-size:28px; font-weight:800; letter-spacing:-1px; margin-bottom:4px; }
+  .subtitle { font-size:14px; color:#6b6b80; margin-bottom:32px; }
+
+  .filters {
+    display:flex; gap:12px; align-items:center; margin-bottom:24px; flex-wrap:wrap;
+  }
+  .filters select, .filters input {
+    padding:10px 14px; background:#111118; border:1px solid #1a1a25; border-radius:8px;
+    color:#e8e8f0; font-family:inherit; font-size:13px; outline:none;
+  }
+  .filters select:focus, .filters input:focus { border-color:#6128DB; }
+  .filter-btn {
+    padding:10px 20px; background:#6128DB; color:white; border:none; border-radius:8px;
+    font-family:inherit; font-size:13px; font-weight:600; cursor:pointer;
+  }
+  .export-btn {
+    padding:10px 20px; background:rgba(34,197,94,0.12); color:#22c55e; border:none;
+    border-radius:8px; font-family:inherit; font-size:13px; font-weight:600;
+    cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:6px;
+  }
+
+  .page-stats { display:flex; gap:16px; margin-bottom:32px; flex-wrap:wrap; }
+  .ps-card {
+    background:#111118; border:1px solid #1a1a25; border-radius:12px;
+    padding:16px 20px; flex:1; min-width:180px;
+  }
+  .ps-card h4 { font-size:11px; color:#44445a; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .ps-row { display:flex; gap:20px; }
+  .ps-item .ps-val { font-size:22px; font-weight:800; color:#e8e8f0; line-height:1; }
+  .ps-item .ps-lbl { font-size:10px; color:#44445a; margin-top:2px; }
+
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th { text-align:left; padding:10px 12px; border-bottom:2px solid #1a1a25; color:#44445a; font-weight:600; font-size:11px; letter-spacing:0.5px; text-transform:uppercase; }
+  td { padding:10px 12px; border-bottom:1px solid rgba(26,26,37,0.5); }
+  tr:hover td { background:rgba(97,40,219,0.03); }
+
+  .tag { display:inline-block; padding:2px 8px; border-radius:4px; font-size:10px; font-weight:600; }
+  .tag-engaged { background:rgba(34,197,94,0.1); color:#22c55e; }
+  .tag-viewed { background:rgba(255,255,255,0.05); color:#6b6b80; }
+  .tag-mobile { background:rgba(77,124,245,0.1); color:#4d7cf5; }
+  .tag-desktop { background:rgba(255,255,255,0.05); color:#6b6b80; }
+
+  .empty { text-align:center; padding:60px; color:#44445a; }
+
+  @media (max-width:768px) {
+    .sidebar { display:none; }
+    .main { margin-left:0; padding:20px; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<div class="sidebar">
+  <h2>Ad Funnels</h2>
+  <a href="/admin" style="font-size:11px;color:#44445a;margin-bottom:8px;">← Command Center</a>
+  <div class="divider"></div>
+  <div class="section-label">Overview</div>
+  <a href="/admin/funnels">🎯 Funnels</a>
+  <a href="/admin/grow-leads">📋 Leads</a>
+  <a href="/admin/audiences" class="active">👥 Audiences</a>
+  <div class="divider"></div>
+  <div class="section-label">Lumen</div>
+  <a href="https://lumenmarketing.co/grow/lb" target="_blank">🇱🇧 Lebanon</a>
+  <a href="https://lumenmarketing.co/grow/gcc" target="_blank">🇦🇪 GCC</a>
+  <a href="https://lumenmarketing.co/grow/us" target="_blank">🇺🇸 America</a>
+  <div class="divider"></div>
+  <div class="section-label">MK7 Media</div>
+  <a href="https://mk7media.com/grow/lb" target="_blank">🇱🇧 Lebanon</a>
+  <a href="https://mk7media.com/grow/gcc" target="_blank">🇦🇪 GCC</a>
+  <a href="https://mk7media.com" target="_blank">🌐 Home</a>
+</div>
+
+<div class="main">
+
+  <h1>Audiences</h1>
+  <p class="subtitle">Page visitors segmented by engagement. Export for Meta Ads custom audiences.</p>
+
+  <!-- Per-page stats -->
+  {% if page_stats %}
+  <div class="page-stats">
+    {% for page, s in page_stats.items() %}
+    <div class="ps-card">
+      <h4>{{ page }}</h4>
+      <div class="ps-row">
+        <div class="ps-item"><div class="ps-val">{{ s.views }}</div><div class="ps-lbl">Views</div></div>
+        <div class="ps-item"><div class="ps-val">{{ s.unique }}</div><div class="ps-lbl">Unique</div></div>
+        <div class="ps-item"><div class="ps-val">{{ s.avg_time }}s</div><div class="ps-lbl">Avg Time</div></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Filters -->
+  <div class="filters">
+    <form method="GET" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+      <select name="page">
+        <option value="">All Pages</option>
+        {% for p in pages %}
+        <option value="{{ p }}" {% if p == page_filter %}selected{% endif %}>{{ p }}</option>
+        {% endfor %}
+      </select>
+      <select name="min_time">
+        <option value="0" {% if min_time == 0 %}selected{% endif %}>All Visitors</option>
+        <option value="10" {% if min_time == 10 %}selected{% endif %}>10s+ (Interested)</option>
+        <option value="30" {% if min_time == 30 %}selected{% endif %}>30s+ (Engaged)</option>
+        <option value="60" {% if min_time == 60 %}selected{% endif %}>60s+ (High Intent)</option>
+      </select>
+      <button type="submit" class="filter-btn">Filter</button>
+    </form>
+    <a href="/admin/audiences/export?page={{ page_filter }}&min_time={{ min_time }}&format=csv" class="export-btn">
+      ↓ Export CSV
+    </a>
+  </div>
+
+  <!-- Visitors table -->
+  {% if viewers %}
+  <table>
+    <thead>
+      <tr>
+        <th>IP Address</th>
+        <th>Page</th>
+        <th>Device</th>
+        <th>Time on Page</th>
+        <th>Engagement</th>
+        <th>Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for v in viewers %}
+      <tr>
+        <td style="font-family:'SF Mono',monospace;font-size:12px;">{{ v.ip }}</td>
+        <td style="font-size:12px;color:#6b6b80;">{{ v.page }}</td>
+        <td>
+          {% if v.device == 'mobile' %}<span class="tag tag-mobile">Mobile</span>
+          {% else %}<span class="tag tag-desktop">Desktop</span>{% endif %}
+        </td>
+        <td>{{ v.time }}s</td>
+        <td>
+          {% if v.time >= 30 %}<span class="tag tag-engaged">Engaged</span>
+          {% else %}<span class="tag tag-viewed">Viewed</span>{% endif %}
+        </td>
+        <td style="font-size:12px;color:#44445a;">{{ v.date }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">No page views recorded yet. Visitors will appear here as they land on your grow pages.</div>
+  {% endif %}
+
+</div>
+</div>
+</body>
+</html>

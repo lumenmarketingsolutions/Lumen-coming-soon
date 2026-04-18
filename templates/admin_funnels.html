@@ -147,9 +147,10 @@
   .site-card {
     background:#111118; border:1px solid #1a1a25; border-radius:10px;
     padding:16px 20px; display:flex; align-items:center; justify-content:space-between;
+    gap:16px; min-height:64px;
   }
-  .site-card h4 { font-size:14px; font-weight:600; margin-bottom:2px; }
-  .site-card p { font-size:12px; color:#44445a; }
+  .site-card h4 { font-size:13px; font-weight:600; margin-bottom:2px; white-space:nowrap; }
+  .site-card p { font-size:11px; color:#44445a; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:200px; }
 
   .empty { text-align:center; padding:40px; color:#44445a; font-size:14px; }
 
@@ -166,19 +167,22 @@
 
 <div class="sidebar">
   <h2>Admin</h2>
-  <a href="/admin">← Dashboard</a>
+  <a href="/admin" style="font-size:11px;color:#44445a;margin-bottom:8px;">← Command Center</a>
   <div class="divider"></div>
-  <div class="section-label">Funnels</div>
-  <a href="/admin/funnels" class="active">🎯 Ad Funnels</a>
+  <div class="section-label">Overview</div>
+  <a href="/admin/funnels" class="active">🎯 Funnels</a>
   <a href="/admin/grow-leads">📋 Leads</a>
+  <a href="/admin/audiences">👥 Audiences</a>
   <div class="divider"></div>
-  <div class="section-label">Sites</div>
-  <a href="https://lumenmarketing.co" target="_blank">🌐 Lumen</a>
-  <a href="https://mk7media.com" target="_blank">🌐 MK7 Media</a>
+  <div class="section-label">Lumen</div>
+  <a href="https://lumenmarketing.co/grow/lb" target="_blank">🇱🇧 Lebanon</a>
+  <a href="https://lumenmarketing.co/grow/gcc" target="_blank">🇦🇪 GCC</a>
+  <a href="https://lumenmarketing.co/grow/us" target="_blank">🇺🇸 America</a>
   <div class="divider"></div>
-  <div class="section-label">Tools</div>
-  <a href="/admin/coming-soon">📧 Waitlist</a>
-  <a href="/admin/main-site">📊 Site Analytics</a>
+  <div class="section-label">MK7 Media</div>
+  <a href="https://mk7media.com/grow/lb" target="_blank">🇱🇧 Lebanon</a>
+  <a href="https://mk7media.com/grow/gcc" target="_blank">🇦🇪 GCC</a>
+  <a href="https://mk7media.com" target="_blank">🌐 Home</a>
 </div>
 
 <div class="main">
@@ -217,8 +221,8 @@
 
   <!-- Lumen Pages -->
   <div class="section-title" style="color:#7c4dff;">
-    <span style="display:inline-block;width:8px;height:8px;background:#6128DB;border-radius:50;margin-right:4px;"></span>
-    Lumen Marketing <span class="badge">America</span>
+    <span style="display:inline-block;width:8px;height:8px;background:#6128DB;border-radius:50%;margin-right:4px;"></span>
+    Lumen Marketing
   </div>
 
   <div class="funnel-grid">
@@ -227,22 +231,20 @@
     <div class="funnel-card brand-lumen">
       <div class="fc-header">
         <span class="fc-flag">{{ f.flag }}</span>
-        <span class="fc-brand lumen">{{ f.brand }}</span>
+        <span class="fc-brand lumen">{{ f.market }}</span>
       </div>
       <div class="fc-body">
         <div class="fc-title">{{ f.title }}</div>
         <div class="fc-offer">{{ f.offer }}</div>
         <div class="fc-meta">
-          <div class="fc-meta-item">Market: <span>{{ f.market }}</span></div>
           <div class="fc-meta-item">CTA: <span>{{ f.cta }}</span></div>
-          <div class="fc-meta-item">Pricing: <span>{{ f.pricing }}</span></div>
         </div>
         <div class="fc-urls">
           <div class="fc-url-row">
-            <code>lumenmarketing.co{{ f.url_lumen }}</code>
+            <code>{{ f.domain }}{{ f.url }}</code>
             <div style="display:flex;gap:6px;">
-              <a href="{{ f.url_lumen }}" target="_blank" class="preview-btn">Preview</a>
-              <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co{{ f.url_lumen }}')">Copy</button>
+              <a href="https://{{ f.domain }}{{ f.url }}" target="_blank" class="preview-btn">Open</a>
+              <button class="copy-btn" onclick="copyUrl(this, 'https://{{ f.domain }}{{ f.url }}')">Copy</button>
             </div>
           </div>
         </div>
@@ -255,40 +257,29 @@
   <!-- MK7 Pages -->
   <div class="section-title" style="color:#e84da0;margin-top:40px;">
     <span style="display:inline-block;width:8px;height:8px;background:#e84da0;border-radius:50%;margin-right:4px;"></span>
-    MK7 Media <span class="badge" style="background:rgba(232,77,160,0.12);color:#e84da0;">Lebanon + GCC</span>
+    MK7 Media
   </div>
 
   <div class="funnel-grid">
     {% for f in funnels %}
-    {% if f.brand != 'Lumen' %}
+    {% if f.brand == 'MK7 Media' %}
     <div class="funnel-card brand-mk7">
       <div class="fc-header">
         <span class="fc-flag">{{ f.flag }}</span>
-        <span class="fc-brand mk7">{{ f.brand }}</span>
+        <span class="fc-brand mk7">{{ f.market }}</span>
       </div>
       <div class="fc-body">
         <div class="fc-title">{{ f.title }}</div>
         <div class="fc-offer">{{ f.offer }}</div>
         <div class="fc-meta">
-          <div class="fc-meta-item">Market: <span>{{ f.market }}</span></div>
           <div class="fc-meta-item">CTA: <span>{{ f.cta }}</span></div>
-          <div class="fc-meta-item">Pricing: <span>{{ f.pricing }}</span></div>
         </div>
         <div class="fc-urls">
-          {% if f.url_mk7 %}
           <div class="fc-url-row">
-            <code>mk7media.com{{ f.url_mk7.replace('https://mk7media.com','') }}</code>
+            <code>{{ f.domain }}{{ f.url }}</code>
             <div style="display:flex;gap:6px;">
-              <a href="{{ f.url_mk7 }}" target="_blank" class="preview-btn">Preview</a>
-              <button class="copy-btn" onclick="copyUrl(this, '{{ f.url_mk7 }}')">Copy</button>
-            </div>
-          </div>
-          {% endif %}
-          <div class="fc-url-row">
-            <code>lumenmarketing.co{{ f.url_lumen }}</code>
-            <div style="display:flex;gap:6px;">
-              <a href="{{ f.url_lumen }}" target="_blank" class="preview-btn">Preview</a>
-              <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co{{ f.url_lumen }}')">Copy</button>
+              <a href="https://{{ f.domain }}{{ f.url }}" target="_blank" class="preview-btn">Open</a>
+              <button class="copy-btn" onclick="copyUrl(this, 'https://{{ f.domain }}{{ f.url }}')">Copy</button>
             </div>
           </div>
         </div>
