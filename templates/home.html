@@ -6,17 +6,17 @@
   <meta name="theme-color" content="#0a0a0f">
   <title>Lumen</title>
   <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
-  <meta name="description" content="The source of truth for your marketing. We build systems that turn your ad spend into a machine you can trust.">
+  <meta name="description" content="Ads that bring leads. Systems that close them. We build your full marketing system in 10 days. Based in America.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://lumenmarketing.co">
   <meta property="og:title" content="Lumen Marketing">
-  <meta property="og:description" content="The source of truth for your marketing.">
+  <meta property="og:description" content="Ads that bring leads. Systems that close them. Built in 10 days.">
   <meta property="og:image" content="https://lumenmarketing.co/static/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Lumen Marketing">
-  <meta name="twitter:description" content="The source of truth for your marketing.">
+  <meta name="twitter:description" content="Ads that bring leads. Systems that close them. Built in 10 days.">
   <meta name="twitter:image" content="https://lumenmarketing.co/static/og-image.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -160,14 +160,20 @@
     }
 
     .hero-label {
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 600;
-      letter-spacing: 4px;
+      letter-spacing: 2px;
       text-transform: uppercase;
-      color: var(--purple-light);
+      color: var(--text-muted);
       margin-bottom: 28px;
       opacity: 0;
       animation: fadeUp 1s ease 0.2s forwards;
+    }
+
+    .hero-label .pin {
+      display: inline-block;
+      margin-left: 4px;
+      transform: translateY(1px);
     }
 
     .hero-headline {
@@ -982,7 +988,7 @@
       <a href="#process">Process</a>
       <a href="/about">About</a>
       <a href="/funnel" class="nav-funnel">LumenFunnel</a>
-      <a href="https://calendly.com/lumenmarketingco/lumen" target="_blank" class="nav-cta">Book a Call</a>
+      <a href="https://calendly.com/lumenmarketingco/lumen" target="_blank" class="nav-cta">See if you qualify</a>
     </div>
     <button class="nav-menu-btn" onclick="toggleMobileMenu()">
       <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -998,7 +1004,7 @@
     <a href="#process" onclick="toggleMobileMenu()">Process</a>
     <a href="/about" onclick="toggleMobileMenu()">About</a>
     <a href="/funnel" onclick="toggleMobileMenu()" class="nav-funnel">LumenFunnel</a>
-    <a href="https://calendly.com/lumenmarketingco/lumen" target="_blank" class="btn-primary" onclick="toggleMobileMenu()" style="margin-top:8px;">Book a Call</a>
+    <a href="https://calendly.com/lumenmarketingco/lumen" target="_blank" class="btn-primary" onclick="toggleMobileMenu()" style="margin-top:8px;">See if you qualify</a>
   </div>
 
   <!-- ════════════════════════════════════════
@@ -1006,15 +1012,15 @@
   ════════════════════════════════════════ -->
   <section class="hero">
     <div class="hero-content">
-      <p class="hero-label">Lumen Marketing Solutions</p>
+      <p class="hero-label">Based in America <span class="pin">&#128205;</span></p>
       <h1 class="hero-headline">
-        The source of truth<br>for <em>your marketing</em>
+        Ads that bring leads.<br><em>Systems that close them.</em>
       </h1>
       <p class="hero-sub">
-        We study how your customers think, and build the system that turns that into results.
+        We build your full marketing system in 10 days. Ads, landing pages, CRM, automated follow-up, and revenue tracked from click to closed sale.
       </p>
       <div class="hero-cta-wrap">
-        <a href="https://calendly.com/lumenmarketingco/lumen" target="_blank" class="btn-primary">Book a Free Call</a>
+        <a href="https://calendly.com/lumenmarketingco/lumen" target="_blank" class="btn-primary">See if you qualify</a>
         <a href="#punch" class="btn-ghost">See Our Results</a>
       </div>
     </div>
@@ -1263,7 +1269,7 @@
       <p class="cta-detail reveal">You will leave the call knowing more than you did.</p>
       <div class="reveal">
         <a href="https://calendly.com/lumenmarketingco/lumen" target="_blank" class="btn-primary" style="font-size:16px; padding:18px 40px;">
-          Book Your Free Call
+          See if you qualify
         </a>
       </div>
     </div>
