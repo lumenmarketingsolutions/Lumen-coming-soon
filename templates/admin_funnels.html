@@ -80,6 +80,8 @@
     padding:0; overflow:hidden; transition:border-color 0.2s;
   }
   .funnel-card:hover { border-color:rgba(97,40,219,0.3); }
+  .funnel-card.brand-lumen { border-left:3px solid #6128DB; }
+  .funnel-card.brand-mk7 { border-left:3px solid #e84da0; }
 
   .fc-header {
     padding:20px 24px 16px; border-bottom:1px solid #1a1a25;
@@ -213,15 +215,19 @@
     <div class="market-pill">🇺🇸 America <span class="mp-count">{{ stats.by_market.get('us', 0) }}</span></div>
   </div>
 
-  <!-- Landing Pages -->
-  <div class="section-title">Landing Pages <span class="badge">{{ funnels|length }} funnels</span></div>
+  <!-- Lumen Pages -->
+  <div class="section-title" style="color:#7c4dff;">
+    <span style="display:inline-block;width:8px;height:8px;background:#6128DB;border-radius:50;margin-right:4px;"></span>
+    Lumen Marketing <span class="badge">America</span>
+  </div>
 
   <div class="funnel-grid">
     {% for f in funnels %}
-    <div class="funnel-card">
+    {% if f.brand == 'Lumen' %}
+    <div class="funnel-card brand-lumen">
       <div class="fc-header">
         <span class="fc-flag">{{ f.flag }}</span>
-        <span class="fc-brand {% if f.brand == 'Lumen' %}lumen{% else %}mk7{% endif %}">{{ f.brand }}</span>
+        <span class="fc-brand lumen">{{ f.brand }}</span>
       </div>
       <div class="fc-body">
         <div class="fc-title">{{ f.title }}</div>
@@ -239,6 +245,36 @@
               <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co{{ f.url_lumen }}')">Copy</button>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- MK7 Pages -->
+  <div class="section-title" style="color:#e84da0;margin-top:40px;">
+    <span style="display:inline-block;width:8px;height:8px;background:#e84da0;border-radius:50%;margin-right:4px;"></span>
+    MK7 Media <span class="badge" style="background:rgba(232,77,160,0.12);color:#e84da0;">Lebanon + GCC</span>
+  </div>
+
+  <div class="funnel-grid">
+    {% for f in funnels %}
+    {% if f.brand != 'Lumen' %}
+    <div class="funnel-card brand-mk7">
+      <div class="fc-header">
+        <span class="fc-flag">{{ f.flag }}</span>
+        <span class="fc-brand mk7">{{ f.brand }}</span>
+      </div>
+      <div class="fc-body">
+        <div class="fc-title">{{ f.title }}</div>
+        <div class="fc-offer">{{ f.offer }}</div>
+        <div class="fc-meta">
+          <div class="fc-meta-item">Market: <span>{{ f.market }}</span></div>
+          <div class="fc-meta-item">CTA: <span>{{ f.cta }}</span></div>
+          <div class="fc-meta-item">Pricing: <span>{{ f.pricing }}</span></div>
+        </div>
+        <div class="fc-urls">
           {% if f.url_mk7 %}
           <div class="fc-url-row">
             <code>mk7media.com{{ f.url_mk7.replace('https://mk7media.com','') }}</code>
@@ -248,58 +284,39 @@
             </div>
           </div>
           {% endif %}
+          <div class="fc-url-row">
+            <code>lumenmarketing.co{{ f.url_lumen }}</code>
+            <div style="display:flex;gap:6px;">
+              <a href="{{ f.url_lumen }}" target="_blank" class="preview-btn">Preview</a>
+              <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co{{ f.url_lumen }}')">Copy</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+    {% endif %}
     {% endfor %}
   </div>
 
-  <!-- Live Sites -->
-  <div class="section-title">Live Sites</div>
+  <!-- Lumen Sites -->
+  <div class="section-title" style="margin-top:40px;color:#7c4dff;">
+    <span style="display:inline-block;width:8px;height:8px;background:#6128DB;border-radius:50%;margin-right:4px;"></span>
+    Lumen Sites
+  </div>
   <div class="sites-grid">
-    <div class="site-card">
+    <div class="site-card" style="border-left:3px solid #6128DB;">
       <div>
-        <h4>Lumen Marketing</h4>
-        <p>lumenmarketing.co</p>
-      </div>
-      <div style="display:flex;gap:6px;">
-        <a href="https://lumenmarketing.co" target="_blank" class="preview-btn">Open</a>
-        <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co')">Copy</button>
-      </div>
-    </div>
-    <div class="site-card">
-      <div>
-        <h4>MK7 Media</h4>
-        <p>mk7media.com</p>
-      </div>
-      <div style="display:flex;gap:6px;">
-        <a href="https://mk7media.com" target="_blank" class="preview-btn">Open</a>
-        <button class="copy-btn" onclick="copyUrl(this, 'https://mk7media.com')">Copy</button>
-      </div>
-    </div>
-    <div class="site-card">
-      <div>
-        <h4>MK7 — Home Page</h4>
-        <p>mk7media.com (main site + quiz)</p>
-      </div>
-      <div style="display:flex;gap:6px;">
-        <a href="https://mk7media.com" target="_blank" class="preview-btn">Open</a>
-        <button class="copy-btn" onclick="copyUrl(this, 'https://mk7media.com')">Copy</button>
-      </div>
-    </div>
-    <div class="site-card">
-      <div>
-        <h4>Lumen — Home Page</h4>
-        <p>lumenmarketing.co (main site)</p>
+        <h4>Home Page</h4>
+        <p>lumenmarketing.co/home</p>
       </div>
       <div style="display:flex;gap:6px;">
         <a href="https://lumenmarketing.co/home" target="_blank" class="preview-btn">Open</a>
         <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co/home')">Copy</button>
       </div>
     </div>
-    <div class="site-card">
+    <div class="site-card" style="border-left:3px solid #6128DB;">
       <div>
-        <h4>Lumen — Services</h4>
+        <h4>Services</h4>
         <p>lumenmarketing.co/services</p>
       </div>
       <div style="display:flex;gap:6px;">
@@ -307,7 +324,7 @@
         <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co/services')">Copy</button>
       </div>
     </div>
-    <div class="site-card">
+    <div class="site-card" style="border-left:3px solid #6128DB;">
       <div>
         <h4>WhatsApp Connect</h4>
         <p>lumenmarketing.co/whatsapp-connect</p>
@@ -315,6 +332,44 @@
       <div style="display:flex;gap:6px;">
         <a href="https://lumenmarketing.co/whatsapp-connect" target="_blank" class="preview-btn">Open</a>
         <button class="copy-btn" onclick="copyUrl(this, 'https://lumenmarketing.co/whatsapp-connect')">Copy</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MK7 Sites -->
+  <div class="section-title" style="margin-top:32px;color:#e84da0;">
+    <span style="display:inline-block;width:8px;height:8px;background:#e84da0;border-radius:50%;margin-right:4px;"></span>
+    MK7 Media Sites
+  </div>
+  <div class="sites-grid">
+    <div class="site-card" style="border-left:3px solid #e84da0;">
+      <div>
+        <h4>Home Page</h4>
+        <p>mk7media.com</p>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <a href="https://mk7media.com" target="_blank" class="preview-btn">Open</a>
+        <button class="copy-btn" onclick="copyUrl(this, 'https://mk7media.com')">Copy</button>
+      </div>
+    </div>
+    <div class="site-card" style="border-left:3px solid #e84da0;">
+      <div>
+        <h4>Grow — Lebanon</h4>
+        <p>mk7media.com/grow/lb</p>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <a href="https://mk7media.com/grow/lb" target="_blank" class="preview-btn">Open</a>
+        <button class="copy-btn" onclick="copyUrl(this, 'https://mk7media.com/grow/lb')">Copy</button>
+      </div>
+    </div>
+    <div class="site-card" style="border-left:3px solid #e84da0;">
+      <div>
+        <h4>Grow — GCC</h4>
+        <p>mk7media.com/grow/gcc</p>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <a href="https://mk7media.com/grow/gcc" target="_blank" class="preview-btn">Open</a>
+        <button class="copy-btn" onclick="copyUrl(this, 'https://mk7media.com/grow/gcc')">Copy</button>
       </div>
     </div>
   </div>
