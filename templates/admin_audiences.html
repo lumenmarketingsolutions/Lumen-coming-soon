@@ -98,7 +98,7 @@
   <div class="page-stats">
     {% for page, s in page_stats.items() %}
     <div class="ps-card">
-      <h4>{{ page }}</h4>
+      <h4>{% if page.startswith('mk7') %}MK7 — {{ page.replace('mk7','') }}{% else %}Lumen — {{ page }}{% endif %}</h4>
       <div class="ps-row">
         <div class="ps-item"><div class="ps-val">{{ s.views }}</div><div class="ps-lbl">Views</div></div>
         <div class="ps-item"><div class="ps-val">{{ s.unique }}</div><div class="ps-lbl">Unique</div></div>
@@ -115,7 +115,9 @@
       <select name="page">
         <option value="">All Pages</option>
         {% for p in pages %}
-        <option value="{{ p }}" {% if p == page_filter %}selected{% endif %}>{{ p }}</option>
+        <option value="{{ p }}" {% if p == page_filter %}selected{% endif %}>
+          {% if p.startswith('mk7') %}MK7 — {{ p.replace('mk7','') }}{% else %}Lumen — {{ p }}{% endif %}
+        </option>
         {% endfor %}
       </select>
       <select name="min_time">
@@ -148,7 +150,7 @@
       {% for v in viewers %}
       <tr>
         <td style="font-family:'SF Mono',monospace;font-size:12px;">{{ v.ip }}</td>
-        <td style="font-size:12px;color:#6b6b80;">{{ v.page }}</td>
+        <td style="font-size:12px;color:#6b6b80;">{% if v.page.startswith('mk7') %}<span style="color:#e84da0;font-weight:600;">MK7</span> {{ v.page.replace('mk7','') }}{% else %}<span style="color:#7c4dff;font-weight:600;">Lumen</span> {{ v.page }}{% endif %}</td>
         <td>
           {% if v.device == 'mobile' %}<span class="tag tag-mobile">Mobile</span>
           {% else %}<span class="tag tag-desktop">Desktop</span>{% endif %}
