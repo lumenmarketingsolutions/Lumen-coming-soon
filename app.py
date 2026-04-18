@@ -2065,6 +2065,11 @@ def mk_campaign_detail(campaign_id):
         campaign=campaign, logs=logs)
 
 
+@app.route("/whatsapp-connect")
+def whatsapp_connect_page():
+    return render_template("whatsapp_connect.html")
+
+
 @app.route("/marykate/whatsapp")
 @mk_auth_required
 def mk_whatsapp_page():
