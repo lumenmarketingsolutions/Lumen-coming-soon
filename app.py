@@ -2070,6 +2070,11 @@ def whatsapp_connect_page():
     return render_template("whatsapp_connect.html")
 
 
+@app.route("/privacy")
+def privacy_policy():
+    return render_template("privacy.html")
+
+
 @app.route("/marykate/whatsapp")
 @mk_auth_required
 def mk_whatsapp_page():
