@@ -144,14 +144,15 @@
     margin-top: 40px;
   }
   .cart-hero .big {
-    font-size: clamp(72px, 14vw, 150px);
+    font-size: clamp(44px, 11vw, 150px);
     font-weight: 800;
-    letter-spacing: -5px;
+    letter-spacing: -3px;
     line-height: 1;
     background: linear-gradient(135deg, #ffffff 0%, var(--purple-light) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     margin-bottom: 20px;
+    overflow-wrap: anywhere;
   }
   .cart-hero .desc {
     font-size: 18px;
@@ -614,7 +615,15 @@
 
   @media (max-width: 720px) {
     .included, .options-grid, .timeline-nodes, .cart-flow, .examples-row, .tiers { grid-template-columns: 1fr; }
-    .cart-hero, .how-block, .price-card, .examples, .guarantee, .confidence { padding: 28px 24px; }
+    .cart-hero, .how-block, .price-card, .examples, .guarantee, .confidence { padding: 28px 20px; }
+    .cart-hero .big { font-size: 56px; letter-spacing: -1.5px; }
+    .cart-hero .desc { font-size: 16px; }
+    .timeline-nodes { gap: 20px; }
+    .node { padding: 24px 20px; }
+    h1 { font-size: clamp(40px, 11vw, 60px); letter-spacing: -1.5px; }
+    h2 { font-size: clamp(30px, 8vw, 44px); letter-spacing: -1px; }
+    .container { padding: 0 20px; }
+    section { padding: 60px 0; }
   }
 </style>
 </head>
