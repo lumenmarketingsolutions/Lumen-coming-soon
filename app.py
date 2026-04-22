@@ -2172,6 +2172,11 @@ def whatsapp_connect_page():
     return render_template("whatsapp_connect.html")
 
 
+@app.route("/natew/sce")
+def natew_sce():
+    return render_template("sce_build.html")
+
+
 # ── Grow / Landing Pages ──
 
 @app.route("/grow")
