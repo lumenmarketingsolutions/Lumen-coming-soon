@@ -515,9 +515,19 @@
     margin-top: 56px;
     padding: 0 20px;
   }
+  .timeline-nodes {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    position: relative;
+  }
+  /* Horizontal line is a pseudo-element on the nodes grid.
+     Its top is locked to the dot's vertical center: when-height (16px)
+     + when-margin-bottom (14px) + dot-margin-top (14px) + dot-radius (10px) - line-half (1px) = 53px
+     We keep .when at a fixed height so the math can't drift with font rendering. */
   .timeline-line {
     position: absolute;
-    top: 52px;
+    top: 53px;
     left: 10%;
     right: 10%;
     height: 2px;
@@ -525,32 +535,28 @@
     opacity: 0.5;
     z-index: 0;
   }
-  .timeline-nodes {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 20px;
-    position: relative;
-  }
   .node {
     text-align: center;
+  }
+  .node .when {
+    height: 16px;
+    line-height: 16px;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--purple-light);
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 14px;
   }
   .node .dot {
     width: 20px;
     height: 20px;
     border-radius: 50%;
     background: var(--purple);
-    margin: 16px auto 24px;
+    margin: 14px auto 24px;
     box-shadow: 0 0 24px var(--purple), 0 0 0 6px rgba(97,40,219,0.15);
     position: relative;
     z-index: 1;
-  }
-  .node .when {
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: var(--purple-light);
-    font-weight: 700;
-    text-transform: uppercase;
-    margin-bottom: 10px;
   }
   .node .title {
     font-size: 16px;
