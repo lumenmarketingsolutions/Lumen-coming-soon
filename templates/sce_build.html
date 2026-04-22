@@ -521,20 +521,6 @@
     gap: 20px;
     position: relative;
   }
-  /* Horizontal line is a pseudo-element on the nodes grid.
-     Its top is locked to the dot's vertical center: when-height (16px)
-     + when-margin-bottom (14px) + dot-margin-top (14px) + dot-radius (10px) - line-half (1px) = 53px
-     We keep .when at a fixed height so the math can't drift with font rendering. */
-  .timeline-line {
-    position: absolute;
-    top: 53px;
-    left: 10%;
-    right: 10%;
-    height: 2px;
-    background: linear-gradient(90deg, var(--purple) 0%, var(--purple-light) 50%, var(--purple) 100%);
-    opacity: 0.5;
-    z-index: 0;
-  }
   .node {
     text-align: center;
   }
@@ -616,7 +602,6 @@
 
   @media (max-width: 720px) {
     .included, .options-grid, .timeline-nodes, .cart-flow, .examples-row, .tiers { grid-template-columns: 1fr; }
-    .timeline-line { display: none; }
     .cart-hero, .how-block, .price-card, .examples, .guarantee, .confidence { padding: 28px 24px; }
   }
 </style>
@@ -843,7 +828,6 @@
     <p class="lead reveal">We run it tight for 60 days. See what the system produces with the market we have. Then we iterate into summer based on what the data says.</p>
 
     <div class="timeline reveal">
-      <div class="timeline-line"></div>
       <div class="timeline-nodes">
         <div class="node">
           <div class="when">Week 1</div>
