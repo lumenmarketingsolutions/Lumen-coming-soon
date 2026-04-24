@@ -24,6 +24,17 @@ FATHOM_WEBHOOK_SECRET = os.environ.get("FATHOM_WEBHOOK_SECRET", "")
 CLICKUP_TOKEN = os.environ.get("CLICKUP_TOKEN", "")
 CLICKUP_API = "https://api.clickup.com/api/v2"
 
+# Resend for the internal call-summary email. Uses existing RESEND_API_KEY.
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+
+# Internal recipients for the per-call summary. Hardcoded so client attendees
+# can never be cc'd by accident — Fathom's "share to attendees" sends to
+# everyone including the client, which is exactly what we're avoiding.
+TEAM_RECIPIENTS = [
+    "kendall@lumenmarketing.co",
+    "marykatezarehghazarian@gmail.com",
+]
+
 REPLAY_WINDOW_SECONDS = 5 * 60
 
 # Client match rules. Order matters — first match wins.
@@ -272,6 +283,171 @@ def log_to_clickup(payload: dict):
     )
 
 
+def _html_escape(s: str) -> str:
+    return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
+
+def _md_to_html(md: str) -> str:
+    """Minimal markdown → HTML for Fathom summaries (headings, bullets, bold, line breaks).
+    Fathom summaries are constrained enough that a heavy parser isn't worth the dep.
+    """
+    if not md:
+        return "<p><em>No summary returned by Fathom.</em></p>"
+    out = []
+    in_list = False
+    for raw_line in md.splitlines():
+        line = raw_line.rstrip()
+        if not line.strip():
+            if in_list:
+                out.append("</ul>"); in_list = False
+            continue
+        # Headings
+        if line.startswith("### "):
+            if in_list: out.append("</ul>"); in_list = False
+            out.append(f"<h4 style=\"margin:22px 0 8px;font-size:14px;color:#222;\">{_html_escape(line[4:])}</h4>")
+            continue
+        if line.startswith("## "):
+            if in_list: out.append("</ul>"); in_list = False
+            out.append(f"<h3 style=\"margin:24px 0 10px;font-size:16px;color:#111;\">{_html_escape(line[3:])}</h3>")
+            continue
+        if line.startswith("# "):
+            if in_list: out.append("</ul>"); in_list = False
+            out.append(f"<h2 style=\"margin:24px 0 10px;font-size:18px;color:#111;\">{_html_escape(line[2:])}</h2>")
+            continue
+        # Bullets
+        if line.lstrip().startswith(("- ", "* ")):
+            if not in_list:
+                out.append("<ul style=\"margin:8px 0;padding-left:20px;color:#333;line-height:1.55;\">"); in_list = True
+            text = line.lstrip()[2:]
+            # Bold
+            text = _html_escape(text)
+            while "**" in text:
+                text = text.replace("**", "<strong>", 1)
+                if "**" in text:
+                    text = text.replace("**", "</strong>", 1)
+            out.append(f"<li>{text}</li>")
+            continue
+        # Paragraph
+        if in_list: out.append("</ul>"); in_list = False
+        text = _html_escape(line)
+        while "**" in text:
+            text = text.replace("**", "<strong>", 1)
+            if "**" in text:
+                text = text.replace("**", "</strong>", 1)
+        out.append(f"<p style=\"margin:10px 0;color:#333;line-height:1.6;\">{text}</p>")
+    if in_list:
+        out.append("</ul>")
+    return "\n".join(out)
+
+
+def _fmt_attendees_html(invitees) -> str:
+    if not invitees:
+        return '<p style="margin:0;color:#888;">No attendees listed.</p>'
+    rows = []
+    for i in invitees:
+        name = _html_escape(i.get("name") or "")
+        email = _html_escape(i.get("email") or "")
+        ext = ' <span style="color:#b08258;font-size:12px;font-weight:500;">(external)</span>' if i.get("is_external") else ''
+        rows.append(
+            f'<tr><td style="padding:4px 0;color:#333;">{name}</td>'
+            f'<td style="padding:4px 0 4px 12px;color:#666;font-size:13px;">{email}{ext}</td></tr>'
+        )
+    return f'<table style="width:100%;border-collapse:collapse;">{"".join(rows)}</table>'
+
+
+def _fmt_action_items_html(items) -> str:
+    if not items:
+        return '<p style="margin:0;color:#888;">No action items captured.</p>'
+    rows = []
+    for a in items:
+        desc = _html_escape(a.get("description") or "Action item")
+        assignee = _html_escape((a.get("assignee") or {}).get("email") or "unassigned")
+        playback = a.get("recording_playback_url") or ""
+        link_html = f' <a href="{_html_escape(playback)}" style="color:#26CC7A;text-decoration:none;font-size:12px;">↗ jump to moment</a>' if playback else ''
+        rows.append(
+            f'<li style="margin-bottom:8px;color:#333;line-height:1.5;">'
+            f'{desc}<div style="font-size:12px;color:#888;margin-top:2px;">'
+            f'{assignee}{link_html}</div></li>'
+        )
+    return f'<ul style="margin:0;padding-left:20px;">{"".join(rows)}</ul>'
+
+
+def send_team_summary_email(payload: dict):
+    """Send an internal-only summary email to the Lumen team after each call.
+
+    Fathom's own "send to attendees" feature cc's the client, which is not
+    what we want for internal debriefs. This sends the same breakdown to a
+    hardcoded internal list instead.
+    """
+    if not RESEND_API_KEY:
+        print("[fathom] RESEND_API_KEY unset — skipping team summary email")
+        return
+
+    title = payload.get("meeting_title") or payload.get("title") or "Untitled call"
+    started = payload.get("recording_start_time") or payload.get("created_at") or ""
+    date_display = started[:16].replace("T", " ") + " UTC" if started else "Unknown time"
+    share_url = payload.get("share_url") or payload.get("url") or ""
+    summary_md = ((payload.get("default_summary") or {}).get("markdown_formatted") or "").strip()
+    invitees = payload.get("calendar_invitees") or []
+    action_items = payload.get("action_items") or []
+
+    match = match_client(payload)
+    client_badge = f'<span style="display:inline-block;padding:3px 10px;background:#e8f9f0;color:#1da563;border-radius:6px;font-size:11px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;">{_html_escape(match["name"])}</span>' if match else '<span style="display:inline-block;padding:3px 10px;background:#f5f5f5;color:#888;border-radius:6px;font-size:11px;font-weight:600;letter-spacing:0.5px;text-transform:uppercase;">Internal</span>'
+
+    watch_button = f'<a href="{_html_escape(share_url)}" style="display:inline-block;padding:12px 24px;background:#111;color:#fff;text-decoration:none;border-radius:8px;font-weight:600;font-size:14px;">Watch the recording →</a>' if share_url else ''
+
+    html = f"""
+<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:640px;margin:0 auto;padding:32px 24px;background:#ffffff;color:#1a1a1a;">
+  <div style="margin-bottom:20px;">{client_badge}</div>
+  <h1 style="margin:0 0 6px;font-size:22px;color:#111;line-height:1.3;">{_html_escape(title)}</h1>
+  <p style="margin:0 0 24px;color:#888;font-size:13px;">{_html_escape(date_display)}</p>
+
+  {('<div style="margin-bottom:28px;">' + watch_button + '</div>') if watch_button else ''}
+
+  <div style="padding:20px 0;border-top:1px solid #eee;">
+    <h3 style="margin:0 0 12px;font-size:15px;color:#111;text-transform:uppercase;letter-spacing:0.8px;">Summary</h3>
+    {_md_to_html(summary_md)}
+  </div>
+
+  <div style="padding:20px 0;border-top:1px solid #eee;">
+    <h3 style="margin:0 0 12px;font-size:15px;color:#111;text-transform:uppercase;letter-spacing:0.8px;">Action items</h3>
+    {_fmt_action_items_html(action_items)}
+  </div>
+
+  <div style="padding:20px 0;border-top:1px solid #eee;">
+    <h3 style="margin:0 0 12px;font-size:15px;color:#111;text-transform:uppercase;letter-spacing:0.8px;">Attendees</h3>
+    {_fmt_attendees_html(invitees)}
+  </div>
+
+  <p style="margin:28px 0 0;font-size:11px;color:#bbb;text-align:center;">Internal debrief — not sent to attendees. Automated by the Fathom webhook.</p>
+</div>
+"""
+
+    subject = f"[Call debrief] {title}"
+    body = {
+        "from": "Lumen Calls <notifications@lumenmarketing.co>",
+        "to": TEAM_RECIPIENTS,
+        "subject": subject,
+        "html": html,
+    }
+    try:
+        r = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {RESEND_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json=body,
+            timeout=20,
+        )
+        if r.status_code >= 300:
+            print(f"[fathom] Resend {r.status_code}: {r.text[:300]}")
+        else:
+            print(f"[fathom] team summary sent to {', '.join(TEAM_RECIPIENTS)}")
+    except Exception as e:
+        print(f"[fathom] team summary send error: {e}")
+
+
 @fathom_bp.route("/webhooks/fathom", methods=["POST"])
 def fathom_webhook():
     raw = request.get_data()
@@ -285,4 +461,5 @@ def fathom_webhook():
         return jsonify({"error": "bad json"}), 400
 
     threading.Thread(target=log_to_clickup, args=(payload,), daemon=True).start()
+    threading.Thread(target=send_team_summary_email, args=(payload,), daemon=True).start()
     return jsonify({"ok": True}), 200
