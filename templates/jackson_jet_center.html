@@ -358,9 +358,10 @@
   /* Generic fade on image load */
   img.fade-on-load {
     opacity: 0;
-    transition: opacity 0.6s ease;
+    transform: scale(1.02);
+    transition: opacity 1.1s cubic-bezier(.22,.61,.36,1), transform 1.6s cubic-bezier(.22,.61,.36,1);
   }
-  img.fade-on-load.loaded { opacity: 1; }
+  img.fade-on-load.loaded { opacity: 1; transform: scale(1); }
   .num-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -507,10 +508,25 @@
     height: 100%;
     object-fit: cover;
     opacity: 0;
-    transition: opacity 0.6s ease, transform 1.2s cubic-bezier(.16,.84,.32,1);
+    transform: scale(1.04);
   }
-  .piece img.loaded { opacity: 1; }
+  .piece img.loaded {
+    opacity: 1;
+    transform: scale(1);
+    animation: pieceFadeIn 1.3s cubic-bezier(.22,.61,.36,1) both;
+    transition: transform 0.9s cubic-bezier(.16,.84,.32,1);
+  }
+  .piece:nth-child(1) img.loaded { animation-delay: 0s; }
+  .piece:nth-child(2) img.loaded { animation-delay: 0.09s; }
+  .piece:nth-child(3) img.loaded { animation-delay: 0.18s; }
+  .piece:nth-child(4) img.loaded { animation-delay: 0.27s; }
+  .piece:nth-child(5) img.loaded { animation-delay: 0.36s; }
+  .piece:nth-child(6) img.loaded { animation-delay: 0.45s; }
   .piece:hover img.loaded { transform: scale(1.04); }
+  @keyframes pieceFadeIn {
+    from { opacity: 0; transform: scale(1.04); }
+    to { opacity: 1; transform: scale(1); }
+  }
   .piece .meta {
     position: absolute;
     bottom: 0; left: 0; right: 0;
