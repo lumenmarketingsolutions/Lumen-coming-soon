@@ -38,7 +38,7 @@
     --serif-sc: 'Marcellus SC', 'Marcellus', serif;
     --sans: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
-    --pad: clamp(28px, 5vw, 88px);
+    --pad: clamp(24px, 4vw, 68px);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -48,8 +48,8 @@
     color: var(--fg);
     font-family: var(--sans);
     font-weight: 300;
-    font-size: 16px;
-    line-height: 1.75;
+    font-size: 14.5px;
+    line-height: 1.7;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
@@ -61,7 +61,7 @@
   /* ---------- Type system ---------- */
   .eyebrow {
     font-family: var(--sans);
-    font-size: 0.66rem;
+    font-size: 0.6rem;
     font-weight: 400;
     letter-spacing: 0.42em;
     text-transform: uppercase;
@@ -69,7 +69,7 @@
   }
   .label {
     font-family: var(--sans);
-    font-size: 0.7rem;
+    font-size: 0.62rem;
     font-weight: 500;
     letter-spacing: 0.32em;
     text-transform: uppercase;
@@ -81,10 +81,10 @@
     letter-spacing: 0.005em;
     line-height: 1.12;
   }
-  h1 { font-size: clamp(2.6rem, 7.4vw, 6.5rem); }
-  h2 { font-size: clamp(2rem, 4.6vw, 3.6rem); line-height: 1.18; }
-  h3 { font-size: clamp(1.3rem, 2.2vw, 1.7rem); }
-  h4 { font-size: 1rem; font-weight: 400; }
+  h1 { font-size: clamp(2rem, 5.4vw, 4.4rem); }
+  h2 { font-size: clamp(1.5rem, 3.2vw, 2.5rem); line-height: 1.18; }
+  h3 { font-size: clamp(1.05rem, 1.6vw, 1.35rem); }
+  h4 { font-size: 0.92rem; font-weight: 400; }
 
   .monument {
     font-family: var(--serif-monument);
@@ -94,7 +94,7 @@
 
   .lede {
     font-family: var(--serif-display);
-    font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+    font-size: clamp(1rem, 1.55vw, 1.3rem);
     line-height: 1.55;
     color: var(--fg-soft);
     font-weight: 400;
@@ -116,15 +116,15 @@
   /* ---------- Layout ---------- */
   section {
     position: relative;
-    padding: clamp(96px, 14vh, 180px) var(--pad);
+    padding: clamp(64px, 10vh, 120px) var(--pad);
   }
   .container {
-    max-width: 1180px;
+    max-width: 1100px;
     margin: 0 auto;
     width: 100%;
   }
-  .narrow { max-width: 720px; margin: 0 auto; }
-  .mid { max-width: 920px; margin: 0 auto; }
+  .narrow { max-width: 680px; margin: 0 auto; }
+  .mid { max-width: 880px; margin: 0 auto; }
 
   /* ---------- Reveal animation system ---------- */
   .reveal {
@@ -199,8 +199,8 @@
     font-family: var(--serif-monument);
     font-weight: 500;
     letter-spacing: 0.02em;
-    line-height: 1.05;
-    font-size: clamp(2.4rem, 6.8vw, 5.8rem);
+    line-height: 1.08;
+    font-size: clamp(1.85rem, 4.8vw, 4rem);
   }
   .hero h1 .word {
     display: inline-block;
@@ -269,22 +269,21 @@
     background: var(--bg);
     text-align: center;
   }
-  .opening .lede { font-size: clamp(1.4rem, 2.6vw, 2rem); line-height: 1.5; }
+  .opening .lede { font-size: clamp(1.1rem, 1.85vw, 1.55rem); line-height: 1.5; }
 
   /* ---------- AUDIENCE / NUMBERS ---------- */
   .audience {
     background: var(--bg);
-    border-top: 1px solid var(--hairline);
   }
 
   /* ---------- FIRST LOOK (wide render of installation in lobby) ---------- */
-  .first-look { background: var(--bg); border-top: 1px solid var(--hairline); }
-  .first-look .container { max-width: 1240px; }
+  .first-look { background: var(--bg); }
+  .first-look .container { max-width: 1180px; }
   .first-look-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 18px;
-    margin-bottom: 36px;
+    gap: 14px;
+    margin-bottom: 28px;
   }
   .first-look-frame {
     position: relative;
@@ -319,7 +318,7 @@
   .first-look-caption .label { display: block; margin-bottom: 12px; }
   .first-look-caption p {
     font-family: var(--serif-display);
-    font-size: clamp(1rem, 1.5vw, 1.2rem);
+    font-size: clamp(0.92rem, 1.25vw, 1.05rem);
     color: var(--fg-soft);
     line-height: 1.55;
   }
@@ -327,20 +326,19 @@
   /* ---------- DISPLAY FEATURE (side-by-side with portrait render) ---------- */
   .display-feature {
     background: var(--bg);
-    padding: clamp(96px, 14vh, 180px) var(--pad);
-    border-top: 1px solid var(--hairline);
+    padding: clamp(64px, 10vh, 120px) var(--pad);
   }
   .display-feature-inner {
-    max-width: 1240px;
+    max-width: 1180px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr 480px;
-    gap: 80px;
+    grid-template-columns: 1fr 420px;
+    gap: 64px;
     align-items: center;
   }
   .display-feature .lede {
-    font-size: clamp(1.1rem, 1.6vw, 1.35rem);
-    margin-top: 1.4rem;
+    font-size: clamp(0.95rem, 1.3vw, 1.15rem);
+    margin-top: 1.2rem;
   }
   .display-portrait {
     position: relative;
@@ -367,26 +365,26 @@
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 0;
-    margin: 4.5rem 0 1rem;
+    margin: 3.4rem 0 1rem;
   }
   .num {
     text-align: left;
-    padding: 28px 28px 28px 0;
+    padding: 22px 22px 22px 0;
     border-left: 1px solid var(--hairline);
-    padding-left: 28px;
+    padding-left: 22px;
   }
   .num:first-child { border-left: none; padding-left: 0; }
   .num .figure {
     font-family: var(--serif-monument);
     font-weight: 500;
-    font-size: clamp(1.7rem, 3vw, 2.6rem);
+    font-size: clamp(1.35rem, 2.2vw, 1.95rem);
     color: var(--fg);
     letter-spacing: 0.02em;
     line-height: 1;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
   }
   .num .caption {
-    font-size: 0.7rem;
+    font-size: 0.62rem;
     letter-spacing: 0.24em;
     color: var(--fg-mute);
     text-transform: uppercase;
@@ -406,8 +404,8 @@
   .artist { background: var(--bg-2); }
   .artist-grid {
     display: grid;
-    grid-template-columns: 360px 1fr;
-    gap: 80px;
+    grid-template-columns: 300px 1fr;
+    gap: 64px;
     align-items: start;
   }
   .artist-portrait {
@@ -424,9 +422,9 @@
   .credentials {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 28px;
-    margin-top: 36px;
-    padding-top: 32px;
+    gap: 22px;
+    margin-top: 28px;
+    padding-top: 26px;
     border-top: 1px solid var(--hairline);
   }
   .cred-item .year {
@@ -439,7 +437,7 @@
   }
   .cred-item .what {
     font-family: var(--serif-display);
-    font-size: 1rem;
+    font-size: 0.92rem;
     color: var(--fg);
     line-height: 1.4;
   }
@@ -461,11 +459,11 @@
   }
   .pullquote blockquote {
     font-family: var(--serif-display);
-    font-size: clamp(1.6rem, 3vw, 2.4rem);
-    line-height: 1.4;
+    font-size: clamp(1.2rem, 2.1vw, 1.75rem);
+    line-height: 1.45;
     font-style: italic;
     color: var(--fg);
-    max-width: 880px;
+    max-width: 820px;
     margin: 0 auto;
     position: relative;
   }
@@ -486,7 +484,7 @@
   }
   .work-intro {
     text-align: center;
-    margin-bottom: 6rem;
+    margin-bottom: 4rem;
   }
   .work-intro h2 {
     font-family: var(--serif-monument);
@@ -522,7 +520,7 @@
   }
   .piece .name {
     font-family: var(--serif-monument);
-    font-size: 0.95rem;
+    font-size: 0.84rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     margin-bottom: 4px;
@@ -554,12 +552,11 @@
   /* ---------- THE MATERIALS (NEW) ---------- */
   .materials {
     background: var(--bg-2);
-    border-top: 1px solid var(--hairline);
   }
   .materials-intro {
     text-align: center;
-    max-width: 760px;
-    margin: 0 auto 5rem;
+    max-width: 720px;
+    margin: 0 auto 3.5rem;
   }
   .materials-intro h2 {
     font-family: var(--serif-monument);
@@ -570,15 +567,15 @@
   .materials-pull {
     font-family: var(--serif-display);
     font-style: italic;
-    font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+    font-size: clamp(1.05rem, 1.7vw, 1.4rem);
     line-height: 1.5;
     color: var(--fg);
-    margin-top: 1.6rem;
+    margin-top: 1.4rem;
   }
   .materials-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 80px;
+    gap: 64px;
     margin-top: 2rem;
   }
   .material {
@@ -588,18 +585,18 @@
   .material .label { color: var(--gold); margin-bottom: 14px; display: block; }
   .material h3 {
     font-family: var(--serif-display);
-    font-size: 1.6rem;
+    font-size: 1.3rem;
     color: var(--fg);
-    margin-bottom: 18px;
+    margin-bottom: 16px;
     line-height: 1.25;
   }
-  .material p { font-size: 0.95rem; }
+  .material p { font-size: 0.88rem; }
   .material .stat {
-    margin-top: 28px;
-    padding-top: 22px;
+    margin-top: 24px;
+    padding-top: 20px;
     border-top: 1px solid var(--hairline);
     font-family: var(--serif-monument);
-    font-size: 0.8rem;
+    font-size: 0.72rem;
     letter-spacing: 0.24em;
     color: var(--fg-mute);
     text-transform: uppercase;
@@ -612,7 +609,6 @@
   .the-piece {
     background: var(--bg);
     text-align: center;
-    border-top: 1px solid var(--hairline);
   }
   .the-piece h2 {
     font-family: var(--serif-monument);
@@ -622,19 +618,19 @@
   .piece-anchor {
     font-family: var(--serif-display);
     font-style: italic;
-    font-size: clamp(1.4rem, 2.6vw, 2rem);
+    font-size: clamp(1.1rem, 1.85vw, 1.55rem);
     line-height: 1.5;
     color: var(--fg);
-    max-width: 820px;
-    margin: 2rem auto;
+    max-width: 760px;
+    margin: 1.6rem auto;
   }
   .piece-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 0;
-    max-width: 880px;
-    margin: 4rem auto 0;
-    padding-top: 36px;
+    max-width: 820px;
+    margin: 3rem auto 0;
+    padding-top: 30px;
     border-top: 1px solid var(--hairline);
   }
   .piece-stats .stat-item {
@@ -644,7 +640,7 @@
   .piece-stats .stat-item:first-child { border-left: none; }
   .piece-stats .stat-figure {
     font-family: var(--serif-monument);
-    font-size: clamp(1.4rem, 2.4vw, 2rem);
+    font-size: clamp(1.15rem, 1.85vw, 1.55rem);
     color: var(--fg);
     letter-spacing: 0.04em;
     margin-bottom: 8px;
@@ -676,8 +672,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 36px;
-    margin: 4rem 0 0;
+    gap: 28px;
+    margin: 3rem 0 0;
     flex-wrap: wrap;
   }
   .overlap-side {
@@ -685,10 +681,10 @@
     max-width: 280px;
   }
   .overlap-side .label { color: var(--gold); margin-bottom: 14px; }
-  .overlap-side .desc { font-family: var(--serif-display); font-size: 1.05rem; line-height: 1.5; color: var(--fg-soft); }
+  .overlap-side .desc { font-family: var(--serif-display); font-size: 0.92rem; line-height: 1.5; color: var(--fg-soft); }
   .overlap-divider {
     font-family: var(--serif-monument);
-    font-size: 2.4rem;
+    font-size: 1.8rem;
     color: var(--fg-faint);
     font-weight: 500;
   }
@@ -743,19 +739,19 @@
     gap: 0;
   }
   .spec {
-    padding: 32px 32px 32px 0;
+    padding: 24px 24px 24px 0;
     border-left: 1px solid var(--hairline);
-    padding-left: 32px;
+    padding-left: 24px;
   }
   .spec:first-child { border-left: none; padding-left: 0; }
   .spec .label { margin-bottom: 12px; }
   .spec h4 {
     font-family: var(--serif-display);
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     color: var(--fg);
     margin-bottom: 8px;
   }
-  .spec p { font-size: 0.92rem; }
+  .spec p { font-size: 0.84rem; }
   @media (max-width: 880px) {
     .spec-grid { grid-template-columns: 1fr; }
     .spec { border-left: none !important; padding-left: 0 !important; padding-top: 28px; border-top: 1px solid var(--hairline); }
@@ -765,11 +761,10 @@
   /* ---------- HOW IT WORKS (NEW) ---------- */
   .how {
     background: var(--bg);
-    border-top: 1px solid var(--hairline);
   }
   .how-intro {
     text-align: center;
-    margin-bottom: 4rem;
+    margin-bottom: 3rem;
   }
   .how-intro h2 {
     font-family: var(--serif-monument);
@@ -786,7 +781,7 @@
     border-bottom: 1px solid var(--hairline);
   }
   .flow-step {
-    padding: 36px 24px;
+    padding: 28px 20px;
     border-left: 1px solid var(--hairline);
     text-align: left;
   }
@@ -801,13 +796,13 @@
   }
   .flow-step h4 {
     font-family: var(--serif-display);
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     color: var(--fg);
     margin-bottom: 10px;
     line-height: 1.3;
   }
   .flow-step p {
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     line-height: 1.55;
   }
   @media (max-width: 980px) {
@@ -827,8 +822,8 @@
   .value-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 56px 64px;
-    margin-top: 4rem;
+    gap: 44px 56px;
+    margin-top: 3rem;
   }
   .value-item .num-mark {
     font-family: var(--serif-monument);
@@ -841,9 +836,9 @@
   .value-item h3 {
     font-family: var(--serif-display);
     margin-bottom: 12px;
-    font-size: 1.4rem;
+    font-size: 1.15rem;
   }
-  .value-item p { font-size: 0.95rem; }
+  .value-item p { font-size: 0.88rem; }
   @media (max-width: 720px) {
     .value-grid { grid-template-columns: 1fr; gap: 44px; }
   }
@@ -855,15 +850,15 @@
   }
   .ask-block {
     border: 1px solid var(--hairline);
-    padding: clamp(40px, 6vw, 72px);
-    margin-top: 4rem;
+    padding: clamp(32px, 4.5vw, 56px);
+    margin-top: 3rem;
     text-align: left;
   }
   .ask-row {
     display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 32px;
-    padding: 28px 0;
+    grid-template-columns: 180px 1fr;
+    gap: 28px;
+    padding: 22px 0;
     border-top: 1px solid var(--hairline);
     align-items: baseline;
   }
@@ -877,7 +872,7 @@
   }
   .ask-row .ask-val {
     font-family: var(--serif-display);
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     color: var(--fg);
     line-height: 1.5;
   }
@@ -885,7 +880,7 @@
     display: block;
     margin-top: 6px;
     font-family: var(--sans);
-    font-size: 0.85rem;
+    font-size: 0.78rem;
     color: var(--fg-mute);
     line-height: 1.55;
   }
@@ -897,19 +892,18 @@
   .wider {
     background: var(--bg);
     text-align: center;
-    border-top: 1px solid var(--hairline);
   }
   .wider .lede {
-    font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+    font-size: clamp(1.05rem, 1.7vw, 1.4rem);
     line-height: 1.5;
-    margin-top: 1.4rem;
+    margin-top: 1.2rem;
   }
   .wider .anchor {
     font-family: var(--serif-monument);
-    font-size: clamp(1rem, 1.4vw, 1.2rem);
+    font-size: clamp(0.85rem, 1.1vw, 1rem);
     letter-spacing: 0.36em;
     color: var(--gold);
-    margin-top: 2.4rem;
+    margin-top: 2rem;
     text-transform: uppercase;
     font-weight: 500;
   }
@@ -925,16 +919,16 @@
     letter-spacing: 0.04em;
   }
   .now-list {
-    margin-top: 3rem;
+    margin-top: 2.4rem;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 0;
     text-align: left;
   }
   .now-item {
-    padding: 32px 32px 32px 0;
+    padding: 24px 24px 24px 0;
     border-left: 1px solid var(--hairline);
-    padding-left: 32px;
+    padding-left: 24px;
   }
   .now-item:first-child { border-left: none; padding-left: 0; }
   .now-item .num-mark {
@@ -947,11 +941,11 @@
   }
   .now-item h4 {
     font-family: var(--serif-display);
-    font-size: 1.15rem;
+    font-size: 0.98rem;
     color: var(--fg);
     margin-bottom: 10px;
   }
-  .now-item p { font-size: 0.9rem; }
+  .now-item p { font-size: 0.82rem; }
   @media (max-width: 880px) {
     .now-list { grid-template-columns: 1fr; }
     .now-item { border-left: none !important; padding-left: 0 !important; padding-top: 28px; border-top: 1px solid var(--hairline); }
@@ -963,24 +957,24 @@
   .steps {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 18px;
-    margin-top: 3rem;
+    gap: 14px;
+    margin-top: 2.4rem;
   }
   .step {
     border: 1px solid var(--hairline);
-    padding: 28px 22px;
+    padding: 22px 18px;
     text-align: center;
   }
   .step .num {
     font-family: var(--serif-monument);
     font-weight: 500;
-    font-size: 1.4rem;
+    font-size: 1.15rem;
     color: var(--gold);
     letter-spacing: 0.05em;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     display: block;
   }
-  .step p { font-size: 0.85rem; line-height: 1.5; }
+  .step p { font-size: 0.78rem; line-height: 1.5; }
   @media (max-width: 720px) {
     .steps { grid-template-columns: 1fr 1fr; }
   }
@@ -1003,8 +997,8 @@
   .signs {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 60px;
-    margin-top: 4rem;
+    gap: 48px;
+    margin-top: 3rem;
     text-align: left;
   }
   .sign .label { margin-bottom: 36px; color: var(--gold); }
@@ -1013,28 +1007,27 @@
     height: 32px;
     margin-bottom: 12px;
   }
-  .sign .name { font-family: var(--serif-display); font-size: 1.05rem; color: var(--fg); }
-  .sign .role { font-size: 0.78rem; color: var(--fg-mute); margin-top: 4px; }
+  .sign .name { font-family: var(--serif-display); font-size: 0.92rem; color: var(--fg); }
+  .sign .role { font-size: 0.72rem; color: var(--fg-mute); margin-top: 4px; }
   @media (max-width: 720px) {
     .signs { grid-template-columns: 1fr; gap: 44px; }
   }
 
   footer {
     text-align: center;
-    padding: 60px var(--pad) 80px;
-    border-top: 1px solid var(--hairline);
+    padding: 48px var(--pad) 64px;
     background: var(--bg);
   }
   footer .fwordmark {
     font-family: var(--serif-monument);
     font-weight: 500;
     letter-spacing: 0.4em;
-    font-size: 0.95rem;
+    font-size: 0.84rem;
     color: var(--fg);
-    margin-bottom: 18px;
+    margin-bottom: 16px;
   }
   footer .fmeta {
-    font-size: 0.75rem;
+    font-size: 0.68rem;
     letter-spacing: 0.25em;
     color: var(--fg-mute);
     text-transform: uppercase;
