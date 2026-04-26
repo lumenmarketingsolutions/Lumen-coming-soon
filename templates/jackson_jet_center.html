@@ -159,7 +159,8 @@
   /* ---------- HERO ---------- */
   .hero {
     height: 100vh;
-    min-height: 720px;
+    height: 100dvh;
+    min-height: 560px;
     padding: 0;
     overflow: hidden;
     display: flex;
@@ -183,6 +184,16 @@
     object-fit: cover;
     z-index: 1;
     opacity: 0.55;
+    pointer-events: none;
+  }
+  .hero video::-webkit-media-controls,
+  .hero video::-webkit-media-controls-panel,
+  .hero video::-webkit-media-controls-start-playback-button,
+  .hero video::-webkit-media-controls-overlay-play-button,
+  .hero video::-webkit-media-controls-play-button {
+    display: none !important;
+    -webkit-appearance: none !important;
+    opacity: 0 !important;
   }
   .hero-content {
     position: relative;
@@ -224,6 +235,23 @@
     color: var(--fg-soft);
     opacity: 0;
     animation: fadeIn 1.6s 1.9s cubic-bezier(.16,.84,.32,1) forwards;
+  }
+  .hero .sub .sub-line { white-space: nowrap; }
+  .hero .sub .sub-divider {
+    display: inline-block;
+    margin: 0 0.4em;
+  }
+  @media (max-width: 600px) {
+    .hero .sub {
+      margin-top: 1.8rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.24em;
+      line-height: 2;
+    }
+    .hero .sub .sub-divider { display: none; }
+    .hero .sub .sub-line { display: block; }
+    .hero .scroll-cue { bottom: 24px; }
+    .hero .scroll-cue .line { height: 40px; }
   }
   .hero .scroll-cue {
     position: absolute;
@@ -1083,7 +1111,7 @@
       <span class="word">what</span>
       <span class="word">flies.</span>
     </h1>
-    <div class="sub">DARE &nbsp;×&nbsp; JACKSON JET CENTER &nbsp;·&nbsp; BOISE &nbsp;+&nbsp; PHOENIX</div>
+    <div class="sub"><span class="sub-line">DARE &nbsp;×&nbsp; JACKSON JET CENTER</span><span class="sub-divider">·</span><span class="sub-line">BOISE &nbsp;+&nbsp; PHOENIX</span></div>
   </div>
   <div class="scroll-cue">
     <div class="line"></div>
@@ -1638,13 +1666,21 @@
     }
   });
 
-  // ----- Pause hero video when scrolled out of view to free CPU/GPU -----
+  // ----- Force-start hero video on mobile, pause when out of view -----
   const heroVideo = document.querySelector('.hero video');
   if (heroVideo) {
+    heroVideo.muted = true;
+    heroVideo.setAttribute('muted', '');
+    heroVideo.setAttribute('playsinline', '');
+    const tryPlay = () => { try { heroVideo.play().catch(() => {}); } catch (e) {} };
+    tryPlay();
+    document.addEventListener('touchstart', tryPlay, { once: true, passive: true });
+    document.addEventListener('click', tryPlay, { once: true });
+
     const visIO = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          heroVideo.play().catch(() => {});
+          tryPlay();
         } else {
           heroVideo.pause();
         }
