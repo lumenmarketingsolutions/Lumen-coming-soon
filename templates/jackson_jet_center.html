@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DARE × Jackson Jet Center</title>
+
+<!-- Social preview: image only, minimal text -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://lumenmarketing.co/jackson-jet-center">
+<meta property="og:image" content="https://lumenmarketing.co/static/jjc-dare/img/og-knife.jpg">
+<meta property="og:image:width" content="1500">
+<meta property="og:image:height" content="2000">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://lumenmarketing.co/static/jjc-dare/img/og-knife.jpg">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Marcellus&family=Marcellus+SC&family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000000;
+    --bg-2: #050505;
+    --bg-3: #0a0a0a;
+    --fg: #f5f3ee;
+    --fg-soft: rgba(245, 243, 238, 0.72);
+    --fg-mute: rgba(245, 243, 238, 0.5);
+    --fg-faint: rgba(245, 243, 238, 0.28);
+    --hairline: rgba(245, 243, 238, 0.14);
+    --hairline-strong: rgba(245, 243, 238, 0.32);
+    --accent: hsl(95, 5%, 53%);
+    --accent-dim: hsl(95, 5%, 38%);
+    --gold: #c5a44e;
+
+    --serif-monument: 'Cinzel', 'Trajan Pro', serif;
+    --serif-display: 'Marcellus', Georgia, serif;
+    --serif-sc: 'Marcellus SC', 'Marcellus', serif;
+    --sans: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+    --pad: clamp(28px, 5vw, 88px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+  }
+
+  img, video { display: block; max-width: 100%; height: auto; }
+
+  /* ---------- Type system ---------- */
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: 0.66rem;
+    font-weight: 400;
+    letter-spacing: 0.42em;
+    text-transform: uppercase;
+    color: var(--fg-mute);
+  }
+  .label {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--serif-display);
+    font-weight: 400;
+    letter-spacing: 0.005em;
+    line-height: 1.12;
+  }
+  h1 { font-size: clamp(2.6rem, 7.4vw, 6.5rem); }
+  h2 { font-size: clamp(2rem, 4.6vw, 3.6rem); line-height: 1.18; }
+  h3 { font-size: clamp(1.3rem, 2.2vw, 1.7rem); }
+  h4 { font-size: 1rem; font-weight: 400; }
+
+  .monument {
+    font-family: var(--serif-monument);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+
+  .lede {
+    font-family: var(--serif-display);
+    font-size: clamp(1.25rem, 2.2vw, 1.75rem);
+    line-height: 1.55;
+    color: var(--fg-soft);
+    font-weight: 400;
+  }
+
+  p { color: var(--fg-soft); }
+  p + p { margin-top: 1em; }
+  strong { color: var(--fg); font-weight: 500; }
+
+  .hairline {
+    display: block;
+    width: 56px;
+    height: 1px;
+    background: var(--fg-faint);
+    margin: 1.6rem 0;
+  }
+  .hairline.center { margin: 2rem auto; }
+
+  /* ---------- Layout ---------- */
+  section {
+    position: relative;
+    padding: clamp(96px, 14vh, 180px) var(--pad);
+  }
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .narrow { max-width: 720px; margin: 0 auto; }
+  .mid { max-width: 920px; margin: 0 auto; }
+
+  /* ---------- Reveal animation system ---------- */
+  .reveal {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    transition: opacity 0.9s cubic-bezier(.16,.84,.32,1),
+                transform 0.9s cubic-bezier(.16,.84,.32,1);
+  }
+  .reveal.in {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  .reveal-up { transform: translate3d(0, 56px, 0); }
+  .reveal-up.in { transform: translate3d(0, 0, 0); }
+  .reveal-slow { transition-duration: 1.4s; }
+  .reveal-stagger > * {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    transition: opacity 0.9s cubic-bezier(.16,.84,.32,1),
+                transform 0.9s cubic-bezier(.16,.84,.32,1);
+  }
+  .reveal-stagger.in > * { opacity: 1; transform: translate3d(0,0,0); }
+  .reveal-stagger.in > *:nth-child(1) { transition-delay: 0.05s; }
+  .reveal-stagger.in > *:nth-child(2) { transition-delay: 0.18s; }
+  .reveal-stagger.in > *:nth-child(3) { transition-delay: 0.31s; }
+  .reveal-stagger.in > *:nth-child(4) { transition-delay: 0.44s; }
+  .reveal-stagger.in > *:nth-child(5) { transition-delay: 0.57s; }
+  .reveal-stagger.in > *:nth-child(6) { transition-delay: 0.7s; }
+  .reveal-stagger.in > *:nth-child(7) { transition-delay: 0.83s; }
+  .reveal-stagger.in > *:nth-child(8) { transition-delay: 0.96s; }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    height: 100vh;
+    min-height: 720px;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.55) 50%, rgba(0,0,0,0.85) 100%);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .hero video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    opacity: 0.55;
+  }
+  .hero-content {
+    position: relative;
+    z-index: 3;
+    max-width: 1100px;
+    padding: 0 var(--pad);
+  }
+  .hero .eyebrow {
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    animation: fadeIn 1.4s 0.4s cubic-bezier(.16,.84,.32,1) forwards;
+  }
+  .hero h1 {
+    font-family: var(--serif-monument);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1.05;
+    font-size: clamp(2.4rem, 6.8vw, 5.8rem);
+  }
+  .hero h1 .word {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(60px);
+    animation: wordReveal 1.4s cubic-bezier(.16,.84,.32,1) forwards;
+  }
+  .hero h1 .word:nth-child(1) { animation-delay: 0.6s; }
+  .hero h1 .word:nth-child(2) { animation-delay: 0.74s; }
+  .hero h1 .word:nth-child(3) { animation-delay: 0.88s; }
+  .hero h1 .word:nth-child(4) { animation-delay: 1.02s; }
+  .hero h1 .word:nth-child(5) { animation-delay: 1.16s; }
+  .hero h1 .word:nth-child(6) { animation-delay: 1.30s; }
+  .hero h1 .word:nth-child(7) { animation-delay: 1.44s; }
+  .hero h1 .word:nth-child(8) { animation-delay: 1.58s; }
+  .hero .sub {
+    margin-top: 2.6rem;
+    font-family: var(--serif-sc);
+    font-size: clamp(0.85rem, 1vw, 1rem);
+    letter-spacing: 0.42em;
+    color: var(--fg-soft);
+    opacity: 0;
+    animation: fadeIn 1.6s 1.9s cubic-bezier(.16,.84,.32,1) forwards;
+  }
+  .hero .scroll-cue {
+    position: absolute;
+    bottom: 38px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    opacity: 0;
+    animation: fadeIn 1.4s 2.4s cubic-bezier(.16,.84,.32,1) forwards;
+    text-align: center;
+  }
+  .scroll-cue .line {
+    width: 1px; height: 56px;
+    background: linear-gradient(180deg, transparent, var(--fg-faint));
+    margin: 0 auto 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .scroll-cue .line::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 0%, var(--fg) 50%, transparent 100%);
+    animation: scrollPulse 2.4s ease-in-out infinite;
+  }
+  .scroll-cue .text {
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--fg-mute);
+    text-transform: uppercase;
+  }
+  @keyframes wordReveal {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn { to { opacity: 1; } }
+  @keyframes scrollPulse {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+  }
+
+  /* ---------- OPENING STATEMENT ---------- */
+  .opening {
+    background: var(--bg);
+    text-align: center;
+  }
+  .opening .lede { font-size: clamp(1.4rem, 2.6vw, 2rem); line-height: 1.5; }
+
+  /* ---------- AUDIENCE / NUMBERS ---------- */
+  .audience {
+    background: var(--bg);
+    border-top: 1px solid var(--hairline);
+  }
+
+  /* ---------- FIRST LOOK (wide render of installation in lobby) ---------- */
+  .first-look { background: var(--bg); border-top: 1px solid var(--hairline); }
+  .first-look .container { max-width: 1240px; }
+  .first-look-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 36px;
+  }
+  .first-look-frame {
+    position: relative;
+    border: 1px solid var(--hairline);
+    overflow: hidden;
+  }
+  .first-look-frame img {
+    width: 100%;
+    display: block;
+  }
+  @media (max-width: 880px) {
+    .first-look-grid { grid-template-columns: 1fr; gap: 14px; }
+  }
+  .render-tag {
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
+    background: rgba(0, 0, 0, 0.78);
+    padding: 8px 16px;
+    font-size: 0.62rem;
+    letter-spacing: 0.34em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-family: var(--sans);
+    font-weight: 500;
+  }
+  .first-look-caption {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  .first-look-caption .label { display: block; margin-bottom: 12px; }
+  .first-look-caption p {
+    font-family: var(--serif-display);
+    font-size: clamp(1rem, 1.5vw, 1.2rem);
+    color: var(--fg-soft);
+    line-height: 1.55;
+  }
+
+  /* ---------- DISPLAY FEATURE (side-by-side with portrait render) ---------- */
+  .display-feature {
+    background: var(--bg);
+    padding: clamp(96px, 14vh, 180px) var(--pad);
+    border-top: 1px solid var(--hairline);
+  }
+  .display-feature-inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 480px;
+    gap: 80px;
+    align-items: center;
+  }
+  .display-feature .lede {
+    font-size: clamp(1.1rem, 1.6vw, 1.35rem);
+    margin-top: 1.4rem;
+  }
+  .display-portrait {
+    position: relative;
+    border: 1px solid var(--hairline);
+    overflow: hidden;
+    background: var(--bg-3);
+  }
+  .display-portrait img {
+    width: 100%;
+    display: block;
+  }
+  @media (max-width: 980px) {
+    .display-feature-inner { grid-template-columns: 1fr; gap: 48px; }
+    .display-portrait { max-width: 480px; margin: 0 auto; }
+  }
+
+  /* Generic fade on image load */
+  img.fade-on-load {
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  img.fade-on-load.loaded { opacity: 1; }
+  .num-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    margin: 4.5rem 0 1rem;
+  }
+  .num {
+    text-align: left;
+    padding: 28px 28px 28px 0;
+    border-left: 1px solid var(--hairline);
+    padding-left: 28px;
+  }
+  .num:first-child { border-left: none; padding-left: 0; }
+  .num .figure {
+    font-family: var(--serif-monument);
+    font-weight: 500;
+    font-size: clamp(1.7rem, 3vw, 2.6rem);
+    color: var(--fg);
+    letter-spacing: 0.02em;
+    line-height: 1;
+    margin-bottom: 14px;
+  }
+  .num .caption {
+    font-size: 0.7rem;
+    letter-spacing: 0.24em;
+    color: var(--fg-mute);
+    text-transform: uppercase;
+    line-height: 1.6;
+  }
+  @media (max-width: 880px) {
+    .num-grid { grid-template-columns: 1fr 1fr; }
+    .num:nth-child(3) { border-left: none; padding-left: 0; }
+  }
+  @media (max-width: 540px) {
+    .num-grid { grid-template-columns: 1fr; }
+    .num { border-left: none !important; padding-left: 0 !important; border-top: 1px solid var(--hairline); padding-top: 24px; }
+    .num:first-child { border-top: none; padding-top: 0; }
+  }
+
+  /* ---------- ARTIST ---------- */
+  .artist { background: var(--bg-2); }
+  .artist-grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 80px;
+    align-items: start;
+  }
+  .artist-portrait {
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    overflow: hidden;
+  }
+  .artist-portrait img { width: 100%; height: 100%; object-fit: cover; }
+  .artist h2 {
+    font-family: var(--serif-monument);
+    letter-spacing: 0.04em;
+    font-weight: 500;
+  }
+  .credentials {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-top: 36px;
+    padding-top: 32px;
+    border-top: 1px solid var(--hairline);
+  }
+  .cred-item .year {
+    font-family: var(--serif-sc);
+    font-size: 0.78rem;
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    margin-bottom: 4px;
+    display: block;
+  }
+  .cred-item .what {
+    font-family: var(--serif-display);
+    font-size: 1rem;
+    color: var(--fg);
+    line-height: 1.4;
+  }
+  .cred-item .where {
+    font-size: 0.78rem;
+    color: var(--fg-mute);
+    margin-top: 4px;
+  }
+  @media (max-width: 880px) {
+    .artist-grid { grid-template-columns: 1fr; gap: 48px; }
+    .artist-portrait { max-width: 280px; margin: 0 auto; }
+    .credentials { grid-template-columns: 1fr; gap: 24px; }
+  }
+
+  /* ---------- PULL QUOTE ---------- */
+  .pullquote {
+    text-align: center;
+    background: var(--bg);
+  }
+  .pullquote blockquote {
+    font-family: var(--serif-display);
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    line-height: 1.4;
+    font-style: italic;
+    color: var(--fg);
+    max-width: 880px;
+    margin: 0 auto;
+    position: relative;
+  }
+  .pullquote cite {
+    display: block;
+    margin-top: 2rem;
+    font-family: var(--serif-sc);
+    font-size: 0.78rem;
+    letter-spacing: 0.4em;
+    color: var(--fg-mute);
+    font-style: normal;
+  }
+
+  /* ---------- THE WORK GALLERY ---------- */
+  .work {
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .work-intro {
+    text-align: center;
+    margin-bottom: 6rem;
+  }
+  .work-intro h2 {
+    font-family: var(--serif-monument);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 18px;
+  }
+  .piece {
+    position: relative;
+    overflow: hidden;
+    background: var(--bg-3);
+    aspect-ratio: 4 / 5;
+  }
+  .piece img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.6s ease, transform 1.2s cubic-bezier(.16,.84,.32,1);
+  }
+  .piece img.loaded { opacity: 1; }
+  .piece:hover img.loaded { transform: scale(1.04); }
+  .piece .meta {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    padding: 24px 22px;
+    background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.85) 80%);
+    color: var(--fg);
+  }
+  .piece .name {
+    font-family: var(--serif-monument);
+    font-size: 0.95rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .piece .price {
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    color: var(--fg-mute);
+    text-transform: uppercase;
+  }
+  .piece.sz-7 { grid-column: span 7; aspect-ratio: 4/3; }
+  .piece.sz-5 { grid-column: span 5; aspect-ratio: 4/5; }
+  .piece.sz-4 { grid-column: span 4; aspect-ratio: 1/1; }
+  .piece.sz-6 { grid-column: span 6; aspect-ratio: 5/4; }
+  .piece.sz-8 { grid-column: span 8; aspect-ratio: 4/3; }
+  .piece.sz-12 { grid-column: span 12; aspect-ratio: 16/9; }
+  @media (max-width: 880px) {
+    .gallery { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .piece, .piece.sz-7, .piece.sz-5, .piece.sz-4, .piece.sz-6, .piece.sz-8 {
+      grid-column: span 1; aspect-ratio: 4/5;
+    }
+    .piece.sz-12 { grid-column: span 2; aspect-ratio: 16/9; }
+  }
+  @media (max-width: 540px) {
+    .gallery { grid-template-columns: 1fr; }
+    .piece, .piece.sz-12 { grid-column: span 1; aspect-ratio: 4/5; }
+  }
+
+  /* ---------- THE MATERIALS (NEW) ---------- */
+  .materials {
+    background: var(--bg-2);
+    border-top: 1px solid var(--hairline);
+  }
+  .materials-intro {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto 5rem;
+  }
+  .materials-intro h2 {
+    font-family: var(--serif-monument);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    margin-top: 1rem;
+  }
+  .materials-pull {
+    font-family: var(--serif-display);
+    font-style: italic;
+    font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+    line-height: 1.5;
+    color: var(--fg);
+    margin-top: 1.6rem;
+  }
+  .materials-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    margin-top: 2rem;
+  }
+  .material {
+    border-top: 1px solid var(--hairline);
+    padding-top: 36px;
+  }
+  .material .label { color: var(--gold); margin-bottom: 14px; display: block; }
+  .material h3 {
+    font-family: var(--serif-display);
+    font-size: 1.6rem;
+    color: var(--fg);
+    margin-bottom: 18px;
+    line-height: 1.25;
+  }
+  .material p { font-size: 0.95rem; }
+  .material .stat {
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid var(--hairline);
+    font-family: var(--serif-monument);
+    font-size: 0.8rem;
+    letter-spacing: 0.24em;
+    color: var(--fg-mute);
+    text-transform: uppercase;
+  }
+  @media (max-width: 880px) {
+    .materials-grid { grid-template-columns: 1fr; gap: 56px; }
+  }
+
+  /* ---------- THE PIECE (NEW — bespoke feature) ---------- */
+  .the-piece {
+    background: var(--bg);
+    text-align: center;
+    border-top: 1px solid var(--hairline);
+  }
+  .the-piece h2 {
+    font-family: var(--serif-monument);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .piece-anchor {
+    font-family: var(--serif-display);
+    font-style: italic;
+    font-size: clamp(1.4rem, 2.6vw, 2rem);
+    line-height: 1.5;
+    color: var(--fg);
+    max-width: 820px;
+    margin: 2rem auto;
+  }
+  .piece-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    max-width: 880px;
+    margin: 4rem auto 0;
+    padding-top: 36px;
+    border-top: 1px solid var(--hairline);
+  }
+  .piece-stats .stat-item {
+    padding: 18px 24px;
+    border-left: 1px solid var(--hairline);
+  }
+  .piece-stats .stat-item:first-child { border-left: none; }
+  .piece-stats .stat-figure {
+    font-family: var(--serif-monument);
+    font-size: clamp(1.4rem, 2.4vw, 2rem);
+    color: var(--fg);
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+  .piece-stats .stat-caption {
+    font-size: 0.7rem;
+    letter-spacing: 0.22em;
+    color: var(--fg-mute);
+    text-transform: uppercase;
+  }
+  @media (max-width: 720px) {
+    .piece-stats { grid-template-columns: 1fr; }
+    .piece-stats .stat-item { border-left: none !important; border-top: 1px solid var(--hairline); padding-top: 22px; }
+    .piece-stats .stat-item:first-child { border-top: none; padding-top: 0; }
+  }
+
+  /* ---------- AUDIENCE OVERLAP ---------- */
+  .overlap {
+    background: var(--bg-2);
+    text-align: center;
+  }
+  .overlap h2 {
+    font-family: var(--serif-monument);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    margin-bottom: 2rem;
+  }
+  .overlap-line {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 36px;
+    margin: 4rem 0 0;
+    flex-wrap: wrap;
+  }
+  .overlap-side {
+    text-align: center;
+    max-width: 280px;
+  }
+  .overlap-side .label { color: var(--gold); margin-bottom: 14px; }
+  .overlap-side .desc { font-family: var(--serif-display); font-size: 1.05rem; line-height: 1.5; color: var(--fg-soft); }
+  .overlap-divider {
+    font-family: var(--serif-monument);
+    font-size: 2.4rem;
+    color: var(--fg-faint);
+    font-weight: 500;
+  }
+
+  /* ---------- THE DISPLAY ---------- */
+  .display {
+    background: var(--bg);
+    padding: 0;
+  }
+  .display-hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--pad);
+    overflow: hidden;
+  }
+  .display-render {
+    position: absolute;
+    inset: 0;
+    background: var(--bg-3);
+    background-image: url('/static/jjc-dare/img/display-render.png');
+    background-size: cover;
+    background-position: center;
+  }
+  .display-render::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.85) 100%);
+  }
+  .display-content {
+    position: relative;
+    z-index: 2;
+    max-width: 760px;
+    text-align: center;
+  }
+  .display-content h2 {
+    font-family: var(--serif-monument);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    margin: 1rem 0 1.4rem;
+  }
+  .display-spec {
+    background: var(--bg-2);
+    padding: var(--pad);
+  }
+  .spec-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+  }
+  .spec {
+    padding: 32px 32px 32px 0;
+    border-left: 1px solid var(--hairline);
+    padding-left: 32px;
+  }
+  .spec:first-child { border-left: none; padding-left: 0; }
+  .spec .label { margin-bottom: 12px; }
+  .spec h4 {
+    font-family: var(--serif-display);
+    font-size: 1.1rem;
+    color: var(--fg);
+    margin-bottom: 8px;
+  }
+  .spec p { font-size: 0.92rem; }
+  @media (max-width: 880px) {
+    .spec-grid { grid-template-columns: 1fr; }
+    .spec { border-left: none !important; padding-left: 0 !important; padding-top: 28px; border-top: 1px solid var(--hairline); }
+    .spec:first-child { border-top: none; padding-top: 0; }
+  }
+
+  /* ---------- HOW IT WORKS (NEW) ---------- */
+  .how {
+    background: var(--bg);
+    border-top: 1px solid var(--hairline);
+  }
+  .how-intro {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .how-intro h2 {
+    font-family: var(--serif-monument);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    margin-top: 1rem;
+  }
+  .flow {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0;
+    margin-top: 2rem;
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .flow-step {
+    padding: 36px 24px;
+    border-left: 1px solid var(--hairline);
+    text-align: left;
+  }
+  .flow-step:first-child { border-left: none; }
+  .flow-step .step-num {
+    font-family: var(--serif-monument);
+    font-size: 0.78rem;
+    letter-spacing: 0.36em;
+    color: var(--gold);
+    margin-bottom: 18px;
+    display: block;
+  }
+  .flow-step h4 {
+    font-family: var(--serif-display);
+    font-size: 1.1rem;
+    color: var(--fg);
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  .flow-step p {
+    font-size: 0.85rem;
+    line-height: 1.55;
+  }
+  @media (max-width: 980px) {
+    .flow { grid-template-columns: 1fr 1fr; }
+    .flow-step { border-left: none; border-top: 1px solid var(--hairline); }
+    .flow-step:nth-child(odd) { border-right: 1px solid var(--hairline); }
+    .flow-step:first-child, .flow-step:nth-child(2) { border-top: none; }
+  }
+  @media (max-width: 600px) {
+    .flow { grid-template-columns: 1fr; }
+    .flow-step { border-left: none !important; border-right: none !important; border-top: 1px solid var(--hairline); }
+    .flow-step:first-child { border-top: none; }
+  }
+
+  /* ---------- VALUE TO JJC ---------- */
+  .value { background: var(--bg-2); }
+  .value-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px 64px;
+    margin-top: 4rem;
+  }
+  .value-item .num-mark {
+    font-family: var(--serif-monument);
+    font-size: 0.78rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    margin-bottom: 14px;
+    display: block;
+  }
+  .value-item h3 {
+    font-family: var(--serif-display);
+    margin-bottom: 12px;
+    font-size: 1.4rem;
+  }
+  .value-item p { font-size: 0.95rem; }
+  @media (max-width: 720px) {
+    .value-grid { grid-template-columns: 1fr; gap: 44px; }
+  }
+
+  /* ---------- THE ASK ---------- */
+  .ask {
+    background: var(--bg);
+    text-align: center;
+  }
+  .ask-block {
+    border: 1px solid var(--hairline);
+    padding: clamp(40px, 6vw, 72px);
+    margin-top: 4rem;
+    text-align: left;
+  }
+  .ask-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 32px;
+    padding: 28px 0;
+    border-top: 1px solid var(--hairline);
+    align-items: baseline;
+  }
+  .ask-row:first-child { border-top: none; padding-top: 0; }
+  .ask-row .ask-key {
+    font-family: var(--serif-sc);
+    font-size: 0.78rem;
+    letter-spacing: 0.32em;
+    color: var(--gold);
+    text-transform: uppercase;
+  }
+  .ask-row .ask-val {
+    font-family: var(--serif-display);
+    font-size: 1.1rem;
+    color: var(--fg);
+    line-height: 1.5;
+  }
+  .ask-row .ask-val small {
+    display: block;
+    margin-top: 6px;
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    color: var(--fg-mute);
+    line-height: 1.55;
+  }
+  @media (max-width: 720px) {
+    .ask-row { grid-template-columns: 1fr; gap: 8px; }
+  }
+
+  /* ---------- WIDER PROGRAM (NEW — quiet) ---------- */
+  .wider {
+    background: var(--bg);
+    text-align: center;
+    border-top: 1px solid var(--hairline);
+  }
+  .wider .lede {
+    font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+    line-height: 1.5;
+    margin-top: 1.4rem;
+  }
+  .wider .anchor {
+    font-family: var(--serif-monument);
+    font-size: clamp(1rem, 1.4vw, 1.2rem);
+    letter-spacing: 0.36em;
+    color: var(--gold);
+    margin-top: 2.4rem;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+
+  /* ---------- WHY NOW ---------- */
+  .now {
+    background: var(--bg-2);
+    text-align: center;
+  }
+  .now h2 {
+    font-family: var(--serif-monument);
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .now-list {
+    margin-top: 3rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    text-align: left;
+  }
+  .now-item {
+    padding: 32px 32px 32px 0;
+    border-left: 1px solid var(--hairline);
+    padding-left: 32px;
+  }
+  .now-item:first-child { border-left: none; padding-left: 0; }
+  .now-item .num-mark {
+    font-family: var(--serif-monument);
+    font-size: 1rem;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    display: block;
+    margin-bottom: 14px;
+  }
+  .now-item h4 {
+    font-family: var(--serif-display);
+    font-size: 1.15rem;
+    color: var(--fg);
+    margin-bottom: 10px;
+  }
+  .now-item p { font-size: 0.9rem; }
+  @media (max-width: 880px) {
+    .now-list { grid-template-columns: 1fr; }
+    .now-item { border-left: none !important; padding-left: 0 !important; padding-top: 28px; border-top: 1px solid var(--hairline); }
+    .now-item:first-child { border-top: none; padding-top: 0; }
+  }
+
+  /* ---------- NEXT STEPS ---------- */
+  .next { background: var(--bg); text-align: center; }
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-top: 3rem;
+  }
+  .step {
+    border: 1px solid var(--hairline);
+    padding: 28px 22px;
+    text-align: center;
+  }
+  .step .num {
+    font-family: var(--serif-monument);
+    font-weight: 500;
+    font-size: 1.4rem;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+    margin-bottom: 14px;
+    display: block;
+  }
+  .step p { font-size: 0.85rem; line-height: 1.5; }
+  @media (max-width: 720px) {
+    .steps { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 480px) {
+    .steps { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- CLOSE / SIGN ---------- */
+  .close {
+    background: var(--bg-2);
+    text-align: center;
+    padding-bottom: 60px;
+  }
+  .close h2 {
+    font-family: var(--serif-monument);
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    margin-bottom: 1.6rem;
+  }
+  .signs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    margin-top: 4rem;
+    text-align: left;
+  }
+  .sign .label { margin-bottom: 36px; color: var(--gold); }
+  .sign .line {
+    border-bottom: 1px solid var(--fg-faint);
+    height: 32px;
+    margin-bottom: 12px;
+  }
+  .sign .name { font-family: var(--serif-display); font-size: 1.05rem; color: var(--fg); }
+  .sign .role { font-size: 0.78rem; color: var(--fg-mute); margin-top: 4px; }
+  @media (max-width: 720px) {
+    .signs { grid-template-columns: 1fr; gap: 44px; }
+  }
+
+  footer {
+    text-align: center;
+    padding: 60px var(--pad) 80px;
+    border-top: 1px solid var(--hairline);
+    background: var(--bg);
+  }
+  footer .fwordmark {
+    font-family: var(--serif-monument);
+    font-weight: 500;
+    letter-spacing: 0.4em;
+    font-size: 0.95rem;
+    color: var(--fg);
+    margin-bottom: 18px;
+  }
+  footer .fmeta {
+    font-size: 0.75rem;
+    letter-spacing: 0.25em;
+    color: var(--fg-mute);
+    text-transform: uppercase;
+  }
+  footer .fmeta a { color: var(--fg-soft); text-decoration: none; }
+  footer .fmeta a:hover { color: var(--fg); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    .reveal, .reveal-up, .reveal-stagger > * { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============================================ -->
+<!-- 1. HERO                                       -->
+<!-- ============================================ -->
+<section class="hero">
+  <video autoplay muted loop playsinline preload="metadata">
+    <source src="/static/jjc-dare/video/hero-loop.mp4" type="video/mp4">
+  </video>
+  <div class="hero-content">
+    <div class="eyebrow">Proposal &middot; April 2026</div>
+    <h1 class="monument">
+      <span class="word">Forged</span>
+      <span class="word">from</span>
+      <span class="word">what</span>
+      <span class="word">fell,</span>
+      <br>
+      <span class="word">made</span>
+      <span class="word">for</span>
+      <span class="word">what</span>
+      <span class="word">flies.</span>
+    </h1>
+    <div class="sub">DARE &nbsp;×&nbsp; JACKSON JET CENTER &nbsp;·&nbsp; BOISE &nbsp;+&nbsp; PHOENIX</div>
+  </div>
+  <div class="scroll-cue">
+    <div class="line"></div>
+    <div class="text">Scroll</div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 2. AN INVITATION                              -->
+<!-- ============================================ -->
+<section class="opening">
+  <div class="narrow reveal">
+    <div class="label">An Invitation</div>
+    <span class="hairline center"></span>
+    <p class="lede">
+      Tristan Dare is a 22 year old Boise artist who forges functional art from meteoric iron, using a technique almost no one else in the world can execute. We would like to commission a bespoke piece from him for each of Jackson Jet Center's two flagship terminals, fused with components recovered from human spaceflight and made for the rooms they will live in.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 3. THE ROOM YOU ALREADY HAVE                  -->
+<!-- ============================================ -->
+<section class="audience">
+  <div class="container reveal" style="text-align: center; max-width: 880px;">
+    <div class="label">The Buyer Is Already Here</div>
+    <h2 class="monument" style="margin-top: 1rem;">The right buyer walks through your terminals every day.</h2>
+    <p class="lede" style="margin-top: 1.8rem;">
+      Aircraft owners, charter clients, and collectors who spend tens of thousands of dollars on rare objects pass through Boise and Phoenix daily, and this work is made for that exact person.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 4. FIRST LOOK (wide render in lobby)          -->
+<!-- ============================================ -->
+<section class="first-look">
+  <div class="container">
+    <div class="first-look-grid reveal">
+      <div class="first-look-frame">
+        <img src="/static/jjc-dare/img/render-lobby.jpg" alt="Render of the DARE installation in the JJC Boise lobby" class="fade-on-load" loading="lazy" decoding="async">
+        <span class="render-tag">Render</span>
+      </div>
+      <div class="first-look-frame">
+        <img src="/static/jjc-dare/img/render-lobby-2.jpg" alt="Render of the DARE installation, alternate angle in the JJC Boise lobby" class="fade-on-load" loading="lazy" decoding="async">
+        <span class="render-tag">Render</span>
+      </div>
+    </div>
+    <div class="first-look-caption reveal">
+      <div class="label">First Look &middot; Boise FBO</div>
+      <p>Two angles of the proposed installation in your Boise lobby, placed where the existing Ray Ban display sits today. Photorealistic, but not a photograph.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 4. THE ARTIST                                 -->
+<!-- ============================================ -->
+<section class="artist">
+  <div class="container">
+    <div class="artist-grid">
+      <div class="artist-portrait reveal reveal-slow">
+        <img src="/static/jjc-dare/img/tristan-portrait.webp" alt="Tristan Dare in his studio">
+      </div>
+      <div class="reveal">
+        <div class="label">The Artist</div>
+        <h2 class="monument" style="margin-top: 1rem; margin-bottom: 1.4rem;">Tristan Dare</h2>
+        <p class="lede" style="margin-bottom: 1.4rem;">
+          Twenty two years old, based in Boise, and self taught since age eleven.
+        </p>
+        <p>
+          Tristan forges functional art from meteoric iron that traveled through space for four and a half billion years before reaching Earth. He developed a proprietary technique that preserves the Widmanstätten crystalline pattern through forging, the kind of detail almost no one else in the world can execute, and his commission work has placed pieces in private collections across three continents.
+        </p>
+        <p>
+          The two pieces being made for Jackson Jet Center will be the first to incorporate components recovered from human spaceflight, with aviation becoming the material rather than the metaphor.
+        </p>
+        <div class="credentials">
+          <div class="cred-item">
+            <span class="year">2024</span>
+            <div class="what">Homo Faber</div>
+            <div class="where">Featured Artist · Venice, Italy</div>
+          </div>
+          <div class="cred-item">
+            <span class="year">Since 2023</span>
+            <div class="what">Art Knife Invitational</div>
+            <div class="where">Member · Las Vegas</div>
+          </div>
+          <div class="cred-item">
+            <span class="year">2024</span>
+            <div class="what">The Art of Cutlery</div>
+            <div class="where">Exhibition · New York</div>
+          </div>
+          <div class="cred-item">
+            <span class="year">2022</span>
+            <div class="what">Wooden Sword Award</div>
+            <div class="where">Nominee · Blade Magazine</div>
+          </div>
+          <div class="cred-item">
+            <span class="year">2021 / 2022</span>
+            <div class="what">50M Play Buttons</div>
+            <div class="where">MrBeast &amp; Dude Perfect</div>
+          </div>
+          <div class="cred-item">
+            <span class="year">2024</span>
+            <div class="what">"World's Rarest Knife"</div>
+            <div class="where">Featured by MaxTheMeatGuy</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 5. THE WORK (Gallery)                         -->
+<!-- ============================================ -->
+<section class="work">
+  <div class="container">
+    <div class="work-intro reveal">
+      <div class="label">The Work</div>
+      <h2 class="monument" style="margin-top: 1rem;">Hand-forged. One of one. Every piece.</h2>
+      <p class="lede" style="max-width: 720px; margin: 1.6rem auto 0;">
+        These are not products. They are artifacts. A reference for the level of craft that will be brought to the pieces commissioned for Jackson Jet Center.
+      </p>
+    </div>
+
+    <div class="gallery reveal">
+      <div class="piece sz-7">
+        <img src="https://images.squarespace-cdn.com/content/v1/610daa05a39b361864b42021/eff3ab9c-421f-4b55-9f8d-4e510eab3415/Sword.jpg?format=1500w" alt="Ekleipsis" loading="lazy" decoding="async">
+        <div class="meta">
+          <div class="name">Ekleipsis</div>
+          <div class="price">$21,250</div>
+        </div>
+      </div>
+      <div class="piece sz-5">
+        <img src="https://images.squarespace-cdn.com/content/v1/610daa05a39b361864b42021/4221731e-70f3-4641-95c7-6d8ddd0efa1e/elisium2.jpg?format=1500w" alt="Elisium" loading="lazy" decoding="async">
+        <div class="meta">
+          <div class="name">Elisium</div>
+          <div class="price">$9,250</div>
+        </div>
+      </div>
+      <div class="piece sz-6">
+        <img src="https://images.squarespace-cdn.com/content/v1/610daa05a39b361864b42021/1741327029471-J0DV141ICM23KPWCO6R4/Cerberus_1.1.jpg?format=1500w" alt="Cerberus" loading="lazy" decoding="async">
+        <div class="meta">
+          <div class="name">Cerberus</div>
+          <div class="price">Reserved</div>
+        </div>
+      </div>
+      <div class="piece sz-6">
+        <img src="https://images.squarespace-cdn.com/content/v1/610daa05a39b361864b42021/53785791-0c9e-444c-8b4e-eb55dfad64a7/Aetos_Dios.jpg?format=1500w" alt="Aetos Dios" loading="lazy" decoding="async">
+        <div class="meta">
+          <div class="name">Aetos Dios</div>
+          <div class="price">Commissioned</div>
+        </div>
+      </div>
+      <div class="piece sz-6">
+        <img src="https://images.squarespace-cdn.com/content/v1/610daa05a39b361864b42021/1697588812103-55VA9X4B24ZOEAC3XI39/RingOfFire+saturation.jpg?format=1500w" alt="Ring of Fire" loading="lazy" decoding="async">
+        <div class="meta">
+          <div class="name">Ring of Fire</div>
+          <div class="price">$3,850</div>
+        </div>
+      </div>
+      <div class="piece sz-6">
+        <img src="https://images.squarespace-cdn.com/content/v1/610daa05a39b361864b42021/1681699441829-WO0CZX0YDI5OFHM0Y3OM/TentacleNoGrain.jpg?format=1500w" alt="Photon" loading="lazy" decoding="async">
+        <div class="meta">
+          <div class="name">Photon</div>
+          <div class="price">$4,250</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 7. THE MATERIALS (NEW)                        -->
+<!-- ============================================ -->
+<section class="materials">
+  <div class="container">
+    <div class="materials-intro reveal">
+      <div class="label">The Materials</div>
+      <h2>What returned from orbit, fused with what came before us.</h2>
+      <p class="materials-pull">
+        Each piece is forged from two histories: meteoric iron that fell to Earth long before humans existed, and components recovered from spacecraft humans built to leave it.
+      </p>
+    </div>
+
+    <div class="materials-grid reveal-stagger">
+      <div class="material">
+        <span class="label">Material I</span>
+        <h3>Meteoric Iron</h3>
+        <p>
+          Material that fell to Earth from interstellar space, older than the planet itself by 50 million years. The Widmanstätten crystalline pattern in this iron can only form over millions of years of cooling in zero gravity, and Tristan is one of the few smiths in the world who can preserve it through forging.
+        </p>
+        <div class="stat">4.5 Billion Years Old · Originating Off Earth</div>
+      </div>
+      <div class="material">
+        <span class="label">Material II</span>
+        <h3>Decommissioned Space Flown Components</h3>
+        <p>
+          Aluminum, titanium, and Inconel alloys recovered from human flown NASA spacecraft, the same materials that hold your charter customers above the ground every time they fly. Each piece will incorporate a documented component, accompanied by a certificate of provenance.
+        </p>
+        <div class="stat">Orbit Returned · Documented Provenance</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 8. THE PIECE (NEW)                            -->
+<!-- ============================================ -->
+<section class="the-piece">
+  <div class="narrow reveal">
+    <div class="label">The Bespoke Commission</div>
+    <h2 style="margin-top: 1rem;">Two pieces, each made for the room it will live in.</h2>
+    <p class="piece-anchor">
+      Each location receives its own original commission, signed and numbered, with shared materials but a form designed specifically for the room it will live in.
+    </p>
+  </div>
+
+  <div class="container piece-stats reveal-stagger">
+    <div class="stat-item">
+      <div class="stat-figure">2</div>
+      <div class="stat-caption">Pieces commissioned<br>One per location</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-figure">$10K–20K</div>
+      <div class="stat-caption">Estimated value<br>per piece</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-figure">1 of 1</div>
+      <div class="stat-caption">Each piece<br>Signed &amp; numbered</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 9. THE INSTALLATION                           -->
+<!-- ============================================ -->
+<section class="display">
+  <div class="display-feature">
+    <div class="display-feature-inner">
+      <div class="reveal">
+        <div class="label">The Installation</div>
+        <h2 class="monument" style="margin-top: 1rem;">A matte black case, lit from above.</h2>
+        <p class="lede">
+          Roughly the footprint of the existing Ray Ban display in your Boise lobby, with quieter lighting and a darker frame. The build is identical at both locations, with the bespoke piece different in each.
+        </p>
+      </div>
+      <div class="display-portrait reveal">
+        <img src="/static/jjc-dare/img/render-detail.jpg" alt="Render: detail view of the DARE case with featured piece on a moon textured backdrop" class="fade-on-load" loading="lazy" decoding="async">
+        <span class="render-tag">Render &middot; Detail</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="display-spec">
+    <div class="container reveal">
+      <div class="spec-grid">
+        <div class="spec">
+          <div class="label">The Case</div>
+          <h4>Black on black, lit from above.</h4>
+          <p>Matte black millwork with museum grade glass and internal LED tuned for the temperature of steel and meteorite. The featured piece is mounted on a textured panel that echoes the surface of the moon.</p>
+        </div>
+        <div class="spec">
+          <div class="label">The Screen</div>
+          <h4>Footage of the forging, looped without audio.</h4>
+          <p>A vertical OLED below the case loops behind the scenes footage of the piece being forged. The footage is filmed at Tristan's studio and at Jackson Jet Center, with JJC branding visible in the establishing shots.</p>
+        </div>
+        <div class="spec">
+          <div class="label">The Tag</div>
+          <h4>An NFC tag at the base unlocks a private experience.</h4>
+          <p>One tap walks the visitor through the story of the piece, the materials, the artist, and the path to inquire. Every scan is logged, and engagement data is reported back to JJC each month.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 10. HOW IT WORKS                              -->
+<!-- ============================================ -->
+<section class="how">
+  <div class="container">
+    <div class="how-intro reveal">
+      <div class="label">How It Works</div>
+      <h2>What happens between someone seeing the piece and JJC receiving the commission.</h2>
+      <p class="lede" style="margin-top: 1.6rem; max-width: 760px; margin-left: auto; margin-right: auto;">
+        A single front desk briefing of five minutes. After that, JJC's only operational role is signing for the commission wire and opening the case when a buyer wants the piece in hand.
+      </p>
+    </div>
+
+    <div class="flow reveal-stagger">
+      <div class="flow-step">
+        <span class="step-num">Step I</span>
+        <h4>Discover</h4>
+        <p>A visitor sees the piece in the lobby and taps the NFC tag at its base, or scans the engraved code.</p>
+      </div>
+      <div class="flow-step">
+        <span class="step-num">Step II</span>
+        <h4>Engage</h4>
+        <p>They reach a private experience that walks through the origin, materials, and artist, with a direct path to inquire about acquisition.</p>
+      </div>
+      <div class="flow-step">
+        <span class="step-num">Step III</span>
+        <h4>Close</h4>
+        <p>We handle every inquiry directly, including conversations, terms, and payment, so JJC has no role in the sale itself.</p>
+      </div>
+      <div class="flow-step">
+        <span class="step-num">Step IV</span>
+        <h4>Handoff</h4>
+        <p>The front desk receives a confirmation, opens the case, and either delivers the piece to the buyer in person or hands it to us to ship within 48 hours.</p>
+      </div>
+      <div class="flow-step">
+        <span class="step-num">Step V</span>
+        <h4>Commission</h4>
+        <p>The commission is wired to JJC the same day the sale closes, without invoicing or delay, and reported alongside the scan and engagement data each month.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 12. WHY THIS LANDS FOR JJC                    -->
+<!-- ============================================ -->
+<section class="value">
+  <div class="container">
+    <div class="reveal" style="text-align: center; margin-bottom: 4rem;">
+      <div class="label">For Jackson Jet Center</div>
+      <h2 class="monument" style="margin-top: 1rem;">Four reasons this lands.</h2>
+    </div>
+
+    <div class="value-grid reveal-stagger">
+      <div class="value-item">
+        <span class="num-mark">01</span>
+        <h3>Forged for your terminals specifically.</h3>
+        <p>Every premium FBO has the same coffee, magazines, and lounge. A bespoke installation with original pieces made for your rooms makes JJC the only FBO with this kind of presence, and the one other FBOs are asked about.</p>
+      </div>
+
+      <div class="value-item">
+        <span class="num-mark">02</span>
+        <h3>A passive content engine.</h3>
+        <p>The behind the scenes footage on the screen is filmed at JJC with your branding in the frames. That footage runs through Tristan's audience, press cycles, and collaborator network, which makes JJC part of the brand story rather than just the place it was filmed.</p>
+      </div>
+
+      <div class="value-item">
+        <span class="num-mark">03</span>
+        <h3>Real engagement data.</h3>
+        <p>Every scan, inquiry, and close is logged and reported back to JJC, so you see exactly how many people engaged with the installation and what it produced. No other lobby fixture can show that.</p>
+      </div>
+
+      <div class="value-item">
+        <span class="num-mark">04</span>
+        <h3>Founding partner status.</h3>
+        <p>JJC's two locations are the originating placements of this program. As it expands across the country, your founding partner status stays preserved in placement, sequencing, and press.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 13. THE ASK                                   -->
+<!-- ============================================ -->
+<section class="ask">
+  <div class="mid">
+    <div class="reveal">
+      <div class="label">What We Need</div>
+      <h2 class="monument" style="margin-top: 1rem;">Two small footprints, two power outlets, and a conversation about the rest.</h2>
+    </div>
+
+    <div class="ask-block reveal">
+      <div class="ask-row">
+        <div class="ask-key">Space</div>
+        <div class="ask-val">
+          One placement at Boise FBO and one at Phoenix FBO.
+          <small>Roughly the footprint of the existing Ray Ban display in Boise, around 24 by 24 inches at the base and 6 ft tall. Final placement is determined together during a walkthrough.</small>
+        </div>
+      </div>
+      <div class="ask-row">
+        <div class="ask-key">Power</div>
+        <div class="ask-val">
+          One standard 120V outlet at each location.
+          <small>For the internal lighting and the screen. Cabling is concealed inside the millwork.</small>
+        </div>
+      </div>
+      <div class="ask-row">
+        <div class="ask-key">Front Desk</div>
+        <div class="ask-val">
+          A five minute briefing on the handoff process at each location.
+          <small>The desk receives a confirmation when a piece is purchased, opens the case, hands the piece over, and signs the chain of custody. That is the entirety of the operational requirement.</small>
+        </div>
+      </div>
+      <div class="ask-row">
+        <div class="ask-key">Build &amp; Install</div>
+        <div class="ask-val">
+          Funded, built, delivered, and installed by Lumen × DARE.
+          <small>Including both bespoke pieces, both cases, both screens, signage, NFC tags, screen content, and ongoing maintenance. JJC carries no cost.</small>
+        </div>
+      </div>
+      <div class="ask-row">
+        <div class="ask-key">Commission</div>
+        <div class="ask-val">
+          Structure to be agreed in person.
+          <small>We have specific numbers we are comfortable with, and we would rather discuss them face to face than dictate them on paper. The intent is a structure that is meaningful for JJC and sustainable for us, paid the same day a sale closes.</small>
+        </div>
+      </div>
+      <div class="ask-row">
+        <div class="ask-key">Timeline</div>
+        <div class="ask-val">
+          Approximately forty five days from greenlight to installation.
+          <small>The bespoke pieces require sourcing, forging, and finishing, with cases built in parallel. Once both pieces and both cases are ready, the install is sequenced together.</small>
+        </div>
+      </div>
+      <div class="ask-row">
+        <div class="ask-key">Exclusivity</div>
+        <div class="ask-val">
+          First and only private terminals in their respective regions.
+          <small>JJC Boise is the founding Northwest placement, and JJC Phoenix is the founding Southwest placement. As the program grows nationally, your position as founding partner is preserved.</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 14. THE WIDER PROGRAM (NEW — quiet)           -->
+<!-- ============================================ -->
+<section class="wider">
+  <div class="narrow reveal">
+    <div class="label">Looking Forward</div>
+    <p class="lede">
+      These two locations are the first of a deliberate sequence, and as the program expands across the country, JJC's two FBOs hold the founding position. What happens next is built on what you say yes to today.
+    </p>
+    <div class="anchor">The First Two of a Larger Constellation</div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 15. WHY NOW                                   -->
+<!-- ============================================ -->
+<section class="now">
+  <div class="container">
+    <div class="reveal">
+      <div class="label">The Window</div>
+      <h2 class="monument" style="margin-top: 1rem;">Why this is on the table now.</h2>
+    </div>
+    <div class="now-list reveal-stagger">
+      <div class="now-item">
+        <span class="num-mark">I</span>
+        <h4>The model is proven.</h4>
+        <p>Tristan's current drop sells full sets at $39,950 each, with six of seven moving quickly. The demand at this price tier exists, and the only real question is where to meet it next.</p>
+      </div>
+      <div class="now-item">
+        <span class="num-mark">II</span>
+        <h4>Press cycles are imminent.</h4>
+        <p>Significant release moments tied to Tristan's name are scheduled in the coming months. JJC announced as the host venue ahead of those cycles compounds the impact for both sides.</p>
+      </div>
+      <div class="now-item">
+        <span class="num-mark">III</span>
+        <h4>Forging takes runway.</h4>
+        <p>Two bespoke pieces with materials sourced from human spaceflight take time to build. A yes now puts the install in autumn, while waiting means the broader program will be built around other cities first.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 16. NEXT STEPS                                -->
+<!-- ============================================ -->
+<section class="next">
+  <div class="container">
+    <div class="reveal">
+      <div class="label">If This Is a Yes</div>
+      <h2 class="monument" style="margin-top: 1rem;">Four steps from here.</h2>
+    </div>
+    <div class="steps reveal-stagger">
+      <div class="step">
+        <span class="num">01</span>
+        <p>Walkthrough at JJC Boise, with a photo and dimension review of Phoenix.</p>
+      </div>
+      <div class="step">
+        <span class="num">02</span>
+        <p>In person discussion of the commission structure and program terms.</p>
+      </div>
+      <div class="step">
+        <span class="num">03</span>
+        <p>Commissions begin on both pieces, with cases built in parallel.</p>
+      </div>
+      <div class="step">
+        <span class="num">04</span>
+        <p>Install at both locations together, followed by a quiet debut and then the press.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 17. CLOSE / SIGNATURES                        -->
+<!-- ============================================ -->
+<section class="close">
+  <div class="mid reveal">
+    <div class="label">Closing</div>
+    <h2>Two rooms, with one piece made for each of them.</h2>
+    <p class="lede" style="margin-top: 1.6rem;">
+      The right object in the right room finds the right person on its own, and Jackson Jet Center has two of the right rooms. We would like to put a piece in each one and let the work do the rest.
+    </p>
+    <div class="signs">
+      <div class="sign">
+        <div class="label">From DARE</div>
+        <div class="line"></div>
+        <div class="name">Tristan Dare</div>
+        <div class="role">Artist · Founder, DARE</div>
+      </div>
+      <div class="sign">
+        <div class="label">From Lumen</div>
+        <div class="line"></div>
+        <div class="name">Kendall Davis</div>
+        <div class="role">Founder, Lumen Marketing Solutions</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="fwordmark">DARE &nbsp;×&nbsp; LUMEN</div>
+  <div class="fmeta">
+    <a href="https://www.tristandareshop.com/">tristandareshop.com</a> &nbsp;·&nbsp;
+    <a href="https://www.instagram.com/tristandareofficial/">@tristandareofficial</a> &nbsp;·&nbsp;
+    Boise, Idaho
+  </div>
+</footer>
+
+<script>
+  // ----- Reveal on scroll -----
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.18, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.reveal, .reveal-up, .reveal-stagger, .artist-portrait').forEach((el) => io.observe(el));
+
+  // ----- Soft fade-in for images on load (avoids pop-in glitches) -----
+  document.querySelectorAll('.piece img, .fade-on-load').forEach((img) => {
+    if (img.complete && img.naturalWidth > 0) {
+      img.classList.add('loaded');
+    } else {
+      img.addEventListener('load', () => img.classList.add('loaded'), { once: true });
+      img.addEventListener('error', () => img.classList.add('loaded'), { once: true });
+    }
+  });
+
+  // ----- Pause hero video when scrolled out of view to free CPU/GPU -----
+  const heroVideo = document.querySelector('.hero video');
+  if (heroVideo) {
+    const visIO = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          heroVideo.play().catch(() => {});
+        } else {
+          heroVideo.pause();
+        }
+      });
+    }, { threshold: 0.05 });
+    visIO.observe(document.querySelector('.hero'));
+  }
+</script>
+
+</body>
+</html>
