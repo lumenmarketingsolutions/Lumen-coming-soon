@@ -159,7 +159,7 @@
   /* ---------- HERO ---------- */
   .hero {
     height: 100vh;
-    height: 100dvh;
+    height: 100svh;
     min-height: 560px;
     padding: 0;
     overflow: hidden;
@@ -1095,7 +1095,7 @@
 <!-- 1. HERO                                       -->
 <!-- ============================================ -->
 <section class="hero">
-  <video autoplay muted loop playsinline preload="metadata">
+  <video autoplay muted loop playsinline webkit-playsinline disablepictureinpicture preload="auto" x-webkit-airplay="deny">
     <source src="/static/jjc-dare/video/hero-loop.mp4" type="video/mp4">
   </video>
   <div class="hero-content">
@@ -1670,12 +1670,30 @@
   const heroVideo = document.querySelector('.hero video');
   if (heroVideo) {
     heroVideo.muted = true;
+    heroVideo.defaultMuted = true;
     heroVideo.setAttribute('muted', '');
     heroVideo.setAttribute('playsinline', '');
-    const tryPlay = () => { try { heroVideo.play().catch(() => {}); } catch (e) {} };
+    heroVideo.setAttribute('webkit-playsinline', '');
+    heroVideo.removeAttribute('controls');
+
+    const tryPlay = () => {
+      if (!heroVideo.paused) return;
+      try {
+        const p = heroVideo.play();
+        if (p) p.catch(() => {});
+      } catch (e) {}
+    };
+
+    heroVideo.addEventListener('loadedmetadata', tryPlay, { once: true });
+    heroVideo.addEventListener('canplay', tryPlay, { once: true });
+    if (heroVideo.readyState >= 2) tryPlay();
     tryPlay();
-    document.addEventListener('touchstart', tryPlay, { once: true, passive: true });
-    document.addEventListener('click', tryPlay, { once: true });
+
+    const userKick = () => tryPlay();
+    document.addEventListener('touchstart', userKick, { passive: true });
+    document.addEventListener('touchend', userKick, { passive: true });
+    document.addEventListener('click', userKick);
+    document.addEventListener('scroll', userKick, { passive: true });
 
     const visIO = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
