@@ -550,6 +550,10 @@ def jeremiah_newby():
 def tristan_dare():
     return render_template("tristan_dare.html")
 
+@app.route("/jackson-jet-center")
+def jackson_jet_center():
+    return render_template("jackson_jet_center.html")
+
 @app.route("/abraj-developments")
 def abraj_proposal():
     return render_template("abraj_proposal.html")
