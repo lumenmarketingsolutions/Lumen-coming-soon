@@ -176,24 +176,43 @@
     z-index: 2;
     pointer-events: none;
   }
+  .hero-poster {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    opacity: 0.55;
+    transition: opacity 0.8s ease;
+  }
+  .hero-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
   .hero video {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    z-index: 1;
-    opacity: 0.55;
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.8s ease;
     pointer-events: none;
   }
+  .hero.video-on video { opacity: 0.55; }
+  .hero.video-on .hero-poster { opacity: 0; }
   .hero video::-webkit-media-controls,
   .hero video::-webkit-media-controls-panel,
+  .hero video::-webkit-media-controls-enclosure,
   .hero video::-webkit-media-controls-start-playback-button,
   .hero video::-webkit-media-controls-overlay-play-button,
   .hero video::-webkit-media-controls-play-button {
     display: none !important;
     -webkit-appearance: none !important;
     opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
   .hero-content {
     position: relative;
@@ -1095,7 +1114,10 @@
 <!-- 1. HERO                                       -->
 <!-- ============================================ -->
 <section class="hero">
-  <video autoplay muted loop playsinline webkit-playsinline disablepictureinpicture preload="auto" x-webkit-airplay="deny">
+  <picture class="hero-poster">
+    <img src="/static/jjc-dare/img/hero-poster.jpg" alt="" decoding="async" fetchpriority="high">
+  </picture>
+  <video autoplay muted loop playsinline webkit-playsinline disablepictureinpicture preload="auto" x-webkit-airplay="deny" poster="/static/jjc-dare/img/hero-poster.jpg">
     <source src="/static/jjc-dare/video/hero-loop.mp4" type="video/mp4">
   </video>
   <div class="hero-content">
@@ -1672,8 +1694,13 @@
     }
   });
 
-  // ----- Force-start hero video on mobile, pause when out of view -----
-  const heroVideo = document.querySelector('.hero video');
+  // ----- Hero video with poster fallback -----
+  // The poster image always shows underneath the video. Once the video
+  // actually starts playing, we fade the poster out and the video in.
+  // If autoplay is blocked (iOS Low Power Mode, etc.), we remove the
+  // video element entirely on mobile so iOS cannot show a play button.
+  const heroSection = document.querySelector('.hero');
+  const heroVideo = heroSection ? heroSection.querySelector('video') : null;
   if (heroVideo) {
     heroVideo.muted = true;
     heroVideo.defaultMuted = true;
@@ -1682,20 +1709,47 @@
     heroVideo.setAttribute('webkit-playsinline', '');
     heroVideo.removeAttribute('controls');
 
+    const isMobileVp = window.matchMedia('(max-width: 700px)').matches;
+    let playSucceeded = false;
+
+    heroVideo.addEventListener('playing', () => {
+      playSucceeded = true;
+      heroSection.classList.add('video-on');
+    }, { once: true });
+
     const tryPlay = () => {
-      if (!heroVideo.paused) return;
+      if (!heroVideo.paused) return Promise.resolve();
       try {
         const p = heroVideo.play();
-        if (p) p.catch(() => {});
-      } catch (e) {}
+        return p || Promise.resolve();
+      } catch (e) { return Promise.reject(e); }
     };
 
-    heroVideo.addEventListener('loadedmetadata', tryPlay, { once: true });
-    heroVideo.addEventListener('canplay', tryPlay, { once: true });
-    if (heroVideo.readyState >= 2) tryPlay();
-    tryPlay();
+    const handleFailure = () => {
+      if (isMobileVp && !playSucceeded) {
+        heroVideo.remove();
+      }
+    };
 
-    const userKick = () => tryPlay();
+    const attempt = () => {
+      const p = tryPlay();
+      if (p && p.catch) p.catch(() => {});
+    };
+
+    heroVideo.addEventListener('loadedmetadata', attempt, { once: true });
+    heroVideo.addEventListener('canplay', attempt, { once: true });
+    if (heroVideo.readyState >= 2) attempt();
+    attempt();
+
+    // After a moment, if we still haven't played, remove the video on mobile
+    setTimeout(() => {
+      if (!playSucceeded) handleFailure();
+    }, 2500);
+
+    const userKick = () => {
+      const p = tryPlay();
+      if (p && p.catch) p.catch(() => {});
+    };
     document.addEventListener('touchstart', userKick, { passive: true });
     document.addEventListener('touchend', userKick, { passive: true });
     document.addEventListener('click', userKick);
@@ -1704,13 +1758,13 @@
     const visIO = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          tryPlay();
-        } else {
+          attempt();
+        } else if (heroVideo.parentNode) {
           heroVideo.pause();
         }
       });
     }, { threshold: 0.05 });
-    visIO.observe(document.querySelector('.hero'));
+    visIO.observe(heroSection);
   }
 </script>
 
