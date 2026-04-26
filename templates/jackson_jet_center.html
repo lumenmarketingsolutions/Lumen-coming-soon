@@ -1645,6 +1645,9 @@
 
 <script>
   // ----- Reveal on scroll -----
+  // Mobile gets a much earlier trigger so reveals fire before the element
+  // enters the viewport, making the page feel responsive on small screens.
+  const isMobile = window.matchMedia('(max-width: 700px)').matches;
   const io = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
@@ -1652,7 +1655,10 @@
         io.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.18, rootMargin: '0px 0px -40px 0px' });
+  }, {
+    threshold: 0,
+    rootMargin: isMobile ? '0px 0px 25% 0px' : '0px 0px -40px 0px'
+  });
 
   document.querySelectorAll('.reveal, .reveal-up, .reveal-stagger, .artist-portrait').forEach((el) => io.observe(el));
 
