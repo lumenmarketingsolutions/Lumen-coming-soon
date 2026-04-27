@@ -554,6 +554,10 @@ def tristan_dare():
 def jackson_jet_center():
     return render_template("jackson_jet_center.html")
 
+@app.route("/formula-dynamics")
+def formula_dynamics():
+    return render_template("formula_dynamics.html")
+
 @app.route("/abraj-developments")
 def abraj_proposal():
     return render_template("abraj_proposal.html")

@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>An Audit + Strategy for Formula Dynamics</title>
+<meta name="description" content="A direct audit of Formula Dynamics' paid acquisition, organic search, and retention systems. Plus three tiers of engagement to fix what we found.">
+
+<link rel="icon" type="image/svg+xml" href="/static/formula-dynamics/img/favicon.svg">
+
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://lumenmarketing.co/formula-dynamics">
+<meta property="og:title" content="An Audit + Strategy for Formula Dynamics">
+<meta property="og:description" content="What we found, and where we'd take it from here.">
+<meta property="og:image" content="https://lumenmarketing.co/static/formula-dynamics/img/ferrari-red.webp">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --bg-2: #131313;
+    --bg-3: #1a1a1a;
+    --fg: #f3f0ea;
+    --fg-soft: rgba(243, 240, 234, 0.74);
+    --fg-mute: rgba(243, 240, 234, 0.5);
+    --fg-faint: rgba(243, 240, 234, 0.28);
+    --hairline: rgba(243, 240, 234, 0.12);
+    --hairline-strong: rgba(243, 240, 234, 0.28);
+    --rosso: #c8201f;
+    --rosso-deep: #8b1715;
+    --oro: #c89544;
+    --verde: #1d6841;
+
+    --display: 'Playfair Display', Georgia, serif;
+    --serif-italic: 'EB Garamond', Georgia, serif;
+    --sans: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+    --pad: clamp(28px, 5vw, 76px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-weight: 300;
+    font-size: 15px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+  }
+  img, video { display: block; max-width: 100%; height: auto; }
+
+  /* Type system */
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: 0.6rem;
+    font-weight: 500;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--oro);
+  }
+  .label {
+    font-family: var(--sans);
+    font-size: 0.64rem;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--rosso);
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--display);
+    font-weight: 500;
+    letter-spacing: -0.005em;
+    line-height: 1.18;
+    color: var(--fg);
+  }
+  h1 { font-size: clamp(2.2rem, 5.4vw, 4.4rem); line-height: 1.06; font-weight: 600; }
+  h2 { font-size: clamp(1.7rem, 3.4vw, 2.7rem); line-height: 1.18; font-weight: 600; }
+  h3 { font-size: clamp(1.15rem, 1.85vw, 1.45rem); font-weight: 500; }
+  h4 { font-size: 1rem; font-weight: 500; }
+
+  h1 em, h2 em { font-family: var(--display); font-style: italic; color: var(--rosso); font-weight: 500; }
+
+  .lede {
+    font-family: var(--display);
+    font-size: clamp(1.1rem, 1.7vw, 1.45rem);
+    line-height: 1.5;
+    color: var(--fg-soft);
+    font-weight: 400;
+  }
+  p { color: var(--fg-soft); }
+  p + p { margin-top: 0.9em; }
+  strong { color: var(--fg); font-weight: 500; }
+  em.q {
+    font-family: var(--serif-italic);
+    font-style: italic;
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  /* Italian flag accent */
+  .tricolore {
+    display: flex;
+    width: 64px;
+    height: 2px;
+  }
+  .tricolore.center { margin: 0 auto 2rem; }
+  .tricolore.lg { width: 72px; height: 2px; margin: 0 auto 2.4rem; }
+  .tricolore .stripe { flex: 1; }
+  .tricolore .stripe.green { background: var(--verde); }
+  .tricolore .stripe.white { background: var(--fg); }
+  .tricolore .stripe.red { background: var(--rosso); }
+
+  /* Layout */
+  section { position: relative; padding: clamp(80px, 12vh, 140px) var(--pad); }
+  .container { max-width: 1080px; margin: 0 auto; width: 100%; }
+  .narrow { max-width: 700px; margin: 0 auto; }
+  .mid { max-width: 900px; margin: 0 auto; }
+
+  /* Reveal */
+  .reveal {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+    transition: opacity 0.9s cubic-bezier(.16,.84,.32,1),
+                transform 0.9s cubic-bezier(.16,.84,.32,1);
+  }
+  .reveal.in { opacity: 1; transform: translate3d(0,0,0); }
+  .reveal-stagger > * {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+    transition: opacity 0.9s cubic-bezier(.16,.84,.32,1),
+                transform 0.9s cubic-bezier(.16,.84,.32,1);
+  }
+  .reveal-stagger.in > * { opacity: 1; transform: translate3d(0,0,0); }
+  .reveal-stagger.in > *:nth-child(1) { transition-delay: 0.05s; }
+  .reveal-stagger.in > *:nth-child(2) { transition-delay: 0.18s; }
+  .reveal-stagger.in > *:nth-child(3) { transition-delay: 0.31s; }
+  .reveal-stagger.in > *:nth-child(4) { transition-delay: 0.44s; }
+  .reveal-stagger.in > *:nth-child(5) { transition-delay: 0.57s; }
+  .reveal-stagger.in > *:nth-child(6) { transition-delay: 0.7s; }
+
+  /* HERO */
+  .hero {
+    min-height: 90vh;
+    min-height: 90svh;
+    padding: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    position: relative;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.7) 50%, rgba(10,10,10,0.95) 100%),
+      radial-gradient(ellipse at center, transparent 20%, rgba(10,10,10,0.5) 100%);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+    opacity: 0.62;
+  }
+  .hero-content {
+    position: relative;
+    z-index: 3;
+    max-width: 980px;
+    padding: 0 var(--pad);
+  }
+  .hero .fd-logo {
+    max-width: 240px;
+    width: 56vw;
+    margin: 0 auto 2.4rem;
+    opacity: 0;
+    animation: fadeIn 1.2s 0.2s cubic-bezier(.16,.84,.32,1) forwards;
+    filter: drop-shadow(0 4px 24px rgba(0,0,0,0.6));
+  }
+  .hero h1 {
+    opacity: 0;
+    animation: fadeUp 1.4s 0.6s cubic-bezier(.16,.84,.32,1) forwards;
+  }
+  .hero .sub {
+    margin-top: 2rem;
+    font-family: var(--sans);
+    font-size: 0.74rem;
+    letter-spacing: 0.36em;
+    color: var(--fg-soft);
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeIn 1.6s 1.4s cubic-bezier(.16,.84,.32,1) forwards;
+  }
+  .hero .sub .dot { color: var(--rosso); margin: 0 0.5em; }
+
+  @keyframes fadeIn { to { opacity: 1; } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+  .scroll-cue {
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    opacity: 0;
+    animation: fadeIn 1.4s 2.2s ease forwards;
+    text-align: center;
+  }
+  .scroll-cue .line {
+    width: 1px; height: 44px;
+    background: linear-gradient(180deg, transparent, var(--fg-faint));
+    margin: 0 auto 12px;
+  }
+  .scroll-cue .text {
+    font-size: 0.56rem;
+    letter-spacing: 0.36em;
+    color: var(--fg-mute);
+    text-transform: uppercase;
+  }
+
+  /* OPENING */
+  .opening {
+    background: var(--bg);
+    text-align: center;
+  }
+  .opening .lede {
+    font-size: clamp(1.2rem, 1.85vw, 1.55rem);
+    line-height: 1.5;
+  }
+
+  /* BREATHER (image only, no padding) */
+  .breather {
+    position: relative;
+    height: 50vh;
+    min-height: 360px;
+    overflow: hidden;
+    padding: 0;
+  }
+  .breather img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    opacity: 0.78;
+  }
+  .breather::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, var(--bg) 0%, transparent 18%, transparent 82%, var(--bg) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* AUDIT */
+  .audit { background: var(--bg); border-top: 1px solid var(--hairline); }
+  .audit-intro {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+  .audit-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 56px;
+    margin-top: 0;
+  }
+  .audit-item {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  .audit-item .num {
+    font-family: var(--display);
+    font-size: 1.6rem;
+    font-style: italic;
+    color: var(--rosso);
+    font-weight: 500;
+    line-height: 1;
+    padding-top: 4px;
+  }
+  .audit-item h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+  }
+  .audit-item .verdict {
+    font-family: var(--sans);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-bottom: 0.7rem;
+    display: inline-block;
+  }
+  .audit-item .verdict.good { color: var(--verde); }
+  .audit-item .verdict.gap { color: var(--rosso); }
+  .audit-item .verdict.opp { color: var(--oro); }
+  .audit-item p { font-size: 0.95rem; }
+  @media (max-width: 600px) {
+    .audit-item { grid-template-columns: 1fr; gap: 8px; }
+    .audit-item .num { padding-top: 0; }
+  }
+
+  /* LARINI CALLOUT (big visual moment) */
+  .larini {
+    background: var(--bg-2);
+    text-align: center;
+    padding: clamp(96px, 14vh, 160px) var(--pad);
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+    position: relative;
+    overflow: hidden;
+  }
+  .larini::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(200, 32, 31, 0.08) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .larini > * { position: relative; z-index: 1; }
+  .larini .label { color: var(--rosso); }
+  .larini .big-line {
+    font-family: var(--display);
+    font-size: clamp(1.5rem, 3vw, 2.4rem);
+    line-height: 1.32;
+    max-width: 880px;
+    margin: 1.4rem auto 0;
+    font-weight: 500;
+  }
+  .larini .big-line em {
+    color: var(--rosso);
+    font-family: var(--display);
+    font-style: italic;
+    font-weight: 500;
+  }
+  .larini .small {
+    margin-top: 2.4rem;
+    font-size: 0.8rem;
+    color: var(--fg-mute);
+    letter-spacing: 0.04em;
+    max-width: 540px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* STRATEGY (pillars) */
+  .strategy { background: var(--bg); }
+  .strategy-intro { text-align: center; margin-bottom: 4rem; max-width: 760px; margin-left: auto; margin-right: auto; }
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+  }
+  .pillar {
+    padding: 32px 26px;
+    border: 1px solid var(--hairline);
+    background: var(--bg-2);
+    transition: border-color 0.3s ease, transform 0.3s ease;
+  }
+  .pillar:hover { border-color: var(--hairline-strong); }
+  .pillar .pill-num {
+    font-family: var(--display);
+    font-style: italic;
+    color: var(--rosso);
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  .pillar h3 { margin-bottom: 0.7rem; }
+  .pillar p { font-size: 0.9rem; line-height: 1.6; }
+  @media (max-width: 880px) { .pillars { grid-template-columns: 1fr; } }
+
+  /* PULL QUOTE */
+  .pullquote {
+    background: var(--bg);
+    text-align: center;
+    padding: clamp(80px, 12vh, 140px) var(--pad);
+  }
+  .pullquote blockquote {
+    font-family: var(--serif-italic);
+    font-style: italic;
+    font-size: clamp(1.35rem, 2.4vw, 1.95rem);
+    line-height: 1.45;
+    color: var(--fg);
+    max-width: 880px;
+    margin: 0 auto;
+    font-weight: 500;
+  }
+  .pullquote blockquote::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--rosso);
+    margin: 0 auto 28px;
+  }
+  .pullquote blockquote::after {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 1px;
+    background: var(--rosso);
+    margin: 28px auto 0;
+  }
+
+  /* TIERS */
+  .tiers { background: var(--bg-2); border-top: 1px solid var(--hairline); }
+  .tiers-intro { text-align: center; margin-bottom: 3.6rem; max-width: 720px; margin-left: auto; margin-right: auto; }
+  .tier-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    align-items: stretch;
+  }
+  .tier {
+    background: var(--bg);
+    border: 1px solid var(--hairline);
+    padding: 36px 28px 28px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .tier.featured { border-color: var(--rosso); }
+  .tier.featured::after {
+    content: 'RECOMMENDED';
+    position: absolute;
+    top: -1px; right: -1px;
+    background: var(--rosso);
+    color: var(--fg);
+    font-size: 0.55rem;
+    letter-spacing: 0.32em;
+    font-weight: 600;
+    padding: 6px 12px;
+  }
+  .tier .tier-name {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.4rem;
+    margin-bottom: 0.3rem;
+  }
+  .tier .tier-tag {
+    font-size: 0.62rem;
+    letter-spacing: 0.28em;
+    color: var(--oro);
+    text-transform: uppercase;
+    margin-bottom: 1.6rem;
+    font-weight: 500;
+  }
+  .tier .price {
+    font-family: var(--display);
+    font-size: 1.85rem;
+    color: var(--fg);
+    font-weight: 600;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .tier .price-sub {
+    font-size: 0.78rem;
+    color: var(--fg-mute);
+    margin-bottom: 1.8rem;
+    line-height: 1.5;
+  }
+  .tier ul {
+    list-style: none;
+    margin: 0 0 0;
+    padding: 0;
+    flex: 1;
+  }
+  .tier li {
+    font-size: 0.84rem;
+    line-height: 1.55;
+    color: var(--fg-soft);
+    padding: 0.7rem 0 0.7rem 22px;
+    position: relative;
+    border-top: 1px solid var(--hairline);
+  }
+  .tier li:first-child { border-top: none; padding-top: 0; }
+  .tier li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 1.05rem;
+    width: 12px; height: 1px;
+    background: var(--rosso);
+  }
+  .tier li:first-child::before { top: 0.55rem; }
+  @media (max-width: 980px) {
+    .tier-grid { grid-template-columns: 1fr; }
+  }
+
+  /* PHASE 0 */
+  .phase {
+    background: var(--bg);
+    border-top: 1px solid var(--hairline);
+  }
+  .phase-intro { text-align: center; margin-bottom: 3rem; max-width: 720px; margin-left: auto; margin-right: auto; }
+  .phase-list {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+  }
+  .phase-step {
+    padding: 30px 22px;
+    border-left: 1px solid var(--hairline);
+  }
+  .phase-step:first-child { border-left: none; }
+  .phase-step .step-num {
+    font-family: var(--display);
+    font-style: italic;
+    color: var(--rosso);
+    font-size: 1.1rem;
+    margin-bottom: 0.9rem;
+    display: block;
+  }
+  .phase-step h4 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-bottom: 0.6rem;
+  }
+  .phase-step p { font-size: 0.82rem; line-height: 1.55; }
+  @media (max-width: 880px) {
+    .phase-list { grid-template-columns: 1fr 1fr; }
+    .phase-step:nth-child(odd) { border-left: none; }
+    .phase-step:nth-child(n+3) { border-top: 1px solid var(--hairline); }
+  }
+  @media (max-width: 540px) {
+    .phase-list { grid-template-columns: 1fr; }
+    .phase-step { border-left: none !important; }
+    .phase-step:nth-child(n+2) { border-top: 1px solid var(--hairline); }
+  }
+
+  /* ABOUT / STATS */
+  .about {
+    background: var(--bg-2);
+    border-top: 1px solid var(--hairline);
+  }
+  .about-intro {
+    max-width: 760px;
+    margin: 0 auto 3.4rem;
+    text-align: center;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0;
+  }
+  .stat {
+    padding: 22px 22px 22px 0;
+    border-left: 1px solid var(--hairline);
+    padding-left: 22px;
+  }
+  .stat:first-child { border-left: none; padding-left: 0; }
+  .stat .figure {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 2.4vw, 2.1rem);
+    color: var(--rosso);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+  .stat .caption {
+    font-size: 0.66rem;
+    letter-spacing: 0.22em;
+    color: var(--fg-mute);
+    text-transform: uppercase;
+    line-height: 1.5;
+    font-weight: 500;
+  }
+  @media (max-width: 880px) {
+    .stats { grid-template-columns: 1fr 1fr; }
+    .stats .stat:nth-child(3) { border-left: none; padding-left: 0; }
+    .stats .stat:nth-child(n+3) { border-top: 1px solid var(--hairline); padding-top: 22px; margin-top: 22px; }
+  }
+  @media (max-width: 540px) {
+    .stats { grid-template-columns: 1fr; }
+    .stats .stat { border-left: none !important; padding-left: 0 !important; border-top: 1px solid var(--hairline); padding-top: 22px; margin-top: 22px; }
+    .stats .stat:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+  }
+
+  /* TERMS */
+  .terms { background: var(--bg); }
+  .terms-intro { text-align: center; margin-bottom: 2.4rem; max-width: 720px; margin-left: auto; margin-right: auto; }
+  .terms-block {
+    border: 1px solid var(--hairline);
+    padding: clamp(32px, 4.5vw, 56px);
+    background: var(--bg-2);
+  }
+  .terms-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 28px;
+    padding: 22px 0;
+    border-top: 1px solid var(--hairline);
+    align-items: baseline;
+  }
+  .terms-row:first-child { border-top: none; padding-top: 0; }
+  .terms-row .key {
+    font-family: var(--sans);
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    color: var(--oro);
+    text-transform: uppercase;
+  }
+  .terms-row .val {
+    font-family: var(--display);
+    font-size: 1.05rem;
+    color: var(--fg);
+    line-height: 1.5;
+    font-weight: 500;
+  }
+  .terms-row .val small {
+    display: block;
+    margin-top: 6px;
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    color: var(--fg-mute);
+    line-height: 1.55;
+    font-weight: 300;
+  }
+  @media (max-width: 720px) {
+    .terms-row { grid-template-columns: 1fr; gap: 6px; }
+  }
+
+  /* CTA */
+  .cta {
+    background: var(--bg-2);
+    text-align: center;
+    border-top: 1px solid var(--hairline);
+    padding: clamp(96px, 14vh, 160px) var(--pad);
+  }
+  .cta h2 em { color: var(--rosso); }
+  .cta p {
+    font-size: 1rem;
+    margin: 1rem auto 0;
+    max-width: 620px;
+  }
+  .cta-btn {
+    display: inline-block;
+    margin-top: 2.4rem;
+    padding: 17px 44px;
+    background: var(--rosso);
+    color: var(--fg);
+    text-decoration: none;
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.74rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    border: 1px solid var(--rosso);
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  .cta-btn:hover {
+    background: var(--rosso-deep);
+    border-color: var(--rosso-deep);
+    transform: translateY(-1px);
+  }
+  .cta .secondary {
+    display: block;
+    margin-top: 1.4rem;
+    font-size: 0.78rem;
+    color: var(--fg-mute);
+    letter-spacing: 0.04em;
+  }
+  .cta .secondary a {
+    color: var(--fg-soft);
+    text-decoration: none;
+    border-bottom: 1px solid var(--hairline);
+    padding-bottom: 1px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .cta .secondary a:hover { color: var(--fg); border-color: var(--rosso); }
+
+  /* SIGN OFF */
+  .signoff {
+    background: var(--bg);
+    text-align: center;
+    padding: clamp(72px, 10vh, 120px) var(--pad);
+    border-top: 1px solid var(--hairline);
+  }
+  .signoff .signature {
+    font-family: var(--display);
+    font-style: italic;
+    font-size: 1.6rem;
+    color: var(--fg);
+    margin-bottom: 0.4rem;
+    font-weight: 500;
+  }
+  .signoff .role {
+    font-size: 0.66rem;
+    letter-spacing: 0.32em;
+    color: var(--fg-mute);
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .signoff .meta {
+    margin-top: 1.6rem;
+    font-size: 0.78rem;
+    color: var(--fg-soft);
+  }
+  .signoff .meta a {
+    color: var(--oro);
+    text-decoration: none;
+  }
+
+  footer {
+    text-align: center;
+    padding: 36px var(--pad) 56px;
+    border-top: 1px solid var(--hairline);
+    background: var(--bg);
+  }
+  footer .fwordmark {
+    font-family: var(--display);
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    font-size: 0.78rem;
+    color: var(--fg);
+    margin-bottom: 12px;
+  }
+  footer .fmeta {
+    font-size: 0.6rem;
+    letter-spacing: 0.28em;
+    color: var(--fg-mute);
+    text-transform: uppercase;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+    .reveal, .reveal-stagger > * { opacity: 1; transform: none; }
+  }
+
+  /* Easter egg modal */
+  .ee-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .ee-modal.show { display: flex; opacity: 1; }
+  .ee-modal-inner {
+    background: var(--bg-2);
+    border: 1px solid var(--rosso);
+    padding: 48px 44px;
+    max-width: 460px;
+    width: 100%;
+    text-align: center;
+    transform: translateY(20px);
+    transition: transform 0.4s cubic-bezier(.16,.84,.32,1);
+    position: relative;
+  }
+  .ee-modal.show .ee-modal-inner { transform: translateY(0); }
+  .ee-modal-flag {
+    display: flex;
+    width: 64px;
+    height: 3px;
+    margin: 0 auto 1.6rem;
+  }
+  .ee-modal-flag .stripe { flex: 1; }
+  .ee-modal-flag .green { background: var(--verde); }
+  .ee-modal-flag .white { background: var(--fg); }
+  .ee-modal-flag .red { background: var(--rosso); }
+  .ee-modal h3 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.6rem;
+    color: var(--fg);
+    margin-bottom: 0.8rem;
+    line-height: 1.2;
+  }
+  .ee-modal h3 em { color: var(--rosso); font-family: var(--display); font-style: italic; }
+  .ee-modal p {
+    font-size: 0.92rem;
+    color: var(--fg-soft);
+    line-height: 1.6;
+    margin-bottom: 1.6rem;
+  }
+  .ee-modal p a {
+    color: var(--rosso);
+    text-decoration: none;
+    font-weight: 500;
+    border-bottom: 1px solid var(--rosso);
+    padding-bottom: 1px;
+  }
+  .ee-modal-close {
+    background: transparent;
+    border: 1px solid var(--hairline-strong);
+    color: var(--fg);
+    font-family: var(--sans);
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    padding: 12px 28px;
+    cursor: pointer;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .ee-modal-close:hover { border-color: var(--rosso); color: var(--rosso); }
+</style>
+</head>
+<body>
+
+<!-- ============================================ -->
+<!-- 1. HERO                                       -->
+<!-- ============================================ -->
+<section class="hero">
+  <img src="/static/formula-dynamics/img/ferrari-red.webp" alt="" class="hero-bg" decoding="async" fetchpriority="high">
+  <div class="hero-content">
+    <img src="/static/formula-dynamics/img/fd-logo.png" alt="Formula Dynamics" class="fd-logo">
+    <h1>An audit, <em>and a plan.</em></h1>
+    <div class="sub">Prepared for Nate <span class="dot">·</span> April 2026</div>
+  </div>
+  <div class="scroll-cue">
+    <div class="line"></div>
+    <div class="text">Begin</div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 2. OPENING                                    -->
+<!-- ============================================ -->
+<section class="opening">
+  <div class="narrow reveal">
+    <span class="tricolore lg"><span class="stripe green"></span><span class="stripe white"></span><span class="stripe red"></span></span>
+    <p class="lede">
+      You asked me to take a look and see what I can find. This is what I found: a real audit of the public facing data, and the strategy I would run from here.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 3. AUDIT                                      -->
+<!-- ============================================ -->
+<section class="audit">
+  <div class="container">
+    <div class="audit-intro reveal">
+      <div class="label">What We Found</div>
+      <h2 style="margin-top: 1rem;">Six things, looking at the surface.</h2>
+      <p class="lede" style="margin-top: 1.4rem; max-width: 760px; margin-left: auto; margin-right: auto;">
+        Once we are inside Klaviyo, Shopify, Google, and Meta the picture sharpens, but these six are what stand out today.
+      </p>
+    </div>
+
+    <div class="audit-grid reveal-stagger">
+      <div class="audit-item">
+        <div class="num">01</div>
+        <div>
+          <div class="verdict good">Working &middot; do not touch</div>
+          <h3>You own your branded SERP and your proprietary SKUs.</h3>
+          <p>
+            Search "Formula Dynamics" and your homepage, collections, About, and Contact occupy the entire first page. You also rank number one organically for proprietary product names like the <strong>Drive By Wire Enhancement Module</strong> and <strong>Larini Systems Maserati distributor</strong>. 237 keywords ranking total, with organic supplying 74 percent of your search driven traffic.
+          </p>
+          <p style="margin-top: 0.9em;">
+            Protecting this means every page that already ranks stays exactly as it is, including titles, URLs, and on page copy. We bid defensively on your brand name in paid search so competitors cannot buy the spot above your organic listing, and we watch the rankings every month so any drop is caught the same month it happens.
+          </p>
+        </div>
+      </div>
+
+      <div class="audit-item">
+        <div class="num">02</div>
+        <div>
+          <div class="verdict gap">Bleeding &middot; immediate fix</div>
+          <h3>You are invisible on category head terms.</h3>
+          <p>
+            The buyer searching <em class="q">Maserati GranTurismo exhaust upgrade</em> or <em class="q">Maserati performance parts</em> sees Fabspeed, Fi Exhaust, Supersprint, Scuderia Car Parts, Performance SpeedShop, CARiD, NAPA. Formula Dynamics is not on page one for any of these. Each of those clicks is a buyer who should have landed in your store, and they are landing in your competitor's instead. This is the most expensive gap on the audit.
+          </p>
+        </div>
+      </div>
+
+      <div class="audit-item">
+        <div class="num">03</div>
+        <div>
+          <div class="verdict gap">Bleeding &middot; immediate cut</div>
+          <h3>Display is your largest paid channel and the sessions are four seconds.</h3>
+          <p>
+            Public traffic data shows Display as your primary inbound source today, with an average visit duration of four seconds. That is bot adjacent traffic, almost certainly placed by a network optimizing for impressions rather than buyers of $9,500 brake kits. The money is better spent on Search head term coverage and YouTube pre rolls in front of actual exotic owners.
+          </p>
+        </div>
+      </div>
+
+      <div class="audit-item">
+        <div class="num">04</div>
+        <div>
+          <div class="verdict gap">Bleeding &middot; build it</div>
+          <h3>Your organic Meta is the only thing running.</h3>
+          <p>
+            The Instagram is consistent, the Page is active, the posts look the part. The gap is the paid layer that turns those impressions into buyers. The play that wins for a brand selling $9,500 brake kits is audience architecture built page by page, where a visitor who lands on a Maserati exhaust gets retargeted with that exhaust and a buyer who priced a Brembo BBK sees that BBK again with the install video and the price. Right now the buyers who already touched your site are walking away cold.
+          </p>
+        </div>
+      </div>
+
+      <div class="audit-item">
+        <div class="num">05</div>
+        <div>
+          <div class="verdict gap">Bleeding &middot; immediate fix</div>
+          <h3>Your welcome email is broken, and I tested it myself.</h3>
+          <p>
+            I signed up the same way any visitor would. The footer form promised <em class="q">Discounts straight to your inbox</em>. What arrived, fifteen minutes later, was a welcome email titled <em class="q">Let's Get This Build Started</em>, with no discount code and no offer. The only clickable items in the email were three product tiles pointed at specific Maserati oil change kits and wheel bolts, which assumes the reader is shopping for those exact things and writes off everyone else.
+          </p>
+          <p style="margin-top: 0.9em;">
+            The body opens with <em class="q">No BS, Just Performance</em>, which lands empty for a buyer who already trusted you enough to give you their email. The subject line implies the reader has not started their build yet, and for anyone who has actually been working on their car for years the gut reaction is <em class="q">I have been at this forever</em>, which is friction at the first impression. It also misses anyone replacing a part, upgrading what they already have, or shopping for the next thing rather than the first thing. The whole email is written about Formula Dynamics, when it needs to be written about what the buyer came in to find.
+          </p>
+          <p style="margin-top: 0.9em;">
+            A visitor who signs up for a discount needs the code in their inbox within thirty seconds, in a subject line that matches the offer that made them sign up. If the front door is this broken, the abandoned cart, browse abandon, post purchase, and win back flows behind it are almost certainly missing the same way.
+          </p>
+        </div>
+      </div>
+
+      <div class="audit-item">
+        <div class="num">06</div>
+        <div>
+          <div class="verdict opp">Hidden moat</div>
+          <h3>You have the most ownable B2B angle in this category, and no one knows.</h3>
+          <p>
+            You said the brand already has real B2B opportunity flowing. From the outside, none of it is visible. There is no way for a shop owner, installer, or fleet buyer to learn what you offer them, and no path for them to apply for a trade account.
+          </p>
+          <p style="margin-top: 0.9em;">
+            There are two losses sitting in that gap: the dealer pipeline that walks past your site every day with nowhere to land, and the perception lift you miss when a brand at your level has no visible dealer program. A buyer choosing between three sites for a $9,500 brake kit picks the one other shops also trust.
+          </p>
+          <p style="margin-top: 0.9em;">
+            Your position as the exclusive North American distributor for Larini Systems is the strongest B2B hook we have ever audited at this scale, and right now no one outside your shop knows it exists.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 5. LARINI CALLOUT                             -->
+<!-- ============================================ -->
+<section class="larini">
+  <div class="reveal">
+    <div class="label">The Hidden Moat</div>
+    <p class="big-line">
+      You are the <em>exclusive North American distributor</em> for Larini Systems. Every other shop in this country that wants to sell Larini has to come through you. That single fact is the most ownable B2B angle in the category.
+    </p>
+    <p class="small">
+      A dedicated dealer landing page anchored on this fact is the bonus opportunity in this proposal. We will detail it in the tier breakdown below.
+    </p>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 6. STRATEGY                                   -->
+<!-- ============================================ -->
+<section class="strategy">
+  <div class="container">
+    <div class="strategy-intro reveal">
+      <div class="label">The Strategy</div>
+      <h2 style="margin-top: 1rem;">Three pillars, built to <em>compound</em>.</h2>
+      <p class="lede" style="margin-top: 1.4rem;">
+        The system works in three pillars: we acquire the buyer who is already searching, retarget the buyer who has already shown intent, and retain the buyer who has already paid. Each pillar feeds the next, and the engine gets cheaper to run every month it stays on.
+      </p>
+    </div>
+
+    <div class="pillars reveal-stagger">
+      <div class="pillar">
+        <span class="pill-num">I.</span>
+        <h3>Acquire</h3>
+        <p>
+          Google Search on category head terms (<em class="q">Maserati GranTurismo exhaust</em>, <em class="q">Ferrari 488 brake upgrade</em>, <em class="q">Levante tuning ECU</em>). Shopping ads on the full catalog feed. Competitor keyword conquest against Fabspeed, Fi Exhaust, Scuderia. YouTube pre-rolls in front of exotic-owner audiences.
+        </p>
+      </div>
+      <div class="pillar">
+        <span class="pill-num">II.</span>
+        <h3>Retarget</h3>
+        <p>
+          Audience architecture built page by page inside Meta, so a visitor who looked at a Maserati exhaust gets Maserati exhaust ads, and a buyer who priced a Brembo big brake kit sees that exact kit again with the install context and the price. The system always serves what the buyer already showed they wanted.
+        </p>
+      </div>
+      <div class="pillar">
+        <span class="pill-num">III.</span>
+        <h3>Retain</h3>
+        <p>
+          A full Klaviyo build covering welcome, browse abandonment, abandoned cart, post purchase, and win back. Every subject line and every body copy line written by someone who can speak the language of an exotic owner. The list becomes the asset that outlasts any individual ad campaign.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 7. PULL QUOTE                                 -->
+<!-- ============================================ -->
+<section class="pullquote">
+  <blockquote class="reveal">
+    Once a buyer lands on a $9,500 Brembo big brake kit, the next ad they see needs to be that exact kit, with the install context and the price, while the iron is still hot.
+  </blockquote>
+</section>
+
+<!-- ============================================ -->
+<!-- 8. TIERS                                      -->
+<!-- ============================================ -->
+<section class="tiers">
+  <div class="container">
+    <div class="tiers-intro reveal">
+      <div class="label">Three Tiers</div>
+      <h2 style="margin-top: 1rem;">Pick the depth that fits.</h2>
+      <p class="lede" style="margin-top: 1.4rem;">
+        Each tier is a self contained engagement that solves a specific layer of what the audit found. Pricing is a base fee plus a performance share on the revenue we can directly attribute back to the work.
+      </p>
+    </div>
+
+    <div class="tier-grid reveal-stagger">
+
+      <div class="tier">
+        <div class="tier-name">Foundation</div>
+        <div class="tier-tag">Tier I</div>
+        <div class="price">$1,500<span style="font-size: 0.7rem; color: var(--fg-mute); font-weight: 400; letter-spacing: 0.04em;"> / month</span></div>
+        <div class="price-sub">+ 2% on Lumen attributed Shopify revenue</div>
+        <ul>
+          <li>Google Search on category head terms + competitor keyword conquest</li>
+          <li>Shopify product feed wired and Shopping ads launched on full catalog</li>
+          <li>Branded search defense and proprietary-SKU protection</li>
+          <li>All Google ad copy written by Lumen</li>
+          <li>Conversion tracking, UTM architecture, attribution dashboard</li>
+          <li>Bi-weekly reporting with real numbers, not vanity metrics</li>
+        </ul>
+      </div>
+
+      <div class="tier featured">
+        <div class="tier-name">Growth</div>
+        <div class="tier-tag">Tier II</div>
+        <div class="price">$3,000<span style="font-size: 0.7rem; color: var(--fg-mute); font-weight: 400; letter-spacing: 0.04em;"> / month</span></div>
+        <div class="price-sub">+ 3% on Lumen attributed Shopify revenue</div>
+        <ul>
+          <li>Everything in Foundation</li>
+          <li>Meta paid program with audience architecture built page by page</li>
+          <li>Product-specific retargeting (Maserati, Ferrari, exhaust, brakes, suspension)</li>
+          <li>YouTube pre-rolls targeting exotic-owner audiences</li>
+          <li>Klaviyo build covering welcome flow with a real first purchase incentive, abandoned cart, browse abandon, and post purchase</li>
+          <li>All ad copy and email copy written by Lumen, in the voice of someone who knows the cars</li>
+          <li>Weekly reporting</li>
+        </ul>
+      </div>
+
+      <div class="tier">
+        <div class="tier-name">Full Engine</div>
+        <div class="tier-tag">Tier III</div>
+        <div class="price">$4,500<span style="font-size: 0.7rem; color: var(--fg-mute); font-weight: 400; letter-spacing: 0.04em;"> / month</span></div>
+        <div class="price-sub">+ 4% on Lumen attributed Shopify revenue</div>
+        <ul>
+          <li>Everything in Growth</li>
+          <li>B2B / Dealer landing page strategy + copy + structure (you build and host)</li>
+          <li>Dedicated B2B paid traffic to dealer page (Meta + Google)</li>
+          <li>Larini exclusivity content angle developed and deployed</li>
+          <li>Klaviyo extended with a dealer application drip, a win back sequence, and a VIP segment</li>
+          <li>Quarterly creative briefs delivered to your video and design team</li>
+          <li>Direct access to me on Slack or text</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <p style="text-align: center; margin-top: 3rem; font-size: 0.84rem; color: var(--fg-mute); max-width: 760px; margin-left: auto; margin-right: auto;">
+      Every tier kicks off with Phase Zero, a deep audit of your full data stack and your custom marketing plan, delivered as the first deliverable of month one before any paid spend goes out. Lumen writes every line of copy, you provide the visual assets.
+    </p>
+
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 11. ENGAGEMENT TERMS                          -->
+<!-- ============================================ -->
+<section class="terms">
+  <div class="container">
+    <div class="terms-intro reveal">
+      <div class="label">The Terms</div>
+      <h2 style="margin-top: 1rem;">Clean, fair, fully explained.</h2>
+    </div>
+
+    <div class="terms-block reveal">
+      <div class="terms-row">
+        <div class="key">Commitment</div>
+        <div class="val">60 day minimum, then month to month with 30 days notice to end and no fee.</div>
+      </div>
+      <div class="terms-row">
+        <div class="key">Rev share basis</div>
+        <div class="val">Lumen attributed Shopify revenue, defined as UTM tagged sessions plus Meta and Google pixel last click within a 7 day window. Reported each month.</div>
+      </div>
+      <div class="terms-row">
+        <div class="key">Creative</div>
+        <div class="val">You provide visual assets. Lumen writes every line of copy.</div>
+      </div>
+      <div class="terms-row">
+        <div class="key">Payment</div>
+        <div class="val">Base fee on the 1st. Rev share invoiced on the 15th of the following month against that month's attribution report.</div>
+      </div>
+      <div class="terms-row">
+        <div class="key">What we need</div>
+        <div class="val">Access to Google Ads, Meta Business Manager, Klaviyo, Shopify, GA4. Brand assets. Existing top seller data and any market research you have. All collected during Phase Zero.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 12. CTA + SIGN OFF (combined)                 -->
+<!-- ============================================ -->
+<section class="cta">
+  <div class="reveal">
+    <h2><em>Let's get on a call.</em></h2>
+    <p>
+      Forty five minutes to walk through the audit, answer anything in this doc, and decide whether the timing and the tier make sense. If the answer is "not now" or "not us" that is a clean answer and we move on.
+    </p>
+    <a href="sms:+12085910132" class="cta-btn" onclick="handleCallCTA(event)">Reply and Set the Call</a>
+    <span class="secondary">
+      <a href="tel:+12085910132">Or call me directly</a>
+    </span>
+    <div style="margin-top: 4rem;">
+      <div style="font-family: var(--display); font-style: italic; font-size: 1.4rem; color: var(--fg); font-weight: 500;">Kendall</div>
+      <div style="font-size: 0.66rem; letter-spacing: 0.32em; color: var(--fg-mute); text-transform: uppercase; margin-top: 0.5rem; font-weight: 500;">Founder &middot; Lumen Marketing Solutions</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- 14. FOOTER                                    -->
+<!-- ============================================ -->
+<footer>
+  <div class="fwordmark">LUMEN &nbsp;×&nbsp; FORMULA DYNAMICS</div>
+  <div class="fmeta">Prepared April 2026 &middot; Confidential</div>
+</footer>
+
+<!-- Easter egg modal for non-Apple devices -->
+<div id="ee-modal" class="ee-modal" onclick="if(event.target===this)closeEasterEgg()">
+  <div class="ee-modal-inner">
+    <span class="ee-modal-flag"><span class="stripe green"></span><span class="stripe white"></span><span class="stripe red"></span></span>
+    <h3>Get back to your <em>MacBook</em>.</h3>
+    <p>This one is an iMessage thing. Or just text me at <a href="sms:+12085910132">(208) 591-0132</a>.</p>
+    <button class="ee-modal-close" onclick="closeEasterEgg()">Close</button>
+  </div>
+</div>
+
+<script>
+  // CTA easter egg: Apple devices open Messages directly, others see a popup
+  function handleCallCTA(e) {
+    const ua = navigator.userAgent;
+    const isApple = /Macintosh|Mac OS X|iPhone|iPad|iPod/.test(ua);
+    if (!isApple) {
+      e.preventDefault();
+      document.getElementById('ee-modal').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+  function closeEasterEgg() {
+    document.getElementById('ee-modal').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeEasterEgg();
+  });
+
+  // Reveal on scroll
+  const isMobile = window.matchMedia('(max-width: 700px)').matches;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0,
+    rootMargin: isMobile ? '0px 0px 25% 0px' : '0px 0px -40px 0px'
+  });
+  document.querySelectorAll('.reveal, .reveal-stagger').forEach((el) => io.observe(el));
+</script>
+
+</body>
+</html>
