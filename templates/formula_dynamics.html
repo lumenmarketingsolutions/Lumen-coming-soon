@@ -10,9 +10,15 @@
 
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://lumenmarketing.co/formula-dynamics">
-<meta property="og:title" content="An Audit + Strategy for Formula Dynamics">
-<meta property="og:description" content="What we found, and where we'd take it from here.">
-<meta property="og:image" content="https://lumenmarketing.co/static/formula-dynamics/img/ferrari-red.webp">
+<meta property="og:title" content="Formula Dynamics × Lumen">
+<meta property="og:description" content="An audit, and a plan.">
+<meta property="og:image" content="https://lumenmarketing.co/static/formula-dynamics/img/og-formula-dynamics.jpg">
+<meta property="og:image:width" content="1500">
+<meta property="og:image:height" content="787">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Formula Dynamics × Lumen">
+<meta name="twitter:description" content="An audit, and a plan.">
+<meta name="twitter:image" content="https://lumenmarketing.co/static/formula-dynamics/img/og-formula-dynamics.jpg">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,7 +44,7 @@
     --serif-italic: 'EB Garamond', Georgia, serif;
     --sans: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
-    --pad: clamp(28px, 5vw, 76px);
+    --pad: clamp(24px, 4.5vw, 68px);
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -81,16 +87,16 @@
     line-height: 1.18;
     color: var(--fg);
   }
-  h1 { font-size: clamp(2.2rem, 5.4vw, 4.4rem); line-height: 1.06; font-weight: 600; }
-  h2 { font-size: clamp(1.7rem, 3.4vw, 2.7rem); line-height: 1.18; font-weight: 600; }
-  h3 { font-size: clamp(1.15rem, 1.85vw, 1.45rem); font-weight: 500; }
-  h4 { font-size: 1rem; font-weight: 500; }
+  h1 { font-size: clamp(2rem, 4.8vw, 3.8rem); line-height: 1.06; font-weight: 600; }
+  h2 { font-size: clamp(1.5rem, 3vw, 2.35rem); line-height: 1.18; font-weight: 600; }
+  h3 { font-size: clamp(1.05rem, 1.6vw, 1.3rem); font-weight: 500; }
+  h4 { font-size: 0.92rem; font-weight: 500; }
 
   h1 em, h2 em { font-family: var(--display); font-style: italic; color: var(--rosso); font-weight: 500; }
 
   .lede {
     font-family: var(--display);
-    font-size: clamp(1.1rem, 1.7vw, 1.45rem);
+    font-size: clamp(1rem, 1.55vw, 1.3rem);
     line-height: 1.5;
     color: var(--fg-soft);
     font-weight: 400;
@@ -119,10 +125,10 @@
   .tricolore .stripe.red { background: var(--rosso); }
 
   /* Layout */
-  section { position: relative; padding: clamp(80px, 12vh, 140px) var(--pad); }
-  .container { max-width: 1080px; margin: 0 auto; width: 100%; }
-  .narrow { max-width: 700px; margin: 0 auto; }
-  .mid { max-width: 900px; margin: 0 auto; }
+  section { position: relative; padding: clamp(72px, 11vh, 124px) var(--pad); }
+  .container { max-width: 1040px; margin: 0 auto; width: 100%; }
+  .narrow { max-width: 680px; margin: 0 auto; }
+  .mid { max-width: 880px; margin: 0 auto; }
 
   /* Reveal */
   .reveal {
@@ -184,9 +190,9 @@
     padding: 0 var(--pad);
   }
   .hero .fd-logo {
-    max-width: 240px;
-    width: 56vw;
-    margin: 0 auto 2.4rem;
+    max-width: 210px;
+    width: 52vw;
+    margin: 0 auto 2.2rem;
     opacity: 0;
     animation: fadeIn 1.2s 0.2s cubic-bezier(.16,.84,.32,1) forwards;
     filter: drop-shadow(0 4px 24px rgba(0,0,0,0.6));
@@ -238,7 +244,7 @@
     text-align: center;
   }
   .opening .lede {
-    font-size: clamp(1.2rem, 1.85vw, 1.55rem);
+    font-size: clamp(1.05rem, 1.65vw, 1.4rem);
     line-height: 1.5;
   }
 
@@ -284,7 +290,7 @@
   }
   .audit-item .num {
     font-family: var(--display);
-    font-size: 1.6rem;
+    font-size: 1.4rem;
     font-style: italic;
     color: var(--rosso);
     font-weight: 500;
@@ -335,10 +341,10 @@
   .larini .label { color: var(--rosso); }
   .larini .big-line {
     font-family: var(--display);
-    font-size: clamp(1.5rem, 3vw, 2.4rem);
+    font-size: clamp(1.3rem, 2.6vw, 2.05rem);
     line-height: 1.32;
-    max-width: 880px;
-    margin: 1.4rem auto 0;
+    max-width: 820px;
+    margin: 1.3rem auto 0;
     font-weight: 500;
   }
   .larini .big-line em {
@@ -393,10 +399,10 @@
   .pullquote blockquote {
     font-family: var(--serif-italic);
     font-style: italic;
-    font-size: clamp(1.35rem, 2.4vw, 1.95rem);
+    font-size: clamp(1.2rem, 2.1vw, 1.7rem);
     line-height: 1.45;
     color: var(--fg);
-    max-width: 880px;
+    max-width: 820px;
     margin: 0 auto;
     font-weight: 500;
   }
@@ -449,7 +455,7 @@
   .tier .tier-name {
     font-family: var(--display);
     font-weight: 600;
-    font-size: 1.4rem;
+    font-size: 1.25rem;
     margin-bottom: 0.3rem;
   }
   .tier .tier-tag {
@@ -462,7 +468,7 @@
   }
   .tier .price {
     font-family: var(--display);
-    font-size: 1.85rem;
+    font-size: 1.65rem;
     color: var(--fg);
     font-weight: 600;
     line-height: 1;
@@ -621,7 +627,7 @@
   }
   .terms-row .val {
     font-family: var(--display);
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     color: var(--fg);
     line-height: 1.5;
     font-weight: 500;
@@ -1135,9 +1141,9 @@
     <span class="secondary">
       <a href="tel:+12085910132">Or call me directly</a>
     </span>
-    <div style="margin-top: 4rem;">
-      <div style="font-family: var(--display); font-style: italic; font-size: 1.4rem; color: var(--fg); font-weight: 500;">Kendall</div>
-      <div style="font-size: 0.66rem; letter-spacing: 0.32em; color: var(--fg-mute); text-transform: uppercase; margin-top: 0.5rem; font-weight: 500;">Founder &middot; Lumen Marketing Solutions</div>
+    <div style="margin-top: 3.6rem;">
+      <div style="font-family: var(--display); font-style: italic; font-size: 1.25rem; color: var(--fg); font-weight: 500;">Kendall</div>
+      <div style="font-size: 0.62rem; letter-spacing: 0.32em; color: var(--fg-mute); text-transform: uppercase; margin-top: 0.5rem; font-weight: 500;">Founder &middot; Lumen Marketing Solutions</div>
     </div>
   </div>
 </section>
