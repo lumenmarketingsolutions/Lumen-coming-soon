@@ -2195,6 +2195,16 @@ def sce_sms_terms():
     return render_template("sce_sms_terms.html")
 
 
+@app.route("/avalon/sms-privacy")
+def avalon_sms_privacy():
+    return render_template("avalon_sms_privacy.html")
+
+
+@app.route("/avalon/sms-terms")
+def avalon_sms_terms():
+    return render_template("avalon_sms_terms.html")
+
+
 # ── Grow / Landing Pages ──
 
 @app.route("/grow")
