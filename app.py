@@ -2185,6 +2185,16 @@ def natew_sce():
     return render_template("sce_build.html")
 
 
+@app.route("/sce/sms-privacy")
+def sce_sms_privacy():
+    return render_template("sce_sms_privacy.html")
+
+
+@app.route("/sce/sms-terms")
+def sce_sms_terms():
+    return render_template("sce_sms_terms.html")
+
+
 # ── Grow / Landing Pages ──
 
 @app.route("/grow")
