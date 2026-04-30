@@ -529,6 +529,118 @@ def track_dashboard():
 def index():
     return render_template("home.html")
 
+@app.route("/qualify")
+def qualify():
+    return render_template("qualify.html")
+
+LABEL_MAP = {
+    "ad_spend": {
+        "not_running": "Not running ads yet",
+        "under_1k": "Under $1,000 / mo",
+        "1_5k": "$1,000 to $5,000 / mo",
+        "5_15k": "$5,000 to $15,000 / mo",
+        "15k_plus": "$15,000+ / mo",
+    },
+    "gap": {
+        "leads": "Not enough leads",
+        "conversion": "Leads not converting",
+        "tracking": "No tracking",
+        "follow_up": "No follow up system",
+    },
+    "revenue": {
+        "under_10k": "Under $10K / mo",
+        "10_50k": "$10K to $50K / mo",
+        "50_100k": "$50K to $100K / mo",
+        "100k_plus": "$100K+ / mo",
+    },
+}
+
+GAP_INSIGHTS = {
+    "leads": "You said the gap is not enough leads. That traces back to targeting and creative. We rebuild both before any budget goes live. Volume becomes the easy part.",
+    "conversion": "You said leads are coming in but not converting. That is rarely the lead. It is the speed and tone of what happens after the form gets submitted. That is the system we install.",
+    "tracking": "You said the gap is not knowing what is working. We build full attribution from ad click to closed sale. Every dollar gets a name, so every decision after gets easier.",
+    "follow_up": "You said the gap is follow up. Most leads decide in the first five minutes whether they get a response. We automate that window and the weeks that follow.",
+}
+
+@app.route("/qualify/submit", methods=["POST"])
+def qualify_submit():
+    data = request.get_json(silent=True) or {}
+    name = (data.get("name") or "").strip()
+    email = (data.get("email") or "").strip().lower()
+    phone = (data.get("phone") or "").strip()
+    business = (data.get("business") or "").strip()
+    ad_spend = (data.get("ad_spend") or "").strip()
+    gap = (data.get("gap") or "").strip()
+    revenue = (data.get("revenue") or "").strip()
+
+    if not name or not email or not phone:
+        return jsonify({"ok": False, "error": "Missing contact info"}), 400
+    if not business or not ad_spend or not gap or not revenue:
+        return jsonify({"ok": False, "error": "Missing answers"}), 400
+
+    ad_spend_label = LABEL_MAP["ad_spend"].get(ad_spend, ad_spend)
+    gap_label = LABEL_MAP["gap"].get(gap, gap)
+    revenue_label = LABEL_MAP["revenue"].get(revenue, revenue)
+    insight = GAP_INSIGHTS.get(gap, "")
+
+    now = datetime.datetime.utcnow().isoformat()
+    tag_string = f"qualify,spend:{ad_spend},gap:{gap},rev:{revenue}"
+
+    con = sqlite3.connect(DB_PATH)
+    con.execute("""
+        INSERT INTO leads (
+            name, email, phone, business, revenue, marketing, challenge,
+            stage, source, tags, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        name, email, phone, business, revenue_label, ad_spend_label, gap_label,
+        "new", "qualify", tag_string, now, now
+    ))
+    con.commit()
+    con.close()
+
+    notify_body = f"""
+    <div style="font-family:Inter,-apple-system,sans-serif; background:#0a0a0f; padding:32px 20px; color:#e8e8f0;">
+      <div style="max-width:620px; margin:0 auto; background:#111118; border:1px solid #1a1a25; border-radius:14px; padding:32px;">
+        <div style="font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#7c4dff; margin-bottom:10px;">New Qualification</div>
+        <h2 style="font-size:22px; font-weight:700; margin:0 0 6px 0; color:#fff;">{name} applied to work with Lumen</h2>
+        <p style="font-size:13px; color:#8b8ba0; margin:0 0 24px 0;">{email} &middot; {phone}</p>
+        <table style="width:100%; border-collapse:collapse; font-size:14px;">
+          <tr><td style="padding:12px 0; border-bottom:1px solid #1a1a25; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#7c4dff; width:35%; vertical-align:top;">Business</td><td style="padding:12px 0 12px 16px; border-bottom:1px solid #1a1a25; color:#e8e8f0; line-height:1.6;">{business}</td></tr>
+          <tr><td style="padding:12px 0; border-bottom:1px solid #1a1a25; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#7c4dff; vertical-align:top;">Ad Spend</td><td style="padding:12px 0 12px 16px; border-bottom:1px solid #1a1a25; color:#e8e8f0;">{ad_spend_label}</td></tr>
+          <tr><td style="padding:12px 0; border-bottom:1px solid #1a1a25; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#7c4dff; vertical-align:top;">The Gap</td><td style="padding:12px 0 12px 16px; border-bottom:1px solid #1a1a25; color:#e8e8f0;">{gap_label}</td></tr>
+          <tr><td style="padding:12px 0; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#7c4dff; vertical-align:top;">Revenue</td><td style="padding:12px 0 12px 16px; color:#e8e8f0;">{revenue_label}</td></tr>
+        </table>
+      </div>
+    </div>
+    """
+    send_email(NOTIFY_EMAIL, f"Qualification: {name} — {business[:60]}", notify_body)
+
+    first_name = name.split(" ")[0] if name else "there"
+    confirm_body = f"""
+    <div style="font-family:Inter,-apple-system,sans-serif; background:#0a0a0f; padding:40px 20px; color:#e8e8f0;">
+      <div style="max-width:580px; margin:0 auto; background:#111118; border:1px solid #1a1a25; border-radius:14px; padding:40px 32px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:28px;">
+          <div style="width:10px;height:10px;background:#6128DB;border-radius:50%;"></div>
+          <div style="font-size:12px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#44445a;">Lumen</div>
+        </div>
+        <h1 style="font-size:28px;font-weight:800;letter-spacing:-1px;line-height:1.2;margin:0 0 18px 0;color:#f0f0f5;">We have it, {first_name}.</h1>
+        <p style="font-size:16px;line-height:1.65;color:#b8b8c8;margin:0 0 28px 0;">Your application came in clean. Kendall will read it before the call so you are not starting from zero.</p>
+        <div style="background:rgba(97,40,219,0.08); border:1px solid rgba(97,40,219,0.3); border-radius:12px; padding:22px; margin-bottom:28px;">
+          <div style="font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#7c4dff;margin-bottom:10px;">First Read</div>
+          <p style="font-size:15px;line-height:1.65;color:#e8e8f0;margin:0;">{insight}</p>
+        </div>
+        <p style="font-size:15px;line-height:1.6;color:#b8b8c8;margin:0 0 22px 0;">The next step is a 30 minute call. You walk away knowing what we would build, what it would cost, and whether the fit is there.</p>
+        <a href="https://calendly.com/lumenmarketingco/lumen" style="display:inline-block;background:#6128DB;color:#fff;font-size:15px;font-weight:700;padding:16px 30px;border-radius:10px;text-decoration:none;letter-spacing:0.3px;">Book your call &rarr;</a>
+        <p style="margin-top:36px; font-size:13px; color:#6b6b80; line-height:1.55;">Reply to this email if you need to reach me directly. I read everything.<br>Kendall &middot; Lumen</p>
+      </div>
+    </div>
+    """
+    send_email(email, "Your application is in. Here's what's next.", confirm_body)
+
+    return jsonify({"ok": True})
+
+
 @app.route("/about")
 def about():
     return render_template("about.html")
@@ -550,7 +662,7 @@ def jeremiah_newby():
 def tristan_dare():
     return render_template("tristan_dare.html")
 
-@app.route("/jackson-jet-center")
+@app.route("/jjc-dare-private-4p4xiv42")
 def jackson_jet_center():
     return render_template("jackson_jet_center.html")
 
@@ -2216,9 +2328,22 @@ def grow_page(market=None):
     return render_template("grow.html", market=market, market_name=valid[market])
 
 
-@app.route("/api/grow/lead", methods=["POST"])
+def _cors_response(resp):
+    """Tag a response with permissive CORS headers — used for funnel endpoints
+    that get called cross-origin from mk7media.com and other client funnels."""
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return resp
+
+
+@app.route("/api/grow/lead", methods=["POST", "OPTIONS"])
 def grow_lead_submit():
-    data = request.get_json() or {}
+    # CORS — MK7 (mk7media.com) and any future external funnel can POST here
+    if request.method == "OPTIONS":
+        return _cors_response(jsonify({"ok": True}))
+    # force=True so sendBeacon's text/plain bodies still parse as JSON
+    data = request.get_json(force=True, silent=True) or {}
     whatsapp = (data.get("whatsapp") or "").strip()
     name = (data.get("name") or "").strip()
     business = (data.get("business") or "").strip()
@@ -2229,7 +2354,7 @@ def grow_lead_submit():
     now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
     if not whatsapp:
-        return jsonify({"error": "WhatsApp number is required"}), 400
+        return _cors_response(jsonify({"error": "WhatsApp number is required"})), 400
 
     con = sqlite3.connect(DB_PATH)
     existing = con.execute("SELECT id FROM funnel_leads WHERE whatsapp = ? AND created_at > datetime('now', '-1 hour')", (whatsapp,)).fetchone()
@@ -2238,7 +2363,7 @@ def grow_lead_submit():
                      (name, business, need, existing[0]))
         con.commit()
         con.close()
-        return jsonify({"ok": True, "updated": True})
+        return _cors_response(jsonify({"ok": True, "updated": True}))
 
     con.execute("INSERT INTO funnel_leads (whatsapp, name, business, need, source_page, market, ip, created_at) VALUES (?,?,?,?,?,?,?,?)",
                 (whatsapp, name, business, need, source_page, market, ip, now))
@@ -2268,40 +2393,49 @@ def grow_lead_submit():
         except Exception:
             pass
 
-    return jsonify({"ok": True})
+    return _cors_response(jsonify({"ok": True}))
 
 
-@app.route("/api/grow/pageview", methods=["POST"])
+@app.route("/api/grow/pageview", methods=["POST", "OPTIONS"])
 def grow_pageview():
-    data = request.get_json() or {}
+    # CORS — called from mk7media.com on every page load + beforeunload
+    if request.method == "OPTIONS":
+        return _cors_response(jsonify({"ok": True}))
+
+    # force=True so sendBeacon's text/plain bodies still parse as JSON
+    data = request.get_json(force=True, silent=True) or {}
     page = (data.get("page") or "").strip()
     time_on_page = float(data.get("time_on_page") or 0)
     ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    if "," in ip:
+        ip = ip.split(",")[0].strip()
     referrer = (data.get("referrer") or "")[:500]
     ua = request.headers.get("User-Agent", "")[:500]
     device = "mobile" if any(m in ua.lower() for m in ["iphone", "android", "mobile"]) else "desktop"
     now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
     if not page:
-        return jsonify({"ok": False}), 400
+        return _cors_response(jsonify({"ok": False})), 400
 
     if ip in OWNER_IPS:
-        return jsonify({"ok": True, "skipped": True})
+        return _cors_response(jsonify({"ok": True, "skipped": True}))
 
     con = sqlite3.connect(DB_PATH)
     if time_on_page > 0:
+        # Time-on-page update — find the most recent open page-view row for
+        # this IP+page within the last hour and stamp its duration
         existing = con.execute("SELECT id FROM funnel_page_views WHERE ip=? AND page=? AND created_at > datetime('now','-1 hour') AND time_on_page=0 ORDER BY id DESC LIMIT 1", (ip, page)).fetchone()
         if existing:
             con.execute("UPDATE funnel_page_views SET time_on_page=? WHERE id=?", (time_on_page, existing[0]))
             con.commit()
             con.close()
-            return jsonify({"ok": True, "updated": True})
+            return _cors_response(jsonify({"ok": True, "updated": True}))
 
     con.execute("INSERT INTO funnel_page_views (page, ip, referrer, user_agent, device, time_on_page, created_at) VALUES (?,?,?,?,?,?,?)",
                 (page, ip, referrer, ua, device, time_on_page, now))
     con.commit()
     con.close()
-    return jsonify({"ok": True})
+    return _cors_response(jsonify({"ok": True}))
 
 
 @app.route("/admin/audiences")
