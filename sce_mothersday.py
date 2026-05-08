@@ -331,7 +331,10 @@ def _build_lead_email_html(c):
 </td></tr>
 
 <tr><td style="padding:24px 32px 0;">
-<a href="{c['stripe_url']}" style="display:inline-block;background:#9B2D4F;color:#fff;text-decoration:none;padding:14px 22px;border-radius:10px;font-weight:600;font-size:14px;letter-spacing:0.01em;">View Stripe checkout link →</a>
+<table cellpadding="0" cellspacing="0" border="0"><tr>
+<td style="padding-right:10px;"><a href="tel:{c['phone_tel']}" style="display:inline-block;background:#9B2D4F;color:#ffffff;text-decoration:none;padding:14px 22px;border-radius:10px;font-weight:600;font-size:14px;letter-spacing:0.01em;">Call them</a></td>
+<td><a href="sms:{c['phone_tel']}" style="display:inline-block;background:#ffffff;color:#9B2D4F;text-decoration:none;padding:13px 21px;border-radius:10px;font-weight:600;font-size:14px;letter-spacing:0.01em;border:1.5px solid #9B2D4F;">Text them</a></td>
+</tr></table>
 </td></tr>
 
 <tr><td style="padding:28px 32px 28px;">
@@ -524,11 +527,21 @@ def optin():
     finally:
         con.close()
 
+    # Format phone for tel:/sms: links — assume +1 (US) if 10 digits.
+    phone_digits = _digits_only(phone)
+    if len(phone_digits) == 10:
+        phone_tel = f"+1{phone_digits}"
+    elif len(phone_digits) == 11 and phone_digits.startswith("1"):
+        phone_tel = f"+{phone_digits}"
+    else:
+        phone_tel = phone_digits
+
     # Fire team notification email (background thread, doesn't block redirect).
     _send_lead_email({
         "name": name,
         "email": email,
         "phone": phone,
+        "phone_tel": phone_tel,
         "tier_name": tier["name"],
         "car_name": car["name"],
         "car_short": car["name"].split(" ")[-1],
