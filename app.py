@@ -13,6 +13,9 @@ from sce_mothersday import sce_md_bp, init_md_db
 app.register_blueprint(sce_md_bp)
 init_md_db()
 
+from sce_admin import sce_admin_bp
+app.register_blueprint(sce_admin_bp)
+
 ADMIN_PIN = "112501"
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAIL = "kendall@lumenmarketing.co"

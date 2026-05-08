@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumen · SCE Admin</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #14141c;
+    --surface-elev: #1c1c26;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.16);
+    --text: #e8e8f0;
+    --dim: #6b6b80;
+    --accent: #6128DB;
+    --accent-bright: #7c4dff;
+    --danger: #ef4444;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    background: radial-gradient(ellipse at top, rgba(97, 40, 219, 0.12), transparent 60%), var(--bg);
+    color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 15px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px;
+  }
+  .card {
+    width: 100%; max-width: 420px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 40px 36px 36px;
+    box-shadow:
+      0 4px 12px rgba(0,0,0,0.3),
+      0 32px 64px rgba(97, 40, 219, 0.12);
+  }
+  .brand {
+    text-align: center;
+    font-size: 11px; letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent-bright);
+    font-weight: 700; margin-bottom: 22px;
+  }
+  h1 {
+    font-size: 24px; letter-spacing: -0.02em;
+    margin: 0 0 6px; font-weight: 700; text-align: center;
+  }
+  .sub {
+    color: var(--dim); font-size: 14px; text-align: center;
+    margin: 0 0 32px;
+  }
+  label { display: block; margin-bottom: 16px; }
+  .lbl {
+    font-size: 11px; color: var(--dim);
+    letter-spacing: 0.16em; text-transform: uppercase;
+    font-weight: 600; margin-bottom: 8px;
+  }
+  input {
+    width: 100%; padding: 14px 16px;
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    background: var(--surface-elev);
+    color: var(--text);
+    font-family: inherit; font-size: 15px;
+    -webkit-appearance: none;
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  input:focus {
+    outline: none; border-color: var(--accent-bright);
+    box-shadow: 0 0 0 3px rgba(124, 77, 255, 0.18);
+  }
+  .btn {
+    width: 100%; padding: 14px 20px;
+    background: var(--accent);
+    color: #fff;
+    border: 0; border-radius: 10px;
+    font-family: inherit; font-size: 15px; font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    box-shadow:
+      0 2px 4px rgba(97, 40, 219, 0.25),
+      0 12px 30px rgba(97, 40, 219, 0.35);
+    transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
+  }
+  .btn:hover { background: var(--accent-bright); transform: translateY(-1px); }
+  .err {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+    padding: 10px 14px; border-radius: 8px;
+    font-size: 13px; margin-bottom: 16px;
+    text-align: center;
+  }
+  .foot {
+    text-align: center; margin-top: 24px;
+    color: var(--dim); font-size: 11px;
+    letter-spacing: 0.06em;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">Lumen · SCE</div>
+  <h1>Sign in</h1>
+  <p class="sub">Internal admin portal</p>
+  {% if error %}<div class="err">{{ error }}</div>{% endif %}
+  <form method="post" action="{{ url_for('sce_admin.login_handler') }}">
+    <label>
+      <div class="lbl">Email</div>
+      <input type="email" name="email" required autocomplete="email" autofocus>
+    </label>
+    <label>
+      <div class="lbl">Password</div>
+      <input type="password" name="password" required autocomplete="current-password">
+    </label>
+    <button class="btn" type="submit">Sign in</button>
+  </form>
+  <div class="foot">Lumen Mainframe · Authorized users only</div>
+</div>
+</body>
+</html>

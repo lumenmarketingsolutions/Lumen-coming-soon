@@ -276,6 +276,7 @@ fbq('track','PageView');
 fbq('track','ViewContent', {content_category: 'mothers_day_tier', content_name: '{{ tier.id }}'});
 </script>
 {% endif %}
+{% include "_sce_track.html" with context %}
 </head>
 <body>
 

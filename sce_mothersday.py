@@ -164,6 +164,7 @@ def init_md_db():
         CREATE TABLE IF NOT EXISTS mothersday_leads (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             event_id TEXT UNIQUE NOT NULL,
+            session_id TEXT DEFAULT '',
             name TEXT DEFAULT '',
             email TEXT NOT NULL,
             phone TEXT DEFAULT '',
@@ -189,11 +190,43 @@ def init_md_db():
             updated_at TEXT NOT NULL
         )
     """)
-    # Migrate: add prefs/notes columns to existing tables.
+    # Migrate: add columns to existing tables (idempotent).
     existing_cols = [r[1] for r in con.execute("PRAGMA table_info(mothersday_leads)").fetchall()]
-    for col in ("restaurant_prefs", "special_notes"):
+    for col in ("restaurant_prefs", "special_notes", "session_id"):
         if col not in existing_cols:
             con.execute(f"ALTER TABLE mothersday_leads ADD COLUMN {col} TEXT DEFAULT ''")
+
+    # Visit tracking — one row per (session, page) entry, time_on_page updated on unload.
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS mothersday_visits (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT NOT NULL,
+            page TEXT NOT NULL,
+            tier TEXT DEFAULT '',
+            car TEXT DEFAULT '',
+            ip TEXT DEFAULT '',
+            user_agent TEXT DEFAULT '',
+            referrer TEXT DEFAULT '',
+            screen TEXT DEFAULT '',
+            language TEXT DEFAULT '',
+            timezone TEXT DEFAULT '',
+            platform TEXT DEFAULT '',
+            device TEXT DEFAULT '',
+            utm_source TEXT DEFAULT '',
+            utm_medium TEXT DEFAULT '',
+            utm_campaign TEXT DEFAULT '',
+            utm_content TEXT DEFAULT '',
+            utm_term TEXT DEFAULT '',
+            fbp TEXT DEFAULT '',
+            fbc TEXT DEFAULT '',
+            entered_at TEXT NOT NULL,
+            time_on_page_ms INTEGER DEFAULT 0,
+            updated_at TEXT NOT NULL
+        )
+    """)
+    con.execute("CREATE INDEX IF NOT EXISTS idx_md_visits_session ON mothersday_visits(session_id)")
+    con.execute("CREATE INDEX IF NOT EXISTS idx_md_visits_page ON mothersday_visits(page)")
+    con.execute("CREATE INDEX IF NOT EXISTS idx_md_visits_entered ON mothersday_visits(entered_at)")
     con.execute("""
         CREATE TABLE IF NOT EXISTS mothersday_purchases (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -460,18 +493,19 @@ def optin():
 
     stripe_url = STRIPE_LINKS[tier_id][car_id]
     now = datetime.datetime.utcnow().isoformat()
+    session_id = (request.form.get("session_id") or "").strip()[:64]
 
     con = sqlite3.connect(DB_PATH)
     try:
         con.execute("""
             INSERT INTO mothersday_leads
-                (event_id, name, email, phone, tier, car, sku, price_cents, stripe_link,
+                (event_id, session_id, name, email, phone, tier, car, sku, price_cents, stripe_link,
                  restaurant_prefs, special_notes,
                  ip, user_agent, referrer, utm_source, utm_medium, utm_campaign, utm_content, utm_term,
                  fbp, fbc, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            event_id, name, email, phone,
+            event_id, session_id, name, email, phone,
             tier_id, car_id, car["sku"], car["package_price"] * 100, stripe_url,
             prefs, notes,
             request.headers.get("X-Forwarded-For", request.remote_addr or ""),
@@ -549,6 +583,68 @@ def optin():
 def booked():
     sku = (request.args.get("sku") or "").strip()
     return render_template("sce_md_booked.html", sku=sku, **_ctx())
+
+
+@sce_md_bp.route("/mothersday/track", methods=["POST", "OPTIONS"])
+def track():
+    """Receives page-view + time-on-page events from the funnel pages."""
+    if request.method == "OPTIONS":
+        resp = jsonify({"ok": True})
+        resp.headers["Access-Control-Allow-Origin"] = "*"
+        return resp
+    try:
+        data = request.get_json(silent=True) or {}
+    except Exception:
+        data = {}
+    sid    = (data.get("sid") or "").strip()[:64]
+    page   = (data.get("page") or "").strip()[:32]
+    kind   = (data.get("kind") or "view").strip()[:16]
+    if not sid or not page:
+        return jsonify({"ok": False, "err": "bad_payload"}), 400
+
+    now = datetime.datetime.utcnow().isoformat()
+    ip  = _client_ip()
+    ua  = request.headers.get("User-Agent", "")
+    device = "Mobile" if any(t in ua for t in ("iPhone","Android","Mobile","iPad")) else "Desktop"
+
+    con = sqlite3.connect(DB_PATH)
+    try:
+        if kind == "view":
+            con.execute("""
+                INSERT INTO mothersday_visits
+                    (session_id, page, tier, car, ip, user_agent, referrer,
+                     screen, language, timezone, platform, device,
+                     utm_source, utm_medium, utm_campaign, utm_content, utm_term,
+                     fbp, fbc, entered_at, time_on_page_ms, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?)
+            """, (
+                sid, page,
+                (data.get("tier") or "")[:32], (data.get("car") or "")[:32],
+                ip, ua, (data.get("ref") or "")[:256],
+                (data.get("screen") or "")[:32], (data.get("lang") or "")[:16],
+                (data.get("tz") or "")[:64], (data.get("plat") or "")[:32], device,
+                (data.get("us") or "")[:64], (data.get("um") or "")[:64],
+                (data.get("uc") or "")[:64], (data.get("un") or "")[:64], (data.get("ut") or "")[:64],
+                request.cookies.get("_fbp", ""), request.cookies.get("_fbc", ""),
+                now, now,
+            ))
+        elif kind == "time":
+            ms = int(data.get("ms") or 0)
+            if ms > 0:
+                con.execute("""
+                    UPDATE mothersday_visits SET time_on_page_ms = ?, updated_at = ?
+                    WHERE id = (
+                        SELECT id FROM mothersday_visits
+                        WHERE session_id = ? AND page = ?
+                        ORDER BY id DESC LIMIT 1
+                    )
+                """, (ms, now, sid, page))
+        con.commit()
+    finally:
+        con.close()
+    resp = jsonify({"ok": True})
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    return resp
 
 
 @sce_md_bp.route("/mothersday/stripe-webhook", methods=["POST"])

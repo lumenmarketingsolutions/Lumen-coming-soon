@@ -292,6 +292,7 @@ fbq('track','PageView');
 fbq('track','AddToCart',{content_ids:['{{ car.sku }}'],content_type:'product',value:{{ car.package_price }},currency:'USD'});
 </script>
 {% endif %}
+{% include "_sce_track.html" with context %}
 </head>
 <body>
 

@@ -1,0 +1,70 @@
+{% extends "admin_base.html" %}
+{% block title %}Abandoned · Mother's Day · Lumen SCE{% endblock %}
+
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1 class="page-title">{{ offer_name }}</h1>
+    <div class="page-sub">{{ sessions|length }} session{{ '' if sessions|length == 1 else 's' }} hit the funnel without converting</div>
+  </div>
+  <div class="right-tools">
+    <div class="range">
+      <a href="?range=7d"  class="{{ 'active' if range_key == '7d'  else '' }}">7 days</a>
+      <a href="?range=30d" class="{{ 'active' if range_key == '30d' else '' }}">30 days</a>
+      <a href="?range=all" class="{{ 'active' if range_key == 'all' else '' }}">All time</a>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <a class="tab" href="{{ url_for('sce_admin.md_metrics') }}?range={{ range_key }}">Metrics</a>
+  <a class="tab" href="{{ url_for('sce_admin.md_contacts') }}?range={{ range_key }}">Leads</a>
+  <a class="tab active" href="{{ url_for('sce_admin.md_abandoned') }}?range={{ range_key }}">Abandoned · {{ sessions|length }}</a>
+</div>
+
+{% if sessions %}
+<div class="table-wrap">
+<div class="table-scroll">
+<table class="tbl">
+<thead>
+  <tr>
+    <th>Last seen</th>
+    <th>Furthest step</th>
+    <th>Visits</th>
+    <th>IP</th>
+    <th>Device</th>
+    <th>Source</th>
+    <th>Session</th>
+  </tr>
+</thead>
+<tbody>
+{% for s in sessions %}
+  <tr>
+    <td class="mono">{{ s.last_seen[:16].replace('T', ' ') }}</td>
+    <td>
+      <span style="color:var(--accent-bright);font-weight:600;">{{ s.furthest_page }}</span>
+      <div style="color:var(--dim);font-size:11px;margin-top:2px;">{{ s.pages|join(' · ') }}</div>
+    </td>
+    <td>{{ s.visits }}</td>
+    <td class="mono">{{ s.ip }}</td>
+    <td>{{ s.device }}</td>
+    <td style="color:var(--dim);font-size:11px;">
+      {{ s.utm_source }}{% if s.utm_campaign and s.utm_campaign != '—' %}<br>{{ s.utm_campaign }}{% endif %}
+    </td>
+    <td class="mono">{{ s.session_id[:12] }}…</td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+</div>
+{% else %}
+<div class="card">
+  <div class="empty-state">
+    <div class="ic">👀</div>
+    <h4>No abandoned sessions yet</h4>
+    <p>Visitors who load the funnel but don't submit will show up here, grouped by furthest step reached.</p>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
