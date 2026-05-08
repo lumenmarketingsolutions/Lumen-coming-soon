@@ -295,15 +295,27 @@ def _build_lead_email_html(c):
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="format-detection" content="telephone=yes">
+<meta name="format-detection" content="telephone=no, address=no, email=no">
 <meta name="x-apple-disable-message-reformatting">
+<style>
+  /* Defensive: disable iOS data detector on the action buttons specifically.
+     Auto-detection was overlaying its own gesture handler and absorbing taps. */
+  a[x-apple-data-detectors] {{
+    color: inherit !important;
+    text-decoration: none !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+    font-weight: inherit !important;
+    line-height: inherit !important;
+  }}
+</style>
 </head>
 <body style="margin:0;padding:0;background:#f4f1ec;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1A1A1A;">
 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f4f1ec;padding:32px 16px;">
 <tr><td align="center">
 <table cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
 
-<tr><td style="background:#9B2D4F;padding:22px 32px;color:#fff;">
+<tr><td style="background:#ff4d00;padding:22px 32px;color:#fff;">
 <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;font-weight:600;opacity:0.9;">SCE Boise · Mother's Day</div>
 <div style="font-size:22px;font-weight:700;margin-top:6px;letter-spacing:-0.01em;">New lead</div>
 </td></tr>
@@ -311,12 +323,12 @@ def _build_lead_email_html(c):
 <tr><td style="padding:28px 32px 8px;">
 <div style="font-size:24px;font-weight:700;letter-spacing:-0.015em;">{c['name'] or '(no name given)'}</div>
 <div style="color:#5C5C5C;font-size:14px;margin-top:6px;">{c['tier_name']} · {c['car_name']} · {c['car_duration']}</div>
-<div style="font-size:38px;font-weight:700;color:#9B2D4F;margin-top:14px;letter-spacing:-0.02em;line-height:1;">${c['price_str']}</div>
+<div style="font-size:38px;font-weight:700;color:#ff4d00;margin-top:14px;letter-spacing:-0.02em;line-height:1;">${c['price_str']}</div>
 <div style="color:#D4A431;font-size:13px;font-weight:700;letter-spacing:0.04em;margin-top:6px;text-transform:uppercase;">Saves ${c['savings_str']} off ${c['retail_str']} retail</div>
 </td></tr>
 
 <tr><td style="padding:28px 32px 0;">
-<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#9B2D4F;font-weight:700;margin-bottom:10px;">Contact</div>
+<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#ff4d00;font-weight:700;margin-bottom:10px;">Contact</div>
 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:14px;">
 <tr><td style="padding:6px 0;color:#5C5C5C;width:90px;">Email</td><td style="color:#1A1A1A;"><a href="mailto:{c['email']}" style="color:#1A1A1A;text-decoration:none;">{c['email']}</a></td></tr>
 <tr><td style="padding:6px 0;color:#5C5C5C;">Phone</td><td style="color:#1A1A1A;"><a href="tel:{c['phone_tel']}" style="color:#1A1A1A;text-decoration:none;">{c['phone'] or '(none)'}</a></td></tr>
@@ -324,7 +336,7 @@ def _build_lead_email_html(c):
 </td></tr>
 
 <tr><td style="padding:28px 32px 0;">
-<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#9B2D4F;font-weight:700;margin-bottom:10px;">Order</div>
+<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#ff4d00;font-weight:700;margin-bottom:10px;">Order</div>
 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:14px;">
 <tr><td style="padding:6px 0;color:#5C5C5C;">Tier</td><td style="color:#1A1A1A;text-align:right;">{c['tier_name']}</td></tr>
 <tr><td style="padding:6px 0;color:#5C5C5C;">Car</td><td style="color:#1A1A1A;text-align:right;">{c['car_name']}</td></tr>
@@ -335,7 +347,7 @@ def _build_lead_email_html(c):
 </td></tr>
 
 <tr><td style="padding:28px 32px 0;">
-<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#9B2D4F;font-weight:700;margin-bottom:10px;">Preferences</div>
+<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#ff4d00;font-weight:700;margin-bottom:10px;">Preferences</div>
 <div style="background:#FAF7F2;border-radius:10px;padding:14px 16px;margin-bottom:12px;">
 <div style="color:#5C5C5C;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;font-weight:600;margin-bottom:6px;">Restaurants of interest</div>
 <div style="color:#1A1A1A;font-size:15px;">{prefs_html}</div>
@@ -347,22 +359,12 @@ def _build_lead_email_html(c):
 </td></tr>
 
 <tr><td style="padding:24px 32px 0;">
-<table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
-<td bgcolor="#9B2D4F" style="background-color:#9B2D4F;border-radius:10px;">
-  <a href="tel:{c['phone_tel']}" target="_self" style="display:block;color:#ffffff;text-decoration:none;padding:14px 24px;font-weight:600;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;line-height:1;mso-padding-alt:0;mso-text-raise:0;">Call them</a>
-</td>
-<td width="10" style="width:10px;font-size:0;line-height:0;">&nbsp;</td>
-<td bgcolor="#ffffff" style="background-color:#ffffff;border-radius:10px;border:1.5px solid #9B2D4F;">
-  <a href="sms:{c['phone_tel']}" target="_self" style="display:block;color:#9B2D4F;text-decoration:none;padding:12.5px 23px;font-weight:600;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;line-height:1;">Text them</a>
-</td>
-</tr></table>
-<div style="font-size:12px;color:#5C5C5C;margin-top:12px;font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;">
-  Or copy: <a href="tel:{c['phone_tel']}" style="color:#1A1A1A;font-weight:600;text-decoration:none;">{c['phone'] or c['phone_tel']}</a>
-</div>
+  <a href="tel:{c['phone_tel']}" style="display:inline-block;background-color:#ff4d00;color:#ffffff;text-decoration:none;padding:14px 24px;border-radius:10px;font-weight:600;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;margin-right:8px;margin-bottom:8px;">Call them</a>
+  <a href="sms:{c['phone_tel']}" style="display:inline-block;background-color:#ffffff;color:#ff4d00;text-decoration:none;padding:12.5px 22.5px;border-radius:10px;font-weight:600;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;border:1.5px solid #ff4d00;margin-bottom:8px;">Text them</a>
 </td></tr>
 
 <tr><td style="padding:28px 32px 28px;">
-<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#9B2D4F;font-weight:700;margin-bottom:10px;">Attribution</div>
+<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#ff4d00;font-weight:700;margin-bottom:10px;">Attribution</div>
 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:12px;color:#5C5C5C;">
 <tr><td style="padding:4px 0;">Source</td><td style="text-align:right;color:#1A1A1A;">{c['utm_source'] or '—'}</td></tr>
 <tr><td style="padding:4px 0;">Campaign</td><td style="text-align:right;color:#1A1A1A;">{c['utm_campaign'] or '—'}</td></tr>
