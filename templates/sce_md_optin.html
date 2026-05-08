@@ -90,20 +90,65 @@
     letter-spacing: -0.015em; font-weight: 700;
   }
   .summary .duration { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
-  .summary .row {
-    display: flex; justify-content: space-between;
-    padding: 12px 0; border-top: 1px solid var(--line);
+  .summary .includes-label {
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--rose);
+    font-weight: 700;
+    margin: 6px 0 14px;
+  }
+  .summary .includes {
+    list-style: none; padding: 0; margin: 0 0 22px;
+  }
+  .summary .includes li {
+    padding: 10px 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
     font-size: 15px;
+    color: var(--text);
+    line-height: 1.5;
   }
-  .summary .row.total {
-    padding: 16px 0 0;
-    margin-top: 6px;
+  .summary .includes li::before {
+    content: '';
+    flex: 0 0 18px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: rgba(155, 45, 79, 0.1);
+    color: var(--rose);
+    font-size: 11px;
+    font-weight: 800;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-top: 2px;
+    background-image: linear-gradient(rgba(155, 45, 79, 0.1), rgba(155, 45, 79, 0.1));
+  }
+  .summary .includes li::before {
+    content: '✓';
+    color: var(--rose);
+    background: rgba(155, 45, 79, 0.1);
+  }
+  .summary .payline {
     border-top: 1px solid var(--line-strong);
-    font-size: 18px; font-weight: 700;
+    padding-top: 18px;
+    display: flex; flex-direction: column; gap: 12px;
   }
-  .summary .row .v { color: var(--text); font-weight: 500; }
-  .summary .row.savings .v { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }
-  .summary .row .strike { color: var(--muted); text-decoration: line-through; font-weight: 400; font-size: 13px; }
+  .summary .value-row {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 14px; color: var(--muted);
+  }
+  .summary .value-row .label { flex: 1; }
+  .summary .value-row .strike { text-decoration: line-through; font-weight: 500; }
+  .summary .total-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-top: 6px;
+  }
+  .summary .total-row .label {
+    font-weight: 700; font-size: 18px; letter-spacing: -0.005em;
+  }
+  .summary .total-row .amount {
+    font-size: 28px; font-weight: 700; letter-spacing: -0.02em;
+  }
   .save-pill {
     background: var(--gold-bright);
     color: #1A1A1A;
@@ -239,38 +284,30 @@ fbq('track','AddToCart',{content_ids:['{{ car.sku }}'],content_type:'product',va
       <h2>{{ car.name }}</h2>
       <div class="duration">{{ car.duration }}</div>
 
-      <div class="row">
-        <span>Supercar rental</span>
-        <span class="v">{{ car.duration.split(' ')[0] }} hours</span>
-      </div>
-      <div class="row">
-        <span>${{ tier.restaurant_value }} restaurant gift card</span>
-        <span class="v">Included</span>
-      </div>
-      <div class="row">
-        <span>Hand &amp; Stone spa gift card</span>
-        <span class="v">Included</span>
-      </div>
-      <div class="row">
-        <span>Door delivery</span>
-        <span class="v">Free</span>
-      </div>
-      <div class="row savings">
-        <span>Total value</span>
-        <span class="v">
+      <div class="includes-label">What's included</div>
+      <ul class="includes">
+        <li>{{ car.duration }} on the {{ car.name }}</li>
+        <li>${{ tier.restaurant_value }} restaurant gift card, her pick</li>
+        <li>$120 Hand &amp; Stone spa gift card</li>
+        <li>Free door-to-door delivery</li>
+      </ul>
+
+      <div class="payline">
+        <div class="value-row">
+          <span class="label">Total value</span>
           <span class="strike">${{ '{:,}'.format(car.total_value) }}</span>
           <span class="save-pill">Save ${{ '{:,}'.format(car.savings) }}</span>
-        </span>
-      </div>
-      <div class="row total">
-        <span>You pay</span>
-        <span>${{ '{:,}'.format(car.package_price) }}</span>
+        </div>
+        <div class="total-row">
+          <span class="label">You pay</span>
+          <span class="amount">${{ '{:,}'.format(car.package_price) }}</span>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="reassurance">
-    <b>No date needed now.</b> We coordinate the actual day with you after booking so Mom can pick her perfect day.
+    <b>Pickup time coordinated after checkout.</b> Nate texts you within 12 hours to lock in Mom's day.
   </div>
 
   <form method="post" action="{{ url_for('sce_md.optin') }}" id="optinForm">
@@ -316,7 +353,7 @@ fbq('track','AddToCart',{content_ids:['{{ car.sku }}'],content_type:'product',va
   <div class="faq">
     <details>
       <summary>Am I committing to a specific date right now?</summary>
-      <div class="a">No. You're reserving the package. We coordinate the actual day with you after booking.</div>
+      <div class="a">You're reserving the package. Pickup time gets coordinated after checkout, so Mom picks her day.</div>
     </details>
     <details>
       <summary>Why do you need my phone?</summary>
