@@ -41,7 +41,7 @@
   .scarcity {
     background: #1A1A1A;
     color: #fff;
-    padding: 11px 16px;
+    padding: 11px 24px;
     text-align: center;
     font-size: 13px;
     letter-spacing: 0.04em;
@@ -50,7 +50,7 @@
   .scarcity strong { color: var(--gold); font-weight: 600; }
 
   .nav {
-    padding: 18px 22px;
+    padding: 18px 28px;
     text-align: center;
     border-bottom: 1px solid var(--line);
   }
@@ -63,8 +63,11 @@
   }
   .wordmark .dot { color: var(--rose); }
 
-  .wrap { max-width: 720px; margin: 0 auto; padding: 0 22px; }
-  .wrap-wide { max-width: 1080px; margin: 0 auto; padding: 0 22px; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 28px; }
+  .wrap-wide { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+  @media (min-width: 600px) {
+    .wrap, .wrap-wide { padding: 0 32px; }
+  }
 
   /* HERO */
   .hero { padding: 48px 0 28px; text-align: center; }
@@ -87,11 +90,14 @@
     margin-bottom: 18px;
   }
   h1 {
-    font-size: clamp(34px, 7vw, 56px);
-    line-height: 1.08;
+    font-size: clamp(30px, 6.2vw, 54px);
+    line-height: 1.1;
     letter-spacing: -0.02em;
     font-weight: 700;
     margin: 0 0 18px;
+    max-width: 18ch;
+    margin-left: auto;
+    margin-right: auto;
   }
   h1 em { color: var(--rose); font-style: normal; font-weight: 700; }
   .lede {
@@ -273,7 +279,7 @@
   /* TESTIMONIAL */
   .testimonial {
     text-align: center;
-    padding: 56px 22px;
+    padding: 56px 28px;
   }
   .stars { color: var(--gold); letter-spacing: 4px; font-size: 18px; margin-bottom: 14px; }
   .quote {
@@ -312,7 +318,7 @@
 
   /* FOOTER */
   footer {
-    padding: 44px 22px 56px;
+    padding: 44px 28px 56px;
     text-align: center;
     color: var(--muted);
     font-size: 13px;
