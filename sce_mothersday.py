@@ -147,6 +147,11 @@ TIERS = {
 META_PIXEL_ID  = os.environ.get("META_PIXEL_ID_SCE", "1514374663034732")
 META_CAPI_TOKEN = os.environ.get("META_CAPI_TOKEN_SCE", "")
 
+# Resend lead notification configuration
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+NOTIFY_EMAILS = ["kendall@lumenmarketing.co", "n.wilkinson@launchpoint.dev"]
+NOTIFY_FROM   = "SCE Mother's Day <kendall@lumenmarketing.co>"
+
 # DB path resolved by the host app's DATA_DIR convention
 DATA_DIR = "/data" if os.path.isdir("/data") else os.path.dirname(__file__)
 DB_PATH = os.path.join(DATA_DIR, "waitlist.db")
@@ -168,6 +173,8 @@ def init_md_db():
             price_cents INTEGER NOT NULL,
             stripe_link TEXT NOT NULL,
             status TEXT DEFAULT 'opt-in',
+            restaurant_prefs TEXT DEFAULT '',
+            special_notes TEXT DEFAULT '',
             ip TEXT DEFAULT '',
             user_agent TEXT DEFAULT '',
             referrer TEXT DEFAULT '',
@@ -182,6 +189,11 @@ def init_md_db():
             updated_at TEXT NOT NULL
         )
     """)
+    # Migrate: add prefs/notes columns to existing tables.
+    existing_cols = [r[1] for r in con.execute("PRAGMA table_info(mothersday_leads)").fetchall()]
+    for col in ("restaurant_prefs", "special_notes"):
+        if col not in existing_cols:
+            con.execute(f"ALTER TABLE mothersday_leads ADD COLUMN {col} TEXT DEFAULT ''")
     con.execute("""
         CREATE TABLE IF NOT EXISTS mothersday_purchases (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -227,6 +239,119 @@ def _client_ip():
     if fwd:
         return fwd.split(",")[0].strip()
     return request.remote_addr or ""
+
+
+def _build_lead_email_html(c):
+    """Build a clean inline-styled HTML email for a new lead. Inline-only styles
+    so it holds up across Gmail / Apple Mail / Outlook."""
+    notes_html = (c["notes"] or "<span style='color:#9aa0a6'>None</span>").replace("\n", "<br>")
+    prefs_html = c["prefs"] or "<span style='color:#9aa0a6'>No preference</span>"
+    return f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="margin:0;padding:0;background:#f4f1ec;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1A1A1A;">
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f4f1ec;padding:32px 16px;">
+<tr><td align="center">
+<table cellpadding="0" cellspacing="0" border="0" width="600" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06);">
+
+<tr><td style="background:#9B2D4F;padding:22px 32px;color:#fff;">
+<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;font-weight:600;opacity:0.9;">SCE Boise · Mother's Day</div>
+<div style="font-size:22px;font-weight:700;margin-top:6px;letter-spacing:-0.01em;">New lead</div>
+</td></tr>
+
+<tr><td style="padding:28px 32px 8px;">
+<div style="font-size:24px;font-weight:700;letter-spacing:-0.015em;">{c['name'] or '(no name given)'}</div>
+<div style="color:#5C5C5C;font-size:14px;margin-top:6px;">{c['tier_name']} · {c['car_name']} · {c['car_duration']}</div>
+<div style="font-size:38px;font-weight:700;color:#9B2D4F;margin-top:14px;letter-spacing:-0.02em;line-height:1;">${c['price_str']}</div>
+<div style="color:#D4A431;font-size:13px;font-weight:700;letter-spacing:0.04em;margin-top:6px;text-transform:uppercase;">Saves ${c['savings_str']} off ${c['retail_str']} retail</div>
+</td></tr>
+
+<tr><td style="padding:28px 32px 0;">
+<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#9B2D4F;font-weight:700;margin-bottom:10px;">Contact</div>
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:14px;">
+<tr><td style="padding:6px 0;color:#5C5C5C;width:90px;">Email</td><td style="color:#1A1A1A;"><a href="mailto:{c['email']}" style="color:#1A1A1A;text-decoration:none;">{c['email']}</a></td></tr>
+<tr><td style="padding:6px 0;color:#5C5C5C;">Phone</td><td style="color:#1A1A1A;"><a href="tel:{c['phone']}" style="color:#1A1A1A;text-decoration:none;">{c['phone'] or '(none)'}</a></td></tr>
+</table>
+</td></tr>
+
+<tr><td style="padding:28px 32px 0;">
+<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#9B2D4F;font-weight:700;margin-bottom:10px;">Order</div>
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:14px;">
+<tr><td style="padding:6px 0;color:#5C5C5C;">Tier</td><td style="color:#1A1A1A;text-align:right;">{c['tier_name']}</td></tr>
+<tr><td style="padding:6px 0;color:#5C5C5C;">Car</td><td style="color:#1A1A1A;text-align:right;">{c['car_name']}</td></tr>
+<tr><td style="padding:6px 0;color:#5C5C5C;">Duration</td><td style="color:#1A1A1A;text-align:right;">{c['car_duration']}</td></tr>
+<tr><td style="padding:6px 0;color:#5C5C5C;">SKU</td><td style="color:#1A1A1A;text-align:right;font-family:'SF Mono',Menlo,monospace;font-size:12px;">{c['sku']}</td></tr>
+<tr><td style="padding:6px 0;color:#5C5C5C;border-top:1px solid #eee;">Package price</td><td style="color:#1A1A1A;text-align:right;font-weight:700;border-top:1px solid #eee;">${c['price_str']}</td></tr>
+</table>
+</td></tr>
+
+<tr><td style="padding:28px 32px 0;">
+<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#9B2D4F;font-weight:700;margin-bottom:10px;">Preferences</div>
+<div style="background:#FAF7F2;border-radius:10px;padding:14px 16px;margin-bottom:12px;">
+<div style="color:#5C5C5C;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;font-weight:600;margin-bottom:6px;">Restaurants of interest</div>
+<div style="color:#1A1A1A;font-size:15px;">{prefs_html}</div>
+</div>
+<div style="background:#FAF7F2;border-radius:10px;padding:14px 16px;">
+<div style="color:#5C5C5C;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;font-weight:600;margin-bottom:6px;">Special notes</div>
+<div style="color:#1A1A1A;font-size:15px;line-height:1.55;">{notes_html}</div>
+</div>
+</td></tr>
+
+<tr><td style="padding:24px 32px 0;">
+<a href="{c['stripe_url']}" style="display:inline-block;background:#9B2D4F;color:#fff;text-decoration:none;padding:14px 22px;border-radius:10px;font-weight:600;font-size:14px;letter-spacing:0.01em;">View Stripe checkout link →</a>
+</td></tr>
+
+<tr><td style="padding:28px 32px 28px;">
+<div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#9B2D4F;font-weight:700;margin-bottom:10px;">Attribution</div>
+<table cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:12px;color:#5C5C5C;">
+<tr><td style="padding:4px 0;">Source</td><td style="text-align:right;color:#1A1A1A;">{c['utm_source'] or '—'}</td></tr>
+<tr><td style="padding:4px 0;">Campaign</td><td style="text-align:right;color:#1A1A1A;">{c['utm_campaign'] or '—'}</td></tr>
+<tr><td style="padding:4px 0;">Medium</td><td style="text-align:right;color:#1A1A1A;">{c['utm_medium'] or '—'}</td></tr>
+<tr><td style="padding:4px 0;">Event ID</td><td style="text-align:right;font-family:'SF Mono',Menlo,monospace;color:#1A1A1A;">{c['event_id']}</td></tr>
+<tr><td style="padding:4px 0;">Submitted</td><td style="text-align:right;color:#1A1A1A;">{c['submitted_at']}</td></tr>
+</table>
+</td></tr>
+
+<tr><td style="background:#FAF7F2;padding:16px 32px;text-align:center;">
+<div style="font-size:11px;color:#5C5C5C;letter-spacing:0.06em;">Lumen Mainframe · SCE Mother's Day funnel</div>
+</td></tr>
+
+</table>
+</td></tr>
+</table>
+</body>
+</html>"""
+
+
+def _send_lead_email(ctx):
+    """Fire lead notification email via Resend in a background thread.
+    No-op if RESEND_API_KEY is not configured."""
+    if not RESEND_API_KEY:
+        print("[SCE-MD email] RESEND_API_KEY not set, skipping notification")
+        return
+    subject = f"New SCE MD Lead · {ctx['name'] or 'Anonymous'} · ${ctx['price_str']} · {ctx['car_short']}"
+    payload = {
+        "from": NOTIFY_FROM,
+        "to": NOTIFY_EMAILS,
+        "subject": subject,
+        "html": _build_lead_email_html(ctx),
+        "reply_to": ctx["email"],
+    }
+    def _send():
+        try:
+            r = requests.post(
+                "https://api.resend.com/emails",
+                headers={
+                    "Authorization": f"Bearer {RESEND_API_KEY}",
+                    "Content-Type": "application/json",
+                },
+                json=payload, timeout=8,
+            )
+            if r.status_code >= 300:
+                print(f"[SCE-MD email] {r.status_code}: {r.text[:300]}")
+        except Exception as e:
+            print(f"[SCE-MD email] exception: {e}")
+    threading.Thread(target=_send, daemon=True).start()
 
 
 def _capi_fire(event_name, event_id, source_url, user_data, custom_data=None):
@@ -289,6 +414,18 @@ def tier(tier_id):
     return render_template("sce_md_cars.html", tier=tier, **_ctx())
 
 
+@sce_md_bp.route("/mothersday/preferences/<tier_id>/<car_id>")
+def preferences(tier_id, car_id):
+    tier, car = _get_combo(tier_id, car_id)
+    if not tier or not car:
+        return redirect(url_for("sce_md.landing"))
+    return render_template(
+        "sce_md_preferences.html",
+        tier=tier, car=car,
+        **_ctx(),
+    )
+
+
 @sce_md_bp.route("/mothersday/reserve/<tier_id>/<car_id>")
 def reserve(tier_id, car_id):
     tier, car = _get_combo(tier_id, car_id)
@@ -312,6 +449,8 @@ def optin():
     email   = (request.form.get("email") or "").strip().lower()
     phone   = (request.form.get("phone") or "").strip()
     event_id = (request.form.get("event_id") or "").strip() or uuid.uuid4().hex
+    prefs   = (request.form.get("restaurant_prefs") or "").strip()[:500]
+    notes   = (request.form.get("special_notes") or "").strip()[:1000]
 
     tier, car = _get_combo(tier_id, car_id)
     if not tier or not car:
@@ -327,12 +466,14 @@ def optin():
         con.execute("""
             INSERT INTO mothersday_leads
                 (event_id, name, email, phone, tier, car, sku, price_cents, stripe_link,
+                 restaurant_prefs, special_notes,
                  ip, user_agent, referrer, utm_source, utm_medium, utm_campaign, utm_content, utm_term,
                  fbp, fbc, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             event_id, name, email, phone,
             tier_id, car_id, car["sku"], car["package_price"] * 100, stripe_url,
+            prefs, notes,
             request.headers.get("X-Forwarded-For", request.remote_addr or ""),
             request.headers.get("User-Agent", ""),
             request.referrer or "",
@@ -348,6 +489,29 @@ def optin():
         con.commit()
     finally:
         con.close()
+
+    # Fire team notification email (background thread, doesn't block redirect).
+    _send_lead_email({
+        "name": name,
+        "email": email,
+        "phone": phone,
+        "tier_name": tier["name"],
+        "car_name": car["name"],
+        "car_short": car["name"].split(" ")[-1],
+        "car_duration": car["duration"],
+        "sku": car["sku"],
+        "price_str": "{:,}".format(car["package_price"]),
+        "retail_str": "{:,}".format(car["total_value"]),
+        "savings_str": "{:,}".format(car["savings"]),
+        "stripe_url": stripe_url,
+        "prefs": prefs,
+        "notes": notes,
+        "utm_source":   request.form.get("utm_source", ""),
+        "utm_medium":   request.form.get("utm_medium", ""),
+        "utm_campaign": request.form.get("utm_campaign", ""),
+        "event_id": event_id,
+        "submitted_at": now + " UTC",
+    })
 
     # Fire server-side CAPI Lead (background thread, doesn't block redirect).
     name_parts = name.split()

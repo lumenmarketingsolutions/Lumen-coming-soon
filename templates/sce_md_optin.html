@@ -298,9 +298,9 @@ fbq('track','AddToCart',{content_ids:['{{ car.sku }}'],content_type:'product',va
 <div class="topbar">Last step  ·  <strong>Reserve your spot</strong></div>
 
 <nav class="nav">
-  <a class="back" href="{{ url_for('sce_md.tier', tier_id=tier.id) }}">Back</a>
+  <a class="back" href="{{ url_for('sce_md.preferences', tier_id=tier.id, car_id=car.id) }}">Back</a>
   <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
-  <span class="step-pill">Step 2 / 2</span>
+  <span class="step-pill">Step 3 / 3</span>
 </nav>
 
 <section class="head wrap">
@@ -347,6 +347,8 @@ fbq('track','AddToCart',{content_ids:['{{ car.sku }}'],content_type:'product',va
     <input type="hidden" name="tier" value="{{ tier.id }}">
     <input type="hidden" name="car" value="{{ car.id }}">
     <input type="hidden" name="event_id" value="{{ event_id }}">
+    <input type="hidden" name="restaurant_prefs" id="restaurant_prefs">
+    <input type="hidden" name="special_notes"    id="special_notes">
     <input type="hidden" name="utm_source"   id="utm_source">
     <input type="hidden" name="utm_medium"   id="utm_medium">
     <input type="hidden" name="utm_campaign" id="utm_campaign">
@@ -421,6 +423,15 @@ fbq('track','AddToCart',{content_ids:['{{ car.sku }}'],content_type:'product',va
       var el = document.getElementById(k);
       if (el) el.value = v;
     });
+    // Pull restaurant prefs + notes captured on the previous step (if any).
+    try {
+      var prefs = localStorage.getItem('sce_md_prefs') || '';
+      var notes = localStorage.getItem('sce_md_notes') || '';
+      var pi = document.getElementById('restaurant_prefs');
+      var ni = document.getElementById('special_notes');
+      if (pi) pi.value = prefs;
+      if (ni) ni.value = notes;
+    } catch(e) {}
   })();
 
   // On submit: re-init the pixel with Advanced Matching using the user's actual data,
