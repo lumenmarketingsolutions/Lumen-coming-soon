@@ -259,6 +259,7 @@ fbq('track','AddToCart',{content_ids:['{{ car.sku }}'],content_type:'product',va
   <form method="post" action="{{ url_for('sce_md.optin') }}" id="optinForm">
     <input type="hidden" name="tier" value="{{ tier.id }}">
     <input type="hidden" name="car" value="{{ car.id }}">
+    <input type="hidden" name="event_id" value="{{ event_id }}">
     <input type="hidden" name="utm_source"   id="utm_source">
     <input type="hidden" name="utm_medium"   id="utm_medium">
     <input type="hidden" name="utm_campaign" id="utm_campaign">
@@ -337,7 +338,8 @@ fbq('track','AddToCart',{content_ids:['{{ car.sku }}'],content_type:'product',va
   })();
 
   // On submit: re-init the pixel with Advanced Matching using the user's actual data,
-  // then fire the Lead event. Pixel hashes em/ph/fn/ln to SHA-256 automatically.
+  // then fire Lead with the same event_id the server uses so Meta dedupes the
+  // browser-side and CAPI fires into a single Lead.
   document.getElementById('optinForm').addEventListener('submit', function(ev) {
     if (!window.fbq) return;
     try {
@@ -353,7 +355,7 @@ fbq('track','AddToCart',{content_ids:['{{ car.sku }}'],content_type:'product',va
         content_name: '{{ car.name }} {{ tier.name }}',
         value: {{ car.package_price }},
         currency: 'USD'
-      });
+      }, {eventID: '{{ event_id }}'});
     } catch(e) {}
   });
 </script>

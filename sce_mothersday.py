@@ -17,6 +17,10 @@ import sqlite3
 import datetime
 import uuid
 import json
+import time
+import hashlib
+import threading
+import requests
 from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify
 
 sce_md_bp = Blueprint("sce_md", __name__)
@@ -203,6 +207,57 @@ def _get_combo(tier_id, car_id):
     return tier, car
 
 
+# ─────────────────── Meta CAPI helpers ───────────────────
+
+def _sha256(v):
+    """Lowercase + trim + SHA-256 hex. Empty string for empty input."""
+    if not v:
+        return ""
+    return hashlib.sha256(v.strip().lower().encode("utf-8")).hexdigest()
+
+
+def _digits_only(v):
+    return "".join(c for c in (v or "") if c.isdigit())
+
+
+def _client_ip():
+    fwd = request.headers.get("X-Forwarded-For", "") or ""
+    if fwd:
+        return fwd.split(",")[0].strip()
+    return request.remote_addr or ""
+
+
+def _capi_fire(event_name, event_id, source_url, user_data, custom_data=None):
+    """Fire a single CAPI event in a background thread. Silent no-op if token missing."""
+    if not META_CAPI_TOKEN or not META_PIXEL_ID:
+        return
+    payload_event = {
+        "event_name": event_name,
+        "event_time": int(time.time()),
+        "event_id": event_id,
+        "action_source": "website",
+        "event_source_url": source_url,
+        "user_data": {k: v for k, v in user_data.items() if v},
+    }
+    if custom_data:
+        payload_event["custom_data"] = custom_data
+    body = {"data": [payload_event], "access_token": META_CAPI_TOKEN}
+
+    def _send():
+        try:
+            r = requests.post(
+                f"https://graph.facebook.com/v19.0/{META_PIXEL_ID}/events",
+                json=body,
+                timeout=4,
+            )
+            if r.status_code != 200:
+                print(f"[CAPI] {event_name} {r.status_code}: {r.text[:300]}")
+        except Exception as e:
+            print(f"[CAPI] {event_name} exception: {e}")
+
+    threading.Thread(target=_send, daemon=True).start()
+
+
 def _ctx():
     """Common template context."""
     return {
@@ -237,7 +292,14 @@ def reserve(tier_id, car_id):
     tier, car = _get_combo(tier_id, car_id)
     if not tier or not car:
         return redirect(url_for("sce_md.landing"))
-    return render_template("sce_md_optin.html", tier=tier, car=car, **_ctx())
+    # Generate event_id at page render so client-side fbq Lead and server-side
+    # CAPI Lead share the same id and Meta dedupes them within the 5-minute window.
+    event_id = uuid.uuid4().hex
+    return render_template(
+        "sce_md_optin.html",
+        tier=tier, car=car, event_id=event_id,
+        **_ctx(),
+    )
 
 
 @sce_md_bp.route("/mothersday/optin", methods=["POST"])
@@ -247,6 +309,7 @@ def optin():
     name    = (request.form.get("name") or "").strip()
     email   = (request.form.get("email") or "").strip().lower()
     phone   = (request.form.get("phone") or "").strip()
+    event_id = (request.form.get("event_id") or "").strip() or uuid.uuid4().hex
 
     tier, car = _get_combo(tier_id, car_id)
     if not tier or not car:
@@ -255,7 +318,6 @@ def optin():
         return redirect(url_for("sce_md.reserve", tier_id=tier_id, car_id=car_id) + "?err=email")
 
     stripe_url = STRIPE_LINKS[tier_id][car_id]
-    event_id = uuid.uuid4().hex
     now = datetime.datetime.utcnow().isoformat()
 
     con = sqlite3.connect(DB_PATH)
@@ -284,6 +346,33 @@ def optin():
         con.commit()
     finally:
         con.close()
+
+    # Fire server-side CAPI Lead (background thread, doesn't block redirect).
+    name_parts = name.split()
+    fn = name_parts[0] if name_parts else ""
+    ln = " ".join(name_parts[1:]) if len(name_parts) > 1 else ""
+    _capi_fire(
+        event_name="Lead",
+        event_id=event_id,
+        source_url=f"{request.scheme}://{request.host}{request.path}",
+        user_data={
+            "em": _sha256(email),
+            "ph": _sha256(_digits_only(phone)),
+            "fn": _sha256(fn),
+            "ln": _sha256(ln),
+            "client_ip_address": _client_ip(),
+            "client_user_agent": request.headers.get("User-Agent", ""),
+            "fbp": request.cookies.get("_fbp", ""),
+            "fbc": request.cookies.get("_fbc", ""),
+        },
+        custom_data={
+            "currency": "USD",
+            "value": car["package_price"],
+            "content_ids": [car["sku"]],
+            "content_name": f"{car['name']} {tier['name']}",
+            "content_type": "product",
+        },
+    )
 
     # Pass event_id and email into Stripe via prefilled_email so attribution stays clean.
     sep = "&" if "?" in stripe_url else "?"
@@ -317,6 +406,8 @@ def stripe_webhook():
         meta = (sess.get("metadata") or {})
         sku = meta.get("sku") or ""
 
+        # Look up the original lead so we can recover phone/name/IP for CAPI match.
+        lead = None
         if sid:
             con = sqlite3.connect(DB_PATH)
             try:
@@ -339,8 +430,55 @@ def stripe_webhook():
                         "UPDATE mothersday_leads SET status='paid', updated_at=? WHERE event_id=?",
                         (datetime.datetime.utcnow().isoformat(), client_ref),
                     )
+                    row = con.execute(
+                        """SELECT email, phone, name, sku, ip, user_agent, fbp, fbc
+                           FROM mothersday_leads WHERE event_id = ?""",
+                        (client_ref,),
+                    ).fetchone()
+                    if row:
+                        lead = {
+                            "email": row[0] or email,
+                            "phone": row[1] or "",
+                            "name":  row[2] or "",
+                            "sku":   row[3] or sku,
+                            "ip":    row[4] or "",
+                            "ua":    row[5] or "",
+                            "fbp":   row[6] or "",
+                            "fbc":   row[7] or "",
+                        }
                 con.commit()
             finally:
                 con.close()
+
+        # Fire CAPI Purchase server-side using the highest-fidelity user data we have.
+        purchase_event_id = client_ref or sid or uuid.uuid4().hex
+        ud_email = (lead and lead["email"]) or email
+        ud_phone = lead and lead["phone"] or ""
+        name = (lead and lead["name"]) or ""
+        parts = name.split()
+        fn = parts[0] if parts else ""
+        ln = " ".join(parts[1:]) if len(parts) > 1 else ""
+        _capi_fire(
+            event_name="Purchase",
+            event_id=purchase_event_id,
+            source_url=f"https://supercarexp.lumenmarketing.co/mothersday/booked",
+            user_data={
+                "em": _sha256(ud_email),
+                "ph": _sha256(_digits_only(ud_phone)),
+                "fn": _sha256(fn),
+                "ln": _sha256(ln),
+                "client_ip_address": (lead and lead["ip"]) or "",
+                "client_user_agent": (lead and lead["ua"]) or "",
+                "fbp": (lead and lead["fbp"]) or "",
+                "fbc": (lead and lead["fbc"]) or "",
+            },
+            custom_data={
+                "currency": (sess.get("currency") or "usd").upper(),
+                "value": (amount or 0) / 100.0,
+                "content_ids": [(lead and lead["sku"]) or sku] if ((lead and lead["sku"]) or sku) else [],
+                "content_type": "product",
+                "order_id": sid,
+            },
+        )
 
     return jsonify({"ok": True})
