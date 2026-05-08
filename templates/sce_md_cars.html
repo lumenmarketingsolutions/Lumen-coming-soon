@@ -268,7 +268,7 @@ fbq('track','ViewContent', {content_category: 'mothers_day_tier', content_name: 
             <span class="retail">${{ '{:,}'.format(car.total_value) }} retail</span>
           </div>
         </div>
-        <span class="btn">Reserve {{ car.name.split(' ')[-1] if 'Lamborghini' in car.name or 'Mercedes' in car.name else car.name }} for ${{ car.package_price }}</span>
+        <span class="btn">Reserve {{ car.name.split(' ')[-1] }} for ${{ car.package_price }}</span>
       </div>
     </a>
     {% endfor %}
