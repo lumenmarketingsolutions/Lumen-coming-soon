@@ -116,10 +116,17 @@ def _md_metrics(start_iso, end_iso):
             WHERE entered_at >= ? AND entered_at <= ?
         """, (start_iso, end_iso)).fetchone()[0] or 0
 
-        # Lead count
+        # Lead count (total, includes pre-tracking leads)
         leads = con.execute("""
             SELECT COUNT(*) FROM mothersday_leads
             WHERE created_at >= ? AND created_at <= ?
+        """, (start_iso, end_iso)).fetchone()[0] or 0
+
+        # Tracked leads (have a session_id we can join to visits) — used for
+        # conversion rate so the math stays consistent with total_visitors.
+        leads_tracked = con.execute("""
+            SELECT COUNT(*) FROM mothersday_leads
+            WHERE created_at >= ? AND created_at <= ? AND session_id != ''
         """, (start_iso, end_iso)).fetchone()[0] or 0
 
         # Paid count
@@ -189,14 +196,21 @@ def _md_metrics(start_iso, end_iso):
                 prefs_counter[p] += 1
         restaurant_prefs = sorted(prefs_counter.items(), key=lambda kv: -kv[1])
 
-        # Conversion rate = leads / total_visitors
-        conv_rate = (leads / total_visitors * 100) if total_visitors else 0
+        # Conversion rate = tracked_leads / total_visitors. Filtering by
+        # session_id excludes leads created before tracking was wired up so
+        # the rate stays internally consistent with visit data. Hard cap at
+        # 100 % as a defensive safeguard against any future data drift.
+        if total_visitors:
+            conv_rate = min((leads_tracked / total_visitors) * 100, 100)
+        else:
+            conv_rate = 0
     finally:
         con.close()
 
     return {
         "total_visitors": total_visitors,
         "leads": leads,
+        "leads_tracked": leads_tracked,
         "paid": paid,
         "conv_rate": round(conv_rate, 2),
         "avg_time_s": avg_time_s,
