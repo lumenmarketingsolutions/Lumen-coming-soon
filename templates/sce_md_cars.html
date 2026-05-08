@@ -170,6 +170,18 @@
       0 1px 2px rgba(26, 26, 26, 0.03),
       0 4px 14px rgba(26, 26, 26, 0.04);
   }
+  .experience-card { overflow: hidden; padding-bottom: 0; }
+  .experience-card .resto-list { margin-bottom: 0; }
+  .spa-section {
+    margin: 28px -28px 0;
+    padding: 28px 28px 30px;
+    background: rgba(155, 45, 79, 0.035);
+    border-top: 1px solid rgba(155, 45, 79, 0.1);
+  }
+  .spa-section .info-head { margin-bottom: 10px; }
+  .spa-section h4 { font-size: 22px; letter-spacing: -0.015em; margin: 0 0 10px; font-weight: 700; }
+  .spa-section .info-sub { color: var(--muted); margin: 0 0 18px; line-height: 1.6; font-size: 15px; }
+  .spa-section .spa-stat { padding-top: 18px; border-top: 1px solid rgba(155, 45, 79, 0.12); }
   .info-head {
     display: flex; align-items: center; justify-content: space-between;
     gap: 12px; margin-bottom: 12px;
@@ -306,7 +318,7 @@ fbq('track','ViewContent', {content_category: 'mothers_day_tier', content_name: 
     {% endfor %}
   </div>
 
-  <div class="info-block">
+  <div class="info-block experience-card">
     <div class="info-eyebrow">Dinner  ·  Her choice</div>
     <h4>${{ tier.restaurant_value }} restaurant gift card</h4>
     <p class="info-sub">{{ tier.restaurants_note }}</p>
@@ -319,18 +331,18 @@ fbq('track','ViewContent', {content_category: 'mothers_day_tier', content_name: 
       </div>
       {% endfor %}
     </div>
-  </div>
 
-  <div class="info-block">
-    <div class="info-head">
-      <div class="info-eyebrow">Spa partner</div>
-      <span class="info-city">{{ tier.spa_city }}</span>
-    </div>
-    <h4>Hand &amp; Stone</h4>
-    <p class="info-sub">One hour massage or facial. Mom picks which.</p>
-    <div class="spa-stat">
-      <span class="face">$120 face value</span>
-      <span class="tag">{{ 'Fully included' if tier.id == 'full-day' else 'Yours for $80' }}</span>
+    <div class="spa-section">
+      <div class="info-head">
+        <div class="info-eyebrow">Plus the spa</div>
+        <span class="info-city">{{ tier.spa_city }}</span>
+      </div>
+      <h4>Hand &amp; Stone</h4>
+      <p class="info-sub">One hour massage or facial. Mom picks which.</p>
+      <div class="spa-stat">
+        <span class="face">$120 face value</span>
+        <span class="tag">{{ 'Fully included' if tier.id == 'full-day' else 'Yours for $80' }}</span>
+      </div>
     </div>
   </div>
 </section>
