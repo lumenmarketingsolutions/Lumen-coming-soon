@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{{ tier.name }} · Supercar Experience Boise</title>
+<meta name="description" content="Pick the car for {{ tier.name }}. {{ tier.tagline }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF7F2; --surface: #FFFFFF;
+    --text: #1A1A1A; --muted: #5C5C5C;
+    --rose: #9B2D4F; --rose-dark: #7A2240;
+    --gold: #C9A227;
+    --line: rgba(26, 26, 26, 0.08);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+
+  .topbar { background: #1A1A1A; color: #fff; text-align: center; padding: 11px 16px; font-size: 13px; letter-spacing: 0.04em; }
+  .topbar strong { color: var(--gold); font-weight: 600; }
+
+  .nav {
+    padding: 14px 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+  }
+  .back { color: var(--muted); font-size: 13px; font-weight: 500; }
+  .back::before { content: '←'; margin-right: 6px; }
+  .wordmark { font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; }
+  .wordmark .dot { color: var(--rose); }
+  .step-pill {
+    background: rgba(155, 45, 79, 0.08); color: var(--rose);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; padding: 6px 10px; border-radius: 999px;
+  }
+
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 22px; }
+
+  .head { text-align: center; padding: 44px 0 12px; }
+  .eyebrow {
+    color: var(--rose); font-size: 12px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    font-weight: 600; margin-bottom: 14px;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 40px);
+    line-height: 1.12; letter-spacing: -0.02em;
+    margin: 0 0 12px; font-weight: 700;
+  }
+  .lede { color: var(--muted); max-width: 540px; margin: 0 auto 8px; font-size: 16px; }
+
+  /* CAR CARDS */
+  .cars { display: grid; gap: 18px; padding: 32px 0 12px; }
+  @media (min-width: 720px) {
+    .cars { grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  }
+  .car {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .car:hover { border-color: var(--rose); }
+  .car .photo { aspect-ratio: 4 / 3; overflow: hidden; background: #f0eae2; }
+  .car .photo img { width: 100%; height: 100%; object-fit: cover; }
+  .car .body { padding: 22px 22px 24px; display: flex; flex-direction: column; flex: 1; }
+  .car h3 {
+    font-size: 22px; letter-spacing: -0.015em;
+    margin: 0 0 4px; font-weight: 700;
+  }
+  .car .duration {
+    color: var(--rose); font-size: 13px; font-weight: 600;
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .car .price-row {
+    display: flex; align-items: baseline; justify-content: space-between;
+    padding-top: 14px; border-top: 1px solid var(--line);
+    margin-bottom: 6px;
+  }
+  .car .price-row .label { color: var(--muted); font-size: 13px; }
+  .car .price-row .price { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+  .car .savings {
+    font-size: 13px; color: var(--gold); font-weight: 600; margin-bottom: 18px;
+  }
+  .car .savings .strike { color: var(--muted); text-decoration: line-through; font-weight: 400; margin-right: 6px; }
+  .btn {
+    display: inline-block; background: var(--rose); color: #fff;
+    padding: 15px 22px; border-radius: 12px;
+    font-weight: 600; font-size: 15px; text-align: center;
+    width: 100%; margin-top: auto; transition: background 0.2s;
+  }
+  .btn:hover { background: var(--rose-dark); }
+
+  .info-block {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px 26px;
+    margin-top: 22px;
+  }
+  .info-block h4 {
+    font-size: 18px; letter-spacing: -0.01em;
+    margin: 0 0 10px; font-weight: 700;
+  }
+  .info-block p { color: var(--muted); margin: 0 0 14px; line-height: 1.6; font-size: 15px; }
+  .restaurants {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    margin-top: 6px;
+  }
+  .pill {
+    background: rgba(26, 26, 26, 0.04);
+    border: 1px solid var(--line);
+    padding: 8px 14px; border-radius: 999px;
+    font-size: 13px; color: var(--text); font-weight: 500;
+  }
+
+  footer {
+    padding: 44px 22px; text-align: center;
+    color: var(--muted); font-size: 13px;
+    border-top: 1px solid var(--line); margin-top: 44px;
+  }
+  footer a { color: var(--muted); margin: 0 8px; }
+  .phone-cta { color: var(--text); font-weight: 600; font-size: 15px; }
+</style>
+{% if pixel_id %}
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','{{ pixel_id }}');
+fbq('track','PageView');
+fbq('track','ViewContent', {content_category: 'mothers_day_tier', content_name: '{{ tier.id }}'});
+</script>
+{% endif %}
+</head>
+<body>
+
+<div class="topbar">Mother's Day Drop  ·  <strong>Limited slots</strong>  ·  Delivered to her door</div>
+
+<nav class="nav">
+  <a class="back" href="{{ url_for('sce_md.landing') }}">Back</a>
+  <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
+  <span class="step-pill">Step 1 of 2</span>
+</nav>
+
+<section class="head wrap">
+  <div class="eyebrow">{{ tier.name }}</div>
+  <h1>Pick her car.</h1>
+  <p class="lede">{{ tier.tagline }}</p>
+</section>
+
+<section class="wrap">
+  <div class="cars">
+    {% for car in tier.cars %}
+    <a class="car" href="{{ url_for('sce_md.reserve', tier_id=tier.id, car_id=car.id) }}">
+      <div class="photo">
+        <img src="{{ url_for('static', filename='sce-mothersday/' ~ car.image) }}" alt="{{ car.name }}" loading="{{ 'eager' if loop.first else 'lazy' }}">
+      </div>
+      <div class="body">
+        <h3>{{ car.name }}</h3>
+        <div class="duration">{{ car.duration }}</div>
+        <div class="price-row">
+          <span class="label">Package price</span>
+          <span class="price">${{ '{:,}'.format(car.package_price) }}</span>
+        </div>
+        <div class="savings"><span class="strike">${{ '{:,}'.format(car.total_value) }} value</span> save ${{ '{:,}'.format(car.savings) }}</div>
+        <span class="btn">Reserve {{ car.name.split(' ')[-1] if 'Lamborghini' in car.name or 'Mercedes' in car.name else car.name }} for ${{ car.package_price }}</span>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+
+  <div class="info-block">
+    <h4>The restaurants</h4>
+    <p>{{ tier.restaurants_note }} Mom can use the ${{ tier.restaurant_value }} gift card at any of these:</p>
+    <div class="restaurants">
+      {% for r in tier.restaurants %}<span class="pill">{{ r }}</span>{% endfor %}
+    </div>
+  </div>
+
+  <div class="info-block">
+    <h4>The spa</h4>
+    <p>{{ tier.spa_value_line }}. One hour massage or facial at Hand &amp; Stone, Mom's choice.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="phone-cta">Questions? Call <a href="tel:{{ support_phone_tel }}">{{ support_phone }}</a></div>
+  <div style="margin-top: 12px;">
+    <a href="/sce/sms-privacy">Privacy</a>·<a href="/sce/sms-terms">Terms</a>
+  </div>
+  <div style="margin-top: 16px;">© Supercar Experience Boise</div>
+</footer>
+
+</body>
+</html>

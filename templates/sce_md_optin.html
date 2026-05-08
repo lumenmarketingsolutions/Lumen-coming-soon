@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Reserve {{ car.name }} · {{ tier.name }}</title>
+<meta name="description" content="Reserve {{ car.name }} for {{ tier.name }} at Supercar Experience Boise. ${{ car.package_price }}.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF7F2; --surface: #FFFFFF;
+    --text: #1A1A1A; --muted: #5C5C5C;
+    --rose: #9B2D4F; --rose-dark: #7A2240;
+    --gold: #C9A227;
+    --line: rgba(26, 26, 26, 0.08);
+    --line-strong: rgba(26, 26, 26, 0.18);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+
+  .topbar { background: #1A1A1A; color: #fff; text-align: center; padding: 11px 16px; font-size: 13px; letter-spacing: 0.04em; }
+  .topbar strong { color: var(--gold); font-weight: 600; }
+
+  .nav {
+    padding: 14px 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+  }
+  .back { color: var(--muted); font-size: 13px; font-weight: 500; }
+  .back::before { content: '←'; margin-right: 6px; }
+  .wordmark { font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; }
+  .wordmark .dot { color: var(--rose); }
+  .step-pill {
+    background: rgba(155, 45, 79, 0.08); color: var(--rose);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+    text-transform: uppercase; padding: 6px 10px; border-radius: 999px;
+  }
+
+  .wrap { max-width: 580px; margin: 0 auto; padding: 0 22px; }
+
+  .head { text-align: center; padding: 36px 0 8px; }
+  .eyebrow {
+    color: var(--rose); font-size: 12px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    font-weight: 600; margin-bottom: 14px;
+  }
+  h1 {
+    font-size: clamp(28px, 5.5vw, 38px);
+    line-height: 1.1; letter-spacing: -0.02em;
+    margin: 0 0 10px; font-weight: 700;
+  }
+  .lede { color: var(--muted); margin: 0 auto; max-width: 480px; font-size: 16px; }
+
+  /* SUMMARY */
+  .summary {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    overflow: hidden;
+    margin: 28px 0 24px;
+  }
+  .summary .photo {
+    aspect-ratio: 16 / 9;
+    background: #f0eae2;
+    overflow: hidden;
+  }
+  .summary .photo img { width: 100%; height: 100%; object-fit: cover; }
+  .summary .body { padding: 24px 24px 26px; }
+  .summary .car-line {
+    color: var(--rose); font-size: 12px; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px;
+  }
+  .summary h2 {
+    font-size: 24px; margin: 0 0 6px;
+    letter-spacing: -0.015em; font-weight: 700;
+  }
+  .summary .duration { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
+  .summary .row {
+    display: flex; justify-content: space-between;
+    padding: 12px 0; border-top: 1px solid var(--line);
+    font-size: 15px;
+  }
+  .summary .row.total {
+    padding: 16px 0 0;
+    margin-top: 6px;
+    border-top: 1px solid var(--line-strong);
+    font-size: 18px; font-weight: 700;
+  }
+  .summary .row .v { color: var(--text); font-weight: 500; }
+  .summary .row.savings .v { color: var(--gold); }
+  .summary .row .strike { color: var(--muted); text-decoration: line-through; margin-right: 6px; font-weight: 400; }
+
+  .reassurance {
+    background: rgba(155, 45, 79, 0.05);
+    border: 1px solid rgba(155, 45, 79, 0.18);
+    border-radius: 14px;
+    padding: 16px 18px;
+    color: var(--text);
+    font-size: 14px;
+    margin-bottom: 26px;
+    line-height: 1.55;
+  }
+  .reassurance b { color: var(--rose); }
+
+  /* FORM */
+  form { display: flex; flex-direction: column; gap: 14px; }
+  label { display: block; }
+  .lbl { font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  input[type=text], input[type=email], input[type=tel] {
+    width: 100%; padding: 16px 18px;
+    border: 1px solid var(--line-strong);
+    border-radius: 12px;
+    background: var(--surface);
+    font-family: inherit; font-size: 16px; color: var(--text);
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+  input:focus { outline: none; border-color: var(--rose); }
+
+  .consent {
+    display: flex; gap: 12px; align-items: flex-start;
+    color: var(--muted); font-size: 13px;
+    margin-top: 6px; line-height: 1.55;
+  }
+  .consent input { margin-top: 4px; flex: 0 0 18px; width: 18px; height: 18px; accent-color: var(--rose); }
+  .consent a { color: var(--rose); text-decoration: underline; }
+
+  .btn {
+    background: var(--rose); color: #fff;
+    padding: 19px 24px; border-radius: 14px;
+    font-weight: 600; font-size: 17px;
+    border: 0; cursor: pointer;
+    width: 100%; margin-top: 8px;
+    transition: background 0.2s;
+    letter-spacing: 0.005em;
+  }
+  .btn:hover { background: var(--rose-dark); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .secured {
+    text-align: center; color: var(--muted);
+    font-size: 12px; margin-top: 12px;
+    letter-spacing: 0.06em;
+  }
+
+  /* TRUST */
+  .trust {
+    text-align: center; padding: 32px 22px 8px;
+    color: var(--muted); font-size: 13px;
+  }
+  .stars { color: var(--gold); letter-spacing: 4px; font-size: 16px; margin-bottom: 8px; }
+
+  /* FAQ */
+  .section { padding: 32px 0; }
+  .section h3 { text-align: center; margin: 0 0 22px; font-size: 22px; letter-spacing: -0.01em; font-weight: 700; }
+  .faq { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .faq details { border-bottom: 1px solid var(--line); }
+  .faq details:last-child { border-bottom: 0; }
+  .faq summary {
+    cursor: pointer; padding: 18px 22px;
+    font-weight: 600; font-size: 15px;
+    list-style: none;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after {
+    content: '+'; color: var(--rose);
+    font-weight: 400; font-size: 22px;
+  }
+  .faq details[open] summary::after { content: '−'; }
+  .faq .a { padding: 0 22px 20px; color: var(--muted); line-height: 1.6; font-size: 14px; }
+
+  footer {
+    padding: 36px 22px; text-align: center;
+    color: var(--muted); font-size: 13px;
+    border-top: 1px solid var(--line); margin-top: 36px;
+  }
+  footer a { color: var(--muted); margin: 0 8px; }
+  .phone-cta { color: var(--text); font-weight: 600; font-size: 15px; }
+</style>
+{% if pixel_id %}
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','{{ pixel_id }}');
+fbq('track','PageView');
+fbq('track','AddToCart',{content_ids:['{{ car.sku }}'],content_type:'product',value:{{ car.package_price }},currency:'USD'});
+</script>
+{% endif %}
+</head>
+<body>
+
+<div class="topbar">Last step  ·  <strong>Reserve in 60 seconds</strong>  ·  Pay next</div>
+
+<nav class="nav">
+  <a class="back" href="{{ url_for('sce_md.tier', tier_id=tier.id) }}">Back</a>
+  <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
+  <span class="step-pill">Step 2 of 2</span>
+</nav>
+
+<section class="head wrap">
+  <div class="eyebrow">{{ tier.name }}</div>
+  <h1>You picked the {{ car.name }}.</h1>
+  <p class="lede">Lock it in below. Pay on the next page. We'll text you to coordinate the day.</p>
+</section>
+
+<section class="wrap">
+  <div class="summary">
+    <div class="photo">
+      <img src="{{ url_for('static', filename='sce-mothersday/' ~ car.image) }}" alt="{{ car.name }}">
+    </div>
+    <div class="body">
+      <div class="car-line">{{ tier.name }}</div>
+      <h2>{{ car.name }}</h2>
+      <div class="duration">{{ car.duration }}</div>
+
+      <div class="row">
+        <span>Supercar rental</span>
+        <span class="v">{{ car.duration.split(' ')[0] }} hours</span>
+      </div>
+      <div class="row">
+        <span>${{ tier.restaurant_value }} restaurant gift card</span>
+        <span class="v">Included</span>
+      </div>
+      <div class="row">
+        <span>Hand &amp; Stone spa gift card</span>
+        <span class="v">Included</span>
+      </div>
+      <div class="row">
+        <span>Door delivery</span>
+        <span class="v">Free</span>
+      </div>
+      <div class="row savings">
+        <span>Total value</span>
+        <span class="v"><span class="strike">${{ '{:,}'.format(car.total_value) }}</span> save ${{ '{:,}'.format(car.savings) }}</span>
+      </div>
+      <div class="row total">
+        <span>You pay</span>
+        <span>${{ '{:,}'.format(car.package_price) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="reassurance">
+    <b>No date needed now.</b> We coordinate the actual day with you after booking so Mom can pick her perfect day.
+  </div>
+
+  <form method="post" action="{{ url_for('sce_md.optin') }}" id="optinForm">
+    <input type="hidden" name="tier" value="{{ tier.id }}">
+    <input type="hidden" name="car" value="{{ car.id }}">
+    <input type="hidden" name="utm_source"   id="utm_source">
+    <input type="hidden" name="utm_medium"   id="utm_medium">
+    <input type="hidden" name="utm_campaign" id="utm_campaign">
+    <input type="hidden" name="utm_content"  id="utm_content">
+    <input type="hidden" name="utm_term"     id="utm_term">
+
+    <label>
+      <div class="lbl">Your name</div>
+      <input type="text" name="name" required autocomplete="name" placeholder="First and last">
+    </label>
+    <label>
+      <div class="lbl">Phone</div>
+      <input type="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="(208) 555-0123">
+    </label>
+    <label>
+      <div class="lbl">Email</div>
+      <input type="email" name="email" required autocomplete="email" inputmode="email" placeholder="you@example.com">
+    </label>
+
+    <label class="consent">
+      <input type="checkbox" required>
+      <span>I agree to be contacted by Supercar Experience Boise about this reservation. Standard message and data rates may apply. View our <a href="/sce/sms-privacy">privacy policy</a> and <a href="/sce/sms-terms">terms</a>.</span>
+    </label>
+
+    <button class="btn" type="submit">Continue to payment  ·  ${{ '{:,}'.format(car.package_price) }}</button>
+    <div class="secured">SECURED CHECKOUT VIA STRIPE</div>
+  </form>
+</section>
+
+<div class="trust">
+  <div class="stars">★ ★ ★ ★ ★</div>
+  <div>4.9 from 200+ Google reviews</div>
+</div>
+
+<section class="section wrap">
+  <h3>Quick answers.</h3>
+  <div class="faq">
+    <details>
+      <summary>Am I committing to a specific date right now?</summary>
+      <div class="a">No. You're reserving the package. We coordinate the actual day with you after booking.</div>
+    </details>
+    <details>
+      <summary>Why do you need my phone?</summary>
+      <div class="a">So Nate can text you to lock in Mom's day. We don't sell or share your info.</div>
+    </details>
+    <details>
+      <summary>What happens after I pay?</summary>
+      <div class="a">You'll get an instant confirmation by email and Nate at Supercar Experience Boise will text you within 12 hours.</div>
+    </details>
+    <details>
+      <summary>Does Mom need special insurance?</summary>
+      <div class="a">No. Active personal vehicle insurance is enough. Driver must be 21+ with a valid license.</div>
+    </details>
+  </div>
+</section>
+
+<footer>
+  <div class="phone-cta">Questions? Call <a href="tel:{{ support_phone_tel }}">{{ support_phone }}</a></div>
+  <div style="margin-top: 12px;">
+    <a href="/sce/sms-privacy">Privacy</a>·<a href="/sce/sms-terms">Terms</a>
+  </div>
+  <div style="margin-top: 16px;">© Supercar Experience Boise</div>
+</footer>
+
+<script>
+  // Persist UTM params from URL into the form (and localStorage in case they navigate around).
+  (function() {
+    var qs = new URLSearchParams(window.location.search);
+    var keys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
+    keys.forEach(function(k) {
+      var v = qs.get(k) || localStorage.getItem('sce_'+k) || '';
+      if (qs.get(k)) localStorage.setItem('sce_'+k, qs.get(k));
+      var el = document.getElementById(k);
+      if (el) el.value = v;
+    });
+  })();
+
+  // On submit: re-init the pixel with Advanced Matching using the user's actual data,
+  // then fire the Lead event. Pixel hashes em/ph/fn/ln to SHA-256 automatically.
+  document.getElementById('optinForm').addEventListener('submit', function(ev) {
+    if (!window.fbq) return;
+    try {
+      var email = (ev.target.querySelector('[name=email]') || {}).value || '';
+      var phone = ((ev.target.querySelector('[name=phone]') || {}).value || '').replace(/\D/g,'');
+      var name  = ((ev.target.querySelector('[name=name]')  || {}).value || '').trim();
+      var parts = name.split(/\s+/);
+      var fn = (parts[0] || '').toLowerCase();
+      var ln = (parts.slice(1).join(' ') || '').toLowerCase();
+      fbq('init','{{ pixel_id }}', {em: email.toLowerCase(), ph: phone, fn: fn, ln: ln});
+      fbq('track','Lead', {
+        content_ids: ['{{ car.sku }}'],
+        content_name: '{{ car.name }} {{ tier.name }}',
+        value: {{ car.package_price }},
+        currency: 'USD'
+      });
+    } catch(e) {}
+  });
+</script>
+
+</body>
+</html>
