@@ -28,11 +28,11 @@
   img { max-width: 100%; display: block; }
   a { color: inherit; text-decoration: none; }
 
-  .topbar { background: #1A1A1A; color: #fff; text-align: center; padding: 11px 16px; font-size: 13px; letter-spacing: 0.04em; }
+  .topbar { background: #1A1A1A; color: #fff; text-align: center; padding: 11px 24px; font-size: 13px; letter-spacing: 0.04em; }
   .topbar strong { color: var(--gold); font-weight: 600; }
 
   .nav {
-    padding: 14px 22px;
+    padding: 14px 28px;
     display: flex; align-items: center; justify-content: space-between;
     border-bottom: 1px solid var(--line);
   }
@@ -46,7 +46,8 @@
     text-transform: uppercase; padding: 6px 10px; border-radius: 999px;
   }
 
-  .wrap { max-width: 580px; margin: 0 auto; padding: 0 22px; }
+  .wrap { max-width: 580px; margin: 0 auto; padding: 0 28px; }
+  @media (min-width: 600px) { .wrap { padding: 0 32px; } }
 
   .head { text-align: center; padding: 36px 0 8px; }
   .eyebrow {
@@ -55,9 +56,10 @@
     font-weight: 600; margin-bottom: 14px;
   }
   h1 {
-    font-size: clamp(28px, 5.5vw, 38px);
-    line-height: 1.1; letter-spacing: -0.02em;
+    font-size: clamp(26px, 5vw, 38px);
+    line-height: 1.14; letter-spacing: -0.02em;
     margin: 0 0 10px; font-weight: 700;
+    max-width: 18ch; margin-left: auto; margin-right: auto;
   }
   .lede { color: var(--muted); margin: 0 auto; max-width: 480px; font-size: 16px; }
 
@@ -155,7 +157,7 @@
 
   /* TRUST */
   .trust {
-    text-align: center; padding: 32px 22px 8px;
+    text-align: center; padding: 32px 28px 8px;
     color: var(--muted); font-size: 13px;
   }
   .stars { color: var(--gold); letter-spacing: 4px; font-size: 16px; margin-bottom: 8px; }
@@ -181,7 +183,7 @@
   .faq .a { padding: 0 22px 20px; color: var(--muted); line-height: 1.6; font-size: 14px; }
 
   footer {
-    padding: 36px 22px; text-align: center;
+    padding: 36px 28px; text-align: center;
     color: var(--muted); font-size: 13px;
     border-top: 1px solid var(--line); margin-top: 36px;
   }
