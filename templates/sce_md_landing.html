@@ -20,7 +20,8 @@
     --muted: #5C5C5C;
     --rose: #9B2D4F;
     --rose-dark: #7A2240;
-    --gold: #C9A227;
+    --gold: #D4A431;
+    --gold-bright: #E5B934;
     --line: rgba(26, 26, 26, 0.08);
     --line-strong: rgba(26, 26, 26, 0.18);
   }
@@ -36,7 +37,8 @@
     -webkit-text-size-adjust: 100%;
   }
   img { max-width: 100%; display: block; }
-  a { color: inherit; }
+  a { color: inherit; text-decoration: none; }
+  a.tier, a.tier * { text-decoration: none !important; }
 
   .scarcity {
     background: #1A1A1A;
@@ -279,18 +281,33 @@
   /* TESTIMONIAL */
   .testimonial {
     text-align: center;
-    padding: 56px 28px;
+    padding: 64px 28px 56px;
   }
-  .stars { color: var(--gold); letter-spacing: 4px; font-size: 18px; margin-bottom: 14px; }
+  .stars {
+    color: var(--gold-bright);
+    letter-spacing: 6px;
+    font-size: 24px;
+    margin-bottom: 12px;
+    text-shadow: 0 0 0.5px var(--gold-bright);
+  }
+  .rating-line {
+    color: var(--text);
+    font-size: 14px;
+    letter-spacing: 0.06em;
+    font-weight: 600;
+    margin-bottom: 28px;
+    text-transform: uppercase;
+  }
+  .rating-line .num { color: var(--gold); font-weight: 700; }
   .quote {
     font-size: clamp(20px, 3vw, 26px);
     font-weight: 500;
     line-height: 1.45;
     letter-spacing: -0.01em;
     max-width: 640px;
-    margin: 0 auto 18px;
+    margin: 0 auto 22px;
   }
-  .quote-attr { color: var(--muted); font-size: 14px; letter-spacing: 0.04em; }
+  .quote-attr { color: var(--muted); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
 
   /* FAQ */
   .faq { background: var(--surface); border-radius: 18px; border: 1px solid var(--line); overflow: hidden; }
@@ -339,7 +356,7 @@ fbq('track','PageView');
 </head>
 <body>
 
-<div class="scarcity">Mother's Day Drop  ·  <strong>Limited slots</strong>  ·  Delivered to her door</div>
+<div class="scarcity">Mother's Day Drop  ·  <strong>4 Spots Left</strong></div>
 
 <nav class="nav">
   <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
@@ -421,8 +438,9 @@ fbq('track','PageView');
 
 <section class="testimonial wrap">
   <div class="stars">★ ★ ★ ★ ★</div>
+  <div class="rating-line"><span class="num">4.9</span>  from 200+ Google reviews</div>
   <p class="quote">"Took the Ferrari to my anniversary and the look on my wife's face was priceless."</p>
-  <div class="quote-attr">Michael K.  ·  4.9 from 200+ Google reviews</div>
+  <div class="quote-attr">— Michael K.</div>
 </section>
 
 <section class="section">

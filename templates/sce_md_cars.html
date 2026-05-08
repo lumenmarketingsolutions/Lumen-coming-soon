@@ -13,7 +13,7 @@
     --bg: #FAF7F2; --surface: #FFFFFF;
     --text: #1A1A1A; --muted: #5C5C5C;
     --rose: #9B2D4F; --rose-dark: #7A2240;
-    --gold: #C9A227;
+    --gold: #D4A431; --gold-bright: #E5B934;
     --line: rgba(26, 26, 26, 0.08);
   }
   * { box-sizing: border-box; }
@@ -31,18 +31,21 @@
   .topbar strong { color: var(--gold); font-weight: 600; }
 
   .nav {
-    padding: 14px 28px;
+    padding: 14px 24px;
     display: flex; align-items: center; justify-content: space-between;
     border-bottom: 1px solid var(--line);
+    gap: 12px;
   }
-  .back { color: var(--muted); font-size: 13px; font-weight: 500; }
+  .back { color: var(--muted); font-size: 13px; font-weight: 500; white-space: nowrap; }
   .back::before { content: '←'; margin-right: 6px; }
-  .wordmark { font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; }
+  .wordmark { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; white-space: nowrap; }
   .wordmark .dot { color: var(--rose); }
+  @media (max-width: 540px) { .wordmark { display: none; } }
   .step-pill {
     background: rgba(155, 45, 79, 0.08); color: var(--rose);
-    font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
-    text-transform: uppercase; padding: 6px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+    text-transform: uppercase; padding: 6px 11px; border-radius: 999px;
+    white-space: nowrap;
   }
 
   .wrap { max-width: 920px; margin: 0 auto; padding: 0 28px; }
@@ -89,14 +92,29 @@
   .car .price-row {
     display: flex; align-items: baseline; justify-content: space-between;
     padding-top: 14px; border-top: 1px solid var(--line);
-    margin-bottom: 6px;
+    margin-bottom: 10px;
   }
   .car .price-row .label { color: var(--muted); font-size: 13px; }
   .car .price-row .price { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
-  .car .savings {
-    font-size: 13px; color: var(--gold); font-weight: 600; margin-bottom: 18px;
+  .car .value-row {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 18px; flex-wrap: wrap;
   }
-  .car .savings .strike { color: var(--muted); text-decoration: line-through; font-weight: 400; margin-right: 6px; }
+  .car .value-row .strike {
+    color: var(--muted); text-decoration: line-through;
+    font-size: 13px; font-weight: 500;
+  }
+  .save-pill {
+    background: var(--gold-bright);
+    color: #1A1A1A;
+    padding: 4px 9px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
   .btn {
     display: inline-block; background: var(--rose); color: #fff;
     padding: 15px 22px; border-radius: 12px;
@@ -109,24 +127,74 @@
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 18px;
-    padding: 28px 26px;
+    padding: 30px 28px;
     margin-top: 22px;
   }
+  .info-eyebrow {
+    color: var(--rose);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
   .info-block h4 {
-    font-size: 18px; letter-spacing: -0.01em;
-    margin: 0 0 10px; font-weight: 700;
+    font-size: 22px; letter-spacing: -0.015em;
+    margin: 0 0 12px; font-weight: 700;
+    line-height: 1.2;
   }
-  .info-block p { color: var(--muted); margin: 0 0 14px; line-height: 1.6; font-size: 15px; }
-  .restaurants {
-    display: flex; flex-wrap: wrap; gap: 10px;
-    margin-top: 6px;
+  .info-block .info-sub { color: var(--muted); margin: 0 0 18px; line-height: 1.6; font-size: 15px; }
+  .resto-list {
+    display: flex; flex-direction: column;
+    border-top: 1px solid var(--line);
+    margin-top: 4px;
   }
-  .pill {
-    background: rgba(26, 26, 26, 0.04);
-    border: 1px solid var(--line);
-    padding: 8px 14px; border-radius: 999px;
-    font-size: 13px; color: var(--text); font-weight: 500;
+  .resto {
+    display: flex; align-items: center; gap: 18px;
+    padding: 16px 0;
+    border-bottom: 1px solid var(--line);
   }
+  .resto:last-child { border-bottom: 0; }
+  .resto-num {
+    color: var(--rose);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    font-weight: 700;
+    flex: 0 0 24px;
+    font-feature-settings: "tnum" 1;
+  }
+  .resto-name {
+    flex: 1;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--text);
+  }
+  .resto-meta {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .spa-detail {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding-top: 6px;
+    border-top: 1px solid var(--line);
+    margin-top: 4px;
+    padding-top: 18px;
+  }
+  .spa-detail .label {
+    flex: 0 0 90px;
+    color: var(--rose);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding-top: 2px;
+  }
+  .spa-detail .copy { color: var(--text); font-size: 15px; line-height: 1.6; }
+  .spa-detail .copy b { color: var(--gold); font-weight: 700; }
 
   footer {
     padding: 44px 28px; text-align: center;
@@ -147,12 +215,12 @@ fbq('track','ViewContent', {content_category: 'mothers_day_tier', content_name: 
 </head>
 <body>
 
-<div class="topbar">Mother's Day Drop  ·  <strong>Limited slots</strong>  ·  Delivered to her door</div>
+<div class="topbar">Mother's Day Drop  ·  <strong>4 Spots Left</strong></div>
 
 <nav class="nav">
   <a class="back" href="{{ url_for('sce_md.landing') }}">Back</a>
   <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
-  <span class="step-pill">Step 1 of 2</span>
+  <span class="step-pill">Step 1 / 2</span>
 </nav>
 
 <section class="head wrap">
@@ -175,7 +243,10 @@ fbq('track','ViewContent', {content_category: 'mothers_day_tier', content_name: 
           <span class="label">Package price</span>
           <span class="price">${{ '{:,}'.format(car.package_price) }}</span>
         </div>
-        <div class="savings"><span class="strike">${{ '{:,}'.format(car.total_value) }} value</span> save ${{ '{:,}'.format(car.savings) }}</div>
+        <div class="value-row">
+          <span class="strike">${{ '{:,}'.format(car.total_value) }} value</span>
+          <span class="save-pill">Save ${{ '{:,}'.format(car.savings) }}</span>
+        </div>
         <span class="btn">Reserve {{ car.name.split(' ')[-1] if 'Lamborghini' in car.name or 'Mercedes' in car.name else car.name }} for ${{ car.package_price }}</span>
       </div>
     </a>
@@ -183,16 +254,28 @@ fbq('track','ViewContent', {content_category: 'mothers_day_tier', content_name: 
   </div>
 
   <div class="info-block">
-    <h4>The restaurants</h4>
-    <p>{{ tier.restaurants_note }} Mom can use the ${{ tier.restaurant_value }} gift card at any of these:</p>
-    <div class="restaurants">
-      {% for r in tier.restaurants %}<span class="pill">{{ r }}</span>{% endfor %}
+    <div class="info-eyebrow">Dinner  ·  Her choice</div>
+    <h4>${{ tier.restaurant_value }} restaurant gift card</h4>
+    <p class="info-sub">{{ tier.restaurants_note }}</p>
+    <div class="resto-list">
+      {% for r in tier.restaurants %}
+      <div class="resto">
+        <span class="resto-num">0{{ loop.index }}</span>
+        <span class="resto-name">{{ r }}</span>
+        <span class="resto-meta">Boise</span>
+      </div>
+      {% endfor %}
     </div>
   </div>
 
   <div class="info-block">
-    <h4>The spa</h4>
-    <p>{{ tier.spa_value_line }}. One hour massage or facial at Hand &amp; Stone, Mom's choice.</p>
+    <div class="info-eyebrow">Spa partner</div>
+    <h4>Hand &amp; Stone</h4>
+    <p class="info-sub">One hour massage or facial. Mom picks which.</p>
+    <div class="spa-detail">
+      <span class="label">Value</span>
+      <span class="copy"><b>{{ tier.spa_value_line }}</b></span>
+    </div>
   </div>
 </section>
 
