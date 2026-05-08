@@ -49,6 +49,7 @@ TIERS = {
         "value_up_to": 1019,
         "spa_label": "Hand & Stone spa gift card included",
         "spa_value_line": "$120 spa value, included",
+        "spa_city": "Meridian",
         "restaurant_value": 100,
         "restaurants": [
             {"name": "Percy", "city": "Boise"},
@@ -98,6 +99,7 @@ TIERS = {
         "value_up_to": 969,
         "spa_label": "Hand & Stone spa gift card included",
         "spa_value_line": "$120 spa value, $80 through our partnership",
+        "spa_city": "Meridian",
         "restaurant_value": 50,
         "restaurants": [
             {"name": "Don & Charly's", "city": "Boise"},

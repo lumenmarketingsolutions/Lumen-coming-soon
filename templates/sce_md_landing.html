@@ -160,6 +160,9 @@
     border: 1px solid var(--line);
     border-radius: 18px;
     padding: 32px 28px;
+    box-shadow:
+      0 1px 2px rgba(26, 26, 26, 0.04),
+      0 6px 18px rgba(26, 26, 26, 0.04);
   }
   .included ul { list-style: none; padding: 0; margin: 0; }
   .included li {
@@ -188,6 +191,9 @@
     border: 1px solid var(--line);
     border-radius: 18px;
     padding: 28px 26px;
+    box-shadow:
+      0 1px 2px rgba(26, 26, 26, 0.03),
+      0 4px 14px rgba(26, 26, 26, 0.035);
   }
   .step-num {
     color: var(--rose);
@@ -222,9 +228,18 @@
     padding: 32px 28px;
     display: flex;
     flex-direction: column;
-    transition: border-color 0.2s, transform 0.2s;
+    transition: border-color 0.25s, transform 0.18s ease-out, box-shadow 0.25s ease-out;
+    box-shadow:
+      0 1px 2px rgba(26, 26, 26, 0.04),
+      0 6px 18px rgba(26, 26, 26, 0.04);
   }
-  .tier:hover { border-color: var(--rose); }
+  .tier:hover {
+    border-color: var(--rose);
+    box-shadow:
+      0 4px 8px rgba(26, 26, 26, 0.05),
+      0 18px 40px rgba(155, 45, 79, 0.08);
+    transform: translateY(-1px);
+  }
   .tier-tag {
     align-self: flex-start;
     background: rgba(155, 45, 79, 0.08);
@@ -283,10 +298,19 @@
     border: 0;
     cursor: pointer;
     width: 100%;
-    transition: background 0.2s;
+    transition: background 0.2s, box-shadow 0.25s ease-out, transform 0.18s ease-out;
     letter-spacing: 0.005em;
+    box-shadow:
+      0 1px 2px rgba(155, 45, 79, 0.18),
+      0 6px 16px rgba(155, 45, 79, 0.22);
   }
-  .btn:hover { background: var(--rose-dark); }
+  .btn:hover {
+    background: var(--rose-dark);
+    box-shadow:
+      0 2px 4px rgba(155, 45, 79, 0.22),
+      0 10px 24px rgba(155, 45, 79, 0.32);
+    transform: translateY(-1px);
+  }
   .btn-ghost {
     background: transparent;
     color: var(--text);
@@ -326,7 +350,15 @@
   .quote-attr { color: var(--muted); font-size: 13px; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 600; }
 
   /* FAQ */
-  .faq { background: var(--surface); border-radius: 18px; border: 1px solid var(--line); overflow: hidden; }
+  .faq {
+    background: var(--surface);
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    box-shadow:
+      0 1px 2px rgba(26, 26, 26, 0.03),
+      0 4px 14px rgba(26, 26, 26, 0.035);
+  }
   .faq details { border-bottom: 1px solid var(--line); }
   .faq details:last-child { border-bottom: 0; }
   .faq summary {
