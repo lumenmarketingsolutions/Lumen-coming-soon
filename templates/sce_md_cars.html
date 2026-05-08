@@ -282,8 +282,8 @@ fbq('track','ViewContent', {content_category: 'mothers_day_tier', content_name: 
       {% for r in tier.restaurants %}
       <div class="resto">
         <span class="resto-num">0{{ loop.index }}</span>
-        <span class="resto-name">{{ r }}</span>
-        <span class="resto-meta">Boise</span>
+        <span class="resto-name">{{ r.name }}</span>
+        <span class="resto-meta">{{ r.city }}</span>
       </div>
       {% endfor %}
     </div>
