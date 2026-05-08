@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tell us about her day · {{ tier.name }}</title>
+<meta name="description" content="Pick the restaurants she'd love and tell us anything that helps us make her day.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF7F2; --surface: #FFFFFF;
+    --text: #1A1A1A; --muted: #5C5C5C;
+    --rose: #9B2D4F; --rose-dark: #7A2240;
+    --gold: #D4A431; --gold-bright: #E5B934;
+    --line: rgba(26, 26, 26, 0.08);
+    --line-strong: rgba(26, 26, 26, 0.18);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 17px; line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    animation: page-fade-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes page-fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @view-transition { navigation: auto; }
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 280ms;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  a:active, button:active { opacity: 0.92; }
+  .btn { transition: background 0.2s, box-shadow 0.25s ease-out, transform 0.18s ease-out; }
+  .btn:active { transform: scale(0.985); }
+
+  .topbar { background: #1A1A1A; color: #fff; text-align: center; padding: 11px 24px; font-size: 13px; letter-spacing: 0.04em; }
+  .topbar strong { color: var(--gold); font-weight: 600; }
+
+  .nav {
+    padding: 14px 24px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--line);
+    gap: 12px;
+  }
+  .back { color: var(--muted); font-size: 13px; font-weight: 500; white-space: nowrap; }
+  .back::before { content: '←'; margin-right: 6px; }
+  .wordmark { font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; white-space: nowrap; }
+  .wordmark .dot { color: var(--rose); }
+  @media (max-width: 540px) { .wordmark { display: none; } }
+  .step-pill {
+    background: rgba(155, 45, 79, 0.08); color: var(--rose);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.16em;
+    text-transform: uppercase; padding: 6px 11px; border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .wrap { max-width: 580px; margin: 0 auto; padding: 0 28px; }
+  @media (min-width: 600px) { .wrap { padding: 0 32px; } }
+
+  .head { text-align: center; padding: 36px 0 8px; }
+  .eyebrow {
+    color: var(--rose); font-size: 12px;
+    letter-spacing: 0.22em; text-transform: uppercase;
+    font-weight: 600; margin-bottom: 14px;
+  }
+  h1 {
+    font-size: clamp(26px, 5vw, 38px);
+    line-height: 1.14; letter-spacing: -0.02em;
+    margin: 0 0 10px; font-weight: 700;
+    max-width: 18ch; margin-left: auto; margin-right: auto;
+  }
+  .lede { color: var(--muted); margin: 0 auto; max-width: 36ch; font-size: 16px; }
+
+  .section {
+    padding: 30px 0 8px;
+  }
+  .section + .section { padding-top: 16px; }
+  .section-eyebrow {
+    color: var(--rose);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .section h2 {
+    font-size: 22px;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    margin: 0 0 6px;
+    font-weight: 700;
+  }
+  .section .section-sub {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 0 0 20px;
+  }
+  .section .optional-tag {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-left: 10px;
+  }
+
+  /* CHIPS */
+  .resto-chips {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  @media (min-width: 540px) {
+    .resto-chips { grid-template-columns: 1fr 1fr; }
+  }
+  .chip { cursor: pointer; }
+  .chip input { position: absolute; opacity: 0; pointer-events: none; }
+  .chip-label {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    border: 1px solid var(--line-strong);
+    border-radius: 14px;
+    background: var(--surface);
+    transition: border-color 0.18s, background 0.18s, box-shadow 0.18s, transform 0.15s;
+    box-shadow: 0 1px 2px rgba(26, 26, 26, 0.03);
+    gap: 10px;
+  }
+  .chip:hover .chip-label { border-color: var(--rose); }
+  .chip:active .chip-label { transform: scale(0.985); }
+  .chip input:checked + .chip-label {
+    border-color: var(--rose);
+    background: rgba(155, 45, 79, 0.05);
+    box-shadow:
+      0 0 0 2px rgba(155, 45, 79, 0.18),
+      0 1px 2px rgba(26, 26, 26, 0.03);
+  }
+  .chip-name {
+    font-weight: 600; font-size: 15px;
+    color: var(--text); letter-spacing: -0.005em;
+  }
+  .chip-city {
+    color: var(--muted); font-size: 11px;
+    letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .chip input:checked + .chip-label .chip-name { color: var(--rose); }
+
+  /* NOTES */
+  textarea {
+    width: 100%; padding: 14px 18px;
+    border: 1px solid var(--line-strong); border-radius: 12px;
+    background: var(--surface);
+    font-family: inherit; font-size: 16px; color: var(--text);
+    resize: vertical; min-height: 110px;
+    line-height: 1.55;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    box-shadow: 0 1px 2px rgba(26, 26, 26, 0.025);
+    -webkit-appearance: none;
+  }
+  textarea:focus {
+    outline: none; border-color: var(--rose);
+    box-shadow:
+      0 0 0 3px rgba(155, 45, 79, 0.12),
+      0 1px 2px rgba(26, 26, 26, 0.025);
+  }
+
+  /* BUTTONS */
+  .btn {
+    background: var(--rose); color: #fff;
+    padding: 18px 24px; border-radius: 14px;
+    font-weight: 600; font-size: 16px;
+    border: 0; cursor: pointer;
+    width: 100%; margin-top: 8px;
+    letter-spacing: 0.005em;
+    box-shadow:
+      0 2px 4px rgba(155, 45, 79, 0.2),
+      0 10px 28px rgba(155, 45, 79, 0.28);
+  }
+  .btn:hover {
+    background: var(--rose-dark);
+    box-shadow:
+      0 3px 6px rgba(155, 45, 79, 0.25),
+      0 16px 36px rgba(155, 45, 79, 0.36);
+    transform: translateY(-1px);
+  }
+
+  .skip-link {
+    display: block;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 16px;
+    padding: 8px 0;
+    text-decoration: none;
+    cursor: pointer;
+    background: none;
+    border: 0;
+    width: 100%;
+    font-family: inherit;
+  }
+  .skip-link:hover { color: var(--text); }
+
+  .actions {
+    padding: 26px 0 12px;
+  }
+
+  footer {
+    padding: 36px 28px; text-align: center;
+    color: var(--muted); font-size: 13px;
+    border-top: 1px solid var(--line); margin-top: 36px;
+  }
+  footer a { color: var(--muted); margin: 0 8px; }
+  .phone-cta { color: var(--text); font-weight: 600; font-size: 15px; }
+</style>
+{% if pixel_id %}
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','{{ pixel_id }}');
+fbq('track','PageView');
+fbq('track','ViewContent', {content_category:'mothers_day_preferences', content_name:'{{ tier.id }}/{{ car.id }}'});
+</script>
+{% endif %}
+</head>
+<body>
+
+<div class="topbar">Almost there  ·  <strong>One quick step</strong></div>
+
+<nav class="nav">
+  <a class="back" href="{{ url_for('sce_md.tier', tier_id=tier.id) }}">Back</a>
+  <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
+  <span class="step-pill">Step 2 / 3</span>
+</nav>
+
+<section class="head wrap">
+  <div class="eyebrow">{{ car.name }}  ·  {{ tier.name }}</div>
+  <h1>Tell us about her day.</h1>
+  <p class="lede">Quick details so we can make it feel like hers. Skip what you don't know yet.</p>
+</section>
+
+<section class="wrap">
+  <form id="prefsForm" onsubmit="return saveAndContinue(event);">
+
+    <div class="section">
+      <div class="section-eyebrow">Restaurant <span class="optional-tag">Optional</span></div>
+      <h2>Which one would she love?</h2>
+      <p class="section-sub">Pick any that look right. We coordinate the gift card to her favorite.</p>
+
+      <div class="resto-chips">
+        {% for r in tier.restaurants %}
+        <label class="chip">
+          <input type="checkbox" name="prefs" value="{{ r.name }}">
+          <span class="chip-label">
+            <span class="chip-name">{{ r.name }}</span>
+            <span class="chip-city">{{ r.city }}</span>
+          </span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-eyebrow">Special notes <span class="optional-tag">Optional</span></div>
+      <h2>Anything we should know?</h2>
+      <p class="section-sub">Anniversary, birthday, surprise drop-off, dietary restrictions. Anything that helps us nail the day.</p>
+
+      <textarea name="notes" rows="4" maxlength="500" placeholder="It's our 10-year anniversary, she loves white peonies, surprise her at lunch..."></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="btn" type="submit">Continue to reservation</button>
+      <button class="skip-link" type="button" onclick="skipToReserve()">Skip — I'll tell Nate later</button>
+    </div>
+
+  </form>
+</section>
+
+<footer>
+  <div class="phone-cta">Questions? Call <a href="tel:{{ support_phone_tel }}">{{ support_phone }}</a></div>
+  <div style="margin-top: 12px;">
+    <a href="/sce/sms-privacy">Privacy</a>·<a href="/sce/sms-terms">Terms</a>
+  </div>
+  <div style="margin-top: 16px;">© Supercar Experience Boise</div>
+</footer>
+
+<script>
+  function saveAndContinue(ev) {
+    ev.preventDefault();
+    var form = ev.target;
+    var prefs = Array.from(form.querySelectorAll('input[name=prefs]:checked')).map(i => i.value);
+    var notes = ((form.querySelector('textarea[name=notes]') || {}).value || '').trim();
+    try {
+      localStorage.setItem('sce_md_prefs', prefs.join(', '));
+      localStorage.setItem('sce_md_notes', notes);
+    } catch(e) {}
+    if (window.fbq) {
+      try {
+        fbq('track', 'AddToCart', {
+          content_category: 'mothers_day_preferences',
+          content_name: '{{ tier.id }}/{{ car.id }}',
+          num_items: prefs.length
+        });
+      } catch(e) {}
+    }
+    window.location.href = "{{ url_for('sce_md.reserve', tier_id=tier.id, car_id=car.id) }}";
+    return false;
+  }
+
+  function skipToReserve() {
+    try {
+      localStorage.setItem('sce_md_prefs', '');
+      localStorage.setItem('sce_md_notes', '');
+    } catch(e) {}
+    window.location.href = "{{ url_for('sce_md.reserve', tier_id=tier.id, car_id=car.id) }}";
+  }
+</script>
+
+</body>
+</html>

@@ -272,7 +272,7 @@ fbq('track','ViewContent', {content_category: 'mothers_day_tier', content_name: 
 <nav class="nav">
   <a class="back" href="{{ url_for('sce_md.landing') }}">Back</a>
   <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
-  <span class="step-pill">Step 1 / 2</span>
+  <span class="step-pill">Step 1 / 3</span>
 </nav>
 
 <section class="head wrap">
@@ -284,7 +284,7 @@ fbq('track','ViewContent', {content_category: 'mothers_day_tier', content_name: 
 <section class="wrap">
   <div class="cars">
     {% for car in tier.cars %}
-    <a class="car" href="{{ url_for('sce_md.reserve', tier_id=tier.id, car_id=car.id) }}">
+    <a class="car" href="{{ url_for('sce_md.preferences', tier_id=tier.id, car_id=car.id) }}">
       <div class="photo">
         <img src="{{ url_for('static', filename='sce-mothersday/' ~ car.image) }}" alt="{{ car.name }}" loading="{{ 'eager' if loop.first else 'lazy' }}">
       </div>
