@@ -22,7 +22,7 @@
   body {
     background: var(--bg); color: var(--text);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 17px; line-height: 1.65;
+    font-size: 17px; line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     animation: page-fade-in 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
@@ -39,7 +39,7 @@
   img { max-width: 100%; display: block; }
   a { color: inherit; text-decoration: none; }
   a:active, button:active { opacity: 0.92; }
-  .btn { transition: background 0.2s, transform 0.18s ease-out; }
+  .btn { transition: background 0.2s, box-shadow 0.25s ease-out, transform 0.18s ease-out; }
   .btn:active { transform: scale(0.985); }
 
   .topbar { background: #1A1A1A; color: #fff; text-align: center; padding: 11px 24px; font-size: 13px; letter-spacing: 0.04em; }
@@ -63,72 +63,176 @@
     white-space: nowrap;
   }
 
-  .wrap { max-width: 580px; margin: 0 auto; padding: 0 28px; }
-  @media (min-width: 600px) { .wrap { padding: 0 32px; } }
-
-  .head { text-align: center; padding: 36px 0 8px; }
-  .eyebrow {
-    color: var(--rose); font-size: 12px;
-    letter-spacing: 0.22em; text-transform: uppercase;
-    font-weight: 600; margin-bottom: 14px;
+  /* ───── CHECKOUT GRID (2-col desktop, 1-col mobile) ───── */
+  .checkout {
+    max-width: 1080px; margin: 0 auto;
+    padding: 28px 22px 60px;
+    display: grid; gap: 28px;
+    grid-template-columns: 1fr;
   }
-  h1 {
-    font-size: clamp(26px, 5vw, 38px);
-    line-height: 1.14; letter-spacing: -0.02em;
-    margin: 0 0 10px; font-weight: 700;
-    max-width: 18ch; margin-left: auto; margin-right: auto;
+  @media (min-width: 880px) {
+    .checkout {
+      padding: 44px 32px 80px;
+      grid-template-columns: minmax(0, 1fr) 380px;
+      gap: 56px;
+    }
   }
-  .lede { color: var(--muted); margin: 0 auto; max-width: 36ch; font-size: 16px; }
 
-  /* SUMMARY */
-  .summary {
+  .col-form { min-width: 0; order: 2; }
+  .col-summary { min-width: 0; order: 1; }
+  @media (min-width: 880px) {
+    .col-form { order: 1; }
+    .col-summary { order: 2; }
+  }
+
+  /* ───── COMPACT MOBILE SUMMARY (collapsible) ───── */
+  .order-collapse {
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 22px;
+    border-radius: 14px;
     overflow: hidden;
-    margin: 28px 0 24px;
-    box-shadow:
-      0 2px 4px rgba(26, 26, 26, 0.04),
-      0 14px 36px rgba(26, 26, 26, 0.06);
+    box-shadow: 0 1px 2px rgba(26,26,26,0.04), 0 4px 14px rgba(26,26,26,0.04);
   }
-  .summary .photo {
+  .order-collapse summary {
+    list-style: none; cursor: pointer;
+    padding: 14px 16px;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .order-collapse summary::-webkit-details-marker { display: none; }
+  .order-thumb {
+    flex: 0 0 56px; width: 56px; height: 56px;
+    border-radius: 10px; overflow: hidden;
+    background: #f0eae2;
+  }
+  .order-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .order-info { flex: 1; min-width: 0; }
+  .order-name {
+    font-size: 14px; font-weight: 700; letter-spacing: -0.005em;
+    color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .order-meta { color: var(--muted); font-size: 12px; margin-top: 2px; letter-spacing: 0.02em; }
+  .order-price {
+    font-size: 18px; font-weight: 700; letter-spacing: -0.015em;
+    font-feature-settings: "tnum" 1;
+    color: var(--text);
+    flex: 0 0 auto;
+  }
+  .order-toggle {
+    flex: 0 0 18px; color: var(--rose);
+    font-size: 14px;
+    transition: transform 0.18s;
+  }
+  .order-collapse[open] .order-toggle { transform: rotate(180deg); }
+
+  .order-expanded {
+    border-top: 1px solid var(--line);
+    padding: 18px 18px 22px;
+    background: rgba(26, 26, 26, 0.015);
+  }
+  .order-expanded .photo {
     aspect-ratio: 16 / 9;
     background: #f0eae2;
     overflow: hidden;
+    border-radius: 10px;
+    margin-bottom: 14px;
   }
-  .summary .photo img { width: 100%; height: 100%; object-fit: cover; }
-  .summary .body { padding: 24px 24px 26px; }
-  .summary .car-line {
-    color: var(--rose); font-size: 12px; font-weight: 700;
-    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 8px;
+  .order-expanded .photo img { width: 100%; height: 100%; object-fit: cover; }
+  .order-expanded .car-line {
+    color: var(--rose); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 4px;
   }
-  .summary h2 {
-    font-size: 24px; margin: 0 0 6px;
+  .order-expanded h2 {
+    font-size: 18px; margin: 0 0 4px;
+    letter-spacing: -0.01em; font-weight: 700;
+  }
+  .order-expanded .duration { color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+  .order-expanded .includes-label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--rose);
+    font-weight: 700;
+    margin: 14px 0 8px;
+  }
+  .order-expanded ul {
+    list-style: none; padding: 0; margin: 0 0 14px;
+  }
+  .order-expanded li {
+    padding: 7px 0;
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 13.5px;
+    color: var(--text);
+    line-height: 1.45;
+  }
+  .order-expanded li::before {
+    content: '✓';
+    flex: 0 0 16px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: rgba(155, 45, 79, 0.1);
+    color: var(--rose);
+    font-size: 10px;
+    font-weight: 800;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-top: 1px;
+  }
+  .order-expanded .savings-line {
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px;
+  }
+  .order-expanded .savings-line .l { color: var(--muted); }
+  .order-expanded .savings-line .save { color: var(--gold); font-weight: 700; }
+  .order-expanded .savings-line .strike { color: var(--muted); text-decoration: line-through; margin-right: 6px; font-weight: 500; }
+
+  /* ───── DESKTOP STICKY FULL CARD (>=880px) ───── */
+  .summary-full {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(26,26,26,0.04), 0 14px 36px rgba(26,26,26,0.06);
+    position: sticky; top: 24px;
+  }
+  @media (min-width: 880px) {
+    .order-collapse { display: none; }
+    .summary-full { display: block; }
+  }
+  .summary-full .photo {
+    aspect-ratio: 16 / 10;
+    background: #f0eae2;
+    overflow: hidden;
+  }
+  .summary-full .photo img { width: 100%; height: 100%; object-fit: cover; }
+  .summary-full .body { padding: 22px 22px 24px; }
+  .summary-full .car-line {
+    color: var(--rose); font-size: 11px; font-weight: 700;
+    letter-spacing: 0.22em; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .summary-full h2 {
+    font-size: 22px; margin: 0 0 4px;
     letter-spacing: -0.015em; font-weight: 700;
   }
-  .summary .duration { color: var(--muted); font-size: 14px; margin-bottom: 18px; }
-  .summary .includes-label {
+  .summary-full .duration { color: var(--muted); font-size: 13px; margin-bottom: 18px; }
+  .summary-full .includes-label {
     font-size: 11px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--rose);
     font-weight: 700;
-    margin: 6px 0 14px;
+    margin: 8px 0 10px;
   }
-  .summary .includes {
-    list-style: none; padding: 0; margin: 0 0 22px;
+  .summary-full ul { list-style: none; padding: 0; margin: 0 0 18px; }
+  .summary-full li {
+    padding: 8px 0;
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 14px; color: var(--text); line-height: 1.45;
   }
-  .summary .includes li {
-    padding: 10px 0;
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    font-size: 15px;
-    color: var(--text);
-    line-height: 1.5;
-  }
-  .summary .includes li::before {
-    content: '';
+  .summary-full li::before {
+    content: '✓';
     flex: 0 0 18px;
     width: 18px; height: 18px;
     border-radius: 50%;
@@ -137,61 +241,56 @@
     font-size: 11px;
     font-weight: 800;
     display: inline-flex; align-items: center; justify-content: center;
-    margin-top: 2px;
-    background-image: linear-gradient(rgba(155, 45, 79, 0.1), rgba(155, 45, 79, 0.1));
+    margin-top: 1px;
   }
-  .summary .includes li::before {
-    content: '✓';
-    color: var(--rose);
-    background: rgba(155, 45, 79, 0.1);
+  .summary-full .savings-line {
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13px; margin-bottom: 8px;
   }
-  .summary .payline {
+  .summary-full .savings-line .l { color: var(--muted); }
+  .summary-full .savings-line .save { color: var(--gold); font-weight: 700; }
+  .summary-full .savings-line .strike { color: var(--muted); text-decoration: line-through; margin-right: 6px; font-weight: 500; }
+  .summary-full .total-line {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-top: 12px;
     border-top: 1px solid var(--line-strong);
-    padding-top: 22px;
-    text-align: center;
   }
-  .summary .pay-label {
-    color: var(--muted);
+  .summary-full .total-line .lbl { font-size: 14px; font-weight: 600; }
+  .summary-full .total-line .amt { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; font-feature-settings: "tnum" 1; }
+
+  /* ───── FORM ───── */
+  .section-eyebrow {
+    color: var(--rose);
     font-size: 11px;
     letter-spacing: 0.22em;
     text-transform: uppercase;
     font-weight: 700;
-    margin-bottom: 6px;
+    margin-bottom: 14px;
+    margin-top: 4px;
   }
-  .summary .pay-amount {
-    font-size: 42px;
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    line-height: 1;
-    color: var(--text);
-    margin-bottom: 10px;
-    font-feature-settings: "tnum" 1;
+  .section-title {
+    font-size: clamp(22px, 4vw, 28px);
+    line-height: 1.18; letter-spacing: -0.015em;
+    margin: 0 0 6px; font-weight: 700;
   }
-  .summary .pay-meta {
-    font-size: 13px;
-    color: var(--muted);
+  .section-sub {
+    color: var(--muted); font-size: 14px; line-height: 1.5;
+    margin: 0 0 22px;
   }
-  .summary .pay-meta .save { color: var(--rose); font-weight: 700; }
-  .summary .pay-meta .retail { color: var(--muted); }
 
-  .reassurance {
-    text-align: center;
-    color: var(--muted);
-    font-size: 13px;
-    margin: 0 auto 26px;
-    max-width: 36ch;
-    line-height: 1.55;
-  }
-  .reassurance b { color: var(--rose); font-weight: 600; }
-
-  /* FORM */
   form { display: flex; flex-direction: column; gap: 14px; }
+  .field-row { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 540px) {
+    .field-row.two { grid-template-columns: 1fr 1fr; }
+  }
   label { display: block; }
-  .lbl { font-size: 13px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+  .lbl { font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 600; letter-spacing: 0.04em; }
   input[type=text], input[type=email], input[type=tel] {
-    width: 100%; padding: 16px 18px;
+    width: 100%; padding: 15px 16px;
     border: 1px solid var(--line-strong);
-    border-radius: 12px;
+    border-radius: 11px;
     background: var(--surface);
     font-family: inherit; font-size: 16px; color: var(--text);
     transition: border-color 0.18s, box-shadow 0.18s;
@@ -206,21 +305,32 @@
       0 1px 2px rgba(26, 26, 26, 0.025);
   }
 
+  .reassurance {
+    background: rgba(155, 45, 79, 0.04);
+    border: 1px solid rgba(155, 45, 79, 0.12);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.5;
+    margin-top: 4px;
+  }
+  .reassurance b { color: var(--rose); font-weight: 700; }
+
   .consent {
     display: flex; gap: 12px; align-items: flex-start;
-    color: var(--muted); font-size: 13px;
-    margin-top: 6px; line-height: 1.55;
+    color: var(--muted); font-size: 12.5px;
+    margin-top: 8px; line-height: 1.55;
   }
-  .consent input { margin-top: 4px; flex: 0 0 18px; width: 18px; height: 18px; accent-color: var(--rose); }
+  .consent input { margin-top: 3px; flex: 0 0 18px; width: 18px; height: 18px; accent-color: var(--rose); }
   .consent a { color: var(--rose); text-decoration: underline; }
 
   .btn {
     background: var(--rose); color: #fff;
-    padding: 19px 24px; border-radius: 14px;
-    font-weight: 600; font-size: 17px;
+    padding: 18px 24px; border-radius: 12px;
+    font-weight: 600; font-size: 16px;
     border: 0; cursor: pointer;
-    width: 100%; margin-top: 8px;
-    transition: background 0.2s, box-shadow 0.25s ease-out, transform 0.18s ease-out;
+    width: 100%; margin-top: 6px;
     letter-spacing: 0.005em;
     box-shadow:
       0 2px 4px rgba(155, 45, 79, 0.2),
@@ -233,28 +343,32 @@
       0 16px 36px rgba(155, 45, 79, 0.36);
     transform: translateY(-1px);
   }
-  .btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
   .secured {
     text-align: center; color: var(--muted);
-    font-size: 12px; margin-top: 12px;
-    letter-spacing: 0.06em;
+    font-size: 11px; margin-top: 14px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
+  .secured::before { content: '🔒'; margin-right: 6px; opacity: 0.6; }
 
-  /* TRUST */
   .trust {
-    text-align: center; padding: 32px 28px 8px;
-    color: var(--muted); font-size: 13px;
+    text-align: center; padding: 24px 0 0;
+    color: var(--muted); font-size: 12px;
   }
-  .stars { color: var(--gold); letter-spacing: 4px; font-size: 16px; margin-bottom: 8px; }
+  .stars { color: var(--gold-bright); letter-spacing: 4px; font-size: 16px; }
 
   /* FAQ */
-  .section { padding: 32px 0; }
-  .section h3 { text-align: center; margin: 0 0 22px; font-size: 22px; letter-spacing: -0.01em; font-weight: 700; }
+  .faq-section { margin-top: 28px; }
+  .faq-section h3 {
+    text-align: center; margin: 0 0 18px;
+    font-size: 18px; letter-spacing: -0.01em; font-weight: 700;
+    color: var(--text);
+  }
   .faq {
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 16px;
+    border-radius: 14px;
     overflow: hidden;
     box-shadow:
       0 1px 2px rgba(26, 26, 26, 0.03),
@@ -263,26 +377,26 @@
   .faq details { border-bottom: 1px solid var(--line); }
   .faq details:last-child { border-bottom: 0; }
   .faq summary {
-    cursor: pointer; padding: 18px 22px;
-    font-weight: 600; font-size: 15px;
+    cursor: pointer; padding: 16px 20px;
+    font-weight: 600; font-size: 14px;
     list-style: none;
     display: flex; justify-content: space-between; align-items: center;
   }
   .faq summary::-webkit-details-marker { display: none; }
   .faq summary::after {
     content: '+'; color: var(--rose);
-    font-weight: 400; font-size: 22px;
+    font-weight: 400; font-size: 20px;
   }
   .faq details[open] summary::after { content: '−'; }
-  .faq .a { padding: 0 22px 20px; color: var(--muted); line-height: 1.6; font-size: 14px; }
+  .faq .a { padding: 0 20px 18px; color: var(--muted); line-height: 1.55; font-size: 13px; }
 
   footer {
-    padding: 36px 28px; text-align: center;
-    color: var(--muted); font-size: 13px;
-    border-top: 1px solid var(--line); margin-top: 36px;
+    padding: 28px 28px; text-align: center;
+    color: var(--muted); font-size: 12px;
+    border-top: 1px solid var(--line); margin-top: 32px;
   }
   footer a { color: var(--muted); margin: 0 8px; }
-  .phone-cta { color: var(--text); font-weight: 600; font-size: 15px; }
+  .phone-cta { color: var(--text); font-weight: 600; font-size: 14px; }
 </style>
 {% if pixel_id %}
 <script>
@@ -304,106 +418,148 @@ fbq('track','AddToCart',{content_ids:['{{ car.sku }}'],content_type:'product',va
   <span class="step-pill">Step 3 / 3</span>
 </nav>
 
-<section class="head wrap">
-  <div class="eyebrow">{{ tier.name }}</div>
-  <h1>You picked the {{ car.name }}.</h1>
-  <p class="lede">Lock it in below. Pay on the next page. We'll text you to coordinate the day.</p>
-</section>
+<div class="checkout">
 
-<section class="wrap">
-  <div class="summary">
-    <div class="photo">
-      <img src="{{ url_for('static', filename='sce-mothersday/' ~ car.image) }}" alt="{{ car.name }}">
-    </div>
-    <div class="body">
-      <div class="car-line">{{ tier.name }}</div>
-      <h2>{{ car.name }}</h2>
-      <div class="duration">{{ car.duration }}</div>
+  <!-- ─── COL 1: FORM ─── -->
+  <div class="col-form">
 
-      <div class="includes-label">What's included</div>
-      <ul class="includes">
-        <li>{{ car.duration }} on the {{ car.name }}</li>
-        <li>${{ tier.restaurant_value }} restaurant gift card, her pick</li>
-        <li>$120 Hand &amp; Stone spa gift card</li>
-        <li>Free door-to-door delivery</li>
-      </ul>
-
-      <div class="payline">
-        <div class="pay-label">You pay today</div>
-        <div class="pay-amount">${{ '{:,}'.format(car.package_price) }}</div>
-        <div class="pay-meta">
-          <span class="save">Save ${{ '{:,}'.format(car.savings) }}</span>
-          <span> · </span>
-          <span class="retail">${{ '{:,}'.format(car.total_value) }} retail</span>
+    <!-- Mobile-only: collapsed order summary at top -->
+    <details class="order-collapse">
+      <summary>
+        <div class="order-thumb">
+          <img src="{{ url_for('static', filename='sce-mothersday/' ~ car.image) }}" alt="">
         </div>
+        <div class="order-info">
+          <div class="order-name">{{ car.name }}</div>
+          <div class="order-meta">{{ tier.name }} · {{ car.duration }}</div>
+        </div>
+        <div class="order-price">${{ '{:,}'.format(car.package_price) }}</div>
+        <div class="order-toggle">▾</div>
+      </summary>
+      <div class="order-expanded">
+        <div class="photo">
+          <img src="{{ url_for('static', filename='sce-mothersday/' ~ car.image) }}" alt="{{ car.name }}">
+        </div>
+        <div class="car-line">{{ tier.name }}</div>
+        <h2>{{ car.name }}</h2>
+        <div class="duration">{{ car.duration }}</div>
+        <div class="includes-label">What's included</div>
+        <ul>
+          <li>{{ car.duration }} on the {{ car.name }}</li>
+          <li>${{ tier.restaurant_value }} restaurant gift card, her pick</li>
+          <li>$120 Hand &amp; Stone spa gift card</li>
+          <li>Free door-to-door delivery</li>
+        </ul>
+        <div class="savings-line">
+          <span class="l">Total value</span>
+          <span><span class="strike">${{ '{:,}'.format(car.total_value) }}</span><span class="save">save ${{ '{:,}'.format(car.savings) }}</span></span>
+        </div>
+      </div>
+    </details>
+
+    <div style="margin-top: 18px;">
+      <div class="section-eyebrow">Your information</div>
+      <h2 class="section-title">Where do we send confirmation?</h2>
+      <p class="section-sub">We'll text you to coordinate Mom's day. No spam, promise.</p>
+    </div>
+
+    <form method="post" action="{{ url_for('sce_md.optin') }}" id="optinForm">
+      <input type="hidden" name="tier" value="{{ tier.id }}">
+      <input type="hidden" name="car" value="{{ car.id }}">
+      <input type="hidden" name="event_id" value="{{ event_id }}">
+      <input type="hidden" name="restaurant_prefs" id="restaurant_prefs">
+      <input type="hidden" name="special_notes"    id="special_notes">
+      <input type="hidden" name="utm_source"   id="utm_source">
+      <input type="hidden" name="utm_medium"   id="utm_medium">
+      <input type="hidden" name="utm_campaign" id="utm_campaign">
+      <input type="hidden" name="utm_content"  id="utm_content">
+      <input type="hidden" name="utm_term"     id="utm_term">
+
+      <label>
+        <div class="lbl">Full name</div>
+        <input type="text" name="name" required autocomplete="name" placeholder="First and last">
+      </label>
+      <div class="field-row two">
+        <label>
+          <div class="lbl">Phone</div>
+          <input type="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="(208) 555-0123">
+        </label>
+        <label>
+          <div class="lbl">Email</div>
+          <input type="email" name="email" required autocomplete="email" inputmode="email" placeholder="you@example.com">
+        </label>
+      </div>
+
+      <div class="reassurance">
+        <b>Pickup time coordinated after checkout.</b> Mom picks her day.
+      </div>
+
+      <label class="consent">
+        <input type="checkbox" required>
+        <span>I agree to be contacted by Supercar Experience Boise about this reservation. Standard message and data rates may apply. <a href="/sce/sms-privacy">Privacy</a> · <a href="/sce/sms-terms">Terms</a>.</span>
+      </label>
+
+      <button class="btn" type="submit">Continue to payment  ·  ${{ '{:,}'.format(car.package_price) }}</button>
+      <div class="secured">Secure checkout via Stripe</div>
+    </form>
+
+    <div class="trust">
+      <div class="stars">★ ★ ★ ★ ★</div>
+    </div>
+
+    <div class="faq-section">
+      <h3>Quick answers</h3>
+      <div class="faq">
+        <details>
+          <summary>Am I committing to a specific date right now?</summary>
+          <div class="a">You're reserving the package. Pickup time gets coordinated after checkout, so Mom picks her day.</div>
+        </details>
+        <details>
+          <summary>Why do you need my phone?</summary>
+          <div class="a">So Nate can text you to lock in Mom's day. We don't sell or share your info.</div>
+        </details>
+        <details>
+          <summary>What happens after I pay?</summary>
+          <div class="a">Instant email confirmation, then Nate at Supercar Experience Boise texts you within 12 hours.</div>
+        </details>
+        <details>
+          <summary>Does Mom need special insurance?</summary>
+          <div class="a">No. Active personal vehicle insurance is enough. Driver must be 21+ with a valid license.</div>
+        </details>
       </div>
     </div>
   </div>
 
-  <div class="reassurance">
-    <b>Pickup time coordinated after checkout.</b> Mom picks her day.
+  <!-- ─── COL 2: DESKTOP STICKY SUMMARY ─── -->
+  <div class="col-summary">
+    <aside class="summary-full">
+      <div class="photo">
+        <img src="{{ url_for('static', filename='sce-mothersday/' ~ car.image) }}" alt="{{ car.name }}">
+      </div>
+      <div class="body">
+        <div class="car-line">{{ tier.name }}</div>
+        <h2>{{ car.name }}</h2>
+        <div class="duration">{{ car.duration }}</div>
+        <div class="includes-label">What's included</div>
+        <ul>
+          <li>{{ car.duration }} on the {{ car.name }}</li>
+          <li>${{ tier.restaurant_value }} restaurant gift card, her pick</li>
+          <li>$120 Hand &amp; Stone spa gift card</li>
+          <li>Free door-to-door delivery</li>
+        </ul>
+        <div class="savings-line">
+          <span class="l">Total value</span>
+          <span><span class="strike">${{ '{:,}'.format(car.total_value) }}</span><span class="save">save ${{ '{:,}'.format(car.savings) }}</span></span>
+        </div>
+        <div class="total-line">
+          <span class="lbl">You pay today</span>
+          <span class="amt">${{ '{:,}'.format(car.package_price) }}</span>
+        </div>
+      </div>
+    </aside>
   </div>
 
-  <form method="post" action="{{ url_for('sce_md.optin') }}" id="optinForm">
-    <input type="hidden" name="tier" value="{{ tier.id }}">
-    <input type="hidden" name="car" value="{{ car.id }}">
-    <input type="hidden" name="event_id" value="{{ event_id }}">
-    <input type="hidden" name="restaurant_prefs" id="restaurant_prefs">
-    <input type="hidden" name="special_notes"    id="special_notes">
-    <input type="hidden" name="utm_source"   id="utm_source">
-    <input type="hidden" name="utm_medium"   id="utm_medium">
-    <input type="hidden" name="utm_campaign" id="utm_campaign">
-    <input type="hidden" name="utm_content"  id="utm_content">
-    <input type="hidden" name="utm_term"     id="utm_term">
-
-    <label>
-      <div class="lbl">Your name</div>
-      <input type="text" name="name" required autocomplete="name" placeholder="First and last">
-    </label>
-    <label>
-      <div class="lbl">Phone</div>
-      <input type="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="(208) 555-0123">
-    </label>
-    <label>
-      <div class="lbl">Email</div>
-      <input type="email" name="email" required autocomplete="email" inputmode="email" placeholder="you@example.com">
-    </label>
-
-    <label class="consent">
-      <input type="checkbox" required>
-      <span>I agree to be contacted by Supercar Experience Boise about this reservation. Standard message and data rates may apply. View our <a href="/sce/sms-privacy">privacy policy</a> and <a href="/sce/sms-terms">terms</a>.</span>
-    </label>
-
-    <button class="btn" type="submit">Continue to payment  ·  ${{ '{:,}'.format(car.package_price) }}</button>
-    <div class="secured">SECURED CHECKOUT VIA STRIPE</div>
-  </form>
-</section>
-
-<div class="trust">
-  <div class="stars">★ ★ ★ ★ ★</div>
 </div>
-
-<section class="section wrap">
-  <h3>Quick answers.</h3>
-  <div class="faq">
-    <details>
-      <summary>Am I committing to a specific date right now?</summary>
-      <div class="a">You're reserving the package. Pickup time gets coordinated after checkout, so Mom picks her day.</div>
-    </details>
-    <details>
-      <summary>Why do you need my phone?</summary>
-      <div class="a">So Nate can text you to lock in Mom's day. We don't sell or share your info.</div>
-    </details>
-    <details>
-      <summary>What happens after I pay?</summary>
-      <div class="a">You'll get an instant confirmation by email and Nate at Supercar Experience Boise will text you within 12 hours.</div>
-    </details>
-    <details>
-      <summary>Does Mom need special insurance?</summary>
-      <div class="a">No. Active personal vehicle insurance is enough. Driver must be 21+ with a valid license.</div>
-    </details>
-  </div>
-</section>
 
 <footer>
   <div class="phone-cta">Questions? Call <a href="tel:{{ support_phone_tel }}">{{ support_phone }}</a></div>
