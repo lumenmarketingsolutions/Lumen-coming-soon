@@ -51,10 +51,10 @@ TIERS = {
         "spa_value_line": "$120 spa value, included",
         "restaurant_value": 100,
         "restaurants": [
-            "Percy",
-            "Fork",
-            "Eight Thirty Common",
-            "The Wylder",
+            {"name": "Percy", "city": "Boise"},
+            {"name": "Fork", "city": "Boise"},
+            {"name": "Eight Thirty Common", "city": "Meridian"},
+            {"name": "The Wylder", "city": "Boise"},
         ],
         "restaurants_note": "Your choice from these or any restaurant she loves.",
         "cars": [
@@ -100,10 +100,10 @@ TIERS = {
         "spa_value_line": "$120 spa value, $80 through our partnership",
         "restaurant_value": 50,
         "restaurants": [
-            "Don & Charly's",
-            "Zullee",
-            "The Local",
-            "The Wylder",
+            {"name": "Don & Charly's", "city": "Boise"},
+            {"name": "Zullee", "city": "Meridian"},
+            {"name": "The Local", "city": "Garden City"},
+            {"name": "The Wylder", "city": "Boise"},
         ],
         "restaurants_note": "Your choice from these or any restaurant she loves.",
         "cars": [
