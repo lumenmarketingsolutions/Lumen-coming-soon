@@ -43,7 +43,7 @@ STRIPE_LINKS = {
 TIERS = {
     "full-day": {
         "id": "full-day",
-        "name": "The Full Day Experience",
+        "name": "The Full Day",
         "tagline": "The full day. Pulled up in style, pampered after.",
         "starting_at": 500,
         "value_up_to": 1019,
