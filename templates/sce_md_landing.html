@@ -67,7 +67,17 @@
   .wrap-wide { max-width: 1080px; margin: 0 auto; padding: 0 22px; }
 
   /* HERO */
-  .hero { padding: 56px 0 28px; text-align: center; }
+  .hero { padding: 48px 0 28px; text-align: center; }
+  .hero-img {
+    margin: 28px auto 4px;
+    max-width: 100%;
+    width: 540px;
+    height: auto;
+    display: block;
+  }
+  @media (min-width: 720px) {
+    .hero-img { width: 600px; margin-top: 36px; }
+  }
   .eyebrow {
     color: var(--rose);
     font-size: 12px;
@@ -333,6 +343,7 @@ fbq('track','PageView');
   <div class="eyebrow">Mother's Day 2026</div>
   <h1>Give Mom a day she'll <em>actually remember.</em></h1>
   <p class="lede">A supercar at her door, lunch on us, and an hour at Hand &amp; Stone. The kind of gift she opens once and talks about for years.</p>
+  <img class="hero-img" src="{{ url_for('static', filename='sce-mothersday/hero.png') }}" alt="A bouquet of cream peonies and roses, a rolled spa towel with eucalyptus, an ivory envelope with a rose wax seal, a Mom card in gold script, a car key, and a folded hundred-dollar bill." fetchpriority="high">
   <div class="price-band">
     <span><b>From $330</b></span>
     <span>·</span>
