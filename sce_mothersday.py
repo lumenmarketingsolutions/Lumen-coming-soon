@@ -293,7 +293,11 @@ def _build_lead_email_html(c):
     prefs_html = c["prefs"] or "<span style='color:#9aa0a6'>No preference</span>"
     return f"""<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"></head>
+<head>
+<meta charset="utf-8">
+<meta name="format-detection" content="telephone=yes">
+<meta name="x-apple-disable-message-reformatting">
+</head>
 <body style="margin:0;padding:0;background:#f4f1ec;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;color:#1A1A1A;">
 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#f4f1ec;padding:32px 16px;">
 <tr><td align="center">
@@ -315,7 +319,7 @@ def _build_lead_email_html(c):
 <div style="font-size:11px;letter-spacing:0.22em;text-transform:uppercase;color:#9B2D4F;font-weight:700;margin-bottom:10px;">Contact</div>
 <table cellpadding="0" cellspacing="0" border="0" width="100%" style="font-size:14px;">
 <tr><td style="padding:6px 0;color:#5C5C5C;width:90px;">Email</td><td style="color:#1A1A1A;"><a href="mailto:{c['email']}" style="color:#1A1A1A;text-decoration:none;">{c['email']}</a></td></tr>
-<tr><td style="padding:6px 0;color:#5C5C5C;">Phone</td><td style="color:#1A1A1A;"><a href="tel:{c['phone']}" style="color:#1A1A1A;text-decoration:none;">{c['phone'] or '(none)'}</a></td></tr>
+<tr><td style="padding:6px 0;color:#5C5C5C;">Phone</td><td style="color:#1A1A1A;"><a href="tel:{c['phone_tel']}" style="color:#1A1A1A;text-decoration:none;">{c['phone'] or '(none)'}</a></td></tr>
 </table>
 </td></tr>
 
@@ -343,10 +347,18 @@ def _build_lead_email_html(c):
 </td></tr>
 
 <tr><td style="padding:24px 32px 0;">
-<table cellpadding="0" cellspacing="0" border="0"><tr>
-<td style="padding-right:10px;"><a href="tel:{c['phone_tel']}" style="display:inline-block;background:#9B2D4F;color:#ffffff;text-decoration:none;padding:14px 22px;border-radius:10px;font-weight:600;font-size:14px;letter-spacing:0.01em;">Call them</a></td>
-<td><a href="sms:{c['phone_tel']}" style="display:inline-block;background:#ffffff;color:#9B2D4F;text-decoration:none;padding:13px 21px;border-radius:10px;font-weight:600;font-size:14px;letter-spacing:0.01em;border:1.5px solid #9B2D4F;">Text them</a></td>
+<table cellpadding="0" cellspacing="0" border="0" role="presentation"><tr>
+<td bgcolor="#9B2D4F" style="background-color:#9B2D4F;border-radius:10px;">
+  <a href="tel:{c['phone_tel']}" target="_self" style="display:block;color:#ffffff;text-decoration:none;padding:14px 24px;font-weight:600;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;line-height:1;mso-padding-alt:0;mso-text-raise:0;">Call them</a>
+</td>
+<td width="10" style="width:10px;font-size:0;line-height:0;">&nbsp;</td>
+<td bgcolor="#ffffff" style="background-color:#ffffff;border-radius:10px;border:1.5px solid #9B2D4F;">
+  <a href="sms:{c['phone_tel']}" target="_self" style="display:block;color:#9B2D4F;text-decoration:none;padding:12.5px 23px;font-weight:600;font-size:14px;font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;line-height:1;">Text them</a>
+</td>
 </tr></table>
+<div style="font-size:12px;color:#5C5C5C;margin-top:12px;font-family:-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;">
+  Or copy: <a href="tel:{c['phone_tel']}" style="color:#1A1A1A;font-weight:600;text-decoration:none;">{c['phone'] or c['phone_tel']}</a>
+</div>
 </td></tr>
 
 <tr><td style="padding:28px 32px 28px;">
