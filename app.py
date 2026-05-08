@@ -9,6 +9,10 @@ app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # cache static files 1 year
 from fathom_webhook import fathom_bp
 app.register_blueprint(fathom_bp)
 
+from sce_mothersday import sce_md_bp, init_md_db
+app.register_blueprint(sce_md_bp)
+init_md_db()
+
 ADMIN_PIN = "112501"
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAIL = "kendall@lumenmarketing.co"
@@ -527,6 +531,10 @@ def track_dashboard():
 
 @app.route("/")
 def index():
+    # On the SCE subdomain, route the root to the Mother's Day funnel.
+    host = (request.host or "").lower()
+    if host.startswith("supercarexp."):
+        return redirect(url_for("sce_md.landing"))
     return render_template("home.html")
 
 @app.route("/qualify")
