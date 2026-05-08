@@ -401,6 +401,7 @@ fbq('init','{{ pixel_id }}');
 fbq('track','PageView');
 </script>
 {% endif %}
+{% include "_sce_track.html" with context %}
 </head>
 <body>
 

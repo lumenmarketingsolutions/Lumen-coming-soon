@@ -1,0 +1,187 @@
+{% extends "admin_base.html" %}
+{% block title %}Metrics · Mother's Day · Lumen SCE{% endblock %}
+
+{% block content %}
+{% set m = metrics %}
+{% set landing = m.page_counts.get('landing', 0) %}
+{% set max_count = (m.page_counts.values()|list|max) or 1 %}
+{% set max_time = (m.time_per_page.values()|list|max) or 1 %}
+{% set total_devices = (m.devices.Desktop or 0) + (m.devices.Mobile or 0) %}
+
+<div class="topbar">
+  <div>
+    <h1 class="page-title">{{ offer_name }}</h1>
+    <div class="page-sub">supercarexp.lumenmarketing.co/mothersday</div>
+  </div>
+  <div class="right-tools">
+    <div class="range">
+      <a href="?range=7d"  class="{{ 'active' if range_key == '7d'  else '' }}">7 days</a>
+      <a href="?range=30d" class="{{ 'active' if range_key == '30d' else '' }}">30 days</a>
+      <a href="?range=all" class="{{ 'active' if range_key == 'all' else '' }}">All time</a>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <a class="tab active" href="{{ url_for('sce_admin.md_metrics') }}?range={{ range_key }}">Metrics</a>
+  <a class="tab" href="{{ url_for('sce_admin.md_contacts') }}?range={{ range_key }}">Leads · {{ m.leads }}</a>
+  <a class="tab" href="{{ url_for('sce_admin.md_abandoned') }}?range={{ range_key }}">Abandoned</a>
+</div>
+
+<div class="kpis">
+  <div class="kpi">
+    <div class="kpi-label">Funnel visits</div>
+    <div class="kpi-value">{{ '{:,}'.format(m.total_visitors) }}</div>
+    <div class="kpi-meta">unique sessions in range</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Leads</div>
+    <div class="kpi-value">{{ '{:,}'.format(m.leads) }}</div>
+    <div class="kpi-meta">{% if m.paid %}<span class="good">{{ m.paid }} paid</span>{% else %}awaiting first paid{% endif %}</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Conversion rate</div>
+    <div class="kpi-value">{{ m.conv_rate }}%</div>
+    <div class="kpi-meta">visit → lead</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Avg time on page</div>
+    <div class="kpi-value">{{ m.avg_time_s }}<span style="font-size:18px;color:var(--dim);"> s</span></div>
+    <div class="kpi-meta">across all funnel pages</div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px;">
+  <h3>Page-to-page funnel</h3>
+  {% if m.total_visitors %}
+  <div class="ptp">
+    {% set prev = None %}
+    {% for pid, plabel in funnel_pages %}
+      {% set count = m.page_counts.get(pid, 0) %}
+      {% set h = ((count / max_count) * 100) if max_count else 0 %}
+      <div class="col">
+        <div class="count">{{ '{:,}'.format(count) }}</div>
+        {% if count > 0 %}
+          <div class="bar" style="height: {{ h }}%; min-height: 8px;"></div>
+        {% else %}
+          <div class="bar-empty"></div>
+        {% endif %}
+        <div class="label">{{ plabel }}</div>
+        {% if prev is not none and prev > 0 %}
+          {% set drop = ((prev - count) / prev * 100) | round(0, 'floor') | int %}
+          {% if drop > 0 %}
+            <div class="drop">↓ {{ drop }}%</div>
+          {% endif %}
+        {% endif %}
+      </div>
+      {% set prev = count %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="ic">📊</div>
+    <h4>No traffic yet</h4>
+    <p>Funnel data will appear here as soon as visitors hit the page.</p>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card" style="margin-bottom:16px;">
+  <h3>Time on page</h3>
+  {% if m.total_visitors %}
+  <div class="top-bars">
+    {% for pid, plabel in funnel_pages %}
+      {% set t = m.time_per_page.get(pid, 0) %}
+      {% set h = ((t / max_time) * 100) if max_time else 0 %}
+      <div class="col">
+        <div class="count">{{ t }}s</div>
+        {% if t > 0 %}
+          <div class="bar" style="height: {{ h }}%; min-height: 6px;"></div>
+        {% else %}
+          <div class="bar-empty"></div>
+        {% endif %}
+        <div class="label">{{ plabel }}</div>
+      </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="info" style="text-align:center;padding:30px 0;">No time-on-page data yet.</p>
+  {% endif %}
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h3>Device split</h3>
+    <div class="hbars">
+      {% for label, count in [('Mobile', m.devices.Mobile), ('Desktop', m.devices.Desktop)] %}
+        {% set pct = (count / total_devices * 100) if total_devices else 0 %}
+        <div class="hbar-row">
+          <div class="hbar-name">{{ label }}</div>
+          <div class="hbar-track"><div class="hbar-fill" style="width: {{ pct }}%;"></div></div>
+          <div class="hbar-num">{{ count }} · {{ pct | round(0) | int }}%</div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Tier split (leads)</h3>
+    {% set tot_t = (m.tier_split['full-day'] or 0) + (m.tier_split['day-out'] or 0) %}
+    {% if tot_t %}
+    <div class="hbars">
+      {% for label, count in [('The Full Day', m.tier_split['full-day']), ('The Day Out', m.tier_split['day-out'])] %}
+        {% set pct = (count / tot_t * 100) if tot_t else 0 %}
+        <div class="hbar-row">
+          <div class="hbar-name">{{ label }}</div>
+          <div class="hbar-track"><div class="hbar-fill" style="width: {{ pct }}%;"></div></div>
+          <div class="hbar-num">{{ count }} · {{ pct | round(0) | int }}%</div>
+        </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="info" style="padding:14px 0;">No leads yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h3>Car selection (leads)</h3>
+    {% if m.car_split %}
+    {% set max_car = (m.car_split.values()|list|max) or 1 %}
+    <div class="hbars">
+      {% for car, count in m.car_split.items()|sort(attribute=1, reverse=True) %}
+        {% set pct = (count / max_car * 100) if max_car else 0 %}
+        <div class="hbar-row">
+          <div class="hbar-name">{{ car|upper }}</div>
+          <div class="hbar-track"><div class="hbar-fill" style="width: {{ pct }}%;"></div></div>
+          <div class="hbar-num">{{ count }}</div>
+        </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="info" style="padding:14px 0;">No car selections yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Restaurant interest</h3>
+    {% if m.restaurant_prefs %}
+    {% set max_pref = m.restaurant_prefs[0][1] %}
+    <div class="hbars">
+      {% for name, count in m.restaurant_prefs %}
+        {% set pct = (count / max_pref * 100) if max_pref else 0 %}
+        <div class="hbar-row">
+          <div class="hbar-name">{{ name }}</div>
+          <div class="hbar-track"><div class="hbar-fill" style="width: {{ pct }}%;"></div></div>
+          <div class="hbar-num">{{ count }}</div>
+        </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="info" style="padding:14px 0;">No restaurant preferences captured yet.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

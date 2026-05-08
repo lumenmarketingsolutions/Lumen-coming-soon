@@ -231,6 +231,7 @@ fbq('track','PageView');
 fbq('track','ViewContent', {content_category:'mothers_day_preferences', content_name:'{{ tier.id }}/{{ car.id }}'});
 </script>
 {% endif %}
+{% include "_sce_track.html" with context %}
 </head>
 <body>
 
@@ -245,7 +246,7 @@ fbq('track','ViewContent', {content_category:'mothers_day_preferences', content_
 <section class="head wrap">
   <div class="eyebrow">{{ car.name }}  ·  {{ tier.name }}</div>
   <h1>Tell us about her day.</h1>
-  <p class="lede">Quick details so we can make it feel like hers. Skip what you don't know yet.</p>
+  <p class="lede">Pick the restaurants she'd love. We'll coordinate the gift card to her favorite.</p>
 </section>
 
 <section class="wrap">
@@ -269,14 +270,6 @@ fbq('track','ViewContent', {content_category:'mothers_day_preferences', content_
       </div>
     </div>
 
-    <div class="section">
-      <div class="section-eyebrow">Special notes <span class="optional-tag">Optional</span></div>
-      <h2>Anything we should know?</h2>
-      <p class="section-sub">Anniversary, birthday, surprise drop-off, dietary restrictions. Anything that helps us nail the day.</p>
-
-      <textarea name="notes" rows="4" maxlength="500" placeholder="It's our 10-year anniversary, she loves white peonies, surprise her at lunch..."></textarea>
-    </div>
-
     <div class="actions">
       <button class="btn" type="submit">Continue to reservation</button>
       <button class="skip-link" type="button" onclick="skipToReserve()">Skip — I'll tell Nate later</button>
@@ -298,10 +291,9 @@ fbq('track','ViewContent', {content_category:'mothers_day_preferences', content_
     ev.preventDefault();
     var form = ev.target;
     var prefs = Array.from(form.querySelectorAll('input[name=prefs]:checked')).map(i => i.value);
-    var notes = ((form.querySelector('textarea[name=notes]') || {}).value || '').trim();
     try {
       localStorage.setItem('sce_md_prefs', prefs.join(', '));
-      localStorage.setItem('sce_md_notes', notes);
+      localStorage.setItem('sce_md_notes', '');
     } catch(e) {}
     if (window.fbq) {
       try {

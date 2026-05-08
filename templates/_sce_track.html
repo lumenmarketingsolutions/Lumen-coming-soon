@@ -1,0 +1,79 @@
+<script>
+/* SCE MD funnel tracking — page view + time-on-page */
+(function() {
+  try {
+    var KEY = 'sce_sid';
+    var sid = localStorage.getItem(KEY);
+    if (!sid) {
+      sid = (crypto && crypto.randomUUID) ? crypto.randomUUID()
+           : (Date.now().toString(36) + Math.random().toString(36).slice(2, 12));
+      localStorage.setItem(KEY, sid);
+    }
+    window.__SCE_SID__ = sid;
+    var qs = new URLSearchParams(window.location.search);
+    var page = "{{ page_id|default('') }}" || (
+      window.location.pathname.match(/booked/) ? 'booked' :
+      window.location.pathname.match(/optin/) ? 'reserve' :
+      window.location.pathname.match(/reserve/) ? 'reserve' :
+      window.location.pathname.match(/preferences/) ? 'preferences' :
+      window.location.pathname.match(/tier/) ? 'tier' :
+      window.location.pathname.match(/mothersday\/?$/) ? 'landing' : 'unknown'
+    );
+    var payload = {
+      sid: sid,
+      page: page,
+      kind: 'view',
+      tier: "{{ (tier.id if tier is defined else '') | e }}",
+      car:  "{{ (car.id if car is defined else '') | e }}",
+      ref:  document.referrer || '',
+      screen: (window.screen ? (screen.width + 'x' + screen.height) : ''),
+      lang: navigator.language || '',
+      tz: (Intl && Intl.DateTimeFormat) ? Intl.DateTimeFormat().resolvedOptions().timeZone : '',
+      plat: navigator.platform || '',
+      us: qs.get('utm_source') || localStorage.getItem('sce_utm_source') || '',
+      um: qs.get('utm_medium') || localStorage.getItem('sce_utm_medium') || '',
+      uc: qs.get('utm_campaign') || localStorage.getItem('sce_utm_campaign') || '',
+      un: qs.get('utm_content') || localStorage.getItem('sce_utm_content') || '',
+      ut: qs.get('utm_term') || localStorage.getItem('sce_utm_term') || ''
+    };
+    ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(function(k) {
+      var v = qs.get(k); if (v) localStorage.setItem('sce_' + k, v);
+    });
+    fetch('/mothersday/track', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload),
+      keepalive: true
+    }).catch(function(){});
+
+    // Stamp the opt-in form with the session_id so we can join visits to leads.
+    document.addEventListener('DOMContentLoaded', function() {
+      var f = document.getElementById('optinForm');
+      if (f && !f.querySelector('input[name=session_id]')) {
+        var i = document.createElement('input');
+        i.type = 'hidden'; i.name = 'session_id'; i.value = sid;
+        f.appendChild(i);
+      }
+    });
+
+    // Time on page — fires on tab hide / unload.
+    var enteredAt = Date.now();
+    function flush() {
+      var ms = Date.now() - enteredAt;
+      if (ms < 200) return;
+      var blob = JSON.stringify({sid: sid, page: page, kind: 'time', ms: ms});
+      try {
+        if (navigator.sendBeacon) {
+          navigator.sendBeacon('/mothersday/track', new Blob([blob], {type: 'application/json'}));
+        } else {
+          fetch('/mothersday/track', {method:'POST', headers:{'Content-Type':'application/json'}, body: blob, keepalive: true}).catch(function(){});
+        }
+      } catch(e) {}
+    }
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'hidden') flush();
+    });
+    window.addEventListener('pagehide', flush);
+  } catch (e) { /* swallow tracking errors silently */ }
+})();
+</script>
