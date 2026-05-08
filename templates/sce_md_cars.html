@@ -105,32 +105,36 @@
     color: var(--rose); font-size: 13px; font-weight: 600;
     letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 16px;
   }
-  .car .price-row {
-    display: flex; align-items: baseline; justify-content: space-between;
-    padding-top: 14px; border-top: 1px solid var(--line);
-    margin-bottom: 10px;
+  .car .price-block {
+    text-align: center;
+    padding: 22px 0 14px;
+    border-top: 1px solid var(--line);
+    margin-bottom: 22px;
   }
-  .car .price-row .label { color: var(--muted); font-size: 13px; }
-  .car .price-row .price { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
-  .car .value-row {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 18px; flex-wrap: wrap;
-  }
-  .car .value-row .strike {
-    color: var(--muted); text-decoration: line-through;
-    font-size: 13px; font-weight: 500;
-  }
-  .save-pill {
-    background: var(--gold-bright);
-    color: #1A1A1A;
-    padding: 4px 9px;
-    border-radius: 6px;
+  .car .price-label {
+    color: var(--muted);
     font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    line-height: 1;
+    font-weight: 700;
+    margin-bottom: 6px;
   }
+  .car .price-amount {
+    font-size: 38px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 10px;
+    font-feature-settings: "tnum" 1;
+  }
+  .car .price-meta {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 0.01em;
+  }
+  .car .price-meta .save { color: var(--rose); font-weight: 700; }
+  .car .price-meta .retail { color: var(--muted); }
   .btn {
     display: inline-block; background: var(--rose); color: #fff;
     padding: 15px 22px; border-radius: 12px;
@@ -193,24 +197,24 @@
     text-transform: uppercase;
     font-weight: 600;
   }
-  .spa-detail {
-    display: flex; gap: 14px; align-items: flex-start;
-    padding-top: 6px;
-    border-top: 1px solid var(--line);
-    margin-top: 4px;
+  .spa-stat {
+    display: flex; align-items: center; gap: 12px;
     padding-top: 18px;
+    border-top: 1px solid var(--line);
+    flex-wrap: wrap;
+    font-size: 15px;
   }
-  .spa-detail .label {
-    flex: 0 0 90px;
+  .spa-stat .face { color: var(--text); font-weight: 600; }
+  .spa-stat .tag {
+    background: rgba(155, 45, 79, 0.08);
     color: var(--rose);
+    padding: 6px 12px;
+    border-radius: 999px;
     font-size: 11px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
     font-weight: 700;
-    padding-top: 2px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
   }
-  .spa-detail .copy { color: var(--text); font-size: 15px; line-height: 1.6; }
-  .spa-detail .copy b { color: var(--gold); font-weight: 700; }
 
   footer {
     padding: 44px 28px; text-align: center;
@@ -255,13 +259,14 @@ fbq('track','ViewContent', {content_category: 'mothers_day_tier', content_name: 
       <div class="body">
         <h3>{{ car.name }}</h3>
         <div class="duration">{{ car.duration }}</div>
-        <div class="price-row">
-          <span class="label">Package price</span>
-          <span class="price">${{ '{:,}'.format(car.package_price) }}</span>
-        </div>
-        <div class="value-row">
-          <span class="strike">${{ '{:,}'.format(car.total_value) }} value</span>
-          <span class="save-pill">Save ${{ '{:,}'.format(car.savings) }}</span>
+        <div class="price-block">
+          <div class="price-label">Package price</div>
+          <div class="price-amount">${{ '{:,}'.format(car.package_price) }}</div>
+          <div class="price-meta">
+            <span class="save">Save ${{ '{:,}'.format(car.savings) }}</span>
+            <span> · </span>
+            <span class="retail">${{ '{:,}'.format(car.total_value) }} retail</span>
+          </div>
         </div>
         <span class="btn">Reserve {{ car.name.split(' ')[-1] if 'Lamborghini' in car.name or 'Mercedes' in car.name else car.name }} for ${{ car.package_price }}</span>
       </div>
@@ -288,9 +293,9 @@ fbq('track','ViewContent', {content_category: 'mothers_day_tier', content_name: 
     <div class="info-eyebrow">Spa partner</div>
     <h4>Hand &amp; Stone</h4>
     <p class="info-sub">One hour massage or facial. Mom picks which.</p>
-    <div class="spa-detail">
-      <span class="label">Value</span>
-      <span class="copy"><b>{{ tier.spa_value_line }}</b></span>
+    <div class="spa-stat">
+      <span class="face">$120 face value</span>
+      <span class="tag">{{ 'Fully included' if tier.id == 'full-day' else 'Yours for $80' }}</span>
     </div>
   </div>
 </section>
