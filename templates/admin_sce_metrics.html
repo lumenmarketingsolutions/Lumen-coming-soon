@@ -42,7 +42,13 @@
   <div class="kpi">
     <div class="kpi-label">Conversion rate</div>
     <div class="kpi-value">{{ m.conv_rate }}%</div>
-    <div class="kpi-meta">visit → lead</div>
+    <div class="kpi-meta">
+      {% if m.leads > m.leads_tracked %}
+        based on {{ m.leads_tracked }} tracked of {{ m.leads }}
+      {% else %}
+        visit → lead
+      {% endif %}
+    </div>
   </div>
   <div class="kpi">
     <div class="kpi-label">Avg time on page</div>
