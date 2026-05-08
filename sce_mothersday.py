@@ -21,6 +21,11 @@ import time
 import hashlib
 import threading
 import requests
+try:
+    from zoneinfo import ZoneInfo
+    _BOISE_TZ = ZoneInfo("America/Boise")
+except Exception:
+    _BOISE_TZ = datetime.timezone(datetime.timedelta(hours=-6))
 from flask import Blueprint, render_template, request, redirect, url_for, abort, jsonify
 
 sce_md_bp = Blueprint("sce_md", __name__)
@@ -272,6 +277,13 @@ def _client_ip():
     if fwd:
         return fwd.split(",")[0].strip()
     return request.remote_addr or ""
+
+
+def _format_boise_now():
+    """Current time in Boise local timezone, formatted for human display."""
+    now = datetime.datetime.now(_BOISE_TZ)
+    # "May 7, 2026 · 9:55 PM MDT"
+    return now.strftime("%b %-d, %Y · %-I:%M %p %Z").replace("  ", " ")
 
 
 def _build_lead_email_html(c):
@@ -557,7 +569,7 @@ def optin():
         "utm_medium":   request.form.get("utm_medium", ""),
         "utm_campaign": request.form.get("utm_campaign", ""),
         "event_id": event_id,
-        "submitted_at": now + " UTC",
+        "submitted_at": _format_boise_now(),
     })
 
     # Fire server-side CAPI Lead (background thread, doesn't block redirect).
