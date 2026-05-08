@@ -91,9 +91,18 @@
     border-radius: 22px;
     overflow: hidden;
     display: flex; flex-direction: column;
-    transition: border-color 0.2s, transform 0.2s;
+    transition: border-color 0.25s, transform 0.18s ease-out, box-shadow 0.25s ease-out;
+    box-shadow:
+      0 1px 2px rgba(26, 26, 26, 0.04),
+      0 6px 18px rgba(26, 26, 26, 0.05);
   }
-  .car:hover { border-color: var(--rose); }
+  .car:hover {
+    border-color: var(--rose);
+    box-shadow:
+      0 4px 8px rgba(26, 26, 26, 0.06),
+      0 20px 48px rgba(155, 45, 79, 0.1);
+    transform: translateY(-1px);
+  }
   .car .photo { aspect-ratio: 4 / 3; overflow: hidden; background: #f0eae2; }
   .car .photo img { width: 100%; height: 100%; object-fit: cover; }
   .car .body { padding: 22px 22px 24px; display: flex; flex-direction: column; flex: 1; }
@@ -139,9 +148,17 @@
     display: inline-block; background: var(--rose); color: #fff;
     padding: 15px 22px; border-radius: 12px;
     font-weight: 600; font-size: 15px; text-align: center;
-    width: 100%; margin-top: auto; transition: background 0.2s;
+    width: 100%; margin-top: auto;
+    transition: background 0.2s, box-shadow 0.25s ease-out, transform 0.18s ease-out;
+    box-shadow:
+      0 1px 2px rgba(155, 45, 79, 0.18),
+      0 6px 14px rgba(155, 45, 79, 0.2);
   }
-  .btn:hover { background: var(--rose-dark); }
+  .car:hover .btn {
+    box-shadow:
+      0 2px 4px rgba(155, 45, 79, 0.22),
+      0 10px 22px rgba(155, 45, 79, 0.3);
+  }
 
   .info-block {
     background: var(--surface);
@@ -149,6 +166,21 @@
     border-radius: 18px;
     padding: 30px 28px;
     margin-top: 22px;
+    box-shadow:
+      0 1px 2px rgba(26, 26, 26, 0.03),
+      0 4px 14px rgba(26, 26, 26, 0.04);
+  }
+  .info-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; margin-bottom: 12px;
+  }
+  .info-head .info-eyebrow { margin-bottom: 0; }
+  .info-city {
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 600;
   }
   .info-eyebrow {
     color: var(--rose);
@@ -290,7 +322,10 @@ fbq('track','ViewContent', {content_category: 'mothers_day_tier', content_name: 
   </div>
 
   <div class="info-block">
-    <div class="info-eyebrow">Spa partner</div>
+    <div class="info-head">
+      <div class="info-eyebrow">Spa partner</div>
+      <span class="info-city">{{ tier.spa_city }}</span>
+    </div>
     <h4>Hand &amp; Stone</h4>
     <p class="info-sub">One hour massage or facial. Mom picks which.</p>
     <div class="spa-stat">
