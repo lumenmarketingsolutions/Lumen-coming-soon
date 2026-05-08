@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tell us about her day · {{ tier.name }}</title>
+<title>Pick the restaurants · {{ tier.name }}</title>
 <meta name="description" content="Pick the restaurants she'd love and tell us anything that helps us make her day.">
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -82,7 +82,7 @@
   .lede { color: var(--muted); margin: 0 auto; max-width: 36ch; font-size: 16px; }
 
   .section {
-    padding: 30px 0 8px;
+    padding: 40px 0 8px;
   }
   .section + .section { padding-top: 16px; }
   .section-eyebrow {
@@ -242,12 +242,6 @@ fbq('track','ViewContent', {content_category:'mothers_day_preferences', content_
   <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
   <span class="step-pill">Step 2 / 3</span>
 </nav>
-
-<section class="head wrap">
-  <div class="eyebrow">{{ car.name }}  ·  {{ tier.name }}</div>
-  <h1>Tell us about her day.</h1>
-  <p class="lede">Pick the restaurants she'd love. We'll coordinate the gift card to her favorite.</p>
-</section>
 
 <section class="wrap">
   <form id="prefsForm" onsubmit="return saveAndContinue(event);">
