@@ -1,1 +1,4 @@
 waitlist.db
+whatsapp.db
+__pycache__/
+*.pyc

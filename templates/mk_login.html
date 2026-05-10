@@ -76,14 +76,15 @@
 <body>
   <div class="login-card">
     <img src="/static/logo-white.png" alt="Lumen" class="login-logo">
-    <h1 class="login-greeting">Hey, Marykate.</h1>
-    <p class="login-sub">Enter your pin to get in.</p>
+    <h1 class="login-greeting">Sign in</h1>
+    <p class="login-sub">MK7 Media — outreach &amp; WhatsApp.</p>
     {% if error %}
     <p class="login-error">{{ error }}</p>
     {% endif %}
     <form method="POST">
-      <input type="password" name="pin" class="login-input" placeholder="••••••" autofocus>
-      <button type="submit" class="login-btn">Enter</button>
+      <input type="email" name="email" class="login-input" placeholder="email" autocomplete="email" autofocus style="text-align:left;letter-spacing:normal;font-size:15px;">
+      <input type="password" name="password" class="login-input" placeholder="password" autocomplete="current-password" style="text-align:left;letter-spacing:normal;font-size:15px;">
+      <button type="submit" class="login-btn">Sign in</button>
     </form>
     <p class="login-footer">Built by Lumen</p>
   </div>

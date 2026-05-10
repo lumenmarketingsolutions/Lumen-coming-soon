@@ -16,6 +16,8 @@ init_md_db()
 from sce_admin import sce_admin_bp
 app.register_blueprint(sce_admin_bp)
 
+from agents.whatsapp_agent import agent as wa  # WhatsApp outreach agent (agents/whatsapp_agent/)
+
 ADMIN_PIN = "112501"
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAIL = "kendall@lumenmarketing.co"
@@ -36,6 +38,9 @@ def clean_stale_visitors():
 
 # ── Marykate Agent Config ──
 MK_PIN = os.environ.get("MK_PIN", "091005")
+# Email + password login for the agent dashboard (the PIN above still works as a fallback).
+MK_ADMIN_EMAIL = os.environ.get("MK_ADMIN_EMAIL", "kendall@lumenmarketing.co").strip().lower()
+MK_ADMIN_PASSWORD = os.environ.get("MK_ADMIN_PASSWORD", "Wifimoney420!")
 GMAIL_CLIENT_ID = os.environ.get("GMAIL_CLIENT_ID", "")
 GMAIL_CLIENT_SECRET = os.environ.get("GMAIL_CLIENT_SECRET", "")
 GMAIL_REDIRECT_URI = os.environ.get("GMAIL_REDIRECT_URI", "https://lumenmarketing.co/marykate/gmail/callback")
@@ -538,6 +543,9 @@ def index():
     host = (request.host or "").lower()
     if host.startswith("supercarexp."):
         return redirect(url_for("sce_md.landing"))
+    # whatsapp.mk7media.com is the front door for the agent dashboard.
+    if host.startswith("whatsapp."):
+        return redirect("/marykate")
     return render_template("home.html")
 
 @app.route("/qualify")
@@ -2198,12 +2206,14 @@ def mk_auth_required(f):
 @app.route("/marykate/login", methods=["GET", "POST"])
 def mk_login():
     if request.method == "POST":
-        pin = request.form.get("pin", "")
-        if pin == MK_PIN:
+        email = (request.form.get("email") or "").strip().lower()
+        password = (request.form.get("password") or "").strip()
+        pin = (request.form.get("pin") or password or "").strip()  # PIN still works (typed in either field)
+        if (email == MK_ADMIN_EMAIL and password == MK_ADMIN_PASSWORD) or (pin and pin == MK_PIN):
             session["mk_auth"] = True
             session["mk_show_notice"] = True
             return redirect("/marykate")
-        return render_template("mk_login.html", error="Wrong pin")
+        return render_template("mk_login.html", error="Wrong email or password.")
     return render_template("mk_login.html")
 
 
@@ -2556,7 +2566,115 @@ def privacy_policy():
 @app.route("/marykate/whatsapp")
 @mk_auth_required
 def mk_whatsapp_page():
-    return render_template("mk_whatsapp.html", active="whatsapp")
+    detail_id = (request.args.get("id") or "").strip()
+    convos = wa.recent_conversations(limit=60)
+    detail = None
+    if detail_id:
+        detail = {"wa_id": detail_id, "contact": wa.get_contact(detail_id), "messages": wa.conversation(detail_id)}
+    return render_template("mk_whatsapp.html", active="whatsapp", convos=convos, detail=detail,
+                           generated_link=request.args.get("link"), registered_number=request.args.get("registered"))
+
+
+@app.route("/marykate/whatsapp/send", methods=["POST"])
+@mk_auth_required
+def mk_whatsapp_send():
+    data = request.form.to_dict()
+    to = "".join(ch for ch in (data.get("to") or "") if ch.isdigit())
+    template_name = (data.get("template") or wa.DEFAULT_TEMPLATE).strip()
+    lang_code = (data.get("lang") or wa.DEFAULT_TEMPLATE_LANG).strip() or wa.DEFAULT_TEMPLATE_LANG
+    lead_name = (data.get("name") or "").strip() or None
+    lead_business = (data.get("business") or "").strip() or None
+    lead_source = (data.get("source") or "form").strip() or "form"
+    raw_params = (data.get("params") or "").strip()
+    parts = [p.strip() for p in raw_params.split("|") if p.strip()] if raw_params else []
+    if parts and all("=" in p for p in parts):
+        body_params = {p.split("=", 1)[0].strip(): p.split("=", 1)[1].strip() for p in parts}
+    elif parts:
+        body_params = parts
+    else:
+        body_params = None
+    if not lead_name and len(to) >= 10:
+        _norm = ("1" + to) if len(to) == 10 else to
+        existing = wa.get_contact(_norm)
+        if existing:
+            lead_name = existing.get("lead_name") or existing.get("profile_name") or None
+    if body_params is None:
+        first_name = (lead_name or "").split(" ", 1)[0].strip() or "there"
+        body_params = {"customer_name": first_name}
+    if len(to) >= 10 and template_name:
+        wa.start_outreach(to, template_name=template_name, lang_code=lang_code, body_params=body_params,
+                          lead_name=lead_name, lead_business=lead_business, lead_source=lead_source)
+    return redirect("/marykate/whatsapp?id=" + (("1" + to) if len(to) == 10 else to))
+
+
+@app.route("/marykate/whatsapp/reply", methods=["POST"])
+@mk_auth_required
+def mk_whatsapp_reply():
+    wa_id = "".join(ch for ch in (request.form.get("wa_id") or "") if ch.isdigit())
+    body = (request.form.get("body") or "").strip()
+    if wa_id and body:
+        wa.human_reply(wa_id, body)
+    return redirect("/marykate/whatsapp?id=" + wa_id)
+
+
+@app.route("/marykate/whatsapp/handoff", methods=["POST"])
+@mk_auth_required
+def mk_whatsapp_handoff():
+    wa_id = "".join(ch for ch in (request.form.get("wa_id") or "") if ch.isdigit())
+    new_status = (request.form.get("status") or "handed_off").strip()
+    if wa_id and new_status in ("active", "handed_off", "opted_out"):
+        wa.set_contact_status(wa_id, new_status)
+    return redirect("/marykate/whatsapp?id=" + wa_id)
+
+
+@app.route("/marykate/whatsapp/outreach-link", methods=["POST"])
+@mk_auth_required
+def mk_whatsapp_outreach_link():
+    from urllib.parse import urlencode
+    data = request.form.to_dict()
+    prefill = (data.get("prefill") or "").strip() or None
+    lead_name = (data.get("name") or "").strip() or None
+    lead_business = (data.get("business") or "").strip() or None
+    number = "".join(ch for ch in (data.get("to") or "") if ch.isdigit())
+    if number:
+        wa.register_lead(number, lead_name=lead_name, lead_business=lead_business, lead_source="outreach")
+    return redirect("/marykate/whatsapp?" + urlencode({"link": wa.wa_me_link(prefill), "registered": number or ""}))
+
+
+@app.route("/marykate/whatsapp/debug")
+@mk_auth_required
+def mk_whatsapp_debug():
+    conn = sqlite3.connect(wa.WHATSAPP_DB)
+    conn.row_factory = sqlite3.Row
+    msgs = [dict(r) for r in conn.execute("SELECT * FROM wa_messages ORDER BY id DESC LIMIT 100")]
+    cts = [dict(r) for r in conn.execute("SELECT * FROM wa_contacts ORDER BY wa_id")]
+    conn.close()
+    return jsonify({"db_path": wa.WHATSAPP_DB, "config": {
+        "auto_reply": wa.WHATSAPP_AUTO_REPLY, "model": wa.WHATSAPP_AGENT_MODEL,
+        "has_anthropic_key": bool(wa.ANTHROPIC_API_KEY), "has_access_token": bool(wa.WHATSAPP_ACCESS_TOKEN),
+        "has_app_secret": bool(wa.WHATSAPP_APP_SECRET), "handoff_number": wa.WHATSAPP_HANDOFF_NUMBER},
+        "contacts": cts, "messages": msgs})
+
+
+# ── WhatsApp webhook — public; Meta calls this. ──
+@app.route("/webhooks/whatsapp", methods=["GET"])
+def whatsapp_webhook_verify():
+    challenge = wa.verify_webhook(request.args)
+    if challenge is not None:
+        return challenge, 200
+    return "Forbidden", 403
+
+
+@app.route("/webhooks/whatsapp", methods=["POST"])
+def whatsapp_webhook_receive():
+    raw = request.get_data()
+    if not wa.verify_signature(raw, request.headers.get("X-Hub-Signature-256", "")):
+        return "Forbidden", 403
+    try:
+        wa.handle_webhook(request.get_json(silent=True) or {})
+    except Exception as e:
+        print(f"[whatsapp] webhook handler error: {e}")
+    return "EVENT_RECEIVED", 200
 
 
 @app.route("/marykate/templates")

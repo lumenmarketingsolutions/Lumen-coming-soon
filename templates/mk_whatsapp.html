@@ -1,18 +1,151 @@
 {% extends "mk_base.html" %}
 {% block title %}WhatsApp{% endblock %}
 {% block content %}
-<div style="display:flex; align-items:center; justify-content:center; min-height:60vh; text-align:center;">
-  <div style="max-width:400px;">
-    <div style="width:64px; height:64px; border-radius:16px; background:rgba(128,47,222,0.12); display:flex; align-items:center; justify-content:center; margin:0 auto 24px;">
-      <svg width="32" height="32" fill="none" stroke="#802fde" stroke-width="1.5" viewBox="0 0 24 24"><path d="M8.625 9.75a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375m-13.5 3.01c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.184-4.183a1.14 1.14 0 01.778-.332 48.294 48.294 0 005.83-.498c1.585-.233 2.708-1.626 2.708-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+<style>
+  .wa-wrap { max-width: 1100px; }
+  .wa-h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.4px; margin-bottom: 4px; }
+  .wa-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 24px; }
+  .wa-layout { display: grid; grid-template-columns: 1fr; gap: 22px; }
+  @media (min-width: 920px) { .wa-layout { grid-template-columns: 360px 1fr; } }
+  .wa-panel { background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: 14px; padding: 20px; }
+  .wa-panel h2 { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 14px; }
+  .wa-label { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin: 14px 0 6px; }
+  .wa-label:first-of-type { margin-top: 0; }
+  .wa-wrap input, .wa-wrap textarea { width: 100%; padding: 11px 12px; background: var(--dark); border: 1px solid var(--dark-border); border-radius: 9px; color: var(--text); font-family: inherit; font-size: 14px; outline: none; }
+  .wa-wrap input:focus, .wa-wrap textarea:focus { border-color: var(--teal); }
+  .wa-hint { font-size: 11px; color: var(--text-muted); margin-top: 5px; line-height: 1.5; }
+  .wa-btn { margin-top: 18px; padding: 11px 16px; background: var(--teal); color: #fff; border: none; border-radius: 9px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .wa-btn:hover { background: #0fa8e6; }
+  .wa-btn.ghost { background: transparent; border: 1px solid var(--dark-border); color: var(--text-dim); }
+  .wa-btn.ghost:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .wa-row { display: block; padding: 11px 11px; border-radius: 10px; text-decoration: none; color: var(--text); border: 1px solid transparent; margin-bottom: 3px; }
+  .wa-row:hover { background: rgba(255,255,255,0.03); }
+  .wa-row.active { border-color: var(--dark-border); background: rgba(255,255,255,0.04); }
+  .wa-row .nm { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .wa-row .pv { font-size: 12px; color: var(--text-dim); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .wa-pill { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .wa-pill.active { background: rgba(52,211,153,0.14); color: var(--green); }
+  .wa-pill.handed_off { background: rgba(128,47,222,0.16); color: #b78bf0; }
+  .wa-pill.opted_out { background: rgba(136,136,160,0.14); color: var(--text-muted); }
+  .wa-empty { color: var(--text-muted); font-size: 13px; padding: 8px 0; }
+  .wa-thread { display: flex; flex-direction: column; gap: 9px; max-height: 480px; overflow-y: auto; padding-right: 6px; }
+  .wa-msg { max-width: 78%; padding: 9px 13px; border-radius: 14px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-wrap: break-word; }
+  .wa-msg.in { align-self: flex-start; background: rgba(255,255,255,0.05); border-bottom-left-radius: 4px; }
+  .wa-msg.out { align-self: flex-end; background: rgba(18,143,196,0.18); border-bottom-right-radius: 4px; }
+  .wa-msg .mt { display: block; font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+  .wa-dh { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .wa-dh .who { font-size: 16px; font-weight: 700; }
+  .wa-dh .who-sub { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+  .wa-inline { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+  .wa-inline .wa-btn { margin-top: 0; padding: 8px 12px; font-size: 12px; }
+  .wa-linkbox { background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.25); border-radius: 10px; padding: 12px; margin-bottom: 14px; }
+</style>
+
+<div class="wa-wrap">
+  <div class="wa-h1">WhatsApp</div>
+  <div class="wa-sub">Inbound conversations land here — the agent replies as Kendall from Lumen, qualifies, asks for an email at call time, and flags a handoff when a human should jump in. Number: +1 623 512 6504.</div>
+
+  <div class="wa-layout">
+    <div>
+      <div class="wa-panel" style="margin-bottom:20px;">
+        <h2>Get a WhatsApp link &nbsp;<span style="color:var(--green);font-weight:600;text-transform:none;letter-spacing:0;">(recommended)</span></h2>
+        <div class="wa-hint" style="margin-bottom:14px;">Hand this link to a lead (email, SMS, on a thank-you page) so <em>they</em> message you first — that always delivers and the agent picks it up. Reliable, unlike a cold template.</div>
+        {% if generated_link %}
+          <div class="wa-linkbox">
+            <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">Copy &amp; send to your lead{% if registered_number %} (lead +{{ registered_number }} pre-registered){% endif %}</div>
+            <input readonly onclick="this.select()" value="{{ generated_link }}" style="background:rgba(0,0,0,0.25);font-size:13px;">
+          </div>
+        {% endif %}
+        <form method="post" action="/marykate/whatsapp/outreach-link">
+          <label class="wa-label">Message it pre-fills for them (they can edit)</label>
+          <textarea name="prefill" rows="2" placeholder="Hi! I just filled out the form on the Lumen site." style="resize:vertical;"></textarea>
+          <label class="wa-label">Lead name (optional)</label>
+          <input name="name" placeholder="Sarah">
+          <label class="wa-label">Lead business (optional)</label>
+          <input name="business" placeholder="Bright Smile Dental">
+          <label class="wa-label">Lead's WhatsApp number (optional — pre-registers them so the agent knows their name)</label>
+          <input name="to" placeholder="16235551234">
+          <button type="submit" class="wa-btn">Generate link</button>
+        </form>
+      </div>
+
+      <div class="wa-panel" style="margin-bottom:20px;">
+        <h2>Send a template &nbsp;<span style="color:var(--text-muted);font-weight:500;text-transform:none;letter-spacing:0;">(less reliable for cold leads)</span></h2>
+        <form method="post" action="/marykate/whatsapp/send">
+          <label class="wa-label">WhatsApp number (with country code)</label>
+          <input name="to" placeholder="16235551234" required>
+          <label class="wa-label">Template name</label>
+          <input name="template" value="lumen_outreach" required>
+          <div class="wa-hint">Must be an approved template in WhatsApp Manager.</div>
+          <label class="wa-label">Language code</label>
+          <input name="lang" value="en">
+          <label class="wa-label">Template body variables (optional)</label>
+          <input name="params" placeholder="customer_name=Sarah">
+          <div class="wa-hint">Named: <code>customer_name=Sarah</code> (separate multiple with <code>|</code>). Or positional: <code>a|b|c</code>. Blank → auto-fills <code>customer_name</code> from the lead name (or what we have on file).</div>
+          <label class="wa-label">Lead name (optional)</label>
+          <input name="name" placeholder="Sarah">
+          <label class="wa-label">Lead business (optional)</label>
+          <input name="business" placeholder="Bright Smile Dental">
+          <label class="wa-label">Source</label>
+          <input name="source" value="form_warm">
+          <button type="submit" class="wa-btn">Send template</button>
+        </form>
+      </div>
+
+      <div class="wa-panel">
+        <h2>Conversations</h2>
+        {% if convos %}
+          {% for c in convos %}
+            <a class="wa-row {{ 'active' if detail and detail.wa_id == c.wa_id else '' }}" href="/marykate/whatsapp?id={{ c.wa_id }}">
+              <span class="nm">{{ c.profile_name or c.lead_name or c.wa_id }} <span class="wa-pill {{ c.status }}">{{ c.status }}</span></span>
+              <span class="pv">{{ '→ ' if c.last_dir == 'out' else '' }}{{ (c.last_body or '')[:70] }}</span>
+            </a>
+          {% endfor %}
+        {% else %}
+          <div class="wa-empty">No conversations yet.</div>
+        {% endif %}
+      </div>
     </div>
-    <h2 style="font-size:22px; font-weight:700; margin-bottom:12px;">WhatsApp is coming.</h2>
-    <p style="font-size:14px; color:var(--text-dim); line-height:1.7; margin-bottom:8px;">
-      Blast messages to your leads on WhatsApp, right from this dashboard.
-    </p>
-    <p style="font-size:13px; color:var(--text-muted);">
-      We are setting this up for you. You will know when it is ready.
-    </p>
+
+    <div class="wa-panel">
+      {% if detail %}
+        {% set ct = detail.contact or {} %}
+        <div class="wa-dh">
+          <div>
+            <div class="who">{{ ct.profile_name or ct.lead_name or detail.wa_id }}</div>
+            <div class="who-sub">+{{ detail.wa_id }}{% if ct.lead_business %} · {{ ct.lead_business }}{% endif %}{% if ct.lead_source %} · {{ ct.lead_source }}{% endif %} · <span class="wa-pill {{ ct.status or 'active' }}">{{ ct.status or 'active' }}</span></div>
+          </div>
+          <div class="wa-inline">
+            <a href="https://wa.me/{{ detail.wa_id }}" target="_blank"><button type="button" class="wa-btn ghost">Open in WhatsApp</button></a>
+            <form method="post" action="/marykate/whatsapp/handoff" class="wa-inline">
+              <input type="hidden" name="wa_id" value="{{ detail.wa_id }}">
+              {% if (ct.status or 'active') == 'handed_off' %}
+                <input type="hidden" name="status" value="active">
+                <button type="submit" class="wa-btn ghost">Hand back to agent</button>
+              {% else %}
+                <input type="hidden" name="status" value="handed_off">
+                <button type="submit" class="wa-btn ghost">Take over (pause agent)</button>
+              {% endif %}
+            </form>
+          </div>
+        </div>
+        <div class="wa-thread">
+          {% for m in detail.messages %}
+            <div class="wa-msg {{ m.direction }}">{{ m.body }}<span class="mt">{{ m.created_at }}{% if m.status %} · {{ m.status }}{% endif %}{% if m.msg_type and m.msg_type != 'text' %} · {{ m.msg_type }}{% endif %}</span></div>
+          {% else %}
+            <div class="wa-empty">No messages.</div>
+          {% endfor %}
+        </div>
+        <form method="post" action="/marykate/whatsapp/reply" style="margin-top:16px;display:flex;gap:8px;align-items:flex-end;">
+          <input type="hidden" name="wa_id" value="{{ detail.wa_id }}">
+          <textarea name="body" rows="2" placeholder="Reply as Kendall through this number…" required style="flex:1;resize:vertical;"></textarea>
+          <button type="submit" class="wa-btn" style="margin-top:0;">Send</button>
+        </form>
+        <div class="wa-hint" style="margin-top:6px;">Sending a reply pauses the agent on this conversation — use “Hand back to agent” above to resume. Only works within 24h of the lead's last message.</div>
+      {% else %}
+        <div class="wa-empty">Pick a conversation on the left to read the thread.</div>
+      {% endif %}
+    </div>
   </div>
 </div>
 {% endblock %}
