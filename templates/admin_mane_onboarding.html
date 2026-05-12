@@ -65,12 +65,45 @@
             text-transform: uppercase; color: #a78bfa; margin-bottom: 6px;
         }
         .answer-text { font-size: 13px; color: #b0b0c0; line-height: 1.6; white-space: pre-wrap; }
+
+        .views-box {
+            background: #0e0e14; border: 1px solid #1a1a25;
+            border-radius: 12px; padding: 16px 18px; margin-bottom: 24px;
+        }
+        .views-head {
+            display: flex; align-items: baseline; gap: 10px;
+            margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #1a1a25;
+        }
+        .views-head .label {
+            font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+            text-transform: uppercase; color: #6b6b80;
+        }
+        .views-head .count {
+            font-size: 11px; font-weight: 600; color: #a78bfa;
+            background: rgba(124,77,255,0.12); padding: 2px 8px; border-radius: 5px;
+        }
+        .view-row {
+            display: flex; align-items: baseline; gap: 12px;
+            font-size: 12px; color: #8b8ba0; padding: 5px 0;
+        }
+        .view-row .when { color: #c8c8d4; min-width: 130px; }
+        .view-row .ip { font-family: monospace; font-size: 11px; }
+        .view-row .ua { color: #5a5a6a; font-size: 11px; }
+        .view-row .you {
+            font-size: 9px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+            color: #6b6b80; background: rgba(255,255,255,0.05); padding: 1px 6px; border-radius: 4px;
+        }
+        .views-empty { font-size: 12px; color: #44445a; padding: 4px 0; }
+        .views-note { font-size: 10.5px; color: #44445a; margin-top: 10px; }
+
         @media (max-width: 768px) {
             .topbar { padding: 14px 16px; }
             .container { padding: 16px 16px 60px; }
             .submission { padding: 18px 16px; }
             .submission-header { flex-direction: column; align-items: flex-start; gap: 4px; }
             .share { flex-direction: column; align-items: stretch; }
+            .view-row { flex-wrap: wrap; gap: 4px 10px; }
+            .view-row .when { min-width: 0; }
         }
     </style>
 </head>
@@ -88,6 +121,26 @@
             <div class="share-label">Form</div>
             <input type="text" value="https://lumenmarketing.co/maneonboarding" readonly id="form-url" onclick="this.select()">
             <button onclick="navigator.clipboard.writeText(document.getElementById('form-url').value); this.textContent='Copied'; setTimeout(()=>this.textContent='Copy',1500)">Copy</button>
+        </div>
+
+        <div class="views-box">
+            <div class="views-head">
+                <span class="label">Page views</span>
+                <span class="count">{{ view_total or 0 }} total</span>
+            </div>
+            {% if not views %}
+            <div class="views-empty">No views yet. This logs every time the form page is opened.</div>
+            {% else %}
+            {% for v in views %}
+            <div class="view-row">
+                <span class="when">{{ v.viewed_at[:16].replace('T', '  ') }} UTC</span>
+                <span class="ip">{{ v.ip or '—' }}</span>
+                {% if v.is_owner %}<span class="you">you</span>{% endif %}
+                <span class="ua">{{ v.ua_short }}</span>
+            </div>
+            {% endfor %}
+            <div class="views-note">Showing the most recent {{ views|length }}. Times are UTC. Link-preview bots (Facebook, iMessage, etc.) can register a view when the link is shared, so a real browser visit is the one to look for.</div>
+            {% endif %}
         </div>
 
         {% if submissions|length == 0 %}

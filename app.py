@@ -317,6 +317,18 @@ def init_db():
     """)
     con.commit()
 
+    # Mane Styling Studio onboarding form — page view log (who opened it, when)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS mane_view_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ip TEXT DEFAULT '',
+            user_agent TEXT DEFAULT '',
+            referrer TEXT DEFAULT '',
+            viewed_at TEXT NOT NULL
+        )
+    """)
+    con.commit()
+
     # Avalon CRM onboarding form submissions
     con.execute("""
         CREATE TABLE IF NOT EXISTS avalon_onboarding (
@@ -937,6 +949,18 @@ MANE_PREFILL = {"name": "Keanna Keim", "email": "", "business": "Mane Styling St
 
 @app.route("/maneonboarding")
 def mane_onboarding():
+    # Best-effort page view log so we can see when the client opens the form.
+    try:
+        ip = (request.headers.get("X-Forwarded-For", request.remote_addr or "") or "").split(",")[0].strip()
+        ua = (request.headers.get("User-Agent", "") or "")[:300]
+        ref = (request.headers.get("Referer", "") or "")[:300]
+        con = sqlite3.connect(DB_PATH)
+        con.execute("INSERT INTO mane_view_log (ip, user_agent, referrer, viewed_at) VALUES (?, ?, ?, ?)",
+                    (ip, ua, ref, datetime.datetime.utcnow().isoformat()))
+        con.commit()
+        con.close()
+    except Exception:
+        pass
     return render_template("mane_onboarding.html", prefill=MANE_PREFILL)
 
 @app.route("/maneonboarding/submit", methods=["POST"])
@@ -1034,6 +1058,11 @@ def admin_mane_onboarding():
     con = sqlite3.connect(DB_PATH)
     con.row_factory = sqlite3.Row
     rows = con.execute("SELECT * FROM mane_onboarding ORDER BY created_at DESC").fetchall()
+    try:
+        view_rows = con.execute("SELECT ip, user_agent, referrer, viewed_at FROM mane_view_log ORDER BY viewed_at DESC LIMIT 100").fetchall()
+        view_total = con.execute("SELECT COUNT(*) FROM mane_view_log").fetchone()[0]
+    except Exception:
+        view_rows, view_total = [], 0
     con.close()
     delivery_labels = {"default": "CRM + email (default)", "sms": "Also wants SMS per lead",
                        "sheet": "Wants leads in a shared sheet", "other": "Something else (see notes)"}
@@ -1043,7 +1072,24 @@ def admin_mane_onboarding():
         ld = d.get("lead_delivery", "") or ""
         d["lead_delivery_display"] = ", ".join(delivery_labels.get(x.strip(), x.strip()) for x in ld.split(",") if x.strip())
         subs.append(d)
-    return render_template("admin_mane_onboarding.html", submissions=subs)
+    views = []
+    for v in view_rows:
+        ip = (v["ip"] or "").strip()
+        ua = (v["user_agent"] or "")
+        # crude browser label so a real browser is distinguishable from a link-preview bot
+        ua_short = "Unknown"
+        for name in ("Chrome", "Safari", "Firefox", "Edg", "Instagram", "FBAN", "FBAV", "WhatsApp", "Slack", "TelegramBot", "facebookexternalhit", "bot", "curl"):
+            if name.lower() in ua.lower():
+                ua_short = {"Edg": "Edge", "FBAN": "Facebook app", "FBAV": "Facebook app",
+                            "facebookexternalhit": "Facebook link preview", "bot": "Bot"}.get(name, name)
+                break
+        views.append({
+            "ip": ip,
+            "is_owner": ip in OWNER_IPS,
+            "ua_short": ua_short,
+            "viewed_at": v["viewed_at"],
+        })
+    return render_template("admin_mane_onboarding.html", submissions=subs, views=views, view_total=view_total)
 
 @app.route("/proposal")
 def proposal():
