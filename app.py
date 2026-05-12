@@ -983,6 +983,11 @@ def mane_onboarding_submit():
     ads_labels = {"lots": "Has run paid ads for a while", "some": "Has run a little / experimented",
                   "never": "Never run paid ads"}
 
+    def map_delivery(v):
+        if not v:
+            return ""
+        return ", ".join(delivery_labels.get(x.strip(), x.strip()) for x in str(v).split(",") if x.strip())
+
     def row(label, value):
         if not value:
             return ""
@@ -1007,7 +1012,7 @@ def mane_onboarding_submit():
           {row("Has run paid ads before", ads_labels.get(data.get("ads_before",""), data.get("ads_before","")))}
           {row("Past ads detail", data.get("ads_detail",""))}
           {row("Existing content available", data.get("existing_content",""))}
-          {row("Lead delivery preference", delivery_labels.get(data.get("lead_delivery",""), data.get("lead_delivery","")))}
+          {row("Lead delivery preference", map_delivery(data.get("lead_delivery","")))}
           {row("Notes on lead delivery", data.get("lead_delivery_notes",""))}
           {row("Who handles incoming leads / speed", data.get("lead_handler",""))}
           {row("Other metrics they care about", data.get("metrics_focus",""))}
@@ -1030,7 +1035,15 @@ def admin_mane_onboarding():
     con.row_factory = sqlite3.Row
     rows = con.execute("SELECT * FROM mane_onboarding ORDER BY created_at DESC").fetchall()
     con.close()
-    return render_template("admin_mane_onboarding.html", submissions=rows)
+    delivery_labels = {"default": "CRM + email (default)", "sms": "Also wants SMS per lead",
+                       "sheet": "Wants leads in a shared sheet", "other": "Something else (see notes)"}
+    subs = []
+    for r in rows:
+        d = dict(r)
+        ld = d.get("lead_delivery", "") or ""
+        d["lead_delivery_display"] = ", ".join(delivery_labels.get(x.strip(), x.strip()) for x in ld.split(",") if x.strip())
+        subs.append(d)
+    return render_template("admin_mane_onboarding.html", submissions=subs)
 
 @app.route("/proposal")
 def proposal():
