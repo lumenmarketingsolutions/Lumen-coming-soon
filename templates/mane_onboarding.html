@@ -211,17 +211,13 @@
         .choice .choice-sub { font-size: 12px; color: #8b8ba0; line-height: 1.45; }
         .choice.selected .choice-sub { color: #b0a0ff; }
 
-        .note-box {
-            background: rgba(124, 77, 255, 0.07);
-            border: 1px solid rgba(124, 77, 255, 0.22);
-            border-radius: 10px;
-            padding: 14px 16px;
-            font-size: 13.5px;
-            color: #c0bedb;
-            line-height: 1.6;
-            margin-bottom: 22px;
+        .multi-hint {
+            font-weight: 400;
+            color: #6b6b80;
+            font-size: 12px;
+            text-transform: none;
+            letter-spacing: 0;
         }
-        .note-box strong { color: #d8d4f5; }
 
         @media (max-width: 768px) {
             .page { padding: 36px 18px 80px; }
@@ -242,7 +238,7 @@
             <img src="/static/logo-white.png" alt="Lumen">
             <div class="eyebrow">Marketing Onboarding</div>
             <h1>Before we build your campaign</h1>
-            <p>A few questions so I show up to your onboarding call already knowing your business inside out. There are no wrong answers here. The more you give me, the sharper your campaign is from day one. Takes about five minutes.</p>
+            <p>A few questions so I show up to your onboarding call already knowing your business. No wrong answers, and the more you give me the sharper your campaign is from day one. About five minutes.</p>
         </div>
 
         <div class="progress" id="progress">
@@ -262,7 +258,7 @@
             <div class="step active" data-step="1">
                 <div class="step-label">Step 1 of 8</div>
                 <h2>The basics</h2>
-                <p class="hint">Just so I have the right details on file. Most of this is already plugged in.</p>
+                <p class="hint">Most of this is already filled in for you.</p>
                 <div class="row">
                     <div class="field-group">
                         <label>Your name</label>
@@ -297,14 +293,14 @@
             <div class="step" data-step="2">
                 <div class="step-label">Step 2 of 8</div>
                 <h2>Your services and what they cost</h2>
-                <p class="hint">This becomes the backbone of every offer and ad I build, so the more detail you give me here, the better your campaign comes out.</p>
+                <p class="hint">This is the backbone of every offer and ad I build. The more detail, the better.</p>
                 <div class="field-group">
                     <label>List every service you offer, with the price for each.</label>
-                    <textarea name="services_pricing" placeholder="Color, cut, extensions, treatments, blowouts, packages, whatever's on your menu, with the price next to it. Ranges are fine. Don't skip anything."></textarea>
+                    <textarea name="services_pricing" placeholder="Color, cut, extensions, treatments, packages, everything on your menu, with the price next to it. Ranges are fine."></textarea>
                 </div>
                 <div class="field-group">
-                    <label>Of all those services, which one or two do you most want to bring in new clients on right now, and why?</label>
-                    <textarea name="priority_services" placeholder="Highest margin? Most open chair time? The one you want to be known for? Tell me which to push and the reason behind it."></textarea>
+                    <label>Which one or two services do you most want to bring in new clients on right now, and why?</label>
+                    <textarea name="priority_services" placeholder="Highest margin, most open chair time, the one you want to be known for. Tell me which to push and why."></textarea>
                 </div>
                 <div class="nav">
                     <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
@@ -316,10 +312,10 @@
             <div class="step" data-step="3">
                 <div class="step-label">Step 3 of 8</div>
                 <h2>Offers and deals</h2>
-                <p class="hint">Someone who has never heard of you usually needs a reason to book now instead of someday. I want to know what you already have, and we will build something together if you do not.</p>
+                <p class="hint">People who've never heard of you usually need a reason to book now. Tell me what you've got, or we'll build something together.</p>
                 <div class="field-group">
-                    <label>Do you have any deals, promos, packages, intro offers, or seasonal offers running right now or coming up?</label>
-                    <textarea name="offers_deals" placeholder="First-time client discounts, referral deals, package pricing, gift card promos, holiday or seasonal specials, anything. If you don't have any yet, just say that and we'll build some together."></textarea>
+                    <label>Any deals, promos, packages, intro offers, or seasonal specials running now or coming up?</label>
+                    <textarea name="offers_deals" placeholder="First-time discounts, referral deals, package pricing, gift card promos, seasonal specials. If you don't have any yet, just say so."></textarea>
                 </div>
                 <div class="nav">
                     <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
@@ -331,17 +327,17 @@
             <div class="step" data-step="4">
                 <div class="step-label">Step 4 of 8</div>
                 <h2>Ads you've run before</h2>
-                <p class="hint">Whatever you've tried, it tells me something. What flopped is usually more useful than what worked.</p>
+                <p class="hint">What flopped is usually more useful to me than what worked.</p>
                 <div class="field-group">
                     <label>Have you run paid ads before?</label>
                     <div class="choice-group" data-name="ads_before">
                         <div class="choice" data-value="lots">
                             <div class="choice-title">Yes, for a while</div>
-                            <div class="choice-sub">We've had paid campaigns running on and off, or consistently.</div>
+                            <div class="choice-sub">Running on and off, or consistently.</div>
                         </div>
                         <div class="choice" data-value="some">
                             <div class="choice-title">Yes, a little</div>
-                            <div class="choice-sub">We've boosted posts or tested a campaign or two.</div>
+                            <div class="choice-sub">Boosted posts, tested a campaign or two.</div>
                         </div>
                         <div class="choice" data-value="never">
                             <div class="choice-title">Never run paid ads</div>
@@ -350,8 +346,8 @@
                     </div>
                 </div>
                 <div class="field-group">
-                    <label>If you have run ads: what platforms, what did you run, what worked, and what didn't?</label>
-                    <textarea name="ads_detail" placeholder="Meta, Google, an agency, boosting posts yourself, whatever. What got results, what wasted money, anything you remember. If you've never run ads, you can skip this."></textarea>
+                    <label>If you have: what platforms, what worked, what didn't?</label>
+                    <textarea name="ads_detail" placeholder="Meta, Google, an agency, boosting posts. What got results, what wasted money. Skip if you've never run ads."></textarea>
                 </div>
                 <div class="nav">
                     <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
@@ -363,10 +359,10 @@
             <div class="step" data-step="5">
                 <div class="step-label">Step 5 of 8</div>
                 <h2>Content you already have</h2>
-                <p class="hint">Real, authentic footage outperforms polished shoots in this space, and even rough phone clips can carry an ad. I want to know what you already have to work with.</p>
+                <p class="hint">Rough, real footage beats polished shoots in this space, even straight off your phone. Tell me what you already have.</p>
                 <div class="field-group">
-                    <label>What content do you already have that we could use in ads, and where does it live?</label>
-                    <textarea name="existing_content" placeholder="Videos, reels, behind-the-scenes clips, before-and-after photos, client transformations, testimonials, raw footage on your phone, your Instagram grid, a Google Drive folder, anything. Tell me what exists and how I can get my hands on it."></textarea>
+                    <label>What content do you already have we could use, and where does it live?</label>
+                    <textarea name="existing_content" placeholder="Videos, reels, before-and-afters, client transformations, testimonials, phone footage, your Instagram. Tell me what exists and how I can access it."></textarea>
                 </div>
                 <div class="nav">
                     <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
@@ -378,23 +374,21 @@
             <div class="step" data-step="6">
                 <div class="step-label">Step 6 of 8</div>
                 <h2>How you want leads delivered</h2>
-                <div class="note-box">
-                    <strong>Here's the default:</strong> every lead gets pushed automatically into a CRM I set up for you, and you get an email notification the moment it comes in. That covers most studios. If you want something on top of that, tell me here.
-                </div>
+                <p class="hint">Every lead gets pushed into a CRM I set up for you, plus an email the moment it comes in. If you want anything on top of that, tell me here.</p>
                 <div class="field-group">
-                    <label>Does the CRM plus email setup work for you, or do you want leads delivered another way too?</label>
-                    <div class="choice-group" data-name="lead_delivery">
+                    <label>Does that work, or do you want leads delivered another way too? <span class="multi-hint">pick all that apply</span></label>
+                    <div class="choice-group" data-name="lead_delivery" data-multi="true">
                         <div class="choice" data-value="default">
                             <div class="choice-title">CRM plus email works for me</div>
                             <div class="choice-sub">That's everything I need.</div>
                         </div>
                         <div class="choice" data-value="sms">
                             <div class="choice-title">Also text me each lead</div>
-                            <div class="choice-sub">I'd want an SMS the moment a lead comes in. (Coming soon, can be added once live.)</div>
+                            <div class="choice-sub">An SMS the moment one comes in. (Coming soon.)</div>
                         </div>
                         <div class="choice" data-value="sheet">
                             <div class="choice-title">Put them in a shared spreadsheet</div>
-                            <div class="choice-sub">I'd rather have them land in a sheet I can see at a glance.</div>
+                            <div class="choice-sub">A sheet I can scan at a glance.</div>
                         </div>
                         <div class="choice" data-value="other">
                             <div class="choice-title">Something else</div>
@@ -404,11 +398,11 @@
                 </div>
                 <div class="field-group">
                     <label>Anything to add about how you want leads handled?</label>
-                    <textarea name="lead_delivery_notes" placeholder="Optional. If you picked 'something else' above, explain it here. Otherwise leave it blank."></textarea>
+                    <textarea name="lead_delivery_notes" placeholder="Optional. Explain here if you picked 'something else' above."></textarea>
                 </div>
                 <div class="field-group">
-                    <label>Who on your team handles incoming leads, and how fast can they typically respond?</label>
-                    <textarea name="lead_handler" placeholder="Speed to lead is the single biggest thing that decides whether a lead books, so be honest about your follow up capacity. Is it you, the front desk, only during business hours, and how fast can you realistically get back to someone who reaches out?"></textarea>
+                    <label>Who handles incoming leads, and how fast can they respond?</label>
+                    <textarea name="lead_handler" placeholder="Speed to lead decides whether a lead books, so be honest. Is it you, the front desk, business hours only, and how fast can you realistically reply?"></textarea>
                 </div>
                 <div class="nav">
                     <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
@@ -420,16 +414,14 @@
             <div class="step" data-step="7">
                 <div class="step-label">Step 7 of 8</div>
                 <h2>What metrics matter to you</h2>
-                <div class="note-box">
-                    <strong>Here's what I focus on:</strong> how many leads we're producing, which ads are working and which aren't, and the rate those leads turn into booked clients. Those are the money metrics, and they're what I'll report on every week. If there's anything else you want me watching, tell me here.
-                </div>
+                <p class="hint">I focus on leads, which ads are working, and how often those leads become booked clients. Tell me if there's anything else you want me watching.</p>
                 <div class="field-group">
-                    <label>Is there anything else you specifically want me to track or care about?</label>
-                    <textarea name="metrics_focus" placeholder="Reach, engagement, follower growth, brand awareness, website traffic, something else, or are you happy letting me run on leads and bookings? No wrong answer. I just want to know where your head is at."></textarea>
+                    <label>Anything else you specifically want me to track or care about?</label>
+                    <textarea name="metrics_focus" placeholder="Reach, engagement, follower growth, website traffic, or are you happy letting me run on leads and bookings? No wrong answer."></textarea>
                 </div>
                 <div class="field-group">
                     <label>Is there a specific number you're personally watching?</label>
-                    <textarea name="target_number" placeholder="Like 'I need 15 new clients a month' or 'I want these slow weekdays filled' or 'I want to add an extra stylist's worth of bookings.' Whatever the real target is in your head."></textarea>
+                    <textarea name="target_number" placeholder="Like '15 new clients a month' or 'fill these slow weekdays.' Whatever the real target is in your head."></textarea>
                 </div>
                 <div class="nav">
                     <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
@@ -441,14 +433,14 @@
             <div class="step" data-step="8">
                 <div class="step-label">Step 8 of 8</div>
                 <h2>What success looks like</h2>
-                <p class="hint">Last one. This is what I'll be measuring against, so be as specific as you can.</p>
+                <p class="hint">Last one. This is what I'll measure against, so be specific.</p>
                 <div class="field-group">
                     <label>What would make the first 60 days a clear win for you?</label>
-                    <textarea name="success_60days" placeholder="A number, a feeling, a problem solved. Pretend we're sitting down two months from now and you're telling me it was worth it. What happened?"></textarea>
+                    <textarea name="success_60days" placeholder="A number, a feeling, a problem solved. Two months from now, what makes you say it was worth it?"></textarea>
                 </div>
                 <div class="field-group">
                     <label>Anything else I should know?</label>
-                    <textarea name="anything_else" placeholder="Brand voice and how you want to come across, things competitors do that you like, constraints, the kind of clients you want more of, the kind you want fewer of, anything at all."></textarea>
+                    <textarea name="anything_else" placeholder="Brand voice, competitors you admire, constraints, the kind of clients you want more of and fewer of, anything at all."></textarea>
                 </div>
                 <div style="margin-top: 34px;">
                     <button type="button" class="btn btn-submit" onclick="submitForm()">Send it over</button>
@@ -500,11 +492,16 @@
         }
 
         document.querySelectorAll('.choice-group').forEach(group => {
+            const multi = group.dataset.multi === 'true';
             group.addEventListener('click', (e) => {
                 const choice = e.target.closest('.choice');
                 if (!choice) return;
-                group.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
-                choice.classList.add('selected');
+                if (multi) {
+                    choice.classList.toggle('selected');
+                } else {
+                    group.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
+                    choice.classList.add('selected');
+                }
             });
         });
 
@@ -516,8 +513,13 @@
             });
             document.querySelectorAll('.choice-group').forEach(group => {
                 const name = group.dataset.name;
-                const selected = group.querySelector('.choice.selected');
-                data[name] = selected ? selected.dataset.value : '';
+                if (group.dataset.multi === 'true') {
+                    const vals = Array.from(group.querySelectorAll('.choice.selected')).map(c => c.dataset.value);
+                    data[name] = vals.join(', ');
+                } else {
+                    const selected = group.querySelector('.choice.selected');
+                    data[name] = selected ? selected.dataset.value : '';
+                }
             });
 
             const btn = document.querySelector('.btn-submit');

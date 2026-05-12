@@ -94,7 +94,6 @@
         <div class="empty-state">No submissions yet</div>
         {% endif %}
 
-        {% set delivery_labels = {'default': 'CRM + email (default)', 'sms': 'Also wants SMS per lead', 'sheet': 'Wants leads in a shared sheet', 'other': 'Something else (see notes)'} %}
         {% set ads_labels = {'lots': 'Has run paid ads for a while', 'some': 'Has run a little / experimented', 'never': 'Never run paid ads'} %}
 
         {% for s in submissions %}
@@ -119,7 +118,7 @@
                 ("Has run paid ads before", ads_labels.get(s.ads_before, s.ads_before)),
                 ("Past ads detail", s.ads_detail),
                 ("Existing content available", s.existing_content),
-                ("Lead delivery preference", delivery_labels.get(s.lead_delivery, s.lead_delivery)),
+                ("Lead delivery preference", s.lead_delivery_display),
                 ("Notes on lead delivery", s.lead_delivery_notes),
                 ("Who handles incoming leads / speed", s.lead_handler),
                 ("Other metrics they care about", s.metrics_focus),
