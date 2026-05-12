@@ -23,11 +23,16 @@
         .header {
             text-align: center;
             margin-bottom: 40px;
+            transition: margin-bottom 0.3s ease;
         }
         .header img {
             height: 26px;
             margin-bottom: 26px;
         }
+        .header.compact { margin-bottom: 26px; }
+        .header.compact p { display: none; }
+        .header.compact img { margin-bottom: 18px; }
+        .header.compact .eyebrow { margin-bottom: 10px; }
         .header .eyebrow {
             font-size: 11px;
             font-weight: 600;
@@ -97,7 +102,8 @@
             background: rgba(255,255,255,0.06);
         }
         textarea { min-height: 120px; }
-        ::placeholder { color: #4a4a5a; }
+        ::placeholder { color: #3a3a46; font-size: 13px; }
+        textarea::placeholder { line-height: 1.55; }
 
         .nav {
             display: flex;
@@ -464,11 +470,13 @@
     <script>
         let currentStep = 1;
         const totalSteps = 8;
+        const headerEl = document.querySelector('.header');
 
         function updateProgress() {
             document.querySelectorAll('.progress-dot').forEach((dot, i) => {
                 dot.classList.toggle('filled', i < currentStep);
             });
+            headerEl.classList.toggle('compact', currentStep > 1);
         }
 
         function nextStep() {
