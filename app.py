@@ -295,6 +295,33 @@ def init_db():
     """)
     con.commit()
 
+    # Mane Styling Studio marketing onboarding form submissions
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS mane_onboarding (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT DEFAULT '',
+            email TEXT DEFAULT '',
+            business TEXT DEFAULT '',
+            role TEXT DEFAULT '',
+            business_oneliner TEXT DEFAULT '',
+            services_pricing TEXT DEFAULT '',
+            priority_services TEXT DEFAULT '',
+            offers_deals TEXT DEFAULT '',
+            ads_before TEXT DEFAULT '',
+            ads_detail TEXT DEFAULT '',
+            existing_content TEXT DEFAULT '',
+            lead_delivery TEXT DEFAULT '',
+            lead_delivery_notes TEXT DEFAULT '',
+            lead_handler TEXT DEFAULT '',
+            metrics_focus TEXT DEFAULT '',
+            target_number TEXT DEFAULT '',
+            success_60days TEXT DEFAULT '',
+            anything_else TEXT DEFAULT '',
+            created_at TEXT NOT NULL
+        )
+    """)
+    con.commit()
+
     # Avalon CRM onboarding form submissions
     con.execute("""
         CREATE TABLE IF NOT EXISTS avalon_onboarding (
@@ -910,6 +937,108 @@ def admin_agent_onboarding():
     rows = con.execute("SELECT * FROM agent_onboarding ORDER BY created_at DESC").fetchall()
     con.close()
     return render_template("admin_agent_onboarding.html", submissions=rows)
+
+# ---------------------------------------------------------------------------
+# Mane Styling Studio — marketing onboarding form
+# ---------------------------------------------------------------------------
+MANE_PREFILL = {"name": "Keanna Keim", "email": "", "business": "Mane Styling Studio", "role": "Owner"}
+
+@app.route("/maneonboarding")
+def mane_onboarding():
+    return render_template("mane_onboarding.html", prefill=MANE_PREFILL)
+
+@app.route("/maneonboarding/submit", methods=["POST"])
+def mane_onboarding_submit():
+    data = request.get_json() or {}
+    name = (data.get("name") or "").strip() or "Anonymous"
+    email = (data.get("email") or "").strip()
+    business = (data.get("business") or "").strip() or "Mane Styling Studio"
+
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    con.execute("""
+        INSERT INTO mane_onboarding (
+            name, email, business, role, business_oneliner,
+            services_pricing, priority_services, offers_deals,
+            ads_before, ads_detail, existing_content,
+            lead_delivery, lead_delivery_notes, lead_handler,
+            metrics_focus, target_number, success_60days, anything_else, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        name, email, business,
+        data.get("role", ""),
+        data.get("business_oneliner", ""),
+        data.get("services_pricing", ""),
+        data.get("priority_services", ""),
+        data.get("offers_deals", ""),
+        data.get("ads_before", ""),
+        data.get("ads_detail", ""),
+        data.get("existing_content", ""),
+        data.get("lead_delivery", ""),
+        data.get("lead_delivery_notes", ""),
+        data.get("lead_handler", ""),
+        data.get("metrics_focus", ""),
+        data.get("target_number", ""),
+        data.get("success_60days", ""),
+        data.get("anything_else", ""),
+        now
+    ))
+    con.commit()
+    con.close()
+
+    delivery_labels = {"default": "CRM + email (default)", "sms": "Also wants SMS per lead",
+                       "sheet": "Wants leads in a shared sheet", "other": "Something else (see notes)"}
+    ads_labels = {"lots": "Has run paid ads for a while", "some": "Has run a little / experimented",
+                  "never": "Never run paid ads"}
+
+    def row(label, value):
+        if not value:
+            return ""
+        safe = str(value).replace("\n", "<br>")
+        return f'<tr><td style="padding:12px 0; border-bottom:1px solid #1a1a25; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#7c4dff; width:40%; vertical-align:top;">{label}</td><td style="padding:12px 0 12px 16px; border-bottom:1px solid #1a1a25; font-size:14px; color:#e8e8f0; line-height:1.6;">{safe}</td></tr>'
+
+    body = f"""
+    <div style="font-family: -apple-system, Inter, sans-serif; background:#0a0a0f; padding:32px 20px; color:#e8e8f0;">
+      <div style="max-width:620px; margin:0 auto; background:#111118; border:1px solid #1a1a25; border-radius:14px; padding:32px;">
+        <div style="font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#7c4dff; margin-bottom:10px;">New Onboarding</div>
+        <h2 style="font-size:22px; font-weight:700; margin:0 0 6px 0; color:#fff;">Mane Styling Studio Onboarding</h2>
+        <p style="font-size:13px; color:#8b8ba0; margin:0 0 24px 0;">{name}{' · ' + data.get('role','') if data.get('role') else ''}{' · ' + email if email else ''}</p>
+        <table style="width:100%; border-collapse:collapse;">
+          {row("Name", name)}
+          {row("Email", email)}
+          {row("Business", business)}
+          {row("Role", data.get("role",""))}
+          {row("What the business does", data.get("business_oneliner",""))}
+          {row("Services and pricing", data.get("services_pricing",""))}
+          {row("Priority services to push", data.get("priority_services",""))}
+          {row("Current offers and deals", data.get("offers_deals",""))}
+          {row("Has run paid ads before", ads_labels.get(data.get("ads_before",""), data.get("ads_before","")))}
+          {row("Past ads detail", data.get("ads_detail",""))}
+          {row("Existing content available", data.get("existing_content",""))}
+          {row("Lead delivery preference", delivery_labels.get(data.get("lead_delivery",""), data.get("lead_delivery","")))}
+          {row("Notes on lead delivery", data.get("lead_delivery_notes",""))}
+          {row("Who handles incoming leads / speed", data.get("lead_handler",""))}
+          {row("Other metrics they care about", data.get("metrics_focus",""))}
+          {row("Specific target number", data.get("target_number",""))}
+          {row("What a win looks like in 60 days", data.get("success_60days",""))}
+          {row("Anything else", data.get("anything_else",""))}
+        </table>
+      </div>
+    </div>
+    """
+    send_email(NOTIFY_EMAIL, f"Mane Styling Studio Onboarding: {name}", body)
+
+    return jsonify({"ok": True})
+
+@app.route("/admin/mane-onboarding")
+def admin_mane_onboarding():
+    if not session.get("wl_auth"):
+        return redirect("/admin")
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    rows = con.execute("SELECT * FROM mane_onboarding ORDER BY created_at DESC").fetchall()
+    con.close()
+    return render_template("admin_mane_onboarding.html", submissions=rows)
 
 @app.route("/proposal")
 def proposal():
@@ -1942,6 +2071,11 @@ def api_los_overview():
         avalon_onboard_count = 0
 
     try:
+        mane_onboard_count = con.execute("SELECT COUNT(*) FROM mane_onboarding").fetchone()[0]
+    except Exception:
+        mane_onboard_count = 0
+
+    try:
         funnel_beta_count = con.execute("SELECT COUNT(*) FROM funnel_beta").fetchone()[0]
     except Exception:
         funnel_beta_count = 0
@@ -1971,6 +2105,7 @@ def api_los_overview():
         "lead_count": lead_count, "pipeline_value": pipeline_value,
         "won_value": won_value, "daily": daily, "dashboards": dashboards,
         "avalon_onboard_count": avalon_onboard_count,
+        "mane_onboard_count": mane_onboard_count,
         "funnel_beta_count": funnel_beta_count,
     })
 
