@@ -679,6 +679,74 @@ def qualify_submit():
     return jsonify({"ok": True})
 
 
+# ── /lumenlb — MK7-style landing page on Lumen branding, used to test the WhatsApp
+#    nurture agent (+1 623 512 6504). Leads notify Kendall only. ──
+@app.route("/lumenlb")
+def lumenlb():
+    return render_template("lumenlb.html")
+
+
+def _wa_digits(value):
+    return "".join(c for c in (value or "") if c.isdigit())
+
+
+@app.route("/lumenlb/inquiry", methods=["POST"])
+def lumenlb_inquiry():
+    data = request.get_json(silent=True) or {}
+    name = (data.get("name") or "").strip()
+    whatsapp = (data.get("whatsapp") or "").strip()
+    website = (data.get("website") or "").strip()
+    page_url = (data.get("page_url") or "").strip()
+
+    # Min 10 digits = a real international number with a country code.
+    if not name or len(_wa_digits(whatsapp)) < 10:
+        return jsonify({"ok": False, "error": "Name and a full WhatsApp number with country code are required"}), 400
+
+    now = datetime.datetime.utcnow().isoformat()
+    try:
+        con = sqlite3.connect(DB_PATH)
+        con.execute("""
+            INSERT INTO leads (name, email, phone, business, source, tags, stage, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (name, "", whatsapp, website, "lumenlb", "lumenlb,whatsapp-agent", "new", now, now))
+        con.commit()
+        con.close()
+    except Exception as e:
+        print(f"[lumenlb] lead insert failed: {e}")
+
+    dash = "—"
+    wa_digits = _wa_digits(whatsapp)
+    wa_button = ""
+    if wa_digits:
+        first_name = (name or "there").split(" ", 1)[0]
+        from urllib.parse import quote
+        prefill = f"Hi {first_name}, this is Kendall from Lumen. Saw your inquiry {dash} happy to dig in. When works for a quick chat?"
+        wa_url = f"https://wa.me/{wa_digits}?text={quote(prefill)}"
+        wa_button = (
+            '<div style="margin-top:28px;text-align:center;">'
+            f'<a href="{wa_url}" style="display:inline-block;background:#25D366;color:#fff;text-decoration:none;padding:14px 28px;border-radius:10px;font-weight:600;font-family:sans-serif;font-size:15px;">Reply on WhatsApp</a>'
+            '<p style="margin:12px 0 0;color:#888;font-size:12px;">Opens a chat with this lead, pre-filled. (Or just wait — the agent on +1 623 512 6504 picks up if they message first.)</p>'
+            '</div>'
+        )
+
+    body = (
+        '<div style="font-family:Inter,-apple-system,sans-serif;background:#0a0a0f;padding:32px 20px;color:#e8e8f0;">'
+        '<div style="max-width:560px;margin:0 auto;background:#111118;border:1px solid #1a1a25;border-radius:14px;padding:32px;">'
+        '<div style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#7c4dff;margin-bottom:10px;">New /lumenlb Inquiry</div>'
+        f'<h2 style="font-size:22px;font-weight:700;margin:0 0 22px;color:#fff;">{name}</h2>'
+        '<table style="width:100%;border-collapse:collapse;font-size:14px;">'
+        f'<tr><td style="padding:10px 0;color:#8b8ba0;width:130px;">WhatsApp</td><td style="padding:10px 0;color:#e8e8f0;font-weight:600;">{whatsapp or dash}</td></tr>'
+        f'<tr><td style="padding:10px 0;color:#8b8ba0;">Website</td><td style="padding:10px 0;color:#e8e8f0;">{website or dash}</td></tr>'
+        f'<tr><td style="padding:10px 0;color:#8b8ba0;">Source</td><td style="padding:10px 0;color:#e8e8f0;">{page_url or "lumenmarketing.co/lumenlb"}</td></tr>'
+        '</table>'
+        f'{wa_button}'
+        '</div></div>'
+    )
+    send_email(NOTIFY_EMAIL, f"New /lumenlb inquiry: {name}", body)
+
+    return jsonify({"ok": True})
+
+
 @app.route("/about")
 def about():
     return render_template("about.html")

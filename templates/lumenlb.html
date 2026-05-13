@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Lumen — Ads, Content, and Websites That Actually Work</title>
+  <meta name="description" content="We bring you qualified leads and real sales so you can stop wasting time on people who never buy. Based in America.">
+  <meta property="og:title" content="Lumen — Ads, Content, and Websites That Actually Work">
+  <meta property="og:description" content="We bring you qualified leads and real sales.">
+  <meta property="og:image" content="/static/og-image.png">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+
+  <!-- Meta Pixel — Lumen dataset 1119566303064711 -->
+  <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1119566303064711');
+    fbq('track', 'PageView', {content_name: 'Lumen - LB Landing'});
+  </script>
+  <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1119566303064711&ev=PageView&noscript=1"/></noscript>
+  <!-- End Meta Pixel -->
+  <link rel="stylesheet" href="/static/lumenlb/phone-input.css">
+  <script src="/static/lumenlb/phone-input.js" defer></script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050507;
+      --bg-card: #0d0d12;
+      --bg-elevated: #111118;
+      --text: #f0f0f5;
+      --text-muted: #8888a0;
+      --text-dim: #55556a;
+      --blue: #6128db;
+      --blue-bright: #9b6dff;
+      --pink: #a78bff;
+      --pink-bright: #c4a8ff;
+      --gradient: linear-gradient(135deg, #6128db, #a78bff);
+      --gradient-soft: linear-gradient(135deg, rgba(97,40,219,0.12), rgba(155,109,255,0.12));
+      --gradient-text: linear-gradient(135deg, #9b6dff, #c4a8ff);
+      --border: rgba(255,255,255,0.06);
+      --border-hover: rgba(255,255,255,0.12);
+      --glow-blue: rgba(97,40,219,0.15);
+      --glow-pink: rgba(155,109,255,0.15);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* ── No animations — static content ── */
+
+    /* ── Gradient text ── */
+    .grad-text {
+      background: var(--gradient-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Top announcement strip ── */
+    .top-strip {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 99;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 12px 16px 13px;
+      /* Subtle vertical gradient gives the strip its own light source — feels elevated, not flat against page bg */
+      background:
+        linear-gradient(180deg, rgba(22, 22, 32, 0.94) 0%, rgba(13, 13, 20, 0.94) 100%);
+      backdrop-filter: blur(24px) saturate(140%);
+      -webkit-backdrop-filter: blur(24px) saturate(140%);
+      /* Inner top hairline for the highlight, soft drop shadow downward for elevation */
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.05),
+        0 1px 0 rgba(0, 0, 0, 0.6),
+        0 16px 40px -12px rgba(0, 0, 0, 0.55);
+      color: rgba(255, 255, 255, 0.92);
+      text-decoration: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.2px;
+      transition: background 0.25s;
+    }
+    /* Soft brand-colored glow bleeding into the page below — replaces the hard 1px line with a smooth fade */
+    .top-strip::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0;
+      top: 100%;
+      height: 36px;
+      background: linear-gradient(180deg,
+        rgba(168, 123, 255, 0.18) 0%,
+        rgba(168, 123, 255, 0.07) 35%,
+        rgba(168, 123, 255, 0.02) 70%,
+        transparent 100%);
+      pointer-events: none;
+    }
+    .top-strip:hover {
+      background:
+        linear-gradient(180deg, rgba(28, 28, 40, 0.96) 0%, rgba(18, 18, 28, 0.96) 100%);
+    }
+    .top-strip .arrow { opacity: 0.5; font-weight: 600; transition: transform 0.25s, opacity 0.25s; }
+    .top-strip:hover .arrow { opacity: 0.85; transform: translateX(3px); }
+    @media (max-width: 540px) {
+      .top-strip { font-size: 12px; padding: 11px 12px 12px; gap: 8px; }
+      .top-strip svg { width: 14px; height: 16px; }
+    }
+
+    /* ── Partners trust strip ── */
+    .partners-strip .partners-row { gap: 32px 64px; }
+    /* Fixed-width icon slot keeps the title text starting at the same X across both badges,
+       regardless of how wide or narrow the actual logo glyph is. */
+    .partner-icon {
+      width: 56px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .partner-icon img,
+    .partner-icon svg {
+      max-height: 32px;
+      max-width: 100%;
+      width: auto;
+      height: auto;
+      display: block;
+    }
+    @media (max-width: 720px) {
+      .partners-strip { padding: 56px 20px; }
+      .partners-strip .partners-row { flex-direction: column; gap: 28px; align-items: center; }
+      .partners-strip .partners-divider { display: none; }
+      .partners-strip .partners-row > div { min-width: 260px; justify-content: flex-start; }
+    }
+
+    /* ── Navigation ── */
+    nav {
+      position: fixed;
+      top: 42px; left: 0; right: 0;
+      z-index: 100;
+      padding: 20px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.3s, box-shadow 0.3s;
+    }
+    @media (max-width: 540px) {
+      nav { top: 40px; }
+    }
+    nav.scrolled {
+      background: rgba(5,5,7,0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: 0 1px 0 var(--border);
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .nav-logo svg { width: 32px; height: 32px; }
+    .nav-logo span { font-size: 15px; font-weight: 700; letter-spacing: -0.3px; }
+    .nav-links { display: flex; align-items: center; gap: 32px; }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-cta {
+      background: var(--gradient) !important;
+      color: #fff !important;
+      padding: 10px 24px;
+      border-radius: 10px;
+      font-weight: 600 !important;
+      transition: opacity 0.2s !important;
+    }
+    .nav-cta:hover { opacity: 0.9 !important; }
+    .nav-mobile-toggle {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+    }
+    .nav-mobile-toggle svg { width: 24px; height: 24px; color: var(--text); }
+
+    @media (max-width: 768px) {
+      .hero::before {
+        background:
+          radial-gradient(ellipse 70% 50% at 50% 45%, rgba(155,109,255,0.14) 0%, transparent 70%),
+          radial-gradient(ellipse 60% 45% at 30% 35%, rgba(97,40,219,0.10) 0%, transparent 60%),
+          radial-gradient(ellipse 50% 40% at 75% 55%, rgba(155,109,255,0.08) 0%, transparent 60%),
+          radial-gradient(ellipse 80% 50% at 50% 90%, rgba(97,40,219,0.07) 0%, transparent 50%);
+      }
+      nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      .nav-mobile-toggle { display: block; }
+      .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%; left: 0; right: 0;
+        background: rgba(5,5,7,0.96);
+        backdrop-filter: blur(24px);
+        padding: 24px;
+        gap: 20px;
+        border-bottom: 1px solid var(--border);
+      }
+    }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 160px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 50% 40% at 50% 45%, rgba(155,109,255,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 35% at 25% 35%, rgba(97,40,219,0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 35% 30% at 75% 55%, rgba(155,109,255,0.05) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 40% at 50% 90%, rgba(97,40,219,0.04) 0%, transparent 50%),
+        radial-gradient(ellipse 30% 25% at 80% 20%, rgba(196,168,255,0.04) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .hero-inner { max-width: 760px; position: relative; z-index: 1; }
+    .hero h1 {
+      font-size: clamp(40px, 7vw, 64px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -2px;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+    .hero p {
+      font-size: 18px;
+      color: var(--text-muted);
+      max-width: 520px;
+      margin: 0 auto 44px;
+      line-height: 1.7;
+    }
+    .hero-ctas { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 36px;
+      background: var(--gradient);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 36px;
+      background: transparent;
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.15);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.3); background: rgba(255,255,255,0.04); }
+    .btn-whatsapp { background: #25D366 !important; border-color: #25D366 !important; color: #ffffff !important; }
+    .btn-whatsapp:hover { background: #1ebe5a !important; border-color: #1ebe5a !important; }
+
+    /* ── Section Layout ── */
+    .section {
+      padding: 120px 24px;
+      max-width: 1140px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--blue);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(30px, 4.5vw, 44px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.12;
+      color: var(--text);
+      margin-bottom: 16px;
+    }
+    .section-subtitle {
+      font-size: 17px;
+      color: var(--text-muted);
+      max-width: 540px;
+      line-height: 1.7;
+      margin-bottom: 56px;
+    }
+
+    /* ── Services ── */
+    .services-section {
+      position: relative;
+      padding: 120px 24px;
+      overflow: hidden;
+    }
+    .services-section::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(180deg, var(--bg) 0%, var(--bg-card) 15%, var(--bg-card) 85%, var(--bg) 100%);
+      pointer-events: none;
+    }
+    .services-inner { max-width: 1140px; margin: 0 auto; position: relative; z-index: 1; }
+    .services-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .service-item {
+      position: relative;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 32px;
+    }
+    .service-item .svc-top {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .service-item .svc-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .service-item .svc-icon svg { width: 24px; height: 24px; }
+    .service-item .svc-num {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dim);
+      letter-spacing: 0.5px;
+    }
+    .service-item h3 {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 12px;
+      letter-spacing: -0.3px;
+      position: relative;
+    }
+    .service-item p {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      position: relative;
+    }
+    .service-item.svc-featured {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, rgba(97,40,219,0.06) 0%, rgba(155,109,255,0.04) 100%);
+      border-color: rgba(97,40,219,0.15);
+    }
+    .service-item.svc-featured .svc-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      align-items: center;
+    }
+    .service-item.svc-featured .svc-highlights {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .svc-highlight {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .svc-highlight .dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--gradient);
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .services-list { grid-template-columns: 1fr; }
+      .service-item.svc-featured .svc-content { grid-template-columns: 1fr; gap: 20px; }
+      .service-item { padding: 32px 24px; }
+    }
+
+    /* ── How It Works ── */
+    .how-section {
+      position: relative;
+      padding: 120px 24px;
+    }
+    .how-inner { max-width: 1140px; margin: 0 auto; position: relative; z-index: 1; }
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+    }
+    .step {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 28px;
+    }
+    .step-number {
+      font-size: 40px;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 20px;
+      background: var(--gradient-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .step h3 { font-size: 17px; font-weight: 700; margin-bottom: 10px; letter-spacing: -0.2px; }
+    .step p { font-size: 14px; color: var(--text-muted); line-height: 1.7; }
+
+    @media (max-width: 900px) { .steps { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 560px) { .steps { grid-template-columns: 1fr; } }
+
+    /* ── Results ── */
+    .results-section {
+      background: var(--bg-card);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 120px 24px;
+    }
+    .results-inner { max-width: 1140px; margin: 0 auto; }
+    .results-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 80px;
+    }
+    .stat-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 6px;
+    }
+    .stat-value.blue { color: var(--blue-bright); }
+    .stat-value.pink { color: var(--pink-bright); }
+    .stat-value.grad {
+      background: var(--gradient-text);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .stat-label { font-size: 13px; color: var(--text-dim); line-height: 1.4; }
+    @media (max-width: 900px) { .results-stats { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .results-stats { grid-template-columns: 1fr; } }
+
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .result-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 32px;
+    }
+    .result-tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    .tag-leads { background: rgba(97,40,219,0.12); color: var(--blue-bright); }
+    .tag-ecom { background: rgba(155,109,255,0.12); color: var(--pink-bright); }
+    .result-metric {
+      font-size: 40px;
+      font-weight: 900;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+    .result-metric.blue { color: var(--blue-bright); }
+    .result-metric.pink { color: var(--pink-bright); }
+    .result-label { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+    .result-divider { height: 1px; background: var(--border); margin: 0 0 16px; }
+    .result-card p { font-size: 14px; color: var(--text-dim); line-height: 1.7; }
+
+    @media (max-width: 900px) { .results-grid { grid-template-columns: 1fr; } }
+    .result-desc { font-size: 14px; color: var(--text-muted); line-height: 1.7; margin-bottom: 16px; }
+    .result-detail { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+    .result-img {
+      max-width: 320px;
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      display: block;
+      margin: 20px auto 0;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+    @media (max-width: 768px) {
+      .result-img { max-width: 260px; }
+    }
+
+    /* ── About ── */
+    .about-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .about-text h2 {
+      font-size: 36px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      margin-bottom: 20px;
+    }
+    .about-text p { font-size: 15px; color: var(--text-muted); margin-bottom: 16px; line-height: 1.8; }
+    .about-visual {
+      background: var(--gradient-soft);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 380px;
+      position: relative;
+      overflow: hidden;
+    }
+    .about-visual .logo-large svg { width: 140px; height: 140px; position: relative; z-index: 1; }
+    @media (max-width: 768px) {
+      .about-content { grid-template-columns: 1fr; gap: 32px; }
+      .about-visual { min-height: 260px; }
+    }
+
+    /* ── CTA Banner ── */
+    .cta-banner {
+      text-align: center;
+      padding: 120px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-banner h2 {
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 800;
+      letter-spacing: -0.8px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .cta-banner p {
+      font-size: 17px;
+      color: var(--text-muted);
+      margin-bottom: 36px;
+      position: relative;
+    }
+
+    /* ── Inline Lead Form (under hero) ── */
+    .lead-form-section {
+      padding: 72px 24px 88px;
+      background:
+        radial-gradient(ellipse 700px 460px at 50% 50%, rgba(97,40,219,0.14), transparent 65%),
+        radial-gradient(ellipse 520px 360px at 50% 50%, rgba(155,109,255,0.10), transparent 70%),
+        #0a0a0a;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      scroll-margin-top: 90px;
+      position: relative;
+      overflow: hidden;
+    }
+    .lead-form-inner {
+      max-width: 520px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .lead-form-card {
+      background:
+        linear-gradient(180deg, rgba(97,40,219,0.06), rgba(155,109,255,0.03) 60%, transparent),
+        var(--bg-elevated);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 40px 32px 36px;
+      position: relative;
+      box-shadow:
+        0 20px 60px rgba(0,0,0,0.45),
+        0 0 80px -20px rgba(97,40,219,0.18),
+        0 0 120px -40px rgba(155,109,255,0.14);
+    }
+    /* Subtle gradient-traced border highlight on the card */
+    .lead-form-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 20px;
+      padding: 1px;
+      background: linear-gradient(135deg, rgba(97,40,219,0.45), rgba(155,109,255,0.30) 60%, rgba(255,255,255,0.04));
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+    }
+    .lead-form-title {
+      font-size: clamp(24px, 3.5vw, 32px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    .lead-form-sub {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin: 0 auto 28px;
+      max-width: 440px;
+      line-height: 1.55;
+    }
+    .lead-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      text-align: left;
+    }
+    .lead-input {
+      width: 100%;
+      padding: 16px 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .lead-input::placeholder { color: var(--text-dim); }
+    .lead-input:focus { border-color: var(--blue); }
+    .lead-submit {
+      margin-top: 6px;
+      padding: 16px 24px;
+      background: var(--gradient);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: opacity 0.2s, transform 0.2s;
+      letter-spacing: 0.2px;
+      width: 100%;
+    }
+    .lead-submit:hover { opacity: 0.92; transform: translateY(-1px); }
+    .lead-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .lead-form-success {
+      display: none;
+      text-align: center;
+      padding: 24px 8px 8px;
+    }
+    .lead-form-success.show { display: block; }
+    .lead-form-success .check-circle {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .lead-form-success .check-circle svg { width: 28px; height: 28px; color: #fff; }
+    .lead-form-success h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .lead-form-success p { color: var(--text-muted); font-size: 15px; }
+
+    @media (max-width: 768px) {
+      .lead-form-section { padding: 56px 20px 72px; }
+      .lead-form-card { padding: 32px 24px 28px; border-radius: 18px; }
+      .lead-form-title { font-size: 24px; }
+      .lead-form-sub { font-size: 14px; margin-bottom: 24px; }
+      .lead-input { padding: 14px 16px; font-size: 16px; }
+      .lead-submit { padding: 16px 20px; }
+    }
+
+    /* ── Quiz Modal ── */
+    .quiz-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .quiz-overlay.open { display: flex; }
+    .quiz-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .quiz-modal {
+      position: relative;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 520px;
+      overflow: hidden;
+    }
+    .quiz-inline {
+      margin: 40px auto 0;
+      text-align: left;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+      scroll-margin-top: 90px;
+    }
+    .quiz-header {
+      padding: 28px 32px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .quiz-progress {
+      display: flex;
+      gap: 6px;
+      flex: 1;
+    }
+    .quiz-progress .bar {
+      height: 3px;
+      flex: 1;
+      background: rgba(255,255,255,0.06);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .quiz-progress .bar.active { background: var(--gradient); }
+    .quiz-close {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+      padding: 4px;
+      margin-left: 20px;
+      transition: color 0.2s;
+    }
+    .quiz-close:hover { color: var(--text); }
+    .quiz-close svg { width: 20px; height: 20px; }
+    .quiz-body { padding: 40px 32px 36px; }
+    .quiz-slide { display: none; }
+    .quiz-slide.active { display: block; }
+    .quiz-question {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.3px;
+    }
+    .quiz-hint {
+      font-size: 14px;
+      color: var(--text-dim);
+      margin-bottom: 28px;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .quiz-option {
+      padding: 16px 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      text-align: left;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .quiz-option:hover {
+      border-color: rgba(97,40,219,0.4);
+      background: rgba(97,40,219,0.06);
+    }
+    .quiz-option.selected {
+      border-color: var(--blue);
+      background: rgba(97,40,219,0.1);
+    }
+    .quiz-input {
+      width: 100%;
+      padding: 16px 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.2s;
+      margin-bottom: 12px;
+    }
+    .quiz-input::placeholder { color: var(--text-dim); }
+    .quiz-input:focus { border-color: var(--blue); }
+    .quiz-textarea {
+      width: 100%;
+      padding: 16px 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      outline: none;
+      resize: vertical;
+      min-height: 100px;
+      transition: border-color 0.2s;
+    }
+    .quiz-textarea::placeholder { color: var(--text-dim); }
+    .quiz-textarea:focus { border-color: var(--blue); }
+    .quiz-footer {
+      padding: 0 32px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .quiz-back {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 10px 0;
+      transition: color 0.2s;
+    }
+    .quiz-back:hover { color: var(--text); }
+    .quiz-next {
+      padding: 14px 32px;
+      background: var(--gradient);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: opacity 0.2s;
+    }
+    .quiz-next:hover { opacity: 0.9; }
+    .quiz-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .quiz-success {
+      display: none;
+      text-align: center;
+      padding: 60px 32px;
+    }
+    .quiz-success.show { display: block; }
+    .quiz-success .check-circle {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: var(--gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px;
+    }
+    .quiz-success .check-circle svg { width: 28px; height: 28px; color: #fff; }
+    .quiz-success h3 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .quiz-success p { color: var(--text-muted); font-size: 15px; }
+
+    /* ── Mobile: Quiz + Layout ── */
+    @media (max-width: 768px) {
+      .hero { padding: 140px 20px 60px; }
+      .hero h1 { letter-spacing: -1px; margin-bottom: 20px; }
+      .hero p { font-size: 16px; margin-bottom: 36px; }
+      .hero-ctas { flex-direction: column; gap: 12px; }
+      .hero-ctas .btn-primary,
+      .hero-ctas .btn-secondary { width: 100%; justify-content: center; }
+
+      .services-section,
+      .how-section,
+      .results-section { padding: 80px 20px; }
+      .section { padding: 80px 20px; }
+      .section-title { margin-bottom: 12px; }
+      .section-subtitle { margin-bottom: 40px; font-size: 15px; }
+
+      .service-item { padding: 28px 24px; }
+      .step { padding: 28px 24px; }
+      .result-card { padding: 28px 24px; }
+      .result-metric { font-size: 32px; }
+
+      .about-text h2 { font-size: 28px; }
+
+      .cta-banner { padding: 80px 20px; }
+      .cta-banner .btn-primary { width: 100%; justify-content: center; }
+
+      .quiz-overlay { padding: 0; align-items: flex-end; }
+      .quiz-modal {
+        max-width: 100%;
+        border-radius: 24px 24px 0 0;
+        max-height: 90svh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .quiz-header { padding: 20px 24px 0; }
+      .quiz-body { padding: 28px 24px 24px; }
+      .quiz-footer { padding: 0 24px 24px; }
+      .quiz-question { font-size: 18px; }
+      .quiz-option { padding: 14px 16px; font-size: 14px; min-height: 48px; }
+      .quiz-input { padding: 14px 16px; font-size: 16px; }
+      .quiz-textarea { padding: 14px 16px; font-size: 16px; }
+      .quiz-success { padding: 48px 24px; }
+    }
+
+    @media (max-width: 380px) {
+      .hero h1 { font-size: 32px; }
+      .service-item { flex-direction: column; gap: 12px; }
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 48px 24px;
+      border-top: 1px solid var(--border);
+    }
+    footer .footer-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    footer .footer-logo svg { width: 24px; height: 24px; }
+    footer .footer-logo span { font-size: 14px; font-weight: 700; color: var(--text); }
+    footer p { font-size: 13px; color: var(--text-dim); }
+  </style>
+</head>
+<body>
+
+<!-- ── Top announcement strip ── -->
+<a href="#inquiry" class="top-strip" data-track="ViewContent" data-track-source="top_announcement_pill">
+  <svg width="16" height="18" viewBox="0 305 156 170" xmlns="http://www.w3.org/2000/svg" aria-label="Shopify" style="flex-shrink:0;display:block;"><path fill="#95BF47" d="M131.5 341.9c-.1-.9-.9-1.3-1.5-1.3s-13.7-1-13.7-1-9.1-9.1-10.2-10c-1-1-2.9-.7-3.7-.5-.1 0-2 .6-5.1 1.6-3.1-8.9-8.4-17-17.9-17h-.9c-2.6-3.4-6-5-8.8-5-22 0-32.6 27.5-35.9 41.5-8.6 2.7-14.7 4.5-15.4 4.8-4.8 1.5-4.9 1.6-5.5 6.1-.5 3.4-13 100.1-13 100.1l97.3 18.2L150 468c.1-.2-18.4-125.2-18.5-126.1zm-39.6-9.8c-2.4.7-5.3 1.6-8.2 2.6v-1.8c0-5.4-.7-9.8-2-13.3 5 .6 8.1 6.1 10.2 12.5zm-16.3-11.4c1.3 3.4 2.2 8.2 2.2 14.8v1c-5.4 1.7-11.1 3.4-17 5.3 3.3-12.6 9.6-18.8 14.8-21.1zm-6.4-6.2c1 0 2 .4 2.8 1-7.1 3.3-14.6 11.6-17.7 28.4-4.7 1.5-9.2 2.8-13.5 4.2 3.6-12.8 12.6-33.6 28.4-33.6z"/><path fill="#5E8E3E" d="M130 340.4c-.6 0-13.7-1-13.7-1s-9.1-9.1-10.2-10c-.4-.4-.9-.6-1.3-.6l-7.3 150.6 52.8-11.4s-18.5-125.2-18.6-126.1c-.4-.9-1.1-1.3-1.7-1.5z"/><path fill="#FFFFFF" d="M79.4 369.6L73 388.9s-5.8-3.1-12.7-3.1c-10.3 0-10.8 6.5-10.8 8.1 0 8.8 23 12.2 23 32.9 0 16.3-10.3 26.8-24.2 26.8-16.8 0-25.2-10.4-25.2-10.4l4.5-14.8s8.8 7.6 16.2 7.6c4.9 0 6.9-3.8 6.9-6.6 0-11.5-18.8-12-18.8-31 0-15.9 11.4-31.3 34.5-31.3 8.6-.1 13 2.5 13 2.5z"/></svg>
+  <span>We Build Shopify Sites</span>
+  <span class="arrow">→</span>
+</a>
+
+<!-- ── Navigation ── -->
+<nav id="nav">
+  <a href="#" class="nav-logo">
+    <svg viewBox="0 0 40 40" fill="none">
+      <path d="M20 2 L33.5 8 L37 22 L30 34 L10 34 L3 22 L6.5 8 Z" stroke="url(#navGrad)" stroke-width="2" fill="none"/>
+      <path d="M12 26 L12 14 L20 22 L28 14 L28 26" stroke="#f0f0f5" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <defs><linearGradient id="navGrad" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#6128db"/><stop offset="1" stop-color="#a78bff"/></linearGradient></defs>
+    </svg>
+    <span>Lumen</span>
+  </a>
+  <div class="nav-links" id="navLinks">
+    <a href="#services">Services</a>
+    <a href="#how-it-works">How It Works</a>
+    <a href="#results">Results</a>
+    <a href="#about">About</a>
+    <a href="#inquiry" class="nav-cta" data-track="InitiateCheckout" data-track-source="nav_cta" onclick="document.getElementById('navLinks').classList.remove('open');">Get Started</a>
+  </div>
+  <button class="nav-mobile-toggle" onclick="document.getElementById('navLinks').classList.toggle('open')">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+  </button>
+</nav>
+
+<!-- ── Hero ── -->
+<section class="hero">
+  <div style="position:absolute;inset:0;pointer-events:none;overflow:hidden;">
+    <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:0.06;top:8%;left:15%;"></div>
+    <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:0.1;top:12%;left:72%;"></div>
+    <div style="position:absolute;width:2.5px;height:2.5px;background:#fff;border-radius:50%;opacity:0.15;top:20%;left:35%;"></div>
+    <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:0.06;top:25%;left:88%;"></div>
+    <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:0.08;top:35%;left:8%;"></div>
+    <div style="position:absolute;width:2.5px;height:2.5px;background:#fff;border-radius:50%;opacity:0.12;top:40%;left:62%;"></div>
+    <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:0.06;top:55%;left:22%;"></div>
+    <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:0.1;top:60%;left:80%;"></div>
+    <div style="position:absolute;width:2.5px;height:2.5px;background:#fff;border-radius:50%;opacity:0.14;top:70%;left:45%;"></div>
+    <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:0.06;top:75%;left:92%;"></div>
+    <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:0.08;top:82%;left:18%;"></div>
+    <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:0.1;top:88%;left:55%;"></div>
+    <div style="position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:0.06;top:92%;left:75%;"></div>
+  </div>
+  <div class="hero-inner fade-in">
+    <p style="font-size:13px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text-muted);margin-bottom:20px;">Based in America 📍</p>
+    <h1>Ads, Content, and Websites That <span class="grad-text">Actually Work</span></h1>
+    <p>We bring you qualified leads and real sales so you can stop wasting time on people who never buy.</p>
+    <div class="hero-ctas">
+      <a href="#inquiry" class="btn-primary" data-track="InitiateCheckout" data-track-source="hero_contact_cta">
+        Contact Us
+      </a>
+      <a href="https://wa.me/16235126504?text=Hey%2C%20I%20want%20to%20learn%20more%20about%20your%20services" target="_blank" class="btn-secondary btn-whatsapp" data-track="Lead" data-track-source="whatsapp_hero">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="white" style="flex-shrink:0;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Message on WhatsApp
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Inline Lead Form (under hero) ── -->
+<!-- id="inquiry" lives here so every #inquiry CTA on the page scrolls back to this form -->
+<section class="lead-form-section" id="inquiry">
+  <div class="lead-form-inner">
+    <div class="lead-form-card">
+      <h2 class="lead-form-title"><span class="grad-text">Let's talk.</span></h2>
+      <p class="lead-form-sub">Drop your info and we will reach out within 24 hours.</p>
+
+      <form class="lead-form" id="leadForm" onsubmit="submitLead(event)" novalidate>
+        <input class="lead-input" type="text" id="lf_name" placeholder="Your full name" required autocomplete="name">
+        <div data-phone-input>
+          <input class="lead-input" type="tel" id="lf_whatsapp" placeholder="WhatsApp number" required autocomplete="tel">
+        </div>
+        <input class="lead-input" type="url" id="lf_website" placeholder="Your website (optional)" autocomplete="url" inputmode="url">
+        <button class="lead-submit" type="submit" id="lf_submit" data-track-source="inline_form_submit">Send</button>
+      </form>
+
+      <div class="lead-form-success" id="leadSuccess">
+        <div class="check-circle">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <h3>We got it.</h3>
+        <p>We will message you on WhatsApp within 24 hours.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Partners trust strip ── -->
+<section class="partners-strip" style="padding:64px 24px;background:#0a0a0a;border-top:1px solid rgba(255,255,255,0.04);border-bottom:1px solid rgba(255,255,255,0.04);">
+  <div style="max-width:960px;margin:0 auto;text-align:center;">
+    <p style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin:0 0 32px;">Trusted Partners &amp; Certifications</p>
+    <div class="partners-row" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:32px 64px;">
+      <div style="display:flex;align-items:center;gap:14px;">
+        <span class="partner-icon">
+          <img src="/static/logos/meta.png?v=3" alt="Meta" style="height:24px;">
+        </span>
+        <div style="text-align:left;">
+          <div style="font-size:14px;font-weight:700;letter-spacing:0.3px;color:#fff;line-height:1.2;">Meta Business Partner</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;letter-spacing:0.2px;">Certified Performance Marketers</div>
+        </div>
+      </div>
+      <div class="partners-divider" style="width:1px;height:36px;background:rgba(255,255,255,0.08);"></div>
+      <div style="display:flex;align-items:center;gap:14px;">
+        <span class="partner-icon">
+          <svg viewBox="0 305 156 170" xmlns="http://www.w3.org/2000/svg" aria-label="Shopify" style="height:30px;"><path fill="#95BF47" d="M131.5 341.9c-.1-.9-.9-1.3-1.5-1.3s-13.7-1-13.7-1-9.1-9.1-10.2-10c-1-1-2.9-.7-3.7-.5-.1 0-2 .6-5.1 1.6-3.1-8.9-8.4-17-17.9-17h-.9c-2.6-3.4-6-5-8.8-5-22 0-32.6 27.5-35.9 41.5-8.6 2.7-14.7 4.5-15.4 4.8-4.8 1.5-4.9 1.6-5.5 6.1-.5 3.4-13 100.1-13 100.1l97.3 18.2L150 468c.1-.2-18.4-125.2-18.5-126.1zm-39.6-9.8c-2.4.7-5.3 1.6-8.2 2.6v-1.8c0-5.4-.7-9.8-2-13.3 5 .6 8.1 6.1 10.2 12.5zm-16.3-11.4c1.3 3.4 2.2 8.2 2.2 14.8v1c-5.4 1.7-11.1 3.4-17 5.3 3.3-12.6 9.6-18.8 14.8-21.1zm-6.4-6.2c1 0 2 .4 2.8 1-7.1 3.3-14.6 11.6-17.7 28.4-4.7 1.5-9.2 2.8-13.5 4.2 3.6-12.8 12.6-33.6 28.4-33.6z"/><path fill="#5E8E3E" d="M130 340.4c-.6 0-13.7-1-13.7-1s-9.1-9.1-10.2-10c-.4-.4-.9-.6-1.3-.6l-7.3 150.6 52.8-11.4s-18.5-125.2-18.6-126.1c-.4-.9-1.1-1.3-1.7-1.5z"/><path fill="#FFFFFF" d="M79.4 369.6L73 388.9s-5.8-3.1-12.7-3.1c-10.3 0-10.8 6.5-10.8 8.1 0 8.8 23 12.2 23 32.9 0 16.3-10.3 26.8-24.2 26.8-16.8 0-25.2-10.4-25.2-10.4l4.5-14.8s8.8 7.6 16.2 7.6c4.9 0 6.9-3.8 6.9-6.6 0-11.5-18.8-12-18.8-31 0-15.9 11.4-31.3 34.5-31.3 8.6-.1 13 2.5 13 2.5z"/></svg>
+        </span>
+        <div style="text-align:left;">
+          <div style="font-size:14px;font-weight:700;letter-spacing:0.3px;color:#fff;line-height:1.2;">Shopify Partner</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:2px;letter-spacing:0.2px;">Theme &amp; store builds</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Services ── -->
+<section class="services-section" id="services">
+  <div class="services-inner">
+    <div class="fade-in">
+      <div class="section-label">Services</div>
+      <div class="section-title">What We Do</div>
+      <div class="section-subtitle">Everything your business needs to grow. We handle all of it.</div>
+    </div>
+
+    <div class="services-list">
+      <div class="service-item fade-in d1">
+        <div class="svc-top">
+          <div class="svc-icon" style="background: rgba(97,40,219,0.12);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#9b6dff" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+          </div>
+          <span class="svc-num">01</span>
+        </div>
+        <h3>Meta Advertising</h3>
+        <p>We run your Facebook and Instagram ads. You get leads that actually buy.</p>
+      </div>
+
+      <div class="service-item fade-in d2">
+        <div class="svc-top">
+          <div class="svc-icon" style="background: rgba(155,109,255,0.12);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#c4a8ff" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18"/><path d="M9 3v18"/></svg>
+          </div>
+          <span class="svc-num">02</span>
+        </div>
+        <h3>Websites + E-Commerce</h3>
+        <p>Custom websites, online stores, and landing pages that convert. You own everything we build.</p>
+      </div>
+
+      <div class="service-item fade-in d3">
+        <div class="svc-top">
+          <div class="svc-icon" style="background: rgba(97,40,219,0.12);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#9b6dff" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+          <span class="svc-num">03</span>
+        </div>
+        <h3>Content + Reels</h3>
+        <p>We shoot it, edit it, and post it. Ad creative and organic content that gets attention.</p>
+      </div>
+
+      <div class="service-item fade-in d4">
+        <div class="svc-top">
+          <div class="svc-icon" style="background: rgba(155,109,255,0.12);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#c4a8ff" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <span class="svc-num">04</span>
+        </div>
+        <h3>Social Media Management</h3>
+        <p>We manage your accounts. Posting, engagement, and growth. You focus on your business.</p>
+      </div>
+
+      <div class="service-item fade-in d5">
+        <div class="svc-top">
+          <div class="svc-icon" style="background: rgba(97,40,219,0.12);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#9b6dff" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          </div>
+          <span class="svc-num">05</span>
+        </div>
+        <h3>AI Agents + Automation</h3>
+        <p>Leads get followed up with automatically. Appointments get booked while you sleep.</p>
+      </div>
+
+      <div class="service-item fade-in d6">
+        <div class="svc-top">
+          <div class="svc-icon" style="background: rgba(155,109,255,0.12);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#c4a8ff" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+          </div>
+          <span class="svc-num">06</span>
+        </div>
+        <h3>Lead Nurture + WhatsApp</h3>
+        <p>Automated WhatsApp and email sequences that turn inquiries into customers without you lifting a finger.</p>
+      </div>
+    </div>
+    <div class="fade-in" style="text-align:center;margin-top:56px;padding-top:36px;border-top:1px solid rgba(255,255,255,0.06);">
+      <a href="#inquiry" data-track="InitiateCheckout" data-track-source="services_exit_cta" style="display:inline-flex;align-items:center;gap:8px;color:rgba(255,255,255,0.85);font-size:15px;font-weight:500;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.2);padding-bottom:4px;transition:color 0.2s, border-color 0.2s;" onmouseover="this.style.color='#fff';this.style.borderColor='rgba(255,255,255,0.6)'" onmouseout="this.style.color='rgba(255,255,255,0.85)';this.style.borderColor='rgba(255,255,255,0.2)'">See if these fit your business →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Results ── -->
+<section class="results-section" id="results">
+  <div class="results-inner">
+    <div class="fade-in">
+      <div class="section-label">Results</div>
+      <div class="section-title">Real Numbers from Real Campaigns</div>
+      <div class="section-subtitle">Every number below is backed by data. These are real results from real businesses we have worked with.</div>
+    </div>
+
+    <div class="results-stats fade-in">
+      <div class="stat-card">
+        <div class="stat-value blue">7,800+</div>
+        <div class="stat-label">Leads generated across campaigns</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value pink">$2.8M+</div>
+        <div class="stat-label">Revenue tracked from ad campaigns</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value blue">$5.93</div>
+        <div class="stat-label">Average cost per lead</div>
+      </div>
+    </div>
+
+    <div class="results-grid">
+      <div class="result-card fade-in d1">
+        <div class="result-tag tag-leads">Lead Generation + Revenue</div>
+        <div class="result-metric blue">880 Leads</div>
+        <div class="result-label">$8.38 cost per lead from $7,376 in ad spend</div>
+        <div class="result-divider"></div>
+        <div class="result-desc">880 leads generated for a service business entering a new market. $7,376 total ad spend turned into $290K in net revenue within 82 days. 129 closed sales at $2,319 average ticket.</div>
+        <div class="result-detail">22,861 clicks. Full funnel built from scratch. On track for their best year ever.</div>
+        <img src="/static/lumenlb/case-880-leads.jpg" alt="Meta Ads dashboard showing 880 leads at $8.38 CPL and $290K revenue" class="result-img">
+      </div>
+
+      <div class="result-card fade-in d2">
+        <div class="result-tag tag-leads">Lead Generation</div>
+        <div class="result-metric blue">435 Leads</div>
+        <div class="result-label">$22.69 avg CPL across 4 campaigns</div>
+        <div class="result-divider"></div>
+        <div class="result-desc">Four campaign iterations driving 435 qualified leads from $9,868 in total spend. 466,449 impressions across 9,086 clicks. Each campaign version refined targeting and creative to push cost per lead down.</div>
+        <div class="result-detail">Lead Campaign v1.00 hit $10.17 CPL with 164 leads from just $1,668 in spend.</div>
+        <img src="/static/lumenlb/case-435-leads.jpg" alt="Meta Ads pivot table showing 435 total leads across 4 campaigns" class="result-img">
+      </div>
+
+      <div class="result-card fade-in d3">
+        <div class="result-tag tag-leads">Lead Generation</div>
+        <div class="result-metric blue">127 Leads</div>
+        <div class="result-label">$14.88 CPL from $1,890 in ad spend</div>
+        <div class="result-divider"></div>
+        <div class="result-desc">127 inbound inquiries generated from just $1,890 in Meta ad spend. 4,740 link clicks driving qualified leads directly into the CRM pipeline for follow-up and conversion.</div>
+        <div class="result-detail">Real-time lead tracking with every inquiry captured and routed automatically.</div>
+        <img src="/static/lumenlb/case-127-leads.jpg" alt="Dashboard showing 127 leads from $1.89K spend with 4,740 clicks" class="result-img">
+      </div>
+
+      <div class="result-card fade-in d4">
+        <div class="result-tag tag-ecom">High Ticket Ecommerce</div>
+        <div class="result-metric pink">$1.19M</div>
+        <div class="result-label">Revenue generated in a single period</div>
+        <div class="result-divider"></div>
+        <div class="result-desc">High ticket product launch that generated $1,193,605 in revenue during the campaign period. Complete funnel strategy with ads, landing pages, and conversion tracking.</div>
+        <div class="result-detail">From zero to over a million in product revenue.</div>
+        <img src="/static/lumenlb/case-1m-revenue.jpg" alt="Revenue report showing $1,193,605.83 this period versus $0 last period" class="result-img">
+      </div>
+
+      <div class="result-card fade-in d5">
+        <div class="result-tag tag-ecom">E-Commerce</div>
+        <div class="result-metric pink">14x ROAS</div>
+        <div class="result-label">450+ purchases at $2.35 each</div>
+        <div class="result-divider"></div>
+        <div class="result-desc">Beauty brand. $1,050 in ad spend turned into consistent daily orders with a 14x return. 452 total purchases driven entirely through Meta.</div>
+      </div>
+
+      <div class="result-card fade-in d6">
+        <div class="result-tag tag-ecom">E-Commerce</div>
+        <div class="result-metric pink">30x ROAS</div>
+        <div class="result-label">95+ purchases at $1.05 each</div>
+        <div class="result-divider"></div>
+        <div class="result-desc">Cosmetics brand. Under $100 in ad spend generated over 95 purchases. One of the highest ROAS campaigns we have run.</div>
+      </div>
+
+      <div class="result-card fade-in d7">
+        <div class="result-tag tag-leads">Service Business</div>
+        <div class="result-metric blue">41% Close Rate</div>
+        <div class="result-label">8.5x ROAS from 125+ leads</div>
+        <div class="result-divider"></div>
+        <div class="result-desc">$1,890 in ads. 125 inbound leads. 53 of them converted into paying customers. 41% of every lead that came in turned into revenue.</div>
+      </div>
+
+      <div class="result-card fade-in d8">
+        <div class="result-tag tag-leads">WhatsApp Leads</div>
+        <div class="result-metric blue">260+ Conversations</div>
+        <div class="result-label">$0.43 per WhatsApp conversation</div>
+        <div class="result-divider"></div>
+        <div class="result-desc">Service business running a direct-to-WhatsApp funnel. 800+ clicks at $0.02 per click. 260+ real conversations started at under 50 cents each.</div>
+      </div>
+
+      <div class="result-card fade-in d9">
+        <div class="result-tag tag-ecom">High Ticket</div>
+        <div class="result-metric pink">$1.5M Pipeline</div>
+        <div class="result-label">$7,000 ad spend. Booked out 12+ months.</div>
+        <div class="result-divider"></div>
+        <div class="result-desc">Premium product. $7,000 in total ad spend built a pipeline that filled production capacity for over a year. $1.5M+ in tracked pipeline value.</div>
+      </div>
+
+      <div class="result-card fade-in d10">
+        <div class="result-tag tag-leads">Growth</div>
+        <div class="result-metric blue">$0 to $30K/mo</div>
+        <div class="result-label">90 days from launch to $30,000 monthly revenue</div>
+        <div class="result-divider"></div>
+        <div class="result-desc">Built from zero. Ads, website, and systems installed from scratch. Hit $30,000 in monthly recurring revenue within the first 90 days.</div>
+      </div>
+
+      <div class="result-card fade-in d11">
+        <div class="result-tag tag-ecom">E-Commerce</div>
+        <div class="result-metric pink">4.4x ROAS</div>
+        <div class="result-label">$1,000 ad spend returned $4,500+</div>
+        <div class="result-divider"></div>
+        <div class="result-desc">Small budget, real returns. High ticket products at $15 per purchase. Proof that the system works regardless of budget size.</div>
+      </div>
+    </div>
+    <div class="fade-in" style="margin-top:64px;display:flex;justify-content:center;">
+      <a href="#inquiry" data-track="InitiateCheckout" data-track-source="results_exit_cta" style="display:block;max-width:560px;width:100%;text-align:center;padding:32px 28px;background:linear-gradient(135deg, rgba(97,40,219,0.08), rgba(155,109,255,0.08));border:1px solid rgba(255,255,255,0.08);border-radius:16px;text-decoration:none;color:#fff;transition:border-color 0.25s, transform 0.25s;" onmouseover="this.style.borderColor='rgba(255,255,255,0.2)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.08)';this.style.transform='translateY(0)'">
+        <div style="font-size:18px;font-weight:600;color:#fff;margin-bottom:10px;line-height:1.4;">Your numbers can look like these.</div>
+        <div style="font-size:14px;font-weight:600;color:#9b6dff;">Tell us what you want to grow ↓</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ── How It Works ── -->
+<section class="how-section" id="how-it-works">
+  <div class="how-inner">
+    <div class="fade-in">
+      <div class="section-label">How It Works</div>
+      <div class="section-title">A Clear Process from Start to Results</div>
+      <div class="section-subtitle">Every business is different. The strategy we build for you is specific to what was uncovered in our first conversation.</div>
+    </div>
+
+    <div class="steps">
+      <div class="step fade-in d1">
+        <div class="step-number">01</div>
+        <h3>Discovery</h3>
+        <p>We learn your business, your goals, and your numbers. We figure out what success actually looks like for you and identify the gaps.</p>
+      </div>
+      <div class="step fade-in d2">
+        <div class="step-number">02</div>
+        <h3>Strategy</h3>
+        <p>We build a custom plan around what we uncovered. Targeting, creative direction, funnel structure, and budget. All tailored to you.</p>
+      </div>
+      <div class="step fade-in d3">
+        <div class="step-number">03</div>
+        <h3>Launch</h3>
+        <p>Campaigns go live. We monitor daily, optimize in real time, and make decisions based on data. You see where every dollar is going.</p>
+      </div>
+      <div class="step fade-in d4">
+        <div class="step-number">04</div>
+        <h3>Refine</h3>
+        <p>We cut what is not working and scale what is. Every iteration gets sharper. That is the process that compounds over time.</p>
+      </div>
+    </div>
+    <div class="fade-in" style="text-align:center;margin-top:60px;">
+      <a href="#inquiry" data-track="InitiateCheckout" data-track-source="how_exit_cta" style="display:inline-flex;align-items:center;gap:10px;padding:14px 30px;border:1px solid rgba(255,255,255,0.2);border-radius:999px;color:#fff;font-size:15px;font-weight:500;text-decoration:none;transition:all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.04)';this.style.borderColor='rgba(255,255,255,0.4)'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(255,255,255,0.2)'">Ready for step one? Start discovery →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── About ── -->
+<section class="section" id="about">
+  <div class="about-content">
+    <div class="about-text fade-in">
+      <div class="section-label">About</div>
+      <h2>Built on <span class="grad-text">Results</span></h2>
+      <p>Lumen is a strategic advertising agency focused on one thing. Getting real results from Meta ads. We work closely with every client, build systems that actually convert, and optimize until the numbers speak for themselves.</p>
+      <p>We work with service businesses that need qualified leads and ecommerce brands that need real revenue. Our focus is Meta advertising because that is where we deliver the strongest results.</p>
+    </div>
+    <div class="about-visual fade-in">
+      <div class="logo-large">
+        <svg viewBox="0 0 40 40" fill="none">
+          <path d="M20 2 L33.5 8 L37 22 L30 34 L10 34 L3 22 L6.5 8 Z" stroke="url(#aboutGrad)" stroke-width="1.5" fill="none"/>
+          <path d="M12 26 L12 14 L20 22 L28 14 L28 26" stroke="url(#aboutGrad2)" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs>
+            <linearGradient id="aboutGrad" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#6128db"/><stop offset="1" stop-color="#a78bff"/></linearGradient>
+            <linearGradient id="aboutGrad2" x1="12" y1="14" x2="28" y2="26"><stop stop-color="#9b6dff"/><stop offset="1" stop-color="#c4a8ff"/></linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+  </div>
+  <div class="fade-in" style="text-align:center;margin-top:48px;padding:28px 24px;max-width:680px;margin-left:auto;margin-right:auto;">
+    <p style="font-size:16px;color:rgba(255,255,255,0.75);font-style:italic;margin:0;line-height:1.6;">If you got this far, you probably already know. <a href="#inquiry" data-track="InitiateCheckout" data-track-source="about_exit_cta" style="color:#c4a8ff;font-style:normal;font-weight:600;text-decoration:none;border-bottom:1px solid rgba(196,168,255,0.4);padding-bottom:1px;">Let's build your numbers</a>.</p>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="footer-logo">
+    <svg width="24" height="24" viewBox="0 0 40 40" fill="none"><path d="M20 2 L33.5 8 L37 22 L30 34 L10 34 L3 22 L6.5 8 Z" stroke="url(#footGrad)" stroke-width="2" fill="none"/><path d="M12 26 L12 14 L20 22 L28 14 L28 26" stroke="#f0f0f5" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="footGrad" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#6128db"/><stop offset="1" stop-color="#a78bff"/></linearGradient></defs></svg>
+    <span>Lumen</span>
+  </div>
+  <p>Results-Driven Meta Advertising</p>
+</footer>
+
+<script>
+// Always start at the top, even when an ad / shared link arrives with a
+// hash like /#inquiry or /#about. Browsers default to auto-scrolling to
+// the matched element on first paint, which dumps ad visitors halfway
+// down the page before they see the hero.
+if (window.location.hash) {
+  history.replaceState(null, '', window.location.pathname + window.location.search);
+}
+window.scrollTo(0, 0);
+if ('scrollRestoration' in history) {
+  history.scrollRestoration = 'manual';
+}
+
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+function scrollToTarget(target) {
+  if (!target) return;
+  const navHeight = 80;
+  const top = target.getBoundingClientRect().top + window.scrollY - navHeight;
+  window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+}
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const href = a.getAttribute('href');
+    if (!href || href === '#') return;
+    const target = document.querySelector(href);
+    if (target) {
+      e.preventDefault();
+      scrollToTarget(target);
+      document.getElementById('navLinks').classList.remove('open');
+    }
+  });
+});
+
+// ── Inline Lead Form ──
+// Single-step form: name + WhatsApp + website (optional). Fires Meta Pixel Lead
+// + CAPI Lead via /lumenlb/inquiry (server dedupes against the browser pixel using event_id).
+
+// Stubs kept so any older CTAs that still call openQuiz/closeQuiz keep working.
+function openQuiz() { scrollToTarget(document.getElementById('inquiry')); }
+function closeQuiz() { /* noop — form is inline */ }
+
+// Track form viewed when scrolled into view
+(function () {
+  const form = document.querySelector('.lead-form-section');
+  if (!form || !window.IntersectionObserver) return;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        /* form-viewed analytics hook (no-op here) */
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.4 });
+  io.observe(form);
+})();
+
+async function submitLead(e) {
+  e.preventDefault();
+
+  const nameEl = document.getElementById('lf_name');
+  const waEl = document.getElementById('lf_whatsapp');
+  const webEl = document.getElementById('lf_website');
+  const btn = document.getElementById('lf_submit');
+
+  const name = nameEl.value.trim();
+  const fullWhatsapp = (window.PhoneInput && window.PhoneInput.fullNumber)
+    ? window.PhoneInput.fullNumber(waEl)
+    : waEl.value.trim();
+  const waValid = (window.PhoneInput && window.PhoneInput.isValid)
+    ? window.PhoneInput.isValid(waEl)
+    : (waEl.value.replace(/\D/g, '').length >= 8);
+
+  nameEl.style.borderColor = name ? '' : '#a78bff';
+  waEl.style.borderColor = waValid ? '' : '#a78bff';
+  if (!name || !waValid) return;
+
+  // Shared event_id so the Pixel Lead and the server CAPI Lead dedupe in Events Manager.
+  const eventId = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('ev_' + Date.now() + '_' + Math.random().toString(36).slice(2));
+  const cookie = (n) => { const m = document.cookie.match(new RegExp('(?:^|; )' + n + '=([^;]+)')); return m ? decodeURIComponent(m[1]) : ''; };
+
+  const payload = {
+    name: name,
+    whatsapp: fullWhatsapp,
+    website: webEl.value.trim(),
+    event_id: eventId,
+    fbp: cookie('_fbp'),
+    fbc: cookie('_fbc'),
+    page_url: window.location.href
+  };
+
+  if (window.fbq) {
+    fbq('track', 'Lead', {
+      content_name: 'Lumen inquiry',
+      lead_source: 'lumenlb_inline_form'
+    }, { eventID: eventId });
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  try {
+    await fetch('/lumenlb/inquiry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) { /* lead is already captured client-side via Pixel; CAPI retries are not needed here */ }
+
+  document.getElementById('leadForm').style.display = 'none';
+  document.getElementById('leadSuccess').classList.add('show');
+}
+</script>
+
+<a href="https://wa.me/16235126504?text=Hey%2C%20I%20want%20to%20learn%20more%20about%20your%20services" target="_blank" data-track="Lead" data-track-source="whatsapp_floating" style="position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:99;box-shadow:0 4px 20px rgba(37,211,102,0.3);transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+  <svg viewBox="0 0 24 24" width="28" height="28" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+</a>
+</body>
+</html>
