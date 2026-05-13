@@ -1,0 +1,87 @@
+/* MK7 Media — phone input with country-code selector
+ * Layout matches the existing dark form inputs on index.html (.quiz-input)
+ * and grow.html (.form-wrap input). The .phone-cc <select> is a fixed-width
+ * pill on the left, the phone <input> takes the rest of the row.
+ */
+
+.phone-input-group {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+/* Reset the inner <input>'s own bottom margin since the group now owns spacing */
+.phone-input-group > input[type="tel"] {
+  margin-bottom: 0 !important;
+  flex: 1 1 auto;
+  min-width: 0; /* lets the input shrink past its intrinsic content width on small screens */
+}
+
+.phone-cc {
+  flex: 0 0 auto;
+  width: 118px;
+  padding: 16px 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border, rgba(255, 255, 255, 0.12));
+  border-radius: 12px;
+  color: var(--text, #f0f0f5);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.2;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+
+  /* Custom chevron (matches the pink/blue brand) */
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23a0a0b0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  padding-right: 28px;
+}
+
+.phone-cc:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+.phone-cc:focus {
+  border-color: var(--blue, #4d7cf5);
+}
+
+/* Native option styling (Safari/Chrome desktop honor this; iOS Safari
+ * uses native picker which renders correctly on its own) */
+.phone-cc option {
+  background: #1a1a25;
+  color: #f0f0f5;
+  font-size: 15px;
+  padding: 8px;
+}
+
+.phone-cc option:disabled {
+  color: #555;
+}
+
+/* Tighter on narrow phones — keep enough room for two-line numbers */
+@media (max-width: 420px) {
+  .phone-cc {
+    width: 104px;
+    padding: 16px 8px 16px 12px;
+    background-position: right 8px center;
+    padding-right: 24px;
+    font-size: 14px;
+  }
+  .phone-input-group {
+    gap: 6px;
+  }
+}
+
+/* Even tighter on the smallest screens */
+@media (max-width: 360px) {
+  .phone-cc {
+    width: 96px;
+  }
+}
