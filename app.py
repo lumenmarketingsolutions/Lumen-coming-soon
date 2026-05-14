@@ -21,6 +21,18 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAIL = "kendall@lumenmarketing.co"
 OWNER_IPS = {"209.127.238.130"}
 
+# ── Tristan Dare external-site tracking (Squarespace tristandareshop.com) ──
+# Shared token gates the public /t/td endpoint; the value is also pasted into
+# the tracker <script> on the Squarespace page. Override on Railway if needed.
+TD_TRACK_TOKEN = os.environ.get("TD_TRACK_TOKEN", "td-pub-2026-bejetixdare")
+TD_ALLOWED_ORIGINS = {
+    "https://www.tristandareshop.com",
+    "https://tristandareshop.com",
+}
+# Cap any single session's reported visible time so a runaway tab can't skew
+# averages. 90 minutes is generous for a long-form sales page.
+TD_MAX_SECONDS = 90 * 60
+
 # ── Live presence tracking (in-memory) ──
 # {session_id: {"page": "home", "last_seen": timestamp, "ip": "..."}}
 LIVE_VISITORS = {}
@@ -473,6 +485,43 @@ def init_db():
         )
     """)
 
+    # Tristan Dare external tracking (Squarespace tristandareshop.com/bejetixdare).
+    # One row per page-session. visitor_id is persistent across sessions (localStorage
+    # on the client); session_id is per page load. visible_seconds reflects only time
+    # the page was actually visible on screen, accumulated client-side and posted on
+    # heartbeats + a final beacon at pagehide.
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS td_sessions (
+            session_id TEXT PRIMARY KEY,
+            visitor_id TEXT NOT NULL,
+            page_url TEXT DEFAULT '',
+            page_path TEXT DEFAULT '',
+            utm_source TEXT DEFAULT '',
+            utm_medium TEXT DEFAULT '',
+            utm_campaign TEXT DEFAULT '',
+            utm_content TEXT DEFAULT '',
+            utm_term TEXT DEFAULT '',
+            fbclid TEXT DEFAULT '',
+            gclid TEXT DEFAULT '',
+            referrer TEXT DEFAULT '',
+            user_agent TEXT DEFAULT '',
+            ip TEXT DEFAULT '',
+            screen TEXT DEFAULT '',
+            language TEXT DEFAULT '',
+            timezone TEXT DEFAULT '',
+            platform TEXT DEFAULT '',
+            visible_seconds INTEGER DEFAULT 0,
+            is_owner INTEGER DEFAULT 0,
+            started_at TEXT NOT NULL,
+            last_seen_at TEXT,
+            ended_at TEXT
+        )
+    """)
+    con.execute("CREATE INDEX IF NOT EXISTS idx_td_visitor ON td_sessions(visitor_id)")
+    con.execute("CREATE INDEX IF NOT EXISTS idx_td_started ON td_sessions(started_at)")
+    con.execute("CREATE INDEX IF NOT EXISTS idx_td_campaign ON td_sessions(utm_campaign)")
+    con.execute("CREATE INDEX IF NOT EXISTS idx_td_medium ON td_sessions(utm_medium)")
+
     con.commit()
 
     con.close()
@@ -558,6 +607,112 @@ def track_dashboard():
     resp = jsonify({"ok": True, "sid": sid})
     resp.headers["Access-Control-Allow-Origin"] = "*"
     return resp
+
+
+# ── Tristan Dare tracker (Squarespace tristandareshop.com/bejetixdare) ──
+def _td_cors_origin():
+    """Mirror the caller's Origin back if it's in the whitelist, else the canonical TD host."""
+    origin = (request.headers.get("Origin") or "").strip()
+    if origin in TD_ALLOWED_ORIGINS:
+        return origin
+    return "https://www.tristandareshop.com"
+
+
+@app.route("/t/td", methods=["POST", "OPTIONS"])
+def track_td():
+    """Three event types: 'start' (creates the session row), 'tick' (updates running
+    visible_seconds + last_seen_at), 'end' (final beacon on pagehide).
+    Token-gated via X-TD-Token header or `token` body field (sendBeacon can't
+    set headers, so the body fallback matters)."""
+    if request.method == "OPTIONS":
+        resp = jsonify({"ok": True})
+        resp.headers["Access-Control-Allow-Origin"] = _td_cors_origin()
+        resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type, X-TD-Token"
+        resp.headers["Access-Control-Max-Age"] = "3600"
+        return resp
+
+    data = request.get_json(silent=True) or {}
+    token = (request.headers.get("X-TD-Token") or data.get("token") or "").strip()
+    if token != TD_TRACK_TOKEN:
+        resp = jsonify({"ok": False, "error": "auth"})
+        resp.headers["Access-Control-Allow-Origin"] = _td_cors_origin()
+        return resp, 403
+
+    event = (data.get("event") or "").strip()
+    session_id = (data.get("session_id") or "").strip()
+    visitor_id = (data.get("visitor_id") or "").strip()
+    if not session_id or not visitor_id or event not in ("start", "tick", "end"):
+        resp = jsonify({"ok": False, "error": "bad-payload"})
+        resp.headers["Access-Control-Allow-Origin"] = _td_cors_origin()
+        return resp, 400
+
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+    if "," in ip:
+        ip = ip.split(",")[0].strip()
+    is_owner = 1 if ip in OWNER_IPS else 0
+
+    try:
+        visible_seconds = int(data.get("visible_seconds", 0))
+    except (TypeError, ValueError):
+        visible_seconds = 0
+    visible_seconds = max(0, min(visible_seconds, TD_MAX_SECONDS))
+
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    try:
+        if event == "start":
+            # INSERT OR IGNORE means a duplicate start (e.g. SPA nav firing twice)
+            # never clobbers the original row's UTMs or started_at.
+            con.execute("""
+                INSERT OR IGNORE INTO td_sessions
+                    (session_id, visitor_id, page_url, page_path,
+                     utm_source, utm_medium, utm_campaign, utm_content, utm_term,
+                     fbclid, gclid, referrer, user_agent, ip, screen, language,
+                     timezone, platform, visible_seconds, is_owner, started_at, last_seen_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                session_id, visitor_id,
+                (data.get("page_url") or "")[:500],
+                (data.get("page_path") or "")[:200],
+                (data.get("utm_source") or "")[:200],
+                (data.get("utm_medium") or "")[:200],
+                (data.get("utm_campaign") or "")[:200],
+                (data.get("utm_content") or "")[:200],
+                (data.get("utm_term") or "")[:200],
+                (data.get("fbclid") or "")[:300],
+                (data.get("gclid") or "")[:300],
+                (data.get("referrer") or "")[:500],
+                (request.headers.get("User-Agent") or "")[:500],
+                ip,
+                (data.get("screen") or "")[:50],
+                (data.get("language") or "")[:30],
+                (data.get("timezone") or "")[:60],
+                (data.get("platform") or "")[:60],
+                visible_seconds, is_owner, now, now,
+            ))
+        elif event == "tick":
+            # MAX() means a stale or out-of-order tick never decrements the total.
+            con.execute("""
+                UPDATE td_sessions
+                SET visible_seconds = MAX(visible_seconds, ?), last_seen_at = ?
+                WHERE session_id = ?
+            """, (visible_seconds, now, session_id))
+        else:  # 'end'
+            con.execute("""
+                UPDATE td_sessions
+                SET visible_seconds = MAX(visible_seconds, ?),
+                    last_seen_at = ?, ended_at = ?
+                WHERE session_id = ?
+            """, (visible_seconds, now, now, session_id))
+        con.commit()
+    finally:
+        con.close()
+
+    resp = jsonify({"ok": True})
+    resp.headers["Access-Control-Allow-Origin"] = _td_cors_origin()
+    return resp
+
 
 @app.route("/")
 def index():
@@ -1365,6 +1520,122 @@ def admin_main_site():
     if not session.get("wl_auth"):
         return redirect(url_for("admin_landing"))
     return render_template("admin_site.html")
+
+
+@app.route("/admin/td-tracking")
+def admin_td_tracking():
+    """Dashboard for the Tristan Dare Squarespace tracker (tristandareshop.com/bejetixdare).
+    Excludes is_owner=1 sessions (Kendall's phone) from every aggregate, but still shows
+    them in the recent-sessions list with a flag."""
+    if not session.get("wl_auth"):
+        return redirect(url_for("admin_landing"))
+
+    hours = request.args.get("hours", "168")  # default last 7 days
+    try:
+        hours_int = int(hours) if hours != "max" else None
+    except (TypeError, ValueError):
+        hours_int = 168
+    if hours_int:
+        cutoff = (datetime.datetime.utcnow() - datetime.timedelta(hours=hours_int)).isoformat()
+        time_clause = " AND started_at > ?"
+        time_params = (cutoff,)
+    else:
+        time_clause = ""
+        time_params = ()
+
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+
+    # Headline numbers (exclude owner sessions from every aggregate per user_ip memory).
+    base_where = "WHERE is_owner = 0" + time_clause
+
+    total_sessions = con.execute(
+        f"SELECT COUNT(*) FROM td_sessions {base_where}", time_params
+    ).fetchone()[0]
+    unique_visitors = con.execute(
+        f"SELECT COUNT(DISTINCT visitor_id) FROM td_sessions {base_where}", time_params
+    ).fetchone()[0]
+    avg_seconds = con.execute(
+        f"SELECT AVG(visible_seconds) FROM td_sessions {base_where} AND visible_seconds > 0", time_params
+    ).fetchone()[0] or 0
+    median_seconds = 0
+    durations = [r[0] for r in con.execute(
+        f"SELECT visible_seconds FROM td_sessions {base_where} AND visible_seconds > 0 ORDER BY visible_seconds", time_params
+    ).fetchall()]
+    if durations:
+        mid = len(durations) // 2
+        median_seconds = durations[mid] if len(durations) % 2 else (durations[mid - 1] + durations[mid]) / 2
+
+    # UTM medium breakdown
+    medium_rows = con.execute(f"""
+        SELECT COALESCE(NULLIF(utm_medium, ''), '(none)') AS medium,
+               COUNT(*) AS sessions,
+               COUNT(DISTINCT visitor_id) AS visitors,
+               AVG(visible_seconds) AS avg_sec
+        FROM td_sessions {base_where}
+        GROUP BY medium
+        ORDER BY sessions DESC
+    """, time_params).fetchall()
+    by_medium = [{"medium": r["medium"], "sessions": r["sessions"],
+                  "visitors": r["visitors"],
+                  "avg_sec": int(r["avg_sec"] or 0)} for r in medium_rows]
+
+    # UTM campaign breakdown
+    campaign_rows = con.execute(f"""
+        SELECT COALESCE(NULLIF(utm_campaign, ''), '(none)') AS campaign,
+               COALESCE(NULLIF(utm_medium, ''), '(none)') AS medium,
+               COUNT(*) AS sessions,
+               COUNT(DISTINCT visitor_id) AS visitors,
+               AVG(visible_seconds) AS avg_sec
+        FROM td_sessions {base_where}
+        GROUP BY campaign, medium
+        ORDER BY sessions DESC
+    """, time_params).fetchall()
+    by_campaign = [{"campaign": r["campaign"], "medium": r["medium"],
+                    "sessions": r["sessions"], "visitors": r["visitors"],
+                    "avg_sec": int(r["avg_sec"] or 0)} for r in campaign_rows]
+
+    # Recent sessions list (last 200, owner included with a flag)
+    recent_clause = "WHERE 1=1" + time_clause
+    recent_rows = con.execute(f"""
+        SELECT session_id, visitor_id, utm_source, utm_medium, utm_campaign,
+               utm_content, fbclid, gclid, referrer, visible_seconds, is_owner,
+               started_at, ended_at, ip
+        FROM td_sessions {recent_clause}
+        ORDER BY started_at DESC
+        LIMIT 200
+    """, time_params).fetchall()
+    recent = [{
+        "session_id_short": r["session_id"][-8:],
+        "visitor_id_short": r["visitor_id"][-8:],
+        "utm_source": r["utm_source"] or "—",
+        "utm_medium": r["utm_medium"] or "—",
+        "utm_campaign": r["utm_campaign"] or "—",
+        "utm_content": r["utm_content"] or "",
+        "fbclid": (r["fbclid"] or "")[:18] + ("…" if r["fbclid"] and len(r["fbclid"]) > 18 else ""),
+        "gclid": (r["gclid"] or "")[:18] + ("…" if r["gclid"] and len(r["gclid"]) > 18 else ""),
+        "referrer": (r["referrer"] or "—")[:40],
+        "visible_seconds": r["visible_seconds"] or 0,
+        "is_owner": bool(r["is_owner"]),
+        "started_at": (r["started_at"] or "")[:19].replace("T", " "),
+        "ended_at": (r["ended_at"] or "")[:19].replace("T", " ") if r["ended_at"] else "",
+        "ip": r["ip"] or "",
+    } for r in recent_rows]
+
+    con.close()
+
+    return render_template(
+        "admin_td_tracking.html",
+        hours=hours,
+        total_sessions=total_sessions,
+        unique_visitors=unique_visitors,
+        avg_seconds=int(avg_seconds),
+        median_seconds=int(median_seconds),
+        by_medium=by_medium,
+        by_campaign=by_campaign,
+        recent=recent,
+    )
+
 
 @app.route("/admin/funnel-beta")
 def admin_funnel_beta():

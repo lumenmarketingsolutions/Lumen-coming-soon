@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tristan Dare Tracking · Lumen Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0f;
+            color: #e8e8f0;
+            font-size: 14px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+        .wrap { max-width: 1200px; margin: 0 auto; padding: 32px 24px 80px; }
+        .top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #1a1a25;
+        }
+        .top h1 {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: -0.4px;
+        }
+        .top .sub { font-size: 12px; color: #8b8ba0; margin-top: 4px; letter-spacing: 0.3px; }
+        .top a.back {
+            font-size: 12px;
+            color: #8b8ba0;
+            text-decoration: none;
+            border: 1px solid #2a2a35;
+            padding: 6px 12px;
+            border-radius: 6px;
+        }
+        .top a.back:hover { color: #fff; border-color: #44445a; }
+
+        .filters {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .filters a {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            color: #8b8ba0;
+            text-decoration: none;
+            background: #111118;
+            border: 1px solid #1a1a25;
+            padding: 8px 14px;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .filters a:hover { color: #fff; border-color: #44445a; }
+        .filters a.active {
+            color: #1a1a25;
+            background: #c9a227;
+            border-color: #c9a227;
+        }
+
+        .kpis {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 32px;
+        }
+        @media (max-width: 720px) { .kpis { grid-template-columns: 1fr 1fr; } }
+        .kpi {
+            background: #111118;
+            border: 1px solid #1a1a25;
+            border-radius: 10px;
+            padding: 18px 20px;
+        }
+        .kpi .label {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #7c7c8f;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .kpi .value {
+            font-size: 28px;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.8px;
+            line-height: 1;
+        }
+        .kpi .unit { font-size: 14px; font-weight: 600; color: #8b8ba0; margin-left: 4px; }
+
+        h2 {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #c9a227;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin: 32px 0 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #1a1a25;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            background: #111118;
+            border: 1px solid #1a1a25;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        thead th {
+            background: #15151d;
+            color: #7c7c8f;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            padding: 11px 14px;
+            text-align: left;
+            border-bottom: 1px solid #1a1a25;
+        }
+        tbody td {
+            padding: 11px 14px;
+            border-bottom: 1px solid #161620;
+            color: #d4d4e0;
+            vertical-align: middle;
+        }
+        tbody tr:last-child td { border-bottom: none; }
+        tbody tr:hover td { background: #15151d; }
+        td.num { font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+        td.mono { font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; color: #8b8ba0; }
+        td.dim { color: #7c7c8f; }
+        td.owner-flag { color: #c9a227; font-weight: 700; }
+        .empty {
+            background: #111118;
+            border: 1px dashed #2a2a35;
+            border-radius: 10px;
+            padding: 32px;
+            text-align: center;
+            color: #7c7c8f;
+            font-size: 13px;
+        }
+        .pill {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            padding: 2px 7px;
+            border-radius: 4px;
+            background: #2a2a35;
+            color: #d4d4e0;
+        }
+        .pill.owner { background: rgba(201,162,39,0.15); color: #c9a227; border: 1px solid rgba(201,162,39,0.3); }
+        .pill.medium-cpc { background: rgba(124,77,255,0.15); color: #a78bff; }
+        .pill.medium-organic { background: rgba(80,200,120,0.12); color: #6fdc8c; }
+        .pill.medium-email { background: rgba(255,180,80,0.12); color: #ffc870; }
+        .pill.medium-social { background: rgba(255,107,191,0.12); color: #ff8cca; }
+
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="wrap">
+
+    <div class="top">
+        <div>
+            <h1>Tristan Dare · Page Tracking</h1>
+            <div class="sub">tristandareshop.com/bejetixdare · owner IP excluded from aggregates</div>
+        </div>
+        <a href="/admin" class="back">← Admin</a>
+    </div>
+
+    <div class="filters">
+        <a href="?hours=24"  class="{{ 'active' if hours == '24'  else '' }}">Last 24h</a>
+        <a href="?hours=72"  class="{{ 'active' if hours == '72'  else '' }}">Last 3d</a>
+        <a href="?hours=168" class="{{ 'active' if hours == '168' else '' }}">Last 7d</a>
+        <a href="?hours=720" class="{{ 'active' if hours == '720' else '' }}">Last 30d</a>
+        <a href="?hours=max" class="{{ 'active' if hours == 'max' else '' }}">All time</a>
+    </div>
+
+    <div class="kpis">
+        <div class="kpi">
+            <div class="label">Sessions</div>
+            <div class="value">{{ total_sessions }}</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Unique Visitors</div>
+            <div class="value">{{ unique_visitors }}</div>
+        </div>
+        <div class="kpi">
+            <div class="label">Avg Time on Page</div>
+            <div class="value">{{ avg_seconds }}<span class="unit">sec</span></div>
+        </div>
+        <div class="kpi">
+            <div class="label">Median Time on Page</div>
+            <div class="value">{{ median_seconds }}<span class="unit">sec</span></div>
+        </div>
+    </div>
+
+    <div class="two-col">
+        <div>
+            <h2>By UTM Medium</h2>
+            {% if by_medium %}
+            <table>
+                <thead><tr>
+                    <th>Medium</th>
+                    <th class="num">Sessions</th>
+                    <th class="num">Unique</th>
+                    <th class="num">Avg sec</th>
+                </tr></thead>
+                <tbody>
+                {% for m in by_medium %}
+                    <tr>
+                        <td>{{ m.medium }}</td>
+                        <td class="num">{{ m.sessions }}</td>
+                        <td class="num">{{ m.visitors }}</td>
+                        <td class="num">{{ m.avg_sec }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">No sessions in this window.</div>
+            {% endif %}
+        </div>
+        <div>
+            <h2>By UTM Campaign</h2>
+            {% if by_campaign %}
+            <table>
+                <thead><tr>
+                    <th>Campaign</th>
+                    <th>Medium</th>
+                    <th class="num">Sessions</th>
+                    <th class="num">Avg sec</th>
+                </tr></thead>
+                <tbody>
+                {% for c in by_campaign %}
+                    <tr>
+                        <td>{{ c.campaign }}</td>
+                        <td class="dim">{{ c.medium }}</td>
+                        <td class="num">{{ c.sessions }}</td>
+                        <td class="num">{{ c.avg_sec }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="empty">No campaign-tagged traffic in this window.</div>
+            {% endif %}
+        </div>
+    </div>
+
+    <h2>Recent Sessions</h2>
+    {% if recent %}
+    <table>
+        <thead><tr>
+            <th>Started</th>
+            <th>Visitor</th>
+            <th>Source</th>
+            <th>Medium</th>
+            <th>Campaign</th>
+            <th>Content</th>
+            <th>Referrer</th>
+            <th class="num">Seconds</th>
+            <th></th>
+        </tr></thead>
+        <tbody>
+        {% for r in recent %}
+            <tr>
+                <td class="mono">{{ r.started_at }}</td>
+                <td class="mono">{{ r.visitor_id_short }}</td>
+                <td>{{ r.utm_source }}</td>
+                <td>{{ r.utm_medium }}</td>
+                <td>{{ r.utm_campaign }}</td>
+                <td class="dim">{{ r.utm_content }}</td>
+                <td class="dim">{{ r.referrer }}</td>
+                <td class="num">{{ r.visible_seconds }}</td>
+                <td>{% if r.is_owner %}<span class="pill owner">Owner</span>{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty">Nothing tracked yet. Once the script is live on the page, sessions will land here.</div>
+    {% endif %}
+
+</div>
+</body>
+</html>
