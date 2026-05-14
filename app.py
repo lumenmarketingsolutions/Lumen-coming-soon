@@ -976,6 +976,82 @@ def _wa_digits(value):
     return "".join(c for c in (value or "") if c.isdigit())
 
 
+# ── Meta Conversions API — Lumen dataset (server-side Lead fire) ─────────────
+# The lumenlb form ALREADY fires a browser-side Pixel Lead via
+# fbq('track','Lead',{...},{eventID}). Browser-side alone gets stripped by
+# iOS ITP / ad blockers / strict-mode browsers — realistic loss is 30-50%.
+# This server-side CAPI fire is the load-bearing half of the dual-event:
+# Meta dedupes the two via the shared event_id passed in the form payload.
+# Inert until LUMEN_META_CAPI_TOKEN is set on Railway (Lumen-coming-soon service).
+LUMEN_META_DATASET_ID = os.environ.get("LUMEN_META_DATASET_ID", "1119566303064711")
+LUMEN_META_CAPI_TOKEN = os.environ.get("LUMEN_META_CAPI_TOKEN", "")
+LUMEN_META_TEST_EVENT_CODE = os.environ.get("LUMEN_META_TEST_EVENT_CODE", "")
+
+
+def _capi_hash(value):
+    """SHA-256 hash for Meta CAPI user_data fields. Meta requires email / phone /
+    first_name / last_name be hashed; IP / UA / fbp / fbc are sent plain."""
+    if not value:
+        return None
+    return hashlib.sha256(str(value).strip().lower().encode("utf-8")).hexdigest()
+
+
+def _send_lumen_lead_capi(event_id, name, phone, fbp, fbc, client_ip, client_ua, page_url):
+    """Fire a server-side Meta CAPI Lead event into the Lumen dataset (1119566303064711).
+    Dedupes with the browser-side fbq Lead via the shared event_id. Safe-fail:
+    silently returns on any error so the form response is never blocked."""
+    if not LUMEN_META_CAPI_TOKEN or not LUMEN_META_DATASET_ID:
+        print("[capi-lumen-lead] skipping: LUMEN_META_CAPI_TOKEN unset")
+        return
+    try:
+        ud = {}
+        if phone:
+            digits = "".join(c for c in phone if c.isdigit())
+            if digits:
+                ud["ph"] = [_capi_hash(digits)]
+        if name:
+            parts = name.strip().split(None, 1)
+            if parts:
+                ud["fn"] = [_capi_hash(parts[0])]
+            if len(parts) > 1 and parts[1]:
+                ud["ln"] = [_capi_hash(parts[1])]
+        if client_ip:
+            ud["client_ip_address"] = client_ip
+        if client_ua:
+            ud["client_user_agent"] = client_ua
+        if fbp:
+            ud["fbp"] = fbp
+        if fbc:
+            ud["fbc"] = fbc
+
+        event = {
+            "event_name": "Lead",
+            "event_time": int(time.time()),
+            "event_id": event_id or str(uuid.uuid4()),
+            "action_source": "website",
+            "user_data": ud,
+            "custom_data": {
+                "content_name": "Lumen inquiry",
+                "lead_source": "lumenlb_inline_form",
+            },
+        }
+        if page_url:
+            event["event_source_url"] = page_url
+
+        payload = {"data": [event]}
+        if LUMEN_META_TEST_EVENT_CODE:
+            payload["test_event_code"] = LUMEN_META_TEST_EVENT_CODE
+
+        url = f"https://graph.facebook.com/v19.0/{LUMEN_META_DATASET_ID}/events?access_token={LUMEN_META_CAPI_TOKEN}"
+        r = requests.post(url, json=payload, timeout=5)
+        if r.status_code >= 400:
+            print(f"[capi-lumen-lead] failed {r.status_code}: {r.text[:300]}")
+        else:
+            print(f"[capi-lumen-lead] sent event_id={event['event_id']}")
+    except Exception as e:
+        print(f"[capi-lumen-lead] exception: {e}")
+
+
 @app.route("/lumenlb/inquiry", methods=["POST"])
 def lumenlb_inquiry():
     data = request.get_json(silent=True) or {}
@@ -999,6 +1075,22 @@ def lumenlb_inquiry():
         con.close()
     except Exception as e:
         print(f"[lumenlb] lead insert failed: {e}")
+
+    # Server-side CAPI Lead fire. Runs on a background thread so the form
+    # response stays snappy. event_id is reused from the browser Pixel fire
+    # for dedup — Meta dedupes when both events share the same event_id
+    # within ~5 min. fbp / fbc come from the browser's _fbp / _fbc cookies
+    # (the form JS reads them from document.cookie and includes in payload).
+    event_id = (data.get("event_id") or "").strip() or str(uuid.uuid4())
+    fbp = (data.get("fbp") or "").strip() or None
+    fbc = (data.get("fbc") or "").strip() or None
+    client_ip = (request.headers.get("X-Forwarded-For", "") or request.remote_addr or "").split(",")[0].strip()
+    client_ua = request.headers.get("User-Agent", "")
+    threading.Thread(
+        target=_send_lumen_lead_capi,
+        args=(event_id, name, whatsapp, fbp, fbc, client_ip, client_ua, page_url),
+        daemon=True,
+    ).start()
 
     dash = "—"
     wa_digits = _wa_digits(whatsapp)
