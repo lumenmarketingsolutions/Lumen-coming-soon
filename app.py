@@ -2,9 +2,78 @@ from flask import Flask, render_template, request, jsonify, session, redirect, u
 import os, sqlite3, datetime, uuid, json, threading, requests, csv, io, time, base64, re, hashlib
 from email.mime.text import MIMEText
 
+try:
+    from zoneinfo import ZoneInfo
+    _MTN_TZ = ZoneInfo("America/Denver")  # Mountain Time, DST-aware (Boise + Idaho)
+except Exception:
+    _MTN_TZ = None  # zoneinfo unavailable on the host; helper will fall back
+
+
+def _td_record_owner_ip(ip, email):
+    """Stash an IP into td_owner_ips so future /t/td events from that IP get
+    is_owner=1 and are excluded from analytics. Fired on every successful
+    login at /tristandare/admin (Kendall + Tristan both add their current IP)."""
+    if not ip:
+        return
+    try:
+        now = datetime.datetime.utcnow().isoformat()
+        con = sqlite3.connect(DB_PATH)
+        con.execute("""
+            INSERT INTO td_owner_ips (ip, email, first_seen, last_seen)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT(ip) DO UPDATE SET email = excluded.email, last_seen = excluded.last_seen
+        """, (ip, email, now, now))
+        con.commit()
+        con.close()
+    except Exception as e:
+        print(f"[td-owner-ip] insert failed: {e}")
+
+
+def _td_is_owner_ip(ip):
+    """True if the IP is in the static OWNER_IPS seed OR has been registered
+    via a /tristandare/admin login. Cheap SQLite point lookup on indexed PK."""
+    if not ip:
+        return False
+    if ip in OWNER_IPS:
+        return True
+    try:
+        con = sqlite3.connect(DB_PATH)
+        row = con.execute("SELECT 1 FROM td_owner_ips WHERE ip = ?", (ip,)).fetchone()
+        con.close()
+        return row is not None
+    except Exception:
+        return False
+
+
+def _utc_iso_to_mtn(iso_utc):
+    """UTC ISO timestamp -> human-readable Mountain Time (DST-aware).
+    'May 13, 04:32 PM MDT' in summer, '... MST' in winter. Falls back to the
+    raw UTC slice if the zoneinfo data isn't available on the host."""
+    if not iso_utc:
+        return ""
+    raw = iso_utc[:19].replace("T", " ")
+    if not _MTN_TZ:
+        return raw + " UTC"
+    try:
+        dt = datetime.datetime.fromisoformat(iso_utc[:19])
+        dt = dt.replace(tzinfo=datetime.timezone.utc).astimezone(_MTN_TZ)
+        return dt.strftime("%b %d, %I:%M %p %Z")
+    except Exception:
+        return raw + " UTC"
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "lumen-wl-key-2026")
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # cache static files 1 year
+
+# Keep admin/client logins valid for 60 days so Kendall and clients don't get
+# bounced back to the login screen on every visit (esp. on mobile, where
+# browsers age short-lived sessions aggressively). Cookies marked Secure +
+# HttpOnly + SameSite=Lax on Railway so they ride HTTPS but stay usable.
+app.permanent_session_lifetime = datetime.timedelta(days=60)
+if os.environ.get("RAILWAY_PROJECT_ID") or os.environ.get("RAILWAY_ENVIRONMENT"):
+    app.config["SESSION_COOKIE_SECURE"] = True
+    app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+    app.config["SESSION_COOKIE_HTTPONLY"] = True
 
 from fathom_webhook import fathom_bp
 app.register_blueprint(fathom_bp)
@@ -555,6 +624,19 @@ def init_db():
     con.execute("CREATE INDEX IF NOT EXISTS idx_td_clicks_session ON td_clicks(session_id)")
     con.execute("CREATE INDEX IF NOT EXISTS idx_td_clicks_clicked ON td_clicks(clicked_at)")
 
+    # IPs we treat as "owner" / internal for the Tristan tracker. The static
+    # OWNER_IPS set (Kendall's phone) is the seed; this table accumulates more
+    # IPs every time someone successfully logs into /tristandare/admin, so
+    # Kendall and Tristan's own page visits never pollute the analytics.
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS td_owner_ips (
+            ip TEXT PRIMARY KEY,
+            email TEXT,
+            first_seen TEXT,
+            last_seen TEXT
+        )
+    """)
+
     con.commit()
 
     con.close()
@@ -683,7 +765,7 @@ def track_td():
     ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
     if "," in ip:
         ip = ip.split(",")[0].strip()
-    is_owner = 1 if ip in OWNER_IPS else 0
+    is_owner = 1 if _td_is_owner_ip(ip) else 0
 
     try:
         visible_seconds = int(data.get("visible_seconds", 0))
@@ -1696,8 +1778,8 @@ def _td_dashboard_data(hours, include_owner_in_recent=True):
         "referrer": (r["referrer"] or "—")[:40],
         "visible_seconds": r["visible_seconds"] or 0,
         "is_owner": bool(r["is_owner"]),
-        "started_at": (r["started_at"] or "")[:19].replace("T", " "),
-        "ended_at": (r["ended_at"] or "")[:19].replace("T", " ") if r["ended_at"] else "",
+        "started_at": _utc_iso_to_mtn(r["started_at"]),
+        "ended_at": _utc_iso_to_mtn(r["ended_at"]) if r["ended_at"] else "",
         "ip": r["ip"] or "",
     } for r in recent_rows]
 
@@ -1741,6 +1823,12 @@ def tristandare_admin():
             session.permanent = True
             session["td_client_auth"] = True
             session["td_client_email"] = email
+            # Bind this IP to the login so future /t/td events from here are
+            # flagged is_owner=1 and excluded from the analytics aggregates.
+            login_ip = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+            if "," in login_ip:
+                login_ip = login_ip.split(",")[0].strip()
+            _td_record_owner_ip(login_ip, email)
             return redirect(url_for("tristandare_admin"))
         return render_template("tristandare_login.html", error=True, email=email)
     if not session.get("td_client_auth"):
