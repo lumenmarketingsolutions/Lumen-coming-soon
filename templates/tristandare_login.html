@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#000">
+    <title>DARE · Sign In</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { background: #000; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #e8e6e0;
+            min-height: 100svh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            -webkit-font-smoothing: antialiased;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 30% 20%, rgba(200,184,144,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 75% 80%, rgba(200,184,144,0.04) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .card {
+            position: relative;
+            width: 100%;
+            max-width: 380px;
+            padding: 44px 36px 36px;
+            background: #07070a;
+            border: 1px solid rgba(232,230,224,0.08);
+            border-radius: 6px;
+        }
+        @media (max-width: 420px) {
+            .card { padding: 36px 24px 28px; }
+        }
+        .mark {
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            font-size: 28px;
+            letter-spacing: 6px;
+            text-align: center;
+            margin-bottom: 6px;
+            color: #f5f3ec;
+        }
+        .sub {
+            font-size: 10.5px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #6f6a5e;
+            text-align: center;
+            margin-bottom: 36px;
+        }
+        label {
+            display: block;
+            font-size: 10.5px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #8a8478;
+            margin-bottom: 8px;
+        }
+        .field { margin-bottom: 18px; }
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 13px 14px;
+            background: #000;
+            color: #f5f3ec;
+            border: 1px solid rgba(232,230,224,0.14);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            outline: none;
+            transition: border-color 0.15s;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        input[type="email"]:focus,
+        input[type="password"]:focus { border-color: #c8b890; }
+        .err {
+            margin: -4px 0 14px;
+            font-size: 12px;
+            color: #d4796a;
+            letter-spacing: 0.3px;
+        }
+        button {
+            width: 100%;
+            margin-top: 6px;
+            padding: 13px;
+            background: #f5f3ec;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 3.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: opacity 0.15s;
+        }
+        button:hover { opacity: 0.85; }
+        .footnote {
+            margin-top: 28px;
+            font-size: 10.5px;
+            color: #5a554a;
+            letter-spacing: 0.4px;
+            text-align: center;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <form class="card" method="post" action="/tristandare/admin" autocomplete="on">
+        <div class="mark">DARE</div>
+        <div class="sub">Page Analytics</div>
+
+        <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" autocomplete="username" required autofocus value="{{ email or '' }}" inputmode="email">
+        </div>
+
+        <div class="field">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" autocomplete="current-password" required>
+        </div>
+
+        {% if error %}<div class="err">Incorrect email or password.</div>{% endif %}
+
+        <button type="submit">Enter</button>
+
+        <div class="footnote">tristandareshop.com / bejetixdare</div>
+    </form>
+</body>
+</html>

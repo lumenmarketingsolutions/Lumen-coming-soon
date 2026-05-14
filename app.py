@@ -32,6 +32,20 @@ TD_ALLOWED_ORIGINS = {
 # Cap any single session's reported visible time so a runaway tab can't skew
 # averages. 90 minutes is generous for a long-form sales page.
 TD_MAX_SECONDS = 90 * 60
+# Logins for the Tristan dashboard at /tristandare/admin. Two valid accounts:
+# Kendall (so he can spot-check the client-facing view) and Tristan himself.
+# Separate from Kendall's master admin (wl_auth) so Tristan can sign in here
+# without ever touching anything else on the Mainframe.
+TD_CLIENT_ACCOUNTS = {
+    (
+        (os.environ.get("TD_CLIENT_EMAIL_1") or "kendall@lumenmarketing.co").strip().lower(),
+        os.environ.get("TD_CLIENT_PASSWORD_1") or "Wifimoney420!",
+    ),
+    (
+        (os.environ.get("TD_CLIENT_EMAIL_2") or "tristandareshop@gmail.com").strip().lower(),
+        os.environ.get("TD_CLIENT_PASSWORD_2") or "Meteorite26!",
+    ),
+}
 
 # ── Live presence tracking (in-memory) ──
 # {session_id: {"page": "home", "last_seen": timestamp, "ip": "..."}}
@@ -522,6 +536,25 @@ def init_db():
     con.execute("CREATE INDEX IF NOT EXISTS idx_td_campaign ON td_sessions(utm_campaign)")
     con.execute("CREATE INDEX IF NOT EXISTS idx_td_medium ON td_sessions(utm_medium)")
 
+    # Button click events for the same page. Each row is one click on a CTA.
+    # `position_pct` is the element's top edge as a percentage of the document
+    # height (0 = top of page, 100 = bottom), so we can separate the
+    # upper vs lower placement of duplicate CTAs without needing element IDs.
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS td_clicks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT NOT NULL,
+            visitor_id TEXT NOT NULL,
+            label TEXT DEFAULT '',
+            href TEXT DEFAULT '',
+            position_pct INTEGER DEFAULT 0,
+            is_owner INTEGER DEFAULT 0,
+            clicked_at TEXT NOT NULL
+        )
+    """)
+    con.execute("CREATE INDEX IF NOT EXISTS idx_td_clicks_session ON td_clicks(session_id)")
+    con.execute("CREATE INDEX IF NOT EXISTS idx_td_clicks_clicked ON td_clicks(clicked_at)")
+
     con.commit()
 
     con.close()
@@ -642,7 +675,7 @@ def track_td():
     event = (data.get("event") or "").strip()
     session_id = (data.get("session_id") or "").strip()
     visitor_id = (data.get("visitor_id") or "").strip()
-    if not session_id or not visitor_id or event not in ("start", "tick", "end"):
+    if not session_id or not visitor_id or event not in ("start", "tick", "end", "click"):
         resp = jsonify({"ok": False, "error": "bad-payload"})
         resp.headers["Access-Control-Allow-Origin"] = _td_cors_origin()
         return resp, 400
@@ -698,13 +731,29 @@ def track_td():
                 SET visible_seconds = MAX(visible_seconds, ?), last_seen_at = ?
                 WHERE session_id = ?
             """, (visible_seconds, now, session_id))
-        else:  # 'end'
+        elif event == "end":
             con.execute("""
                 UPDATE td_sessions
                 SET visible_seconds = MAX(visible_seconds, ?),
                     last_seen_at = ?, ended_at = ?
                 WHERE session_id = ?
             """, (visible_seconds, now, now, session_id))
+        else:  # 'click'
+            try:
+                position_pct = int(data.get("click_position", 0))
+            except (TypeError, ValueError):
+                position_pct = 0
+            position_pct = max(0, min(position_pct, 100))
+            con.execute("""
+                INSERT INTO td_clicks
+                    (session_id, visitor_id, label, href, position_pct, is_owner, clicked_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (
+                session_id, visitor_id,
+                (data.get("click_label") or "")[:120],
+                (data.get("click_href") or "")[:500],
+                position_pct, is_owner, now,
+            ))
         con.commit()
     finally:
         con.close()
@@ -1522,15 +1571,11 @@ def admin_main_site():
     return render_template("admin_site.html")
 
 
-@app.route("/admin/td-tracking")
-def admin_td_tracking():
-    """Dashboard for the Tristan Dare Squarespace tracker (tristandareshop.com/bejetixdare).
-    Excludes is_owner=1 sessions (Kendall's phone) from every aggregate, but still shows
-    them in the recent-sessions list with a flag."""
-    if not session.get("wl_auth"):
-        return redirect(url_for("admin_landing"))
-
-    hours = request.args.get("hours", "168")  # default last 7 days
+def _td_dashboard_data(hours, include_owner_in_recent=True):
+    """Pull all dashboard stats + recent sessions for the TD tracker.
+    Aggregates always exclude is_owner=1 sessions. The recent-sessions list
+    optionally includes them (Kendall's master view) or hides them entirely
+    (the client's own view at /tristandare/admin)."""
     try:
         hours_int = int(hours) if hours != "max" else None
     except (TypeError, ValueError):
@@ -1546,7 +1591,6 @@ def admin_td_tracking():
     con = sqlite3.connect(DB_PATH)
     con.row_factory = sqlite3.Row
 
-    # Headline numbers (exclude owner sessions from every aggregate per user_ip memory).
     base_where = "WHERE is_owner = 0" + time_clause
 
     total_sessions = con.execute(
@@ -1558,15 +1602,14 @@ def admin_td_tracking():
     avg_seconds = con.execute(
         f"SELECT AVG(visible_seconds) FROM td_sessions {base_where} AND visible_seconds > 0", time_params
     ).fetchone()[0] or 0
-    median_seconds = 0
     durations = [r[0] for r in con.execute(
         f"SELECT visible_seconds FROM td_sessions {base_where} AND visible_seconds > 0 ORDER BY visible_seconds", time_params
     ).fetchall()]
+    median_seconds = 0
     if durations:
         mid = len(durations) // 2
         median_seconds = durations[mid] if len(durations) % 2 else (durations[mid - 1] + durations[mid]) / 2
 
-    # UTM medium breakdown
     medium_rows = con.execute(f"""
         SELECT COALESCE(NULLIF(utm_medium, ''), '(none)') AS medium,
                COUNT(*) AS sessions,
@@ -1580,7 +1623,6 @@ def admin_td_tracking():
                   "visitors": r["visitors"],
                   "avg_sec": int(r["avg_sec"] or 0)} for r in medium_rows]
 
-    # UTM campaign breakdown
     campaign_rows = con.execute(f"""
         SELECT COALESCE(NULLIF(utm_campaign, ''), '(none)') AS campaign,
                COALESCE(NULLIF(utm_medium, ''), '(none)') AS medium,
@@ -1595,8 +1637,45 @@ def admin_td_tracking():
                     "sessions": r["sessions"], "visitors": r["visitors"],
                     "avg_sec": int(r["avg_sec"] or 0)} for r in campaign_rows]
 
-    # Recent sessions list (last 200, owner included with a flag)
-    recent_clause = "WHERE 1=1" + time_clause
+    # Button clicks — same time window as sessions, owner excluded from aggregates.
+    # Group by label + placement bucket (upper / lower) so duplicate CTAs at
+    # top and bottom of the page show up separately.
+    click_time_clause = " AND clicked_at > ?" if time_params else ""
+    click_rows = con.execute(f"""
+        SELECT
+            label,
+            CASE WHEN position_pct < 50 THEN 'upper' ELSE 'lower' END AS placement,
+            COUNT(*) AS clicks,
+            COUNT(DISTINCT visitor_id) AS unique_clickers,
+            COUNT(DISTINCT session_id) AS clicking_sessions,
+            MIN(position_pct) AS min_pos,
+            MAX(position_pct) AS max_pos
+        FROM td_clicks
+        WHERE is_owner = 0{click_time_clause}
+        GROUP BY label, placement
+        ORDER BY clicks DESC
+    """, time_params).fetchall()
+    clicks = [{
+        "label": r["label"] or "(no label)",
+        "placement": r["placement"],
+        "clicks": r["clicks"],
+        "unique_clickers": r["unique_clickers"],
+        "clicking_sessions": r["clicking_sessions"],
+    } for r in click_rows]
+
+    # Click-through rate against unique visitors (page-level CTR per CTA).
+    total_clicks = sum(c["clicks"] for c in clicks)
+    if unique_visitors > 0:
+        for c in clicks:
+            c["ctr_pct"] = round((c["unique_clickers"] / unique_visitors) * 100, 1)
+    else:
+        for c in clicks:
+            c["ctr_pct"] = 0.0
+
+    if include_owner_in_recent:
+        recent_clause = "WHERE 1=1" + time_clause
+    else:
+        recent_clause = "WHERE is_owner = 0" + time_clause
     recent_rows = con.execute(f"""
         SELECT session_id, visitor_id, utm_source, utm_medium, utm_campaign,
                utm_content, fbclid, gclid, referrer, visible_seconds, is_owner,
@@ -1624,17 +1703,58 @@ def admin_td_tracking():
 
     con.close()
 
-    return render_template(
-        "admin_td_tracking.html",
-        hours=hours,
-        total_sessions=total_sessions,
-        unique_visitors=unique_visitors,
-        avg_seconds=int(avg_seconds),
-        median_seconds=int(median_seconds),
-        by_medium=by_medium,
-        by_campaign=by_campaign,
-        recent=recent,
-    )
+    return {
+        "hours": hours,
+        "total_sessions": total_sessions,
+        "unique_visitors": unique_visitors,
+        "avg_seconds": int(avg_seconds),
+        "median_seconds": int(median_seconds),
+        "by_medium": by_medium,
+        "by_campaign": by_campaign,
+        "clicks": clicks,
+        "total_clicks": total_clicks,
+        "recent": recent,
+    }
+
+
+@app.route("/admin/td-tracking")
+def admin_td_tracking():
+    """Kendall's master view of the Tristan Dare Squarespace tracker.
+    Owner sessions excluded from aggregates, shown in recent list with a flag."""
+    if not session.get("wl_auth"):
+        return redirect(url_for("admin_landing"))
+    hours = request.args.get("hours", "168")
+    data = _td_dashboard_data(hours, include_owner_in_recent=True)
+    return render_template("admin_td_tracking.html", **data)
+
+
+# Per Kendall: every client admin page uses the slug pattern /<client>/admin
+# (e.g. /tristandare/admin, /berryclean/admin, /makhsoom/admin). Email + password
+# login validated against TD_CLIENT_ACCOUNTS; session key is separate from
+# Kendall's wl_auth so clients can't see anything else on the Mainframe.
+@app.route("/tristandare/admin", methods=["GET", "POST"])
+def tristandare_admin():
+    if request.method == "POST":
+        email = (request.form.get("email") or "").strip().lower()
+        password = (request.form.get("password") or "").strip()
+        if (email, password) in TD_CLIENT_ACCOUNTS:
+            session.permanent = True
+            session["td_client_auth"] = True
+            session["td_client_email"] = email
+            return redirect(url_for("tristandare_admin"))
+        return render_template("tristandare_login.html", error=True, email=email)
+    if not session.get("td_client_auth"):
+        return render_template("tristandare_login.html", error=False, email="")
+    hours = request.args.get("hours", "168")
+    data = _td_dashboard_data(hours, include_owner_in_recent=False)
+    data["signed_in_as"] = session.get("td_client_email", "")
+    return render_template("tristandare_dashboard.html", **data)
+
+
+@app.route("/tristandare/admin/logout")
+def tristandare_admin_logout():
+    session.pop("td_client_auth", None)
+    return redirect(url_for("tristandare_admin"))
 
 
 @app.route("/admin/funnel-beta")
