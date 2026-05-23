@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Welcome to Lumen — Outreach Onboarding</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-soft: #f7f8fa;
+    --bg-card: #f0f2f5;
+    --text: #0a0a0a;
+    --text-dim: #5a5a66;
+    --text-mid: #2a2a30;
+    --accent: #1877F2;
+    --accent-dark: #0d5dca;
+    --accent-soft: rgba(24, 119, 242, 0.08);
+    --border: #e6e8ec;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.55;
+    font-size: 15px;
+  }
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 64px 0 56px;
+    border-bottom: 1px solid var(--border);
+  }
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 78% 30%, rgba(24, 119, 242, 0.32), transparent 38%),
+      radial-gradient(circle at 92% 50%, rgba(0, 210, 200, 0.28), transparent 36%),
+      radial-gradient(circle at 60% 25%, rgba(90, 60, 220, 0.22), transparent 42%);
+    filter: blur(6px);
+    z-index: 0;
+  }
+  .container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 1;
+  }
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 56px;
+  }
+  .wordmark {
+    width: 112px;
+    height: 42px;
+    background-image: url("/static/lumen-logo.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: left center;
+  }
+  .top-meta {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    font-weight: 600;
+    text-align: right;
+  }
+  .hero-eyebrow {
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .hero-title {
+    font-size: 64px;
+    font-weight: 800;
+    letter-spacing: -0.045em;
+    line-height: 0.98;
+    margin-bottom: 20px;
+    max-width: 12ch;
+  }
+  .hero-sub {
+    font-size: 19px;
+    color: var(--text-mid);
+    max-width: 600px;
+    line-height: 1.55;
+    margin-bottom: 0;
+    font-weight: 400;
+  }
+
+  .body { padding: 56px 0 80px; }
+  .section-eyebrow {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .section-title {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    margin-bottom: 28px;
+  }
+  .section + .section { margin-top: 64px; }
+
+  .steps {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .step {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 24px 24px 22px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s, box-shadow 0.15s;
+    text-decoration: none;
+    color: inherit;
+  }
+  .step:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.08);
+    border-color: var(--accent);
+  }
+  .step.featured {
+    background: linear-gradient(170deg, #1877F2 0%, #0d5dca 100%);
+    border-color: var(--accent);
+    color: white;
+  }
+  .step-num {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+  .step.featured .step-num { color: rgba(255,255,255,0.85); }
+  .step-name {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+    line-height: 1.15;
+  }
+  .step-desc {
+    font-size: 13.5px;
+    color: var(--text-mid);
+    line-height: 1.5;
+    margin-bottom: 18px;
+  }
+  .step.featured .step-desc { color: rgba(255,255,255,0.92); }
+  .step-cta {
+    margin-top: auto;
+    font-size: 13.5px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+  }
+  .step.featured .step-cta { color: white; }
+  .step-cta::after {
+    content: "→";
+    transition: transform 0.15s;
+  }
+  .step:hover .step-cta::after { transform: translateX(3px); }
+
+  .form-wrap {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px 30px;
+  }
+  .form-note {
+    font-size: 13px;
+    color: var(--text-dim);
+    background: var(--accent-soft);
+    border-left: 3px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 22px;
+  }
+  .form-note strong { color: var(--accent); }
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 18px;
+  }
+  .form-field {
+    display: flex;
+    flex-direction: column;
+  }
+  .form-field.full { grid-column: 1 / -1; }
+  .form-field label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .form-field input,
+  .form-field select,
+  .form-field textarea {
+    font-family: inherit;
+    font-size: 14px;
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: white;
+    color: var(--text);
+    transition: border-color 0.15s;
+  }
+  .form-field input:focus,
+  .form-field select:focus,
+  .form-field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.12);
+  }
+  .form-section-label {
+    font-size: 11.5px;
+    font-weight: 800;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 28px 0 12px;
+    grid-column: 1 / -1;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+  }
+  .form-section-label:first-child {
+    border-top: 0;
+    padding-top: 0;
+    margin-top: 0;
+  }
+  .form-submit {
+    margin-top: 28px;
+    padding: 14px 28px;
+    background: var(--accent);
+    color: white;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    border: 0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .form-submit:hover { background: var(--accent-dark); }
+
+  .placeholder-banner {
+    background: #fff8e1;
+    border: 1px solid #f0d27a;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 28px;
+    font-size: 13.5px;
+    color: #6b5414;
+  }
+  .placeholder-banner strong { color: #5c4609; }
+  .placeholder-banner code {
+    background: rgba(0,0,0,0.06);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', Menlo, monospace;
+    font-size: 12px;
+  }
+
+  .footer {
+    background: var(--bg-soft);
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text-dim);
+  }
+  .footer .container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  @media (max-width: 720px) {
+    .hero-title { font-size: 44px; }
+    .steps { grid-template-columns: 1fr; }
+    .form-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ─── Hero ─── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div class="top-bar">
+      <div class="wordmark" role="img" aria-label="Lumen"></div>
+      <div class="top-meta">
+        <div>Outreach Onboarding</div>
+      </div>
+    </div>
+    <div class="hero-eyebrow">Welcome to Lumen Marketing</div>
+    <h1 class="hero-title">Let's get you set up.</h1>
+    <p class="hero-sub">Four things to do before we kick off. Should take you about 30 to 45 minutes total. Once you're done, you're ready to start.</p>
+  </div>
+</section>
+
+<!-- ─── Body ─── -->
+<div class="body">
+
+  <!-- Step cards -->
+  <div class="container section">
+    <div class="section-eyebrow">Start here</div>
+    <h2 class="section-title">Your first four steps</h2>
+
+    <div class="steps">
+      <a class="step" href="/static/Lumen-Service-Deck.pdf" download="Lumen-Service-Deck.pdf" target="_blank" rel="noopener noreferrer">
+        <div class="step-num">Step 01</div>
+        <div class="step-name">Download the Service Deck</div>
+        <div class="step-desc">Every service Lumen offers, what's included, and what each one costs. This is the master reference for everything you'll be selling. Saves to your computer for easy reference.</div>
+        <div class="step-cta">Download PDF</div>
+      </a>
+
+      <a class="step featured" href="/static/Lumen-Meta-Ads-Training.pdf" download="Lumen-Meta-Ads-Training.pdf" target="_blank" rel="noopener noreferrer">
+        <div class="step-num">Step 02 · Start with this</div>
+        <div class="step-name">Download the Meta Ads training</div>
+        <div class="step-desc">Plain-English guide to the product you'll be selling in week one. What Meta Ads are, why salons and med spas need them, how to handle objections, and how to qualify. Save it for easy reference.</div>
+        <div class="step-cta">Download PDF</div>
+      </a>
+
+      <div class="step" style="cursor:default;">
+        <div class="step-num">Step 03</div>
+        <div class="step-name">Sign the agreement</div>
+        <div class="step-desc">Check your email for the Lumen Outreach Contractor Agreement sent via DocuSign. Open the email, click the signing link, and complete the signature inside DocuSign. Both you and Kendall will receive the executed copy automatically.</div>
+        <div class="step-cta" style="color:var(--text-dim);">Check your inbox</div>
+      </div>
+
+      <a class="step" href="https://www.irs.gov/forms-pubs/about-form-w-9" target="_blank" rel="noopener">
+        <div class="step-num">Step 04</div>
+        <div class="step-name">Fill out your W-9</div>
+        <div class="step-desc">IRS Form W-9 so we can issue your 1099 at year-end. Download the PDF from the IRS, fill it out, and upload it in the form below.</div>
+        <div class="step-cta">Get the W-9</div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Info collection -->
+  <div class="container section">
+    <div class="section-eyebrow">Step 05 · Final step</div>
+    <h2 class="section-title">Submit your info</h2>
+
+    <div class="form-wrap">
+      <div class="form-note">
+        <strong>Your info is safe.</strong> All submissions are encrypted.
+      </div>
+
+      <div style="width:100%;min-height:500px;" data-fillout-id="8ZuyovWYvYus" data-fillout-embed-type="standard" data-fillout-inherit-parameters data-fillout-dynamic-resize></div>
+    </div>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="container">
+    <span>Lumen Marketing · lumenmarketing.co</span>
+    <span>Questions? Text Kendall on WhatsApp: +1 (208) 591-0132</span>
+  </div>
+</footer>
+
+<script src="https://server.fillout.com/embed/v1/"></script>
+</body>
+</html>

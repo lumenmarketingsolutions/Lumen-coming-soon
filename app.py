@@ -1158,6 +1158,10 @@ def formula_dynamics():
 def abraj_proposal():
     return render_template("abraj_proposal.html")
 
+@app.route("/rochellem/outreachonboarding/05232026")
+def rochelle_onboarding():
+    return render_template("rochelle_onboarding.html")
+
 @app.route("/services")
 def services():
     return render_template("services.html")
