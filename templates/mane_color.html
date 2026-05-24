@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mane Styling Studio · Find Your Perfect Color</title>
-    <meta name="description" content="Take our 60-second color quiz and we'll match you to your perfect shade — plus reserve your free Olaplex treatment ($60 value) with your first color.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Mane Styling Studio · Find Your Color Match</title>
+    <meta name="description" content="Answer a few quick questions and we will match you to your perfect color. Free Olaplex treatment included with your first color, a $60 value.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,7 +23,11 @@
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+        html {
+            -webkit-text-size-adjust: 100%;
+            scroll-behavior: smooth;
+            overflow-x: hidden;
+        }
         body {
             font-family: 'Inter', -apple-system, sans-serif;
             background: var(--bg);
@@ -31,14 +35,17 @@
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
         }
 
         .page {
             min-height: 100vh;
+            min-height: 100dvh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 28px 24px 60px;
+            padding: 28px 24px;
+            padding-bottom: max(60px, calc(48px + env(safe-area-inset-bottom)));
         }
 
         .brand {
@@ -48,26 +55,38 @@
             letter-spacing: 4px;
             text-transform: uppercase;
             color: var(--ink);
-            margin-bottom: 72px;
             text-align: center;
-        }
-        .brand .dot {
-            display: inline-block;
-            width: 4px;
-            height: 4px;
-            background: var(--accent);
-            border-radius: 50%;
-            vertical-align: middle;
-            margin: 0 10px 3px;
+            margin-bottom: 36px;
         }
 
-        .hero {
+        /* Progress bar (hidden on landing) */
+        .progress {
             max-width: 560px;
             width: 100%;
-            text-align: center;
-            margin-top: auto;
-            margin-bottom: auto;
+            display: none;
+            gap: 6px;
+            margin-bottom: 36px;
         }
+        .progress.show { display: flex; }
+        .progress-dot {
+            flex: 1;
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(26, 26, 26, 0.08);
+            transition: background 0.3s ease;
+        }
+        .progress-dot.filled { background: var(--accent); }
+
+        /* Steps */
+        .step { display: none; width: 100%; max-width: 560px; }
+        .step.active { display: block; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ─── Landing (step 0) ───────────────────────────────── */
+        .landing { text-align: center; margin: 28px 0 auto; }
 
         .eyebrow {
             display: inline-block;
@@ -84,12 +103,13 @@
 
         h1 {
             font-family: 'Playfair Display', Georgia, serif;
-            font-size: 44px;
+            font-size: 42px;
             font-weight: 600;
-            line-height: 1.12;
+            line-height: 1.14;
             letter-spacing: -0.5px;
             color: var(--ink);
             margin-bottom: 22px;
+            text-wrap: balance;
         }
         h1 em {
             font-style: italic;
@@ -102,8 +122,9 @@
             font-weight: 400;
             line-height: 1.65;
             color: var(--muted);
-            max-width: 460px;
-            margin: 0 auto 40px;
+            max-width: 440px;
+            margin: 0 auto 36px;
+            text-wrap: pretty;
         }
 
         .cta {
@@ -123,6 +144,8 @@
             cursor: pointer;
             transition: all 0.2s ease;
             box-shadow: 0 6px 24px rgba(139, 53, 82, 0.18);
+            min-height: 52px;
+            text-decoration: none;
         }
         .cta:hover {
             background: var(--accent-hover);
@@ -130,14 +153,18 @@
             box-shadow: 0 10px 30px rgba(139, 53, 82, 0.24);
         }
         .cta:active { transform: translateY(0); }
-        .cta .arrow {
-            font-size: 17px;
-            transition: transform 0.2s ease;
+        .cta:disabled {
+            background: rgba(26, 26, 26, 0.12);
+            color: rgba(26, 26, 26, 0.4);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
         }
-        .cta:hover .arrow { transform: translateX(3px); }
+        .cta .arrow { font-size: 17px; transition: transform 0.2s ease; }
+        .cta:hover:not(:disabled) .arrow { transform: translateX(3px); }
 
         .reassure {
-            margin-top: 22px;
+            margin-top: 20px;
             font-size: 12px;
             font-weight: 500;
             letter-spacing: 0.4px;
@@ -145,8 +172,56 @@
         }
         .reassure span { margin: 0 8px; opacity: 0.5; }
 
+        /* Before/after strip on landing */
+        .ba-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin: 56px auto 0;
+            max-width: 560px;
+            width: 100%;
+        }
+        .ba-strip .ba {
+            aspect-ratio: 4 / 5;
+            border-radius: 12px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #d8c5b2 0%, #a88e76 100%);
+            box-shadow: 0 4px 16px rgba(26, 26, 26, 0.06);
+            position: relative;
+        }
+        .ba-strip .ba img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .ba-strip .ba::after {
+            content: 'Before / After';
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 4px 10px;
+            border-radius: 100px;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            white-space: nowrap;
+        }
+        .ba-strip .ba:nth-child(2) {
+            background: linear-gradient(135deg, #7a4830 0%, #c98860 100%);
+        }
+        .ba-strip .ba:nth-child(3) {
+            background: linear-gradient(135deg, #4a3528 0%, #8b6240 100%);
+        }
+
         .credibility {
-            margin-top: 80px;
+            margin-top: 28px;
             padding-top: 28px;
             border-top: 1px solid var(--line);
             text-align: center;
@@ -165,58 +240,656 @@
             font-size: 11px;
         }
 
-        @media (max-width: 640px) {
-            .page { padding: 24px 20px 48px; }
-            .brand { margin-bottom: 56px; font-size: 10px; letter-spacing: 3.5px; }
-            h1 { font-size: 34px; line-height: 1.15; }
-            .eyebrow { font-size: 10px; padding: 6px 12px; margin-bottom: 22px; }
-            .sub { font-size: 15px; margin-bottom: 32px; }
-            .cta { padding: 16px 32px; font-size: 14px; }
-            .credibility { margin-top: 56px; }
+        /* ─── Quiz steps ─────────────────────────────────────── */
+        .step-eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 14px;
+            text-align: center;
+        }
+        .step h2 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 30px;
+            font-weight: 600;
+            line-height: 1.2;
+            letter-spacing: -0.3px;
+            text-align: center;
+            margin-bottom: 12px;
+            text-wrap: balance;
+        }
+        .step h2 em { font-style: italic; color: var(--accent); font-weight: 500; }
+        .step .hint {
+            text-align: center;
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 28px;
         }
 
+        /* Tile grids */
+        .tiles {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        .tiles-2x2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        .tile {
+            cursor: pointer;
+            border-radius: 14px;
+            overflow: hidden;
+            background: var(--surface);
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 8px rgba(26, 26, 26, 0.04);
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(26, 26, 26, 0.10);
+        }
+        .tile.selected {
+            border-color: var(--accent);
+            box-shadow: 0 8px 22px rgba(139, 53, 82, 0.18);
+        }
+        .tile-image {
+            aspect-ratio: 1 / 1;
+            position: relative;
+        }
+        .tile-image .swatch {
+            position: absolute;
+            inset: 0;
+        }
+        .tile-image img {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .tile-label {
+            padding: 12px 10px 14px;
+            text-align: center;
+        }
+        .tile-label .name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ink);
+            line-height: 1.3;
+        }
+        .tile-label .desc {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--muted);
+            margin-top: 3px;
+            line-height: 1.4;
+        }
+        .tile.selected .tile-label .name { color: var(--accent); }
+
+        /* Color swatches as placeholders until real photos drop in */
+        .swatch-brunette    { background: linear-gradient(135deg, #3D2817 0%, #6B4423 100%); }
+        .swatch-highlighted { background: linear-gradient(135deg, #8B6F47 0%, #C9A876 100%); }
+        .swatch-blonde      { background: linear-gradient(135deg, #D4B07A 0%, #F0D5A8 100%); }
+        .swatch-red         { background: linear-gradient(135deg, #7A2E1E 0%, #B8543D 100%); }
+        .swatch-black       { background: linear-gradient(135deg, #1A1410 0%, #2D2520 100%); }
+        .swatch-gray        { background: linear-gradient(135deg, #7A7A7A 0%, #B0B0B0 100%); }
+        .swatch-brighter    { background: linear-gradient(135deg, #F0D5A8 0%, #FFE8C2 100%); }
+        .swatch-richer      { background: linear-gradient(135deg, #3D1F2A 0%, #5C2E3D 100%); }
+        .swatch-covergray   { background: linear-gradient(135deg, #4A3528 0%, #8B6F47 100%); }
+        .swatch-refresh     { background: linear-gradient(135deg, #B49880 0%, #D8C5B2 100%); }
+
+        .step-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 8px;
+        }
+        .btn-back {
+            background: none;
+            border: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 14px 4px;
+            transition: color 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .btn-back:hover { color: var(--ink); }
+
+        /* ─── Email gate (step 3) ────────────────────────────── */
+        .gate {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 36px 32px;
+            box-shadow: 0 8px 30px rgba(26, 26, 26, 0.05);
+        }
+        .gate .step-eyebrow { margin-bottom: 10px; }
+        .gate h2 { margin-bottom: 10px; font-size: 28px; }
+        .gate .gift {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--accent-soft);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 22px;
+            font-size: 13px;
+            color: var(--accent);
+            font-weight: 500;
+            line-height: 1.4;
+        }
+        .gate .gift-icon { font-size: 18px; line-height: 1; flex-shrink: 0; }
+        .field { margin-bottom: 14px; }
+        .field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 6px;
+            letter-spacing: 0.2px;
+        }
+        .field input {
+            width: 100%;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            padding: 14px 16px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            color: var(--ink);
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+        .field input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+        .field input::placeholder { color: #bdb5ad; }
+        .gate .submit {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .gate .legal {
+            margin-top: 14px;
+            text-align: center;
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+
+        /* ─── Result (step 4) ─────────────────────────────────── */
+        .result { text-align: center; }
+        .result .badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: var(--accent-soft);
+            padding: 7px 14px;
+            border-radius: 100px;
+            margin-bottom: 22px;
+        }
+        .result h2 {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+        .result .rec {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-style: italic;
+            font-size: 26px;
+            font-weight: 500;
+            color: var(--accent);
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+        .result .why {
+            font-size: 15px;
+            color: var(--muted);
+            max-width: 440px;
+            margin: 0 auto 32px;
+            line-height: 1.65;
+            text-wrap: pretty;
+        }
+        .result-photo {
+            aspect-ratio: 4 / 3;
+            background: linear-gradient(135deg, #d8c5b2 0%, #a88e76 100%);
+            border-radius: 16px;
+            margin-bottom: 28px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(26, 26, 26, 0.08);
+        }
+        .result-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .result-photo::after {
+            content: 'Before / After';
+            position: absolute;
+            bottom: 14px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.35);
+            padding: 5px 12px;
+            border-radius: 100px;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            white-space: nowrap;
+        }
+        .result-offer {
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 18px 22px;
+            margin-bottom: 22px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .result-offer .icon { font-size: 24px; line-height: 1; flex-shrink: 0; }
+        .result-offer .copy .h {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--ink);
+            margin-bottom: 2px;
+            line-height: 1.3;
+        }
+        .result-offer .copy .s {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.4;
+        }
+        .result .attach {
+            margin-top: 14px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+        .result-foot {
+            margin-top: 36px;
+            padding-top: 22px;
+            border-top: 1px solid var(--line);
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+        .result-foot a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .result-foot a:hover { text-decoration: underline; }
+
+        /* ─── Mobile breakpoints ─────────────────────────────── */
+        @media (max-width: 640px) {
+            .page { padding: 22px 18px; padding-bottom: max(48px, calc(36px + env(safe-area-inset-bottom))); }
+            .brand { margin-bottom: 26px; font-size: 10px; letter-spacing: 3.5px; }
+            h1 { font-size: 32px; line-height: 1.18; }
+            .step h2 { font-size: 24px; }
+            .eyebrow { font-size: 10px; padding: 6px 12px; margin-bottom: 22px; }
+            .sub { font-size: 15px; margin-bottom: 30px; }
+            .cta { padding: 16px 32px; font-size: 14px; min-height: 50px; }
+            .tiles { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+            .tile-label { padding: 10px 8px 12px; }
+            .tile-label .name { font-size: 13px; }
+            .tile-label .desc { font-size: 11px; }
+            .ba-strip { margin-top: 44px; gap: 8px; }
+            .credibility { margin-top: 28px; padding-top: 22px; }
+            .gate { padding: 26px 20px; border-radius: 16px; }
+            .gate h2 { font-size: 24px; }
+            .result h2 { font-size: 28px; }
+            .result .rec { font-size: 22px; }
+            .result-offer { padding: 16px 18px; }
+        }
         @media (max-width: 380px) {
-            h1 { font-size: 30px; }
+            h1 { font-size: 28px; }
+            .step h2 { font-size: 22px; }
+            .ba-strip { gap: 6px; }
+            .tiles { gap: 8px; }
         }
     </style>
 </head>
 <body>
     <main class="page">
 
-        <div class="brand">
-            Mane Styling Studio
+        <div class="brand">Mane Styling Studio</div>
+
+        <div class="progress" id="progress">
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
         </div>
 
-        <section class="hero">
+        <!-- ═══ Step 0: Landing ═══════════════════════════════════ -->
+        <section class="step active landing" data-step="0">
             <div class="eyebrow">Free Olaplex with your first color</div>
-
-            <h1>Find your perfect color <em>in 60 seconds.</em></h1>
-
+            <h1>Your perfect color, <em>in 60 seconds.</em></h1>
             <p class="sub">
-                Take our quick color quiz and we'll match you to the right shade for your hair, your skin, and your life — plus reserve your free Olaplex treatment ($60 value) when you book.
+                Two quick questions and we'll match you to the right shade for your hair, your skin, and your life. Free Olaplex treatment included with your first color. A $60 value.
             </p>
-
-            <button type="button" class="cta" onclick="startQuiz()">
+            <button type="button" class="cta" onclick="goToStep(1)">
                 Start the Quiz <span class="arrow">→</span>
             </button>
-
             <div class="reassure">
-                60 seconds <span>·</span> 4 quick questions <span>·</span> No spam
+                60 seconds <span>·</span> 2 quick questions <span>·</span> No spam
+            </div>
+
+            <div class="ba-strip">
+                <div class="ba"></div>
+                <div class="ba"></div>
+                <div class="ba"></div>
+            </div>
+
+            <div class="credibility">
+                <div class="stars">★ ★ ★ ★ ★</div>
+                Idaho's Premier Laid Back Luxury Salon · Meridian, ID
             </div>
         </section>
 
-        <div class="credibility">
-            <div class="stars">★ ★ ★ ★ ★</div>
-            Trusted by hundreds of guests across the Twin Cities
-        </div>
+        <!-- ═══ Step 1: Current color ═════════════════════════════ -->
+        <section class="step" data-step="1">
+            <div class="step-eyebrow">Question 1 of 2</div>
+            <h2>What's your hair <em>right now?</em></h2>
+            <p class="hint">Closest match is fine.</p>
+
+            <div class="tiles" id="tiles-current">
+                <div class="tile" data-value="brunette">
+                    <div class="tile-image"><div class="swatch swatch-brunette"></div></div>
+                    <div class="tile-label"><div class="name">Brunette</div></div>
+                </div>
+                <div class="tile" data-value="highlighted">
+                    <div class="tile-image"><div class="swatch swatch-highlighted"></div></div>
+                    <div class="tile-label"><div class="name">Highlighted</div></div>
+                </div>
+                <div class="tile" data-value="blonde">
+                    <div class="tile-image"><div class="swatch swatch-blonde"></div></div>
+                    <div class="tile-label"><div class="name">Blonde</div></div>
+                </div>
+                <div class="tile" data-value="red">
+                    <div class="tile-image"><div class="swatch swatch-red"></div></div>
+                    <div class="tile-label"><div class="name">Red or copper</div></div>
+                </div>
+                <div class="tile" data-value="black">
+                    <div class="tile-image"><div class="swatch swatch-black"></div></div>
+                    <div class="tile-label"><div class="name">Very dark</div></div>
+                </div>
+                <div class="tile" data-value="gray">
+                    <div class="tile-image"><div class="swatch swatch-gray"></div></div>
+                    <div class="tile-label"><div class="name">Going gray</div></div>
+                </div>
+            </div>
+
+            <div class="step-nav">
+                <button type="button" class="btn-back" onclick="goToStep(0)">← Back</button>
+                <span></span>
+            </div>
+        </section>
+
+        <!-- ═══ Step 2: Dream look ════════════════════════════════ -->
+        <section class="step" data-step="2">
+            <div class="step-eyebrow">Question 2 of 2</div>
+            <h2>What's your <em>dream?</em></h2>
+            <p class="hint">Pick the one that pulls you the most.</p>
+
+            <div class="tiles tiles-2x2" id="tiles-dream">
+                <div class="tile" data-value="brighter">
+                    <div class="tile-image"><div class="swatch swatch-brighter"></div></div>
+                    <div class="tile-label">
+                        <div class="name">Brighter</div>
+                        <div class="desc">Lighter, sun-kissed, dimensional</div>
+                    </div>
+                </div>
+                <div class="tile" data-value="richer">
+                    <div class="tile-image"><div class="swatch swatch-richer"></div></div>
+                    <div class="tile-label">
+                        <div class="name">Richer</div>
+                        <div class="desc">Deeper tones with shine</div>
+                    </div>
+                </div>
+                <div class="tile" data-value="covergray">
+                    <div class="tile-image"><div class="swatch swatch-covergray"></div></div>
+                    <div class="tile-label">
+                        <div class="name">Cover gray</div>
+                        <div class="desc">Natural, blended coverage</div>
+                    </div>
+                </div>
+                <div class="tile" data-value="refresh">
+                    <div class="tile-image"><div class="swatch swatch-refresh"></div></div>
+                    <div class="tile-label">
+                        <div class="name">Refresh</div>
+                        <div class="desc">Keep my color looking great</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-nav">
+                <button type="button" class="btn-back" onclick="goToStep(1)">← Back</button>
+                <span></span>
+            </div>
+        </section>
+
+        <!-- ═══ Step 3: Email gate ════════════════════════════════ -->
+        <section class="step" data-step="3">
+            <div class="gate">
+                <div class="step-eyebrow">Your match is ready</div>
+                <h2>Where do we send it?</h2>
+                <p class="hint">We'll also reserve your free Olaplex treatment.</p>
+
+                <div class="gift">
+                    <span class="gift-icon">🎁</span>
+                    <span>Free Olaplex treatment with your first color. <strong>$60 value</strong>.</span>
+                </div>
+
+                <form id="lead-form" onsubmit="return submitLead(event)">
+                    <div class="field">
+                        <label for="lead-name">Your first name</label>
+                        <input type="text" id="lead-name" name="name" placeholder="Jane" required autocomplete="given-name" autocapitalize="words">
+                    </div>
+                    <div class="field">
+                        <label for="lead-email">Email</label>
+                        <input type="email" id="lead-email" name="email" placeholder="you@example.com" required autocomplete="email" autocapitalize="none" inputmode="email">
+                    </div>
+                    <div class="field">
+                        <label for="lead-phone">Phone</label>
+                        <input type="tel" id="lead-phone" name="phone" placeholder="(555) 555-5555" required autocomplete="tel" inputmode="tel">
+                    </div>
+                    <button type="submit" class="cta submit" id="submit-btn">
+                        See My Match <span class="arrow">→</span>
+                    </button>
+                    <div class="legal">
+                        By submitting you agree to receive texts and emails from Mane Styling Studio. Reply STOP anytime.
+                    </div>
+                </form>
+            </div>
+
+            <div class="step-nav">
+                <button type="button" class="btn-back" onclick="goToStep(2)">← Back</button>
+                <span></span>
+            </div>
+        </section>
+
+        <!-- ═══ Step 4: Result ═══════════════════════════════════ -->
+        <section class="step result" data-step="4">
+            <div class="badge">Your Color Match</div>
+            <h2>We'd recommend</h2>
+            <div class="rec" id="rec-name">Balayage</div>
+            <p class="why" id="rec-why">A soft, lived-in lightening service that grows out beautifully. The right move for the brighter look you picked.</p>
+
+            <div class="result-photo" id="result-photo"></div>
+
+            <div class="result-offer">
+                <span class="icon">🎁</span>
+                <div class="copy">
+                    <div class="h">Your free Olaplex treatment is reserved.</div>
+                    <div class="s">$60 value. Included with your first color.</div>
+                </div>
+            </div>
+
+            <a href="#" class="cta" id="book-btn" target="_blank" rel="noopener">
+                Book My Color <span class="arrow">→</span>
+            </a>
+            <div class="attach">Plus $25 off any cut booked the same visit.</div>
+
+            <div class="result-foot">
+                <div>Or call us at <a href="tel:+12088171683">208-817-1683</a></div>
+                <div>2929 W Navigator Dr, Suite #110, Meridian, ID</div>
+            </div>
+        </section>
 
     </main>
 
     <script>
-        function startQuiz() {
-            // TODO(next pass): transition to quiz step 1
-            console.log('start');
+        // ─── State ─────────────────────────────────────────────
+        const state = {
+            current: null,
+            dream: null,
+        };
+
+        // ─── Step navigation ───────────────────────────────────
+        function goToStep(n) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            const target = document.querySelector(`.step[data-step="${n}"]`);
+            if (!target) return;
+            target.classList.add('active');
+
+            const progress = document.getElementById('progress');
+            if (n === 0) {
+                progress.classList.remove('show');
+            } else {
+                progress.classList.add('show');
+                document.querySelectorAll('.progress-dot').forEach((d, i) => {
+                    d.classList.toggle('filled', i < n);
+                });
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
+
+        // ─── Tile selection ────────────────────────────────────
+        function wireTiles(containerId, stateKey, nextStep) {
+            const tiles = document.querySelectorAll(`#${containerId} .tile`);
+            tiles.forEach(t => {
+                t.addEventListener('click', () => {
+                    tiles.forEach(x => x.classList.remove('selected'));
+                    t.classList.add('selected');
+                    state[stateKey] = t.dataset.value;
+                    setTimeout(() => goToStep(nextStep), 280);
+                });
+            });
+        }
+        wireTiles('tiles-current', 'current', 2);
+        wireTiles('tiles-dream', 'dream', 3);
+
+        // ─── UTM / tracking params ─────────────────────────────
+        function getTracking() {
+            const p = new URLSearchParams(window.location.search);
+            return {
+                utm_source: p.get('utm_source') || '',
+                utm_campaign: p.get('utm_campaign') || '',
+                utm_content: p.get('utm_content') || '',
+                fbclid: p.get('fbclid') || '',
+                referrer: document.referrer || '',
+            };
+        }
+
+        // ─── Recommendation logic ──────────────────────────────
+        const RECS = {
+            balayage: {
+                name: 'Balayage',
+                why: 'A soft, lived-in lightening service that grows out beautifully. The right move for the brighter look you picked.',
+            },
+            refresh: {
+                name: 'Color Refresh',
+                why: 'A root touch-up and a tone refresh to bring your color back to life. Quick to do, big payoff.',
+            },
+            glaze: {
+                name: 'Glaze and Gloss',
+                why: 'A glossing service that deepens and enriches your existing color with serious shine. Low commitment for a real payoff.',
+            },
+            graycoverage: {
+                name: 'Natural Gray Coverage',
+                why: 'Soft, blended coverage that looks natural and grows out gracefully. Nothing flat or one-tone.',
+            },
+            consult: {
+                name: 'Custom Color Consult',
+                why: 'Your look needs a hands-on consult so we can map out the safest, most beautiful path. Free with your first color.',
+            },
+        };
+
+        function pickRec(cur, dream) {
+            if (dream === 'covergray') return 'graycoverage';
+            if (dream === 'refresh') return 'refresh';
+            if (dream === 'richer') return 'glaze';
+            if (dream === 'brighter') {
+                if (cur === 'black') return 'consult';
+                return 'balayage';
+            }
+            return 'consult';
+        }
+
+        function renderResult() {
+            const key = pickRec(state.current, state.dream);
+            const r = RECS[key];
+            document.getElementById('rec-name').textContent = r.name;
+            document.getElementById('rec-why').textContent = r.why;
+            // TODO(photos): swap result-photo to a real before/after image per recommendation key.
+        }
+
+        // ─── Submit lead ───────────────────────────────────────
+        async function submitLead(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = 'Sending...';
+
+            const payload = {
+                name: document.getElementById('lead-name').value.trim(),
+                email: document.getElementById('lead-email').value.trim(),
+                phone: document.getElementById('lead-phone').value.trim(),
+                current_color: state.current || '',
+                dream_look: state.dream || '',
+                recommendation: pickRec(state.current, state.dream),
+                ...getTracking(),
+            };
+
+            try {
+                const res = await fetch('/manestyling/funnel/submit', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                if (!res.ok) throw new Error('submit failed');
+                // TODO(pixel): fire Meta Pixel `Lead` event here.
+                renderResult();
+                goToStep(4);
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerHTML = 'See My Match <span class="arrow">→</span>';
+                alert('Something went wrong. Try again in a moment.');
+            }
+            return false;
+        }
+
+        // Phorest booking link placeholder. Replace with the real Mane booking URL.
+        document.getElementById('book-btn').href = 'https://book.phorest.com/manestylingstudio';
     </script>
 </body>
 </html>

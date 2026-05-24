@@ -412,6 +412,26 @@ def init_db():
     """)
     con.commit()
 
+    # Mane Styling Studio color funnel leads
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS mane_color_quiz (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT DEFAULT '',
+            email TEXT DEFAULT '',
+            phone TEXT DEFAULT '',
+            current_color TEXT DEFAULT '',
+            dream_look TEXT DEFAULT '',
+            recommendation TEXT DEFAULT '',
+            utm_source TEXT DEFAULT '',
+            utm_campaign TEXT DEFAULT '',
+            utm_content TEXT DEFAULT '',
+            fbclid TEXT DEFAULT '',
+            referrer TEXT DEFAULT '',
+            created_at TEXT NOT NULL
+        )
+    """)
+    con.commit()
+
     # Avalon CRM onboarding form submissions
     con.execute("""
         CREATE TABLE IF NOT EXISTS avalon_onboarding (
@@ -1484,6 +1504,96 @@ def mane_onboarding_submit():
 @app.route("/mane-color")  # dev alias
 def mane_color():
     return render_template("mane_color.html")
+
+REC_LABELS = {
+    "balayage": "Balayage",
+    "refresh": "Color Refresh",
+    "glaze": "Glaze and Gloss",
+    "graycoverage": "Natural Gray Coverage",
+    "consult": "Custom Color Consult",
+}
+CURRENT_LABELS = {
+    "brunette": "Brunette",
+    "highlighted": "Highlighted",
+    "blonde": "Blonde",
+    "red": "Red or copper",
+    "black": "Very dark",
+    "gray": "Going gray",
+}
+DREAM_LABELS = {
+    "brighter": "Brighter",
+    "richer": "Richer",
+    "covergray": "Cover gray",
+    "refresh": "Refresh",
+}
+
+@app.route("/manestyling/funnel/submit", methods=["POST"])
+def mane_color_submit():
+    data = request.get_json() or {}
+    name = (data.get("name") or "").strip() or "Anonymous"
+    email = (data.get("email") or "").strip()
+    phone = (data.get("phone") or "").strip()
+    current_color = (data.get("current_color") or "").strip()
+    dream_look = (data.get("dream_look") or "").strip()
+    recommendation = (data.get("recommendation") or "").strip()
+
+    now = datetime.datetime.utcnow().isoformat()
+    con = sqlite3.connect(DB_PATH)
+    con.execute("""
+        INSERT INTO mane_color_quiz (
+            name, email, phone, current_color, dream_look, recommendation,
+            utm_source, utm_campaign, utm_content, fbclid, referrer, created_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    """, (
+        name, email, phone, current_color, dream_look, recommendation,
+        data.get("utm_source", ""),
+        data.get("utm_campaign", ""),
+        data.get("utm_content", ""),
+        data.get("fbclid", ""),
+        data.get("referrer", ""),
+        now,
+    ))
+    con.commit()
+    con.close()
+
+    cur_l = CURRENT_LABELS.get(current_color, current_color)
+    dream_l = DREAM_LABELS.get(dream_look, dream_look)
+    rec_l = REC_LABELS.get(recommendation, recommendation)
+
+    def row(label, value):
+        if not value:
+            return ""
+        safe = str(value).replace("\n", "<br>")
+        return f'<tr><td style="padding:12px 0; border-bottom:1px solid #1a1a25; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#7c4dff; width:40%; vertical-align:top;">{label}</td><td style="padding:12px 0 12px 16px; border-bottom:1px solid #1a1a25; font-size:14px; color:#e8e8f0; line-height:1.6;">{safe}</td></tr>'
+
+    body = f"""
+    <div style="font-family: -apple-system, Inter, sans-serif; background:#0a0a0f; padding:32px 20px; color:#e8e8f0;">
+      <div style="max-width:620px; margin:0 auto; background:#111118; border:1px solid #1a1a25; border-radius:14px; padding:32px;">
+        <div style="font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#7c4dff; margin-bottom:10px;">New Color Lead</div>
+        <h2 style="font-size:22px; font-weight:700; margin:0 0 6px 0; color:#fff;">Mane Styling Studio</h2>
+        <p style="font-size:13px; color:#8b8ba0; margin:0 0 24px 0;">{name}{' · ' + phone if phone else ''}{' · ' + email if email else ''}</p>
+        <table style="width:100%; border-collapse:collapse;">
+          {row("Name", name)}
+          {row("Email", email)}
+          {row("Phone", phone)}
+          {row("Current color", cur_l)}
+          {row("Dream", dream_l)}
+          {row("Recommendation", rec_l)}
+          {row("UTM source", data.get("utm_source",""))}
+          {row("UTM campaign", data.get("utm_campaign",""))}
+          {row("UTM content", data.get("utm_content",""))}
+          {row("fbclid", data.get("fbclid",""))}
+          {row("Referrer", data.get("referrer",""))}
+        </table>
+      </div>
+    </div>
+    """
+    try:
+        send_email(NOTIFY_EMAIL, f"Mane color lead: {name}", body)
+    except Exception:
+        pass
+
+    return jsonify({"ok": True})
 
 @app.route("/admin/mane-onboarding")
 def admin_mane_onboarding():
