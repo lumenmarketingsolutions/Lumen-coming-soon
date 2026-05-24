@@ -1477,6 +1477,14 @@ def mane_onboarding_submit():
 
     return jsonify({"ok": True})
 
+# ---------------------------------------------------------------------------
+# Mane Styling Studio — color quiz funnel (customer-facing)
+# ---------------------------------------------------------------------------
+@app.route("/manestyling/funnel")
+@app.route("/mane-color")  # dev alias
+def mane_color():
+    return render_template("mane_color.html")
+
 @app.route("/admin/mane-onboarding")
 def admin_mane_onboarding():
     if not session.get("wl_auth"):
