@@ -1500,7 +1500,7 @@ def mane_onboarding_submit():
 # ---------------------------------------------------------------------------
 # Mane Styling Studio — color quiz funnel (customer-facing)
 # ---------------------------------------------------------------------------
-@app.route("/manestyling/funnel")
+@app.route("/manestyling/color-funnel")
 @app.route("/mane-color")  # dev alias
 def mane_color():
     return render_template("mane_color.html")
@@ -1527,7 +1527,7 @@ DREAM_LABELS = {
     "refresh": "Refresh",
 }
 
-@app.route("/manestyling/funnel/submit", methods=["POST"])
+@app.route("/manestyling/color-funnel/submit", methods=["POST"])
 def mane_color_submit():
     data = request.get_json() or {}
     name = (data.get("name") or "").strip() or "Anonymous"
