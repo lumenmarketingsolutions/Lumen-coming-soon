@@ -195,8 +195,8 @@
             object-fit: cover;
             display: block;
         }
-        .ba-strip .ba::after {
-            content: 'Before / After';
+        .ba-strip .ba[data-label]::after {
+            content: attr(data-label);
             position: absolute;
             bottom: 10px;
             left: 50%;
@@ -589,7 +589,7 @@
 
             <div class="ba-strip">
                 <div class="ba"><img src="/static/mane/ba-color-range.jpg" alt="Blonde and brunette color range" loading="lazy"></div>
-                <div class="ba"><img src="/static/mane/ba-brunette-balayage.jpg" alt="Brunette balayage before and after" loading="lazy"></div>
+                <div class="ba" data-label="Before / After"><img src="/static/mane/ba-brunette-balayage.jpg" alt="Brunette balayage before and after" loading="lazy"></div>
                 <div class="ba"><img src="/static/mane/ba-platinum-dimensional.jpg" alt="Dimensional platinum blonde" loading="lazy"></div>
             </div>
 
