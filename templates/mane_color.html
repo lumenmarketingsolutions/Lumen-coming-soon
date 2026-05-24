@@ -49,14 +49,20 @@
         }
 
         .brand {
-            font-family: 'Inter', sans-serif;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            color: var(--ink);
-            text-align: center;
-            margin-bottom: 36px;
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            margin-bottom: 28px;
+        }
+        .brand-logo {
+            height: 48px;
+            width: auto;
+            display: block;
+        }
+        @media (max-width: 640px) {
+            .brand { margin-bottom: 20px; }
+            .brand-logo { height: 40px; }
         }
 
         /* Progress bar (hidden on landing) */
@@ -555,7 +561,9 @@
 <body>
     <main class="page">
 
-        <div class="brand">Mane Styling Studio</div>
+        <div class="brand">
+            <img src="/static/mane/logo.png" alt="Mane Styling Studio" class="brand-logo">
+        </div>
 
         <div class="progress" id="progress">
             <div class="progress-dot"></div>
