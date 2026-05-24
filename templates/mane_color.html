@@ -455,39 +455,6 @@
             line-height: 1.65;
             text-wrap: pretty;
         }
-        .result-photo {
-            aspect-ratio: 4 / 3;
-            background: linear-gradient(135deg, #d8c5b2 0%, #a88e76 100%);
-            border-radius: 16px;
-            margin-bottom: 28px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 8px 24px rgba(26, 26, 26, 0.08);
-        }
-        .result-photo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-        .result-photo::after {
-            content: 'Before / After';
-            position: absolute;
-            bottom: 14px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #fff;
-            background: rgba(0, 0, 0, 0.35);
-            padding: 5px 12px;
-            border-radius: 100px;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            white-space: nowrap;
-        }
         .result-offer {
             background: var(--surface);
             border: 1px solid var(--line);
@@ -728,8 +695,6 @@
             <div class="rec" id="rec-name">Balayage</div>
             <p class="why" id="rec-why">A soft, lived-in lightening service that grows out beautifully. The right move for the brighter look you picked.</p>
 
-            <div class="result-photo" id="result-photo"></div>
-
             <div class="result-offer">
                 <span class="icon">🎁</span>
                 <div class="copy">
@@ -828,12 +793,15 @@
             },
         };
 
+        // Recommendation matrix. Heavy-lift combos (dark/red/gray going brighter)
+        // route to consult — that work is real color correction territory, not a
+        // casual balayage.
         function pickRec(cur, dream) {
             if (dream === 'covergray') return 'graycoverage';
-            if (dream === 'refresh') return 'refresh';
-            if (dream === 'richer') return 'glaze';
+            if (dream === 'refresh')   return 'refresh';
+            if (dream === 'richer')    return 'glaze';
             if (dream === 'brighter') {
-                if (cur === 'black') return 'consult';
+                if (cur === 'black' || cur === 'red' || cur === 'gray') return 'consult';
                 return 'balayage';
             }
             return 'consult';
@@ -844,7 +812,6 @@
             const r = RECS[key];
             document.getElementById('rec-name').textContent = r.name;
             document.getElementById('rec-why').textContent = r.why;
-            // TODO(photos): swap result-photo to a real before/after image per recommendation key.
         }
 
         // ─── Submit lead ───────────────────────────────────────
