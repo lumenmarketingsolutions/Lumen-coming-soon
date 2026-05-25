@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harker Outdoors · Marketing Onboarding</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { -webkit-text-size-adjust: 100%; }
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: #0a0a0f;
+            color: #e8e8f0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+        .page {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 60px 24px 100px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            transition: margin-bottom 0.3s ease;
+        }
+        .header img {
+            height: 26px;
+            margin-bottom: 26px;
+        }
+        .header.compact { margin-bottom: 26px; }
+        .header.compact p { display: none; }
+        .header.compact img { margin-bottom: 18px; }
+        .header.compact .eyebrow { margin-bottom: 10px; }
+        .header .eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #7c4dff;
+            margin-bottom: 14px;
+        }
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+            line-height: 1.25;
+        }
+        .header p {
+            font-size: 15px;
+            color: #8b8ba0;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .step { display: none; animation: fadeIn 0.4s ease-out; }
+        .step.active { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: #7c4dff;
+            margin-bottom: 12px;
+        }
+        .step h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -0.3px;
+            line-height: 1.3;
+        }
+        .step .hint {
+            font-size: 14px;
+            color: #8b8ba0;
+            margin-bottom: 26px;
+            line-height: 1.65;
+        }
+
+        input[type="text"], input[type="email"], input[type="url"], textarea, select {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-size: 15px;
+            color: #e8e8f0;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s;
+            resize: vertical;
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: rgba(124, 77, 255, 0.55);
+            background: rgba(255,255,255,0.06);
+        }
+        textarea { min-height: 120px; }
+        ::placeholder { color: #3a3a46; font-size: 13px; }
+        textarea::placeholder { line-height: 1.55; }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 32px;
+        }
+        .btn {
+            padding: 13px 30px;
+            border-radius: 10px;
+            font-family: 'Inter', -apple-system, sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        .btn-next { background: #7c4dff; color: #fff; }
+        .btn-next:hover { background: #9069ff; transform: translateY(-1px); }
+        .btn-back { background: none; color: #6b6b80; padding: 13px 0; }
+        .btn-back:hover { color: #e8e8f0; }
+        .btn-submit {
+            background: linear-gradient(135deg, #7c4dff, #6128DB);
+            color: #fff;
+            width: 100%;
+            padding: 16px;
+            font-size: 15px;
+        }
+        .btn-submit:hover { filter: brightness(1.1); }
+
+        .progress {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 40px;
+        }
+        .progress-dot {
+            flex: 1;
+            height: 3px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.06);
+            transition: background 0.3s;
+        }
+        .progress-dot.filled { background: #7c4dff; }
+
+        .thank-you {
+            display: none;
+            text-align: center;
+            padding: 80px 0;
+            animation: fadeIn 0.5s ease-out;
+        }
+        .thank-you .checkmark {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            background: rgba(124, 77, 255, 0.15);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 30px; color: #7c4dff;
+        }
+        .thank-you h2 {
+            font-size: 26px; font-weight: 700;
+            margin-bottom: 14px; letter-spacing: -0.3px;
+        }
+        .thank-you p {
+            font-size: 15px; color: #8b8ba0;
+            max-width: 460px; margin: 0 auto;
+        }
+
+        .field-group { margin-bottom: 18px; }
+        .field-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #b0b0c0;
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+        .choice-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .choice {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+            color: #d0d0dd;
+        }
+        .choice:hover {
+            background: rgba(124, 77, 255, 0.06);
+            border-color: rgba(124, 77, 255, 0.25);
+        }
+        .choice.selected {
+            background: rgba(124, 77, 255, 0.12);
+            border-color: rgba(124, 77, 255, 0.6);
+            color: #fff;
+        }
+        .choice .choice-title { font-weight: 600; margin-bottom: 3px; }
+        .choice .choice-sub { font-size: 12px; color: #8b8ba0; line-height: 1.45; }
+        .choice.selected .choice-sub { color: #b0a0ff; }
+
+        .multi-hint {
+            font-weight: 400;
+            color: #6b6b80;
+            font-size: 12px;
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .info-card {
+            background: rgba(124, 77, 255, 0.06);
+            border: 1px solid rgba(124, 77, 255, 0.22);
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 22px;
+        }
+        .info-card-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 2.2px;
+            text-transform: uppercase;
+            color: #b0a0ff;
+            margin-bottom: 8px;
+        }
+        .info-card-text {
+            font-size: 13.5px;
+            color: #d0d0dd;
+            line-height: 1.6;
+        }
+        .info-card-text strong { color: #fff; font-weight: 700; }
+        .info-card .partner-id {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-family: 'SF Mono', Menlo, monospace;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            margin-top: 12px;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .page { padding: 36px 18px 80px; }
+            .header { margin-bottom: 32px; }
+            .header h1 { font-size: 23px; }
+            .header p { font-size: 14px; }
+            .step h2 { font-size: 20px; }
+            input[type="text"], input[type="email"], input[type="url"], textarea, select { font-size: 16px !important; }
+            .row { grid-template-columns: 1fr; gap: 0; }
+            .btn { padding: 13px 24px; }
+            .progress { margin-bottom: 32px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="header">
+            <img src="/static/logo-white.png" alt="Lumen">
+            <div class="eyebrow">Marketing Onboarding</div>
+            <h1>Before we take over your ads</h1>
+            <p>A few questions so we show up to your kickoff call already knowing your brand, your offers, and what's coming up over the next month. About five minutes.</p>
+        </div>
+
+        <div class="progress" id="progress">
+            <div class="progress-dot filled"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
+        </div>
+
+        <form id="onboarding-form">
+
+            <!-- Step 1: Basics -->
+            <div class="step active" data-step="1">
+                <div class="step-label">Step 1 of 7</div>
+                <h2>The basics</h2>
+                <p class="hint">Quick intro so we know who we're talking to.</p>
+                <div class="row">
+                    <div class="field-group">
+                        <label>Your name</label>
+                        <input type="text" name="name" placeholder="First and last" value="{{ prefill.name or '' }}">
+                    </div>
+                    <div class="field-group">
+                        <label>Best email for updates</label>
+                        <input type="email" name="email" placeholder="you@harkeroutdoors.com" value="{{ prefill.email or '' }}">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="field-group">
+                        <label>Business name</label>
+                        <input type="text" name="business" placeholder="Harker Outdoors" value="{{ prefill.business or 'Harker Outdoors' }}">
+                    </div>
+                    <div class="field-group">
+                        <label>Your role</label>
+                        <input type="text" name="role" placeholder="Owner, founder, marketing lead..." value="{{ prefill.role or '' }}">
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label>In one sentence, what does Harker Outdoors actually do?</label>
+                    <input type="text" name="business_oneliner" placeholder="Pretend you're explaining it to someone at the gym.">
+                </div>
+                <div class="nav">
+                    <span></span>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 2: Current offers + what's coming up -->
+            <div class="step" data-step="2">
+                <div class="step-label">Step 2 of 7</div>
+                <h2>What we're pushing this month</h2>
+                <p class="hint">The ads are only as good as the offer. Tell us what's live, what's coming, and what we should be putting spend behind.</p>
+                <div class="field-group">
+                    <label>Any specific offers, promos, bundles, or seasonal pushes you're running right now or planning over the next 30 to 60 days?</label>
+                    <textarea name="offers_deals" placeholder="Bundles, intro discounts, seasonal collections, new product launches, holiday specials. List everything you've got on deck."></textarea>
+                </div>
+                <div class="field-group">
+                    <label>Which product or category is the #1 priority to push right now? Why that one?</label>
+                    <textarea name="priority_product" placeholder="Highest margin, most stock, the one you want to be known for, or just the one moving best lately. Tell us which to push first and the thinking behind it."></textarea>
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 3: Creative assets -->
+            <div class="step" data-step="3">
+                <div class="step-label">Step 3 of 7</div>
+                <h2>Creative assets</h2>
+                <p class="hint">We pull from your existing content to build the ads. The faster we can access it, the faster we can ship creative.</p>
+                <div class="field-group">
+                    <label>Do you have a main folder where all your creative assets live?</label>
+                    <div class="choice-group" data-name="assets_status">
+                        <div class="choice" data-value="organized">
+                            <div class="choice-title">Yes, fully organized</div>
+                            <div class="choice-sub">Google Drive, Dropbox, or similar. Ready to share.</div>
+                        </div>
+                        <div class="choice" data-value="scattered">
+                            <div class="choice-title">Some, but scattered</div>
+                            <div class="choice-sub">Spread across phones, computers, and platforms.</div>
+                        </div>
+                        <div class="choice" data-value="content_team">
+                            <div class="choice-title">Our content team manages it</div>
+                            <div class="choice-sub">We have someone who handles all our content.</div>
+                        </div>
+                        <div class="choice" data-value="not_much">
+                            <div class="choice-title">Not much to share yet</div>
+                            <div class="choice-sub">We're light on existing content right now.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label>If you have a Google Drive, Dropbox, or other shared folder, paste the link here.</label>
+                    <input type="url" name="assets_link" placeholder="https://drive.google.com/...">
+                </div>
+                <div class="field-group">
+                    <label>Who on your team handles content / creative, and what's the best way for us to coordinate with them?</label>
+                    <textarea name="content_team_contact" placeholder="Name, role, email, and how involved they'll be. Or 'just me' if it's a one-person operation."></textarea>
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 4: Past ad performance -->
+            <div class="step" data-step="4">
+                <div class="step-label">Step 4 of 7</div>
+                <h2>Where the ads stand today</h2>
+                <p class="hint">We're taking over from your current setup. The more context on what's been running, the smoother the handoff.</p>
+                <div class="field-group">
+                    <label>What was working well with your previous Meta ad management, and what wasn't?</label>
+                    <textarea name="past_ads_performance" placeholder="What got results, what wasted budget, what frustrated you. Don't hold back."></textarea>
+                </div>
+                <div class="field-group">
+                    <label>Roughly what's your monthly ad spend on Meta right now?</label>
+                    <input type="text" name="monthly_ad_spend" placeholder="$5,000 / month, $10,000 / month, ranges are fine">
+                </div>
+                <div class="field-group">
+                    <label>What ROAS or cost-per-purchase target are you working toward?</label>
+                    <input type="text" name="target_metrics" placeholder="2.5x ROAS, $25 CPP, 'not sure', whatever's honest">
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 5: Shopify / Website access -->
+            <div class="step" data-step="5">
+                <div class="step-label">Step 5 of 7</div>
+                <h2>Shopify store access</h2>
+                <p class="hint">We need access to install tracking properly and make the contact-page changes called out in your agreement.</p>
+                <div class="field-group">
+                    <label>Your Shopify store URL</label>
+                    <input type="url" name="shopify_url" placeholder="https://harkeroutdoors.com or yourstore.myshopify.com">
+                </div>
+                <div class="field-group">
+                    <label>How would you like to grant access?</label>
+                    <div class="choice-group" data-name="shopify_access_method">
+                        <div class="choice" data-value="invite">
+                            <div class="choice-title">Invite our team to your store</div>
+                            <div class="choice-sub">Recommended. Add kendall@lumenmarketing.co as a staff member with full permissions.</div>
+                        </div>
+                        <div class="choice" data-value="credentials">
+                            <div class="choice-title">Send login credentials</div>
+                            <div class="choice-sub">Share over WhatsApp or a secure channel after this form.</div>
+                        </div>
+                        <div class="choice" data-value="figure_out">
+                            <div class="choice-title">Let's figure it out on the call</div>
+                            <div class="choice-sub">Bring it up during kickoff.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-group">
+                    <label>Anything we should know about the store? (Theme, current dev work, recent migrations, etc.)</label>
+                    <textarea name="store_notes" placeholder="Optional. Anything that affects how we can make changes."></textarea>
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 6: Meta access -->
+            <div class="step" data-step="6">
+                <div class="step-label">Step 6 of 7</div>
+                <h2>Meta Business access</h2>
+                <p class="hint">We need admin access to your Meta Business Portfolio. The cleanest way is by assigning our Meta partner ID to your portfolio.</p>
+
+                <div class="info-card">
+                    <div class="info-card-label">Lumen Marketing — Meta Partner ID</div>
+                    <div class="info-card-text">Add this partner ID inside Meta Business Settings, then grant admin access to all assets (Pages, ad accounts, datasets/Pixels, Instagram).</div>
+                    <div class="partner-id">1531559090655146</div>
+                </div>
+
+                <div class="field-group">
+                    <label>Any blockers or questions on the Meta access piece?</label>
+                    <textarea name="meta_blockers" placeholder="Not sure how to do it, don't have admin yourself, lost access, anything — let us know and we'll walk you through it on the call."></textarea>
+                </div>
+                <div class="nav">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                    <button type="button" class="btn btn-next" onclick="nextStep()">Next</button>
+                </div>
+            </div>
+
+            <!-- Step 7: Success + anything else -->
+            <div class="step" data-step="7">
+                <div class="step-label">Step 7 of 7</div>
+                <h2>What success looks like</h2>
+                <p class="hint">Last one. This is what we'll measure against, so be specific.</p>
+                <div class="field-group">
+                    <label>What would make the first 90 days a clear win for you?</label>
+                    <textarea name="success_90days" placeholder="A revenue number, a ROAS target, a problem solved, a specific outcome. End of August 2026 — what makes you say it was worth it?"></textarea>
+                </div>
+                <div class="field-group">
+                    <label>Anything else we should know before we kick off?</label>
+                    <textarea name="anything_else" placeholder="Brand voice, audience nuances, competitors you watch, customers you want more of and fewer of, anything at all."></textarea>
+                </div>
+                <div style="margin-top: 34px;">
+                    <button type="button" class="btn btn-submit" onclick="submitForm()">Send it over</button>
+                </div>
+                <div style="text-align: center; margin-top: 14px;">
+                    <button type="button" class="btn btn-back" onclick="prevStep()">Back</button>
+                </div>
+            </div>
+
+        </form>
+
+        <div class="thank-you" id="thank-you">
+            <div class="checkmark">&#10003;</div>
+            <h2>Got it. Thank you.</h2>
+            <p>We'll read through every word of this before our kickoff call so we show up ready to build, not ready to ask basic questions. Talk soon.</p>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 7;
+        const headerEl = document.querySelector('.header');
+
+        function updateProgress() {
+            document.querySelectorAll('.progress-dot').forEach((dot, i) => {
+                dot.classList.toggle('filled', i < currentStep);
+            });
+            headerEl.classList.toggle('compact', currentStep > 1);
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+                currentStep++;
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+                updateProgress();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+                currentStep--;
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+                updateProgress();
+                window.scrollTo(0, 0);
+            }
+        }
+
+        document.querySelectorAll('.choice-group').forEach(group => {
+            const multi = group.dataset.multi === 'true';
+            group.addEventListener('click', (e) => {
+                const choice = e.target.closest('.choice');
+                if (!choice) return;
+                if (multi) {
+                    choice.classList.toggle('selected');
+                } else {
+                    group.querySelectorAll('.choice').forEach(c => c.classList.remove('selected'));
+                    choice.classList.add('selected');
+                }
+            });
+        });
+
+        function submitForm() {
+            const form = document.getElementById('onboarding-form');
+            const data = {};
+            form.querySelectorAll('input, textarea, select').forEach(el => {
+                data[el.name] = el.value;
+            });
+            document.querySelectorAll('.choice-group').forEach(group => {
+                const name = group.dataset.name;
+                if (group.dataset.multi === 'true') {
+                    const vals = Array.from(group.querySelectorAll('.choice.selected')).map(c => c.dataset.value);
+                    data[name] = vals.join(', ');
+                } else {
+                    const selected = group.querySelector('.choice.selected');
+                    data[name] = selected ? selected.dataset.value : '';
+                }
+            });
+
+            const btn = document.querySelector('.btn-submit');
+            btn.textContent = 'Sending...';
+            btn.disabled = true;
+
+            fetch('/harker-outdoor/onboarding/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(r => r.json())
+            .then(res => {
+                if (res.ok) {
+                    form.style.display = 'none';
+                    document.getElementById('progress').style.display = 'none';
+                    document.getElementById('thank-you').style.display = 'block';
+                    window.scrollTo(0, 0);
+                } else {
+                    btn.textContent = 'Try again';
+                    btn.disabled = false;
+                }
+            })
+            .catch(() => {
+                btn.textContent = 'Try again';
+                btn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>

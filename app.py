@@ -1423,6 +1423,7 @@ def admin_agent_onboarding():
 # Mane Styling Studio — marketing onboarding form
 # ---------------------------------------------------------------------------
 MANE_PREFILL = {"name": "Keanna Keim", "email": "", "business": "Mane Styling Studio", "role": "Owner"}
+HARKER_PREFILL = {"name": "", "email": "", "business": "Harker Outdoors", "role": ""}
 
 @app.route("/maneonboarding")
 def mane_onboarding():
@@ -1715,6 +1716,68 @@ def admin_mane_onboarding():
         d["lead_delivery_display"] = ", ".join(delivery_labels.get(x.strip(), x.strip()) for x in ld.split(",") if x.strip())
         subs.append(d)
     return render_template("admin_mane_onboarding.html", submissions=subs)
+
+@app.route("/harker-outdoor/onboarding")
+def harker_onboarding():
+    return render_template("harker_onboarding.html", prefill=HARKER_PREFILL)
+
+@app.route("/harker-outdoor/onboarding/submit", methods=["POST"])
+def harker_onboarding_submit():
+    data = request.get_json() or {}
+    name = (data.get("name") or "").strip() or "Anonymous"
+    email = (data.get("email") or "").strip()
+    business = (data.get("business") or "").strip() or "Harker Outdoors"
+
+    assets_labels = {
+        "organized": "Yes, fully organized in Drive/Dropbox",
+        "scattered": "Some, but scattered across devices",
+        "content_team": "Content team manages it",
+        "not_much": "Not much existing content yet",
+    }
+    shopify_labels = {
+        "invite": "Will invite Lumen team to Shopify as staff",
+        "credentials": "Will share login credentials via secure channel",
+        "figure_out": "Wants to figure out access on the call",
+    }
+
+    def row(label, value):
+        if not value:
+            return ""
+        safe = str(value).replace("\n", "<br>")
+        return f'<tr><td style="padding:12px 0; border-bottom:1px solid #1a1a25; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#7c4dff; width:40%; vertical-align:top;">{label}</td><td style="padding:12px 0 12px 16px; border-bottom:1px solid #1a1a25; font-size:14px; color:#e8e8f0; line-height:1.6;">{safe}</td></tr>'
+
+    body = f"""
+    <div style="font-family: -apple-system, Inter, sans-serif; background:#0a0a0f; padding:32px 20px; color:#e8e8f0;">
+      <div style="max-width:620px; margin:0 auto; background:#111118; border:1px solid #1a1a25; border-radius:14px; padding:32px;">
+        <div style="font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#7c4dff; margin-bottom:10px;">New Onboarding</div>
+        <h2 style="font-size:22px; font-weight:700; margin:0 0 6px 0; color:#fff;">Harker Outdoors Onboarding</h2>
+        <p style="font-size:13px; color:#8b8ba0; margin:0 0 24px 0;">{name}{' · ' + data.get('role','') if data.get('role') else ''}{' · ' + email if email else ''}</p>
+        <table style="width:100%; border-collapse:collapse;">
+          {row("Name", name)}
+          {row("Email", email)}
+          {row("Business", business)}
+          {row("Role", data.get("role",""))}
+          {row("What the business does", data.get("business_oneliner",""))}
+          {row("Offers / promos / launches", data.get("offers_deals",""))}
+          {row("Priority product to push", data.get("priority_product",""))}
+          {row("Asset folder status", assets_labels.get(data.get("assets_status",""), data.get("assets_status","")))}
+          {row("Asset folder link", data.get("assets_link",""))}
+          {row("Content team contact", data.get("content_team_contact",""))}
+          {row("Past Meta ad performance", data.get("past_ads_performance",""))}
+          {row("Monthly ad spend", data.get("monthly_ad_spend",""))}
+          {row("Target ROAS / CPP", data.get("target_metrics",""))}
+          {row("Shopify store URL", data.get("shopify_url",""))}
+          {row("Shopify access method", shopify_labels.get(data.get("shopify_access_method",""), data.get("shopify_access_method","")))}
+          {row("Store notes", data.get("store_notes",""))}
+          {row("Meta access blockers", data.get("meta_blockers",""))}
+          {row("What a win looks like in 90 days", data.get("success_90days",""))}
+          {row("Anything else", data.get("anything_else",""))}
+        </table>
+      </div>
+    </div>
+    """
+    send_email(NOTIFY_EMAIL, f"Harker Outdoors Onboarding: {name}", body)
+    return jsonify({"ok": True})
 
 @app.route("/proposal")
 def proposal():
