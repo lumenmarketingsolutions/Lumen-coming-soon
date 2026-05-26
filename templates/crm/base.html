@@ -126,19 +126,26 @@
     .sidebar-foot {
       border-top: 1px solid var(--dark-border);
       padding-top: 14px; margin-top: 10px;
-      display: flex; flex-direction: column; gap: 8px;
+      display: flex; flex-direction: column; gap: 10px;
     }
-    .sidebar-foot a {
-      font-size: 12px; color: var(--text-muted);
-      padding: 4px 6px;
+    .logout-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 500; color: var(--text-dim);
+      padding: 8px 10px; border-radius: 8px;
+      transition: background .15s, color .15s;
     }
-    .sidebar-foot a:hover { color: var(--text); }
+    .logout-link:hover { color: var(--text); background: var(--dark-hover); }
+    .logout-link svg { width: 14px; height: 14px; flex-shrink: 0; }
     .powered-by {
-      display: flex; align-items: center; gap: 6px;
+      display: inline-flex; align-items: center; gap: 6px;
       font-size: 10px; color: var(--text-muted);
-      padding: 4px 6px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      padding: 2px 10px;
     }
-    .powered-by img { height: 12px; opacity: 0.6; }
+    .powered-by img {
+      height: 10px; opacity: 0.55;
+      position: relative; top: 1px;  /* optical alignment with the cap-height of POWERED BY */
+    }
 
     /* ── Main ── */
     .main {
@@ -462,6 +469,64 @@
       .hide-mobile { display: none !important; }
     }
 
+    /* ── Book Meeting widget (used on /crm/calendar + /crm/leads/<id>) ── */
+    .cb-lead-context {
+      padding: 12px 14px;
+      background: var(--dark-card-2);
+      border: 1px solid var(--dark-border);
+      border-radius: 10px;
+      font-size: 13px; color: var(--text-dim);
+      margin-bottom: 14px;
+    }
+    .cb-lead-context strong { color: var(--text); font-weight: 600; }
+    .cb-date-btn {
+      display: flex !important; align-items: center; justify-content: space-between;
+      cursor: pointer; text-align: left;
+      width: 100%;
+    }
+    .cb-date-btn svg { color: var(--text-muted); }
+    .cb-cal {
+      margin-top: 8px; padding: 12px;
+      background: var(--dark-card-2);
+      border: 1px solid var(--dark-border);
+      border-radius: 10px;
+    }
+    .cb-cal-head {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .cb-cal-head span { font-weight: 700; font-size: 13px; }
+    .cb-cal-head button {
+      background: none; border: none; cursor: pointer;
+      width: 28px; height: 28px; border-radius: 6px;
+      color: var(--text-dim); font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .cb-cal-head button:hover { background: var(--dark-hover); color: var(--text); }
+    .cb-cal-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+    }
+    .cb-cal-dow {
+      font-size: 10px; color: var(--text-muted); text-align: center;
+      padding: 4px 0; letter-spacing: 0.5px; font-weight: 600;
+    }
+    .cb-cal-day {
+      height: 32px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: var(--text-dim);
+      cursor: pointer; border-radius: 6px;
+      transition: all .1s;
+    }
+    .cb-cal-day:hover:not(.disabled):not(.out-month) {
+      background: var(--dark-hover); color: var(--text);
+    }
+    .cb-cal-day.out-month { opacity: 0.22; pointer-events: none; }
+    .cb-cal-day.disabled { opacity: 0.3; pointer-events: none; }
+    .cb-cal-day.today { font-weight: 700; color: var(--teal); }
+    .cb-cal-day.selected {
+      background: var(--teal); color: white; font-weight: 700;
+    }
+
     /* Utility */
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; }
     .row { display: flex; align-items: center; gap: 8px; }
@@ -548,11 +613,13 @@
       </nav>
 
       <div class="sidebar-foot">
-        <a href="/crm/logout">Log out</a>
+        <a href="/crm/logout" class="logout-link">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          Log out
+        </a>
         <div class="powered-by">
           Powered by
-          <img src="/static/logo-lumen.svg" alt="Lumen">
-          <span>Lumen Marketing</span>
+          <img src="/static/logo-lumen.svg" alt="Lumen Marketing">
         </div>
       </div>
     </aside>
@@ -563,6 +630,91 @@
   </div>
 
   <div class="toast-wrap" id="toast-wrap"></div>
+
+  {# ── Shared Book Meeting widget — opened by window.crmBook.open(opts) ── #}
+  <div class="modal-backdrop" id="cb-modal" onclick="if(event.target===this) window.crmBook.close()">
+    <div class="modal" style="max-width:520px">
+      <div class="modal-head">
+        <h3>Book a meeting</h3>
+        <button class="modal-close" type="button" aria-label="Close" onclick="window.crmBook.close()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-error hidden" id="cb-error"></div>
+
+        {# Lead selector — shown when no lead is pre-bound #}
+        <div class="form-row hidden" id="cb-lead-row">
+          <label class="form-label" for="cb-lead-select">Lead</label>
+          <select class="form-select" id="cb-lead-select">
+            <option value="">Select a lead…</option>
+          </select>
+          <span class="text-muted" style="font-size:11px;margin-top:4px">
+            Most recent first. Type a letter to jump.
+          </span>
+        </div>
+
+        {# Lead context — shown when a lead is pre-bound (lead detail page) #}
+        <div class="cb-lead-context hidden" id="cb-lead-context">
+          Booking for <strong id="cb-lead-name"></strong>
+        </div>
+
+        <div class="form-row">
+          <label class="form-label">Date</label>
+          <button type="button" class="form-input cb-date-btn" onclick="window.crmBook.toggleCal()">
+            <span id="cb-date-label">Select a date…</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="cb-cal hidden" id="cb-cal">
+            <div class="cb-cal-head">
+              <button type="button" onclick="window.crmBook.calNav(-1)" aria-label="Previous month">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+              </button>
+              <span id="cb-cal-label"></span>
+              <button type="button" onclick="window.crmBook.calNav(1)" aria-label="Next month">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </div>
+            <div class="cb-cal-grid" id="cb-cal-grid"></div>
+          </div>
+        </div>
+
+        <div class="form-grid-2" style="margin-top:14px">
+          <div class="form-row">
+            <label class="form-label" for="cb-time">Time</label>
+            <select class="form-select" id="cb-time"></select>
+          </div>
+          <div class="form-row">
+            <label class="form-label" for="cb-duration">Duration</label>
+            <select class="form-select" id="cb-duration">
+              <option value="15">15 minutes</option>
+              <option value="30" selected>30 minutes</option>
+              <option value="45">45 minutes</option>
+              <option value="60">60 minutes</option>
+              <option value="90">90 minutes</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row" style="margin-top:14px">
+          <label class="form-label" for="cb-tz">Timezone</label>
+          <select class="form-select" id="cb-tz"></select>
+        </div>
+
+        <div class="form-row" style="margin-top:14px">
+          <label class="form-label" for="cb-notes">Notes <span class="text-muted" style="text-transform:none;letter-spacing:0">(added to invite, optional)</span></label>
+          <textarea class="form-textarea" id="cb-notes" style="min-height:70px"></textarea>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-outline" type="button" onclick="window.crmBook.close()">Cancel</button>
+        <button class="btn btn-primary" type="button" id="cb-submit" onclick="window.crmBook.submit()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25"/></svg>
+          Book meeting
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script>
     function toggleSidebar() {
@@ -597,6 +749,248 @@
       try { data = await r.json(); } catch { /* ignore */ }
       return { ok: r.ok, status: r.status, data: data };
     };
+
+    // ── Book Meeting widget (shared across pages) ──
+    // Usage:
+    //   window.crmBook.open({ leadId: 42, leadDisplay: 'Acme // @acme' })   // lead pre-bound
+    //   window.crmBook.open()  // open with lead selector (reads window.crmLeads)
+    window.crmBook = (function() {
+      const pad = n => String(n).padStart(2, '0');
+      const $   = id => document.getElementById(id);
+      const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      const TZ_LIST = [
+        'America/Los_Angeles','America/Denver','America/Chicago','America/New_York',
+        'America/Sao_Paulo','Europe/London','Europe/Paris','Europe/Istanbul',
+        'Africa/Cairo','Africa/Casablanca','Africa/Johannesburg',
+        'Asia/Beirut','Asia/Jerusalem','Asia/Riyadh','Asia/Dubai',
+        'Asia/Karachi','Asia/Kolkata','Asia/Bangkok','Asia/Singapore',
+        'Asia/Hong_Kong','Asia/Tokyo','Australia/Sydney',
+      ];
+
+      const state = { leadId: null, selectedDate: null, calYear: 0, calMonth: 0 };
+
+      function populateLeads(leads) {
+        const sel = $('cb-lead-select');
+        sel.innerHTML = '<option value="">Select a lead…</option>';
+        (leads || []).forEach(l => {
+          const opt = document.createElement('option');
+          opt.value = l.id;
+          const handle = l.ig_handle ? ' // @' + l.ig_handle : '';
+          const country = l.country ? ' · ' + l.country : '';
+          opt.textContent = (l.company_name || '?') + handle + country;
+          sel.appendChild(opt);
+        });
+      }
+
+      function populateTimes() {
+        const sel = $('cb-time');
+        sel.innerHTML = '';
+        // 6:00 AM → 9:45 PM in 15-min increments.
+        for (let h = 6; h < 22; h++) {
+          for (let m = 0; m < 60; m += 15) {
+            const opt = document.createElement('option');
+            opt.value = pad(h) + ':' + pad(m);
+            const h12 = ((h + 11) % 12) + 1;
+            const ampm = h < 12 ? 'AM' : 'PM';
+            opt.textContent = h12 + ':' + pad(m) + ' ' + ampm;
+            sel.appendChild(opt);
+          }
+        }
+        // Default = next 30-min boundary that's at least 5 min from now.
+        const now = new Date();
+        let dh = now.getHours();
+        let dm = now.getMinutes();
+        // round up to next :00 or :30
+        if (dm < 25) dm = 30;
+        else if (dm < 55) { dh++; dm = 0; }
+        else { dh += 1; dm = 30; }
+        if (dh >= 22) { dh = 9; dm = 0; }
+        if (dh < 6)  { dh = 9; dm = 0; }
+        sel.value = pad(dh) + ':' + pad(dm);
+      }
+
+      function populateTzs() {
+        const sel = $('cb-tz');
+        sel.innerHTML = '';
+        const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const seen = new Set();
+        if (userTz) {
+          const opt = document.createElement('option');
+          opt.value = userTz;
+          opt.textContent = userTz.replace(/_/g, ' ') + ' (your local)';
+          sel.appendChild(opt);
+          seen.add(userTz);
+        }
+        TZ_LIST.forEach(tz => {
+          if (seen.has(tz)) return;
+          const opt = document.createElement('option');
+          opt.value = tz;
+          opt.textContent = tz.replace(/_/g, ' ');
+          sel.appendChild(opt);
+          seen.add(tz);
+        });
+        sel.value = userTz || 'UTC';
+      }
+
+      function renderCal() {
+        $('cb-cal-label').textContent = MONTHS[state.calMonth] + ' ' + state.calYear;
+        const grid = $('cb-cal-grid');
+        grid.innerHTML = '';
+        ['S','M','T','W','T','F','S'].forEach(d => {
+          const c = document.createElement('div');
+          c.className = 'cb-cal-dow';
+          c.textContent = d;
+          grid.appendChild(c);
+        });
+        const first = new Date(state.calYear, state.calMonth, 1);
+        const startDow = first.getDay();
+        const gridStart = new Date(state.calYear, state.calMonth, 1 - startDow);
+        const today = new Date(); today.setHours(0,0,0,0);
+        for (let i = 0; i < 42; i++) {
+          const d = new Date(gridStart);
+          d.setDate(gridStart.getDate() + i);
+          const cell = document.createElement('div');
+          cell.className = 'cb-cal-day';
+          cell.textContent = d.getDate();
+          if (d.getMonth() !== state.calMonth) cell.classList.add('out-month');
+          if (d < today) cell.classList.add('disabled');
+          if (d.getTime() === today.getTime()) cell.classList.add('today');
+          if (state.selectedDate && d.getTime() === state.selectedDate.getTime()) cell.classList.add('selected');
+          if (!cell.classList.contains('disabled') && !cell.classList.contains('out-month')) {
+            cell.addEventListener('click', () => selectDate(d));
+          }
+          grid.appendChild(cell);
+        }
+      }
+
+      function selectDate(d) {
+        state.selectedDate = d;
+        $('cb-date-label').textContent = d.toLocaleDateString('en-US',
+          { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+        $('cb-cal').classList.add('hidden');
+        renderCal();
+      }
+
+      // Convert a wall-clock date+time in a given timezone to a UTC ISO string.
+      // Works correctly across DST transitions via Intl round-trip.
+      function wallToUTC(dateStr, timeStr, tz) {
+        const [y, mo, d] = dateStr.split('-').map(Number);
+        const [h, mi] = timeStr.split(':').map(Number);
+        const naive = Date.UTC(y, mo - 1, d, h, mi, 0);
+        const dtf = new Intl.DateTimeFormat('en-US', {
+          timeZone: tz, hour12: false,
+          year: 'numeric', month: '2-digit', day: '2-digit',
+          hour: '2-digit', minute: '2-digit', second: '2-digit',
+        });
+        const parts = {};
+        dtf.formatToParts(new Date(naive)).forEach(p => parts[p.type] = p.value);
+        const renderedUtc = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute, +parts.second);
+        const offset = renderedUtc - naive;
+        return new Date(naive - offset).toISOString();
+      }
+
+      function open(opts) {
+        opts = opts || {};
+        state.leadId = opts.leadId || null;
+        state.selectedDate = null;
+        const now = new Date();
+        state.calYear = now.getFullYear();
+        state.calMonth = now.getMonth();
+        $('cb-date-label').textContent = 'Select a date…';
+
+        if (state.leadId) {
+          $('cb-lead-row').classList.add('hidden');
+          $('cb-lead-context').classList.remove('hidden');
+          $('cb-lead-name').textContent = opts.leadDisplay || ('Lead #' + state.leadId);
+        } else {
+          $('cb-lead-row').classList.remove('hidden');
+          $('cb-lead-context').classList.add('hidden');
+          populateLeads(opts.leads || window.crmLeads || []);
+        }
+        populateTimes();
+        populateTzs();
+        $('cb-notes').value = '';
+        $('cb-duration').value = '30';
+        $('cb-error').classList.add('hidden');
+        $('cb-cal').classList.add('hidden');
+        $('cb-modal').classList.add('show');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function close() {
+        $('cb-modal').classList.remove('show');
+        document.body.style.overflow = '';
+      }
+
+      function toggleCal() {
+        $('cb-cal').classList.toggle('hidden');
+        if (!$('cb-cal').classList.contains('hidden')) renderCal();
+      }
+
+      function calNav(delta) {
+        state.calMonth += delta;
+        if (state.calMonth < 0) { state.calMonth = 11; state.calYear--; }
+        if (state.calMonth > 11) { state.calMonth = 0; state.calYear++; }
+        renderCal();
+      }
+
+      async function submit() {
+        const err = $('cb-error');
+        err.classList.add('hidden');
+
+        let leadId = state.leadId;
+        if (!leadId) {
+          leadId = parseInt($('cb-lead-select').value || '0', 10) || null;
+          if (!leadId) {
+            err.textContent = 'Select a lead.'; err.classList.remove('hidden'); return;
+          }
+        }
+        if (!state.selectedDate) {
+          err.textContent = 'Pick a date.'; err.classList.remove('hidden'); return;
+        }
+        const sd = state.selectedDate;
+        const dateStr = sd.getFullYear() + '-' + pad(sd.getMonth() + 1) + '-' + pad(sd.getDate());
+        const time = $('cb-time').value;
+        if (!time) {
+          err.textContent = 'Pick a time.'; err.classList.remove('hidden'); return;
+        }
+        const tz = $('cb-tz').value || 'UTC';
+        const dur = parseInt($('cb-duration').value, 10) || 30;
+        const notes = $('cb-notes').value.trim();
+        const utcISO = wallToUTC(dateStr, time, tz);
+
+        const btn = $('cb-submit');
+        btn.disabled = true;
+        const r = await window.api('/crm/api/meetings', { method: 'POST', body: {
+          lead_id: leadId,
+          scheduled_at: utcISO,
+          duration_min: dur,
+          notes: notes,
+          timezone: tz,
+        }});
+        btn.disabled = false;
+        if (r.ok) {
+          if (r.data.gcal_error) {
+            window.toast('Booked, but Calendar sync failed: ' + r.data.gcal_error, 'error');
+          } else {
+            window.toast('Meeting booked', 'success');
+          }
+          setTimeout(() => window.location.reload(), 500);
+        } else {
+          err.textContent = (r.data && r.data.error) || 'Could not book meeting.';
+          err.classList.remove('hidden');
+        }
+      }
+
+      // Escape key closes
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' && document.getElementById('cb-modal').classList.contains('show')) {
+          close();
+        }
+      });
+
+      return { open, close, toggleCal, calNav, submit };
+    })();
   </script>
   {% block scripts %}{% endblock %}
 </body>

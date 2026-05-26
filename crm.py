@@ -1262,14 +1262,28 @@ def calendar():
     grid_end = grid_start + datetime.timedelta(days=42)
     meetings = con.execute("""
         SELECT m.id, m.lead_id, m.scheduled_at, m.duration_min, m.status, m.setter_user_id,
-               l.company_name, l.country AS lead_country,
-               u.first_name AS setter_first, u.last_name AS setter_last, u.country AS setter_country
+               m.gmeet_link, m.notes AS meeting_notes, m.timezone AS meeting_tz,
+               l.company_name, l.ig_handle, l.full_name AS lead_full_name,
+               l.email AS lead_email, l.phone AS lead_phone,
+               l.country AS lead_country, l.industry, l.status AS lead_status,
+               l.notes AS lead_notes,
+               u.first_name AS setter_first, u.last_name AS setter_last,
+               u.country AS setter_country, u.email AS setter_email
         FROM meetings m
         JOIN leads l ON l.id = m.lead_id
         JOIN users u ON u.id = m.setter_user_id
         WHERE m.scheduled_at >= ? AND m.scheduled_at < ?
         ORDER BY m.scheduled_at ASC
     """, (grid_start.isoformat(), grid_end.isoformat())).fetchall()
+
+    # Recent leads for the "+ Book Meeting" lead-selector on this page.
+    recent_leads = con.execute("""
+        SELECT id, company_name, ig_handle, country, industry, status, email
+        FROM leads
+        WHERE do_not_approach = 0
+        ORDER BY created_at DESC
+        LIMIT 250
+    """).fetchall()
     con.close()
 
     # Group meetings by date string
@@ -1301,11 +1315,17 @@ def calendar():
     next_y, next_m = (year + 1, 1) if month == 12 else (year, month + 1)
     month_label = first.strftime("%B %Y")
 
+    # Embed meeting + lead data for client-side popups.
+    meetings_json = json.dumps({m["id"]: dict(m) for m in meetings}, default=str)
+    leads_json = json.dumps([dict(l) for l in recent_leads], default=str)
+
     return render_template(
         "crm/calendar.html",
         u=u, grid=grid, month_label=month_label,
         year=year, month=month,
         prev_y=prev_y, prev_m=prev_m, next_y=next_y, next_m=next_m,
+        meetings_json=meetings_json,
+        leads_json=leads_json,
         stats={"total_month": total_month, "completed_month": completed_month,
                "my_month": my_month,
                "rate": int((completed_month * 100 / total_month)) if total_month else 0},
@@ -1528,6 +1548,39 @@ def api_create_user():
 
     return jsonify({"ok": True, "email": email, "temp_password": temp_pw,
                     "email_sent": bool(RESEND_API_KEY)})
+
+
+@crm_bp.route("/api/users/<int:user_id>", methods=["DELETE"])
+@admin_required
+def api_delete_user(user_id):
+    """Hard-delete a user. Preserves the leads they created (their FK becomes
+    NULL, showing as "—" for added-by) but drops their meetings outright
+    (and the corresponding GCal events, if any). Frees the email for re-add."""
+    me = current_user()
+    if me["id"] == user_id:
+        return jsonify({"ok": False, "error": "You can't delete your own account."}), 400
+    con = db()
+    target = con.execute("SELECT email FROM users WHERE id = ?", (user_id,)).fetchone()
+    if not target:
+        con.close(); abort(404)
+    # Find this user's meetings to remove their GCal events too.
+    mtgs = con.execute(
+        "SELECT id, google_event_id FROM meetings WHERE setter_user_id = ?",
+        (user_id,)
+    ).fetchall()
+    for m in mtgs:
+        if m["google_event_id"]:
+            delete_google_calendar_event(m["google_event_id"])
+    # Orphan the leads + activity rows (preserves data, just removes FK).
+    con.execute("UPDATE leads SET created_by_user_id = NULL WHERE created_by_user_id = ?", (user_id,))
+    con.execute("UPDATE leads SET assigned_to_user_id = NULL WHERE assigned_to_user_id = ?", (user_id,))
+    con.execute("UPDATE lead_activity SET user_id = NULL WHERE user_id = ?", (user_id,))
+    # Drop the user's meetings + the user row.
+    con.execute("DELETE FROM meetings WHERE setter_user_id = ?", (user_id,))
+    con.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    con.commit()
+    con.close()
+    return jsonify({"ok": True, "email": target["email"]})
 
 
 @crm_bp.route("/api/users/<int:user_id>/reset-password", methods=["POST"])

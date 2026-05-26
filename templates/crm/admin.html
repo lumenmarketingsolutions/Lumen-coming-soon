@@ -158,8 +158,11 @@
           </label>
         </td>
         <td class="dim hide-mobile" style="font-size:11px">{% if usr['last_login_at'] %}Last login {{ usr['last_login_at'][:10] }}{% else %}Never logged in{% endif %}</td>
-        <td style="text-align:right">
+        <td style="text-align:right;white-space:nowrap">
           <button class="btn btn-outline btn-sm" onclick="resetPassword({{ usr['id'] }}, '{{ usr['email'] }}')">Reset password</button>
+          {% if usr['id'] != u['id'] %}
+          <button class="btn btn-danger btn-sm" style="margin-left:6px" onclick="deleteUser({{ usr['id'] }}, '{{ usr['email'] }}')" title="Delete this user — frees their email for re-adding">Delete</button>
+          {% endif %}
         </td>
       </tr>
       {% endfor %}
@@ -340,6 +343,28 @@
     const r = await window.api('/crm/api/users/' + id, { method: 'PATCH', body: patch });
     if (r.ok) window.toast('Saved', 'success');
     else window.toast('Save failed', 'error');
+  }
+
+  async function deleteUser(id, email) {
+    if (!confirm(
+      'Delete ' + email + ' permanently?\n\n' +
+      "Their leads will stay (showing as added by '—'), but their meetings " +
+      "will be removed (and their Google Calendar events too). The email becomes " +
+      "free to add again from scratch.\n\n" +
+      "This cannot be undone."
+    )) return;
+    const r = await window.api('/crm/api/users/' + id, { method: 'DELETE' });
+    if (r.ok) {
+      window.toast(email + ' deleted', 'success');
+      setTimeout(() => window.location.reload(), 300);
+    } else {
+      window.toast((r.data && r.data.error) || 'Delete failed', 'error');
+    }
+  }
+
+  // Auto-open Add User modal when arrived via /crm/admin?add=1 (from Settings link)
+  if (new URLSearchParams(location.search).get('add') === '1') {
+    setTimeout(openAddUserModal, 50);
   }
 </script>
 {% endblock %}

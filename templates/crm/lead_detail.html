@@ -34,7 +34,7 @@
       <button class="btn btn-outline" onclick="toggleDNA(false)">Clear DNA</button>
       {% endif %}
     {% endif %}
-    <button class="btn btn-primary" onclick="openMeetingModal()">
+    <button class="btn btn-primary" onclick='window.crmBook.open({leadId: {{ lead["id"] }}, leadDisplay: {{ ((lead["company_name"] or "") + (" // @" + lead["ig_handle"] if lead["ig_handle"] else ""))|tojson }}})'>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25"/></svg>
       Book Meeting
     </button>
@@ -108,7 +108,7 @@
     <div class="card">
       <div class="row-between" style="margin-bottom:14px">
         <span class="form-label">Meetings</span>
-        <button class="btn btn-outline btn-sm" onclick="openMeetingModal()">+ Book meeting</button>
+        <button class="btn btn-outline btn-sm" onclick='window.crmBook.open({leadId: {{ lead["id"] }}, leadDisplay: {{ ((lead["company_name"] or "") + (" // @" + lead["ig_handle"] if lead["ig_handle"] else ""))|tojson }}})'>+ Book meeting</button>
       </div>
       {% if meetings %}
         <div class="stack" style="gap:10px">
@@ -292,48 +292,7 @@
 </div>
 
 {# ── Book Meeting modal ── #}
-<div class="modal-backdrop" id="meeting-modal" onclick="if(event.target===this) closeMeetingModal()">
-  <div class="modal">
-    <div class="modal-head">
-      <h3>Book a meeting</h3>
-      <button class="modal-close" onclick="closeMeetingModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
-    </div>
-    <div class="modal-body">
-      <div class="alert alert-info">
-        The event will be added to <strong>your</strong> Google Calendar and will auto-invite
-        Kendall, Mary, and MaryKate. A Google Meet link is generated automatically.
-      </div>
-      <div class="alert alert-error hidden" id="m-error"></div>
-      <div class="form-grid-2">
-        <div class="form-row">
-          <label class="form-label">Date</label>
-          <input class="form-input" type="date" id="m-date">
-        </div>
-        <div class="form-row">
-          <label class="form-label">Time (your local)</label>
-          <input class="form-input" type="time" id="m-time">
-        </div>
-      </div>
-      <div class="form-row" style="margin-top:12px">
-        <label class="form-label">Duration</label>
-        <select class="form-select" id="m-duration">
-          <option value="15">15 minutes</option>
-          <option value="30" selected>30 minutes</option>
-          <option value="45">45 minutes</option>
-          <option value="60">60 minutes</option>
-        </select>
-      </div>
-      <div class="form-row" style="margin-top:12px">
-        <label class="form-label">Notes (added to invite)</label>
-        <textarea class="form-textarea" id="m-notes" style="min-height:70px" placeholder="Optional"></textarea>
-      </div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn btn-outline" onclick="closeMeetingModal()">Cancel</button>
-      <button class="btn btn-primary" id="m-submit" onclick="bookMeeting()">Book meeting</button>
-    </div>
-  </div>
-</div>
+{# Book Meeting modal is shared, lives in base.html → opened via window.crmBook.open(). #}
 {% endblock %}
 
 {% block scripts %}
@@ -406,66 +365,8 @@
     }
   }
 
-  function openMeetingModal() {
-    const m = document.getElementById('meeting-modal');
-    m.classList.add('show');
-    document.body.style.overflow = 'hidden';
-    // Default date = today, time = next half-hour.
-    const now = new Date();
-    const date = now.toISOString().slice(0, 10);
-    now.setMinutes(now.getMinutes() + 30 - (now.getMinutes() % 30));
-    const time = now.toTimeString().slice(0, 5);
-    document.getElementById('m-date').value = date;
-    document.getElementById('m-time').value = time;
-  }
-  function closeMeetingModal() {
-    document.getElementById('meeting-modal').classList.remove('show');
-    document.body.style.overflow = '';
-  }
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMeetingModal(); } });
-
-  async function bookMeeting() {
-    const date = document.getElementById('m-date').value;
-    const time = document.getElementById('m-time').value;
-    const dur = parseInt(document.getElementById('m-duration').value, 10) || 30;
-    const notes = document.getElementById('m-notes').value.trim();
-    const err = document.getElementById('m-error');
-    err.classList.add('hidden');
-    if (!date || !time) {
-      err.textContent = 'Pick a date and time.';
-      err.classList.remove('hidden');
-      return;
-    }
-    // Convert local datetime → UTC ISO string the server will accept.
-    const local = new Date(date + 'T' + time);
-    if (isNaN(local.getTime())) {
-      err.textContent = 'Invalid date/time.';
-      err.classList.remove('hidden');
-      return;
-    }
-    const utc = local.toISOString();
-    const btn = document.getElementById('m-submit');
-    btn.disabled = true;
-    const r = await window.api('/crm/api/meetings', { method: 'POST', body: {
-      lead_id: LEAD_ID,
-      scheduled_at: utc,
-      duration_min: dur,
-      notes: notes,
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
-    }});
-    btn.disabled = false;
-    if (r.ok) {
-      if (r.data.gcal_error) {
-        window.toast('Booked, but Calendar sync failed: ' + r.data.gcal_error, 'error');
-      } else {
-        window.toast('Meeting booked', 'success');
-      }
-      window.location.reload();
-    } else {
-      err.textContent = (r.data && r.data.error) || 'Could not book meeting.';
-      err.classList.remove('hidden');
-    }
-  }
+  // Book Meeting modal lives in base.html as window.crmBook — opened via
+  // the page-header / inline buttons. No per-page modal code needed.
 
   async function updateMeeting(id, status) {
     const r = await window.api('/crm/api/meetings/' + id, { method: 'PATCH', body: { status } });

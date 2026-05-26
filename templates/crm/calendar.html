@@ -17,10 +17,8 @@
     background: var(--dark-card-2);
     border-bottom: 1px solid var(--dark-border);
     border-right: 1px solid var(--dark-border);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
     color: var(--text-muted);
   }
   .cal-head:last-child { border-right: none; }
@@ -46,21 +44,23 @@
     display: inline-flex; align-items: center; justify-content: center;
   }
   .meeting-chip {
-    display: block; padding: 4px 8px;
+    display: block; width: 100%;
+    text-align: left;
+    padding: 4px 8px;
     background: var(--teal-glow);
     color: var(--teal);
     border-radius: 6px;
-    font-size: 11px;
-    line-height: 1.2;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    font-size: 11px; line-height: 1.2;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
     cursor: pointer;
     border: 1px solid transparent;
+    font-family: inherit;
   }
   .meeting-chip:hover { border-color: var(--teal); }
   .meeting-chip.completed { background: rgba(52,211,153,0.10); color: var(--green); }
-  .meeting-chip.no_show, .meeting-chip.canceled { background: rgba(248,113,113,0.10); color: var(--red); text-decoration: line-through; }
+  .meeting-chip.no_show, .meeting-chip.canceled {
+    background: rgba(248,113,113,0.10); color: var(--red); text-decoration: line-through;
+  }
   .meeting-chip.mine { font-weight: 600; }
 
   .cal-nav {
@@ -79,11 +79,30 @@
   .cal-nav button:hover { background: var(--dark-hover); color: var(--text); }
   .cal-nav .month-label { font-weight: 700; padding: 0 6px; }
 
+  /* Event info popup table */
+  .ei-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 13px;
+  }
+  .ei-row:last-child { border-bottom: none; }
+  .ei-row .ei-k {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--text-muted);
+    padding-top: 2px;
+  }
+  .ei-row .ei-v { color: var(--text); }
+
   @media (max-width: 900px) {
     .cal-cell { min-height: 60px; padding: 4px; }
     .cal-cell .day { font-size: 11px; }
     .meeting-chip { font-size: 10px; padding: 2px 4px; }
     .cal-head { padding: 6px 4px; font-size: 9px; }
+    .ei-row { grid-template-columns: 1fr; gap: 2px; padding: 6px 0; }
   }
 </style>
 {% endblock %}
@@ -92,7 +111,9 @@
 <div class="page-header">
   <div>
     <div class="page-title">Calendar</div>
-    <div class="page-sub">All meetings booked across the team.{% if u['role'] != 'admin' %} Other setters' meetings show as initials only.{% endif %}</div>
+    <div class="page-sub">
+      All meetings booked across the team.{% if u['role'] != 'admin' %} Other setters' meetings show as initials only.{% endif %}
+    </div>
   </div>
   <div class="page-actions">
     <div class="cal-nav">
@@ -105,6 +126,10 @@
       </button>
     </div>
     <a class="btn btn-outline" href="/crm/calendar">Today</a>
+    <button class="btn btn-primary" onclick="window.crmBook.open()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+      Book meeting
+    </button>
   </div>
 </div>
 
@@ -118,7 +143,6 @@
   {% for d in ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] %}
     <div class="cal-head">{{ d }}</div>
   {% endfor %}
-  {% set today_iso = (None) %}
   {% for week in grid %}
     {% for cell in week %}
       <div class="cal-cell {% if not cell.in_month %}out-month{% endif %}">
@@ -126,12 +150,15 @@
         {% for m in cell.meetings %}
           {% set mine = (m['setter_user_id'] == u['id']) %}
           {% if u['role'] == 'admin' or mine %}
-            <a href="/crm/leads/{{ m['lead_id'] }}" class="meeting-chip {{ m['status'] }} {% if mine %}mine{% endif %}"
+            <button type="button" class="meeting-chip {{ m['status'] }} {% if mine %}mine{% endif %}"
+               onclick="openEventInfo({{ m['id'] }})"
                title="{{ m['company_name'] }} · {{ (m['setter_first'] or '') }} {{ (m['setter_last'] or '') }}">
               {{ m['scheduled_at'][11:16] }} · {{ m['company_name'][:20] }}
-            </a>
+            </button>
           {% else %}
-            <span class="meeting-chip {{ m['status'] }}" title="{{ m['setter_first'] }} {{ m['setter_last'] }} · {{ m['setter_country'] or '' }}">
+            {# Non-admin viewing someone else's meeting: minimal info, not clickable. #}
+            <span class="meeting-chip {{ m['status'] }}"
+                  title="{{ m['setter_first'] }} {{ m['setter_last'] }} · {{ m['setter_country'] or '' }}">
               {{ m['scheduled_at'][11:16] }} · {{ (m['setter_first'] or '?')[:1] }}{{ (m['setter_last'] or '?')[:1] }}
               {% if m['setter_country'] %} · {{ m['setter_country'] }}{% endif %}
             </span>
@@ -143,6 +170,131 @@
 </div>
 
 <p class="text-muted" style="font-size:12px;margin-top:16px;text-align:center">
-  To book a meeting, open the lead and click "Book Meeting" — meetings link directly to a lead in the CRM.
+  Click a meeting to see lead details. Use "Book meeting" above to schedule a new one.
 </p>
+
+{# ── Event Info popup — opens when you click a meeting chip ── #}
+<div class="modal-backdrop" id="event-info-modal" onclick="if(event.target===this) closeEventInfo()">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-head">
+      <div>
+        <h3 id="ei-title">Meeting</h3>
+        <div class="text-muted" style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-top:2px" id="ei-when"></div>
+      </div>
+      <button class="modal-close" type="button" onclick="closeEventInfo()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="ei-row"><div class="ei-k">Status</div><div class="ei-v" id="ei-status"></div></div>
+      <div class="ei-row"><div class="ei-k">Setter</div><div class="ei-v" id="ei-setter"></div></div>
+      <div class="ei-row"><div class="ei-k">Lead</div><div class="ei-v" id="ei-lead"></div></div>
+      <div class="ei-row" id="ei-handle-row"><div class="ei-k">Instagram</div><div class="ei-v"><a id="ei-handle" target="_blank" rel="noopener" style="color:var(--teal)"></a></div></div>
+      <div class="ei-row" id="ei-country-row"><div class="ei-k">Country</div><div class="ei-v" id="ei-country"></div></div>
+      <div class="ei-row" id="ei-industry-row"><div class="ei-k">Industry</div><div class="ei-v" id="ei-industry"></div></div>
+      <div class="ei-row" id="ei-leadstatus-row"><div class="ei-k">Lead status</div><div class="ei-v" id="ei-leadstatus"></div></div>
+      <div class="ei-row" id="ei-email-row"><div class="ei-k">Email</div><div class="ei-v"><a id="ei-email" style="color:var(--teal)"></a></div></div>
+      <div class="ei-row" id="ei-phone-row"><div class="ei-k">Phone</div><div class="ei-v" id="ei-phone"></div></div>
+      <div class="ei-row" id="ei-meet-row"><div class="ei-k">Google Meet</div><div class="ei-v"><a id="ei-meet" target="_blank" rel="noopener" style="color:var(--teal)"></a></div></div>
+      <div class="ei-row" id="ei-notes-row" style="grid-template-columns:1fr;display:none">
+        <div class="ei-k" style="margin-bottom:4px">Notes on the lead</div>
+        <div class="ei-v" id="ei-notes" style="white-space:pre-wrap;line-height:1.5;color:var(--text-dim)"></div>
+      </div>
+      <div class="ei-row" id="ei-mnotes-row" style="grid-template-columns:1fr;display:none">
+        <div class="ei-k" style="margin-bottom:4px">Meeting notes</div>
+        <div class="ei-v" id="ei-mnotes" style="white-space:pre-wrap;line-height:1.5;color:var(--text-dim)"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" type="button" onclick="closeEventInfo()">Close</button>
+      <a class="btn btn-primary" id="ei-open-lead" href="#">Open lead →</a>
+    </div>
+  </div>
+</div>
+
+{# Embed leads + meetings data for client-side popups + booking selector. #}
+<script id="crm-leads-json" type="application/json">{{ leads_json|safe }}</script>
+<script id="crm-meetings-json" type="application/json">{{ meetings_json|safe }}</script>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Hydrate JSON into window globals — crmBook reads window.crmLeads for the
+  // lead selector, and openEventInfo reads window.crmMeetings for chip clicks.
+  window.crmLeads = JSON.parse(document.getElementById('crm-leads-json').textContent || '[]');
+  window.crmMeetings = JSON.parse(document.getElementById('crm-meetings-json').textContent || '{}');
+
+  function openEventInfo(id) {
+    const m = window.crmMeetings[id];
+    if (!m) return;
+    const setterName = ((m.setter_first || '') + ' ' + (m.setter_last || '')).trim() || m.setter_email || 'Unknown';
+    const leadName = m.company_name + (m.ig_handle ? ' // @' + m.ig_handle : '');
+    document.getElementById('ei-title').textContent = leadName;
+    // Pretty when: "Mon Jun 1, 10:00 AM UTC" (server stores UTC; display in user-local)
+    let whenPretty = m.scheduled_at;
+    try {
+      const d = new Date(m.scheduled_at.replace(' ', 'T') + (m.scheduled_at.endsWith('Z') ? '' : 'Z'));
+      whenPretty = d.toLocaleString(undefined, {
+        weekday: 'short', month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit',
+        timeZoneName: 'short',
+      });
+    } catch {}
+    document.getElementById('ei-when').textContent = whenPretty + ' · ' + m.duration_min + ' min';
+
+    const statusLabel = (m.status || 'scheduled').replace('_', ' ');
+    document.getElementById('ei-status').textContent = statusLabel.charAt(0).toUpperCase() + statusLabel.slice(1);
+    document.getElementById('ei-setter').textContent = setterName + (m.setter_country ? ' · ' + m.setter_country : '');
+    document.getElementById('ei-lead').textContent = m.lead_full_name || m.company_name;
+
+    function setRow(rowId, valEl, val, hrefAttr) {
+      const row = document.getElementById(rowId);
+      const el = (typeof valEl === 'string') ? document.getElementById(valEl) : valEl;
+      if (val) {
+        row.style.display = '';
+        el.textContent = val;
+        if (hrefAttr) el.href = hrefAttr;
+      } else {
+        row.style.display = 'none';
+      }
+    }
+    if (m.ig_handle) {
+      const h = String(m.ig_handle).replace(/^@/, '');
+      setRow('ei-handle-row', 'ei-handle', '@' + h, 'https://instagram.com/' + h);
+    } else { setRow('ei-handle-row', 'ei-handle', null); }
+    setRow('ei-country-row',    'ei-country',    m.lead_country);
+    setRow('ei-industry-row',   'ei-industry',   m.industry);
+    setRow('ei-leadstatus-row', 'ei-leadstatus', m.lead_status);
+    if (m.lead_email) setRow('ei-email-row', 'ei-email', m.lead_email, 'mailto:' + m.lead_email);
+    else setRow('ei-email-row', 'ei-email', null);
+    setRow('ei-phone-row', 'ei-phone', m.lead_phone);
+    if (m.gmeet_link) setRow('ei-meet-row', 'ei-meet', m.gmeet_link, m.gmeet_link);
+    else setRow('ei-meet-row', 'ei-meet', null);
+    // Notes (lead-level + meeting-level)
+    if (m.lead_notes) {
+      document.getElementById('ei-notes-row').style.display = '';
+      document.getElementById('ei-notes').textContent = m.lead_notes;
+    } else {
+      document.getElementById('ei-notes-row').style.display = 'none';
+    }
+    if (m.meeting_notes) {
+      document.getElementById('ei-mnotes-row').style.display = '';
+      document.getElementById('ei-mnotes').textContent = m.meeting_notes;
+    } else {
+      document.getElementById('ei-mnotes-row').style.display = 'none';
+    }
+    document.getElementById('ei-open-lead').href = '/crm/leads/' + m.lead_id;
+    document.getElementById('event-info-modal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeEventInfo() {
+    document.getElementById('event-info-modal').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.getElementById('event-info-modal').classList.contains('show')) {
+      closeEventInfo();
+    }
+  });
+</script>
 {% endblock %}
