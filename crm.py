@@ -101,12 +101,10 @@ BOOTSTRAP_ADMIN_EMAIL = os.environ.get(
 BOOTSTRAP_ADMIN_PASSWORD = os.environ.get("CRM_BOOTSTRAP_ADMIN_PASSWORD", "")
 
 # Admins who receive notification emails on lead-add / meeting-booked.
-# Mary (mary@mk7media.com) was dropped per Kendall's request — only Kendall
-# + MaryKate get the notifications now. Override via CRM_NOTIFY_ADMINS env.
 NOTIFY_ADMINS = [
     e.strip() for e in
     os.environ.get("CRM_NOTIFY_ADMINS",
-                   "kendall@lumenmarketing.co,marykatezarehghazarian@gmail.com")
+                   "kendall@lumenmarketing.co,marykatezarehghazarian@gmail.com,mary@mk7media.com")
         .split(",")
     if e.strip()
 ]
@@ -114,12 +112,11 @@ NOTIFY_ADMINS = [
 # Every Google Calendar event created by any setter is auto-attended by these
 # emails. They show up on the invite + get the event on their own GCal. The
 # event organizer (the setter who booked) is suppressed from this list so
-# Google doesn't double-invite them. Mary removed per request — only Kendall
-# (organizer) + MaryKate get the calendar invites now.
+# Google doesn't double-invite them.
 ALWAYS_INVITE = [
     e.strip().lower() for e in
     os.environ.get("CRM_ALWAYS_INVITE",
-                   "kendall@lumenmarketing.co,marykatezarehghazarian@gmail.com")
+                   "kendall@lumenmarketing.co,marykatezarehghazarian@gmail.com,mary@mk7media.com")
         .split(",")
     if e.strip()
 ]
@@ -294,7 +291,7 @@ def init_db():
     # got created with a different password, was reset, or was corrupted,
     # the next boot restores the env-var password. The hash is what's stored
     # in the DB — the plaintext env var is only used during the hash step.
-    existing = cur.execute("SELECT id, password_hash FROM users WHERE email = ?",
+    existing = cur.execute("SELECT id, password_hash, role, is_active FROM users WHERE email = ?",
                            (BOOTSTRAP_ADMIN_EMAIL,)).fetchone()
     if not existing:
         # No admin yet — create one. If env var is missing, use an unguessable
@@ -314,15 +311,22 @@ def init_db():
                   "Set CRM_BOOTSTRAP_ADMIN_PASSWORD env var and restart.")
     elif BOOTSTRAP_ADMIN_PASSWORD:
         # Existing admin — re-sync the password from env var so it's always
-        # current. We only rewrite if the new hash differs from stored, to
-        # avoid pointless writes on every boot (also: check_password_hash
-        # is the only way to compare since each hash has its own salt).
-        if not existing["password_hash"] or \
-           not check_password_hash(existing["password_hash"], BOOTSTRAP_ADMIN_PASSWORD):
-            cur.execute("UPDATE users SET password_hash = ?, must_change_password = 0, is_active = 1 WHERE id = ?",
-                        (generate_password_hash(BOOTSTRAP_ADMIN_PASSWORD), existing["id"]))
+        # current. Also re-assert role='admin' and is_active=1 in case the
+        # row got accidentally demoted/deactivated via the UI (e.g. admin
+        # changes their own position dropdown and the cascade demotes them).
+        pw_ok = (existing["password_hash"] and
+                 check_password_hash(existing["password_hash"], BOOTSTRAP_ADMIN_PASSWORD))
+        role_ok = existing["role"] == "admin"
+        active_ok = bool(existing["is_active"])
+        if not pw_ok or not role_ok or not active_ok:
+            cur.execute(
+                "UPDATE users SET password_hash = ?, must_change_password = 0, "
+                "is_active = 1, role = 'admin' WHERE id = ?",
+                (generate_password_hash(BOOTSTRAP_ADMIN_PASSWORD), existing["id"])
+            )
             con.commit()
-            print(f"[crm] Synced admin {BOOTSTRAP_ADMIN_EMAIL} password from env.")
+            print(f"[crm] Re-synced admin {BOOTSTRAP_ADMIN_EMAIL} "
+                  f"(pw_ok={pw_ok} role_ok={role_ok} active_ok={active_ok}).")
 
     con.close()
 
@@ -1561,12 +1565,54 @@ def admin():
         ORDER BY total_leads DESC, u.first_name
     """, params).fetchall()
     all_users = con.execute("SELECT * FROM users ORDER BY first_name").fetchall()
+
+    # ── Stat tiles: count ALL activity (including admins), not just per-setter
+    # rows. Previously these summed across the filtered Meeting-Setters table
+    # only, which hid admin test bookings entirely. Now they reflect every
+    # lead and meeting in the system, filtered by country only when set.
+    stat_params = []
+    if country_filter:
+        # Country filter applies via the creator/setter user's country, so we
+        # join through users. Leads/meetings whose creator's country doesn't
+        # match (or whose creator was deleted) are excluded.
+        leads_filter = (
+            "JOIN users u ON u.id = l.created_by_user_id WHERE u.country = ?"
+        )
+        meet_filter = (
+            "JOIN users u ON u.id = m.setter_user_id WHERE u.country = ?"
+        )
+        stat_params = [country_filter]
+        total_leads_count = con.execute(
+            f"SELECT COUNT(*) FROM leads l {leads_filter}", stat_params
+        ).fetchone()[0]
+        contacted_count = con.execute(
+            f"SELECT COUNT(*) FROM leads l {leads_filter} AND l.status != 'New'",
+            stat_params,
+        ).fetchone()[0]
+        booked_count = con.execute(
+            f"SELECT COUNT(*) FROM meetings m {meet_filter}", stat_params
+        ).fetchone()[0]
+        attended_count = con.execute(
+            f"SELECT COUNT(*) FROM meetings m {meet_filter} AND m.status = 'completed'",
+            stat_params,
+        ).fetchone()[0]
+        converted_count = con.execute(
+            f"SELECT COUNT(*) FROM leads l {leads_filter} AND l.status = 'Closed'",
+            stat_params,
+        ).fetchone()[0]
+    else:
+        total_leads_count = con.execute("SELECT COUNT(*) FROM leads").fetchone()[0]
+        contacted_count   = con.execute("SELECT COUNT(*) FROM leads WHERE status != 'New'").fetchone()[0]
+        booked_count      = con.execute("SELECT COUNT(*) FROM meetings").fetchone()[0]
+        attended_count    = con.execute("SELECT COUNT(*) FROM meetings WHERE status = 'completed'").fetchone()[0]
+        converted_count   = con.execute("SELECT COUNT(*) FROM leads WHERE status = 'Closed'").fetchone()[0]
+
     con.close()
-    total = sum(r["total_leads"] for r in rows)
-    contacted = sum(r["contacted"] for r in rows)
-    booked = sum(r["meetings_booked"] for r in rows)
-    attended = sum(r["meetings_attended"] for r in rows)
-    converted = sum(r["converted"] for r in rows)
+    total     = total_leads_count
+    contacted = contacted_count
+    booked    = booked_count
+    attended  = attended_count
+    converted = converted_count
     cal = shared_calendar_status()
     return render_template(
         "crm/admin.html",
@@ -1711,11 +1757,12 @@ def api_update_user(user_id):
             elif isinstance(v, str):
                 v = v.strip() or None
             fields[k] = v
-    # If position changed but role wasn't explicitly set, derive role.
-    if "position" in fields and "role" not in fields:
-        derived = POSITION_TO_ROLE.get(fields["position"] or "")
-        if derived:
-            fields["role"] = derived
+    # Position changes used to auto-cascade to role via POSITION_TO_ROLE, which
+    # had a nasty side effect: an admin changing their own position dropdown
+    # (e.g. "Admin" → "Meeting Setter") would silently demote themselves out
+    # of admin and lose access to /crm/admin. Position is now purely a display
+    # label; role must be changed explicitly (and the UI doesn't expose role
+    # for setters, only for admins via this API). No cascade.
     if not fields:
         return jsonify({"ok": True, "noop": True})
     con = db()
