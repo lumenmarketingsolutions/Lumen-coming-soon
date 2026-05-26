@@ -44,7 +44,19 @@
       display: flex; flex-direction: column; align-items: center;
       margin-bottom: 28px;
     }
-    .brand img { height: 32px; margin-bottom: 12px; }
+    .lockup {
+      display: inline-flex; align-items: center; gap: 14px;
+      margin-bottom: 16px;
+    }
+    .lockup img { height: 22px; opacity: 0.92; }
+    .lockup .x {
+      font-size: 14px; font-weight: 400; color: var(--text-muted);
+      letter-spacing: 0;
+    }
+    .lockup .mk7 {
+      font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
+      color: #fff;
+    }
     .brand .title { font-size: 22px; font-weight: 800; letter-spacing: -0.4px; }
     .brand .sub {
       font-size: 11px; color: var(--text-muted);
@@ -123,9 +135,13 @@
 <body>
   <div class="wrap">
     <div class="brand">
-      <img src="/static/logo-mk.png" alt="MK7 Media">
-      <div class="title">MK7 CRM</div>
-      <div class="sub">Setter Dashboard</div>
+      <div class="lockup">
+        <img src="/static/logo-lumen.svg" alt="Lumen">
+        <span class="x">×</span>
+        <span class="mk7">MK7</span>
+      </div>
+      <div class="title">Setter CRM</div>
+      <div class="sub">Lead tracking · Calendar</div>
     </div>
     <div class="card">
       <h1>Sign in</h1>

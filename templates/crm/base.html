@@ -7,7 +7,7 @@
   <title>{% block title %}MK7 CRM{% endblock %}</title>
   <meta name="description" content="MK7 Setter CRM — lead tracker and appointment setter dashboard.">
   <link rel="icon" href="/static/favicon.svg">
-  <link rel="preload" href="/static/logo-mk.png" as="image">
+  <link rel="preload" href="/static/logo-lumen.svg" as="image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -56,13 +56,23 @@
     }
     .brand-row {
       display: flex; align-items: center; gap: 10px;
-      padding: 4px 6px 18px;
+      padding: 4px 6px 16px;
       border-bottom: 1px solid var(--dark-border);
       margin-bottom: 14px;
+      flex-direction: column;
+      align-items: flex-start;
     }
-    .brand-row img { height: 22px; }
+    .brand-lockup {
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .brand-lockup img { height: 16px; opacity: 0.9; }
+    .brand-lockup .x { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+    .brand-lockup .mk7 {
+      font-size: 16px; font-weight: 800; color: #fff; letter-spacing: -0.4px;
+    }
     .brand-text {
       display: flex; flex-direction: column; line-height: 1.1;
+      margin-top: 6px;
     }
     .brand-text .b1 {
       font-size: 13px; font-weight: 700; letter-spacing: 0.3px;
@@ -409,7 +419,9 @@
       z-index: 60;
     }
     .mobile-bar .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
-    .mobile-bar img { height: 18px; }
+    .mobile-bar .logo img { height: 14px; opacity: 0.9; }
+    .mobile-bar .logo .x { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+    .mobile-bar .logo .mk7 { font-weight: 800; letter-spacing: -0.3px; }
     .menu-btn {
       width: 38px; height: 38px;
       background: transparent; border: 1px solid var(--dark-border);
@@ -466,8 +478,10 @@
   {# ── Mobile top bar ────────────────────────────────────────────────────── #}
   <div class="mobile-bar">
     <a class="logo" href="/crm/leads">
-      <img src="/static/logo-mk.png" alt="MK7">
-      <span>MK7 CRM</span>
+      <img src="/static/logo-lumen.svg" alt="Lumen">
+      <span class="x">×</span>
+      <span class="mk7">MK7</span>
+      <span style="color:var(--text-muted);font-weight:400;margin-left:4px">CRM</span>
     </a>
     <button class="menu-btn" type="button" aria-label="Menu" onclick="toggleSidebar()">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h14M3 10h14M3 14h14"/></svg>
@@ -478,10 +492,14 @@
   <div class="layout">
     <aside class="sidebar">
       <div class="brand-row">
-        <img src="/static/logo-mk.png" alt="MK7 Media">
+        <div class="brand-lockup">
+          <img src="/static/logo-lumen.svg" alt="Lumen">
+          <span class="x">×</span>
+          <span class="mk7">MK7</span>
+        </div>
         <div class="brand-text">
-          <span class="b1">MK7 CRM</span>
-          <span class="b2">Setter dashboard</span>
+          <span class="b1">Setter CRM</span>
+          <span class="b2">Lead tracker</span>
         </div>
       </div>
 
