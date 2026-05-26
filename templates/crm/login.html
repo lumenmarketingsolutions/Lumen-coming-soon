@@ -45,16 +45,12 @@
       margin-bottom: 28px;
     }
     .lockup {
-      display: inline-flex; align-items: center; gap: 16px;
-      margin-bottom: 18px;
+      display: inline-flex; align-items: center; gap: 20px;
+      margin-bottom: 28px;  /* breathing room before the page title */
     }
-    /* Both marks share the same render height for perfect visual parity. */
-    .lockup .lumen-mark,
-    .lockup .mk7-mark {
-      height: 48px;
-      display: block;
-      width: auto;
-    }
+    /* MK7 ~20% larger than Lumen — circular badge balances heavier than the wordmark. */
+    .lockup .lumen-mark { height: 42px; display: block; width: auto; }
+    .lockup .mk7-mark   { height: 56px; display: block; width: auto; }
     .lockup .x {
       font-family: 'Inter', sans-serif;
       font-size: 15px; font-weight: 300;

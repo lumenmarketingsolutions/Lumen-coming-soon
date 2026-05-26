@@ -65,8 +65,10 @@
     .brand-lockup {
       display: inline-flex; align-items: center; gap: 10px;
     }
-    .brand-lockup .lumen-mark,
-    .brand-lockup .mk7-mark { height: 28px; display: block; width: auto; }
+    /* MK7 is intentionally ~20% larger than Lumen — the wordmark and the
+       circular badge balance better with the badge sized up a touch. */
+    .brand-lockup .lumen-mark { height: 24px; display: block; width: auto; }
+    .brand-lockup .mk7-mark   { height: 32px; display: block; width: auto; }
     .brand-lockup .x {
       font-family: 'Inter', sans-serif;
       font-size: 12px; font-weight: 300; color: var(--text-muted);
@@ -74,7 +76,7 @@
     }
     .brand-text {
       display: flex; flex-direction: column; line-height: 1.1;
-      margin-top: 6px;
+      margin-top: 18px;  /* breathing room between the logo lockup and the page label */
     }
     .brand-text .b1 {
       font-size: 13px; font-weight: 700; letter-spacing: 0.3px;
@@ -428,8 +430,8 @@
       z-index: 60;
     }
     .mobile-bar .logo { display: flex; align-items: center; gap: 8px; }
-    .mobile-bar .logo .lumen-mark,
-    .mobile-bar .logo .mk7-mark { height: 22px; display: block; width: auto; }
+    .mobile-bar .logo .lumen-mark { height: 18px; display: block; width: auto; }
+    .mobile-bar .logo .mk7-mark   { height: 26px; display: block; width: auto; }
     .mobile-bar .logo .x {
       font-family: 'Inter', sans-serif;
       font-size: 11px; font-weight: 300; color: var(--text-muted);
