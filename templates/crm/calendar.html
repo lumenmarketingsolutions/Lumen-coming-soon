@@ -1,0 +1,148 @@
+{% extends "crm/base.html" %}
+{% set active = 'calendar' %}
+{% block title %}Calendar — MK7 CRM{% endblock %}
+
+{% block head_extra %}
+<style>
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border: 1px solid var(--dark-border);
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--dark-card);
+  }
+  .cal-head {
+    padding: 10px 12px;
+    background: var(--dark-card-2);
+    border-bottom: 1px solid var(--dark-border);
+    border-right: 1px solid var(--dark-border);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .cal-head:last-child { border-right: none; }
+  .cal-cell {
+    min-height: 110px;
+    padding: 8px;
+    border-right: 1px solid var(--dark-border);
+    border-bottom: 1px solid var(--dark-border);
+    background: var(--dark-card);
+    display: flex; flex-direction: column; gap: 4px;
+    overflow: hidden;
+  }
+  .cal-cell:nth-child(7n) { border-right: none; }
+  .cal-cell.out-month { background: var(--dark); }
+  .cal-cell .day {
+    font-size: 12px; font-weight: 600;
+    color: var(--text-dim);
+  }
+  .cal-cell.out-month .day { color: var(--text-muted); }
+  .cal-cell.today .day {
+    background: var(--teal); color: white;
+    width: 22px; height: 22px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .meeting-chip {
+    display: block; padding: 4px 8px;
+    background: var(--teal-glow);
+    color: var(--teal);
+    border-radius: 6px;
+    font-size: 11px;
+    line-height: 1.2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .meeting-chip:hover { border-color: var(--teal); }
+  .meeting-chip.completed { background: rgba(52,211,153,0.10); color: var(--green); }
+  .meeting-chip.no_show, .meeting-chip.canceled { background: rgba(248,113,113,0.10); color: var(--red); text-decoration: line-through; }
+  .meeting-chip.mine { font-weight: 600; }
+
+  .cal-nav {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--dark-card);
+    border: 1px solid var(--dark-border);
+    border-radius: 12px;
+    padding: 6px 10px;
+  }
+  .cal-nav button {
+    background: none; border: none; cursor: pointer;
+    width: 28px; height: 28px; border-radius: 6px;
+    color: var(--text-dim);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cal-nav button:hover { background: var(--dark-hover); color: var(--text); }
+  .cal-nav .month-label { font-weight: 700; padding: 0 6px; }
+
+  @media (max-width: 900px) {
+    .cal-cell { min-height: 60px; padding: 4px; }
+    .cal-cell .day { font-size: 11px; }
+    .meeting-chip { font-size: 10px; padding: 2px 4px; }
+    .cal-head { padding: 6px 4px; font-size: 9px; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Calendar</div>
+    <div class="page-sub">All meetings booked across the team.{% if u['role'] != 'admin' %} Other setters' meetings show as initials only.{% endif %}</div>
+  </div>
+  <div class="page-actions">
+    <div class="cal-nav">
+      <button onclick="window.location='/crm/calendar?y={{ prev_y }}&m={{ prev_m }}'" aria-label="Previous month">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span class="month-label">{{ month_label }}</span>
+      <button onclick="window.location='/crm/calendar?y={{ next_y }}&m={{ next_m }}'" aria-label="Next month">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+    </div>
+    <a class="btn btn-outline" href="/crm/calendar">Today</a>
+  </div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-tile"><div class="label">This Month</div><div class="value">{{ stats.total_month }}</div><div class="sub">Total meetings</div></div>
+  <div class="stat-tile"><div class="label">Completed</div><div class="value">{{ stats.completed_month }}</div><div class="sub">{{ stats.rate }}% completion rate</div></div>
+  <div class="stat-tile"><div class="label">My Meetings</div><div class="value">{{ stats.my_month }}</div><div class="sub">Booked by me</div></div>
+</div>
+
+<div class="cal-grid">
+  {% for d in ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] %}
+    <div class="cal-head">{{ d }}</div>
+  {% endfor %}
+  {% set today_iso = (None) %}
+  {% for week in grid %}
+    {% for cell in week %}
+      <div class="cal-cell {% if not cell.in_month %}out-month{% endif %}">
+        <span class="day">{{ cell.date.day }}</span>
+        {% for m in cell.meetings %}
+          {% set mine = (m['setter_user_id'] == u['id']) %}
+          {% if u['role'] == 'admin' or mine %}
+            <a href="/crm/leads/{{ m['lead_id'] }}" class="meeting-chip {{ m['status'] }} {% if mine %}mine{% endif %}"
+               title="{{ m['company_name'] }} · {{ (m['setter_first'] or '') }} {{ (m['setter_last'] or '') }}">
+              {{ m['scheduled_at'][11:16] }} · {{ m['company_name'][:20] }}
+            </a>
+          {% else %}
+            <span class="meeting-chip {{ m['status'] }}" title="{{ m['setter_first'] }} {{ m['setter_last'] }} · {{ m['setter_country'] or '' }}">
+              {{ m['scheduled_at'][11:16] }} · {{ (m['setter_first'] or '?')[:1] }}{{ (m['setter_last'] or '?')[:1] }}
+              {% if m['setter_country'] %} · {{ m['setter_country'] }}{% endif %}
+            </span>
+          {% endif %}
+        {% endfor %}
+      </div>
+    {% endfor %}
+  {% endfor %}
+</div>
+
+<p class="text-muted" style="font-size:12px;margin-top:16px;text-align:center">
+  To book a meeting, open the lead and click "Book Meeting" — meetings link directly to a lead in the CRM.
+</p>
+{% endblock %}

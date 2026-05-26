@@ -1,0 +1,295 @@
+{% extends "crm/base.html" %}
+{% set active = 'leads' %}
+{% block title %}Leads — MK7 CRM{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Leads</div>
+    <div class="page-sub">{{ total }} lead{% if total != 1 %}s{% endif %} matching your filters</div>
+  </div>
+  <div class="page-actions">
+    <button class="btn btn-outline" onclick="window.location.reload()" title="Refresh">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 019-9 9.75 9.75 0 016.74 2.74L21 8M21 3v5h-5M21 12a9 9 0 01-9 9 9.75 9.75 0 01-6.74-2.74L3 16M3 21v-5h5"/></svg>
+      Refresh
+    </button>
+    <button class="btn btn-primary" onclick="openAddModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+      Add Lead
+    </button>
+  </div>
+</div>
+
+{# ── View toggles ── #}
+<div class="chips" style="margin-bottom:14px">
+  <a href="?{{ {'view':'everyone'}|urlencode_with(f) }}" class="chip {% if f.view != 'mine' %}active{% endif %}">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75M9 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
+    Everyone
+  </a>
+  <a href="?{{ {'view':'mine'}|urlencode_with(f) }}" class="chip {% if f.view == 'mine' %}active{% endif %}">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
+    Mine
+  </a>
+  <a href="?{{ {'dna':'exclude'}|urlencode_with(f) }}" class="chip {% if f.dna == 'exclude' %}active{% endif %}">Exclude DNA</a>
+  <a href="?{{ {'dna':'only'}|urlencode_with(f) }}" class="chip {% if f.dna == 'only' %}active{% endif %}">Only DNA</a>
+  <a href="?{{ {'dna':'all'}|urlencode_with(f) }}" class="chip {% if f.dna == 'all' %}active{% endif %}">All</a>
+</div>
+
+{# ── Filter bar (GET form so back-button cleanly steps through filter states) ── #}
+<form method="get" class="filter-bar" id="filter-form">
+  <input type="hidden" name="view" value="{{ f.view }}">
+  <input type="hidden" name="dna" value="{{ f.dna }}">
+  <div class="search-input">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+    <input class="form-input" type="search" name="q" value="{{ f.q }}" placeholder="Search company, handle, name, email, phone…" autocomplete="off">
+  </div>
+  <select class="form-select" name="source" onchange="this.form.submit()">
+    <option value="">All Sources</option>
+    {% for s in SOURCES %}<option value="{{ s }}" {% if f.source == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+  </select>
+  <select class="form-select" name="industry" onchange="this.form.submit()">
+    <option value="">All Industries</option>
+    {% for i in INDUSTRIES %}<option value="{{ i }}" {% if f.industry == i %}selected{% endif %}>{{ i }}</option>{% endfor %}
+  </select>
+  <select class="form-select" name="country" onchange="this.form.submit()">
+    <option value="">All Countries</option>
+    {% for c in COUNTRIES %}<option value="{{ c }}" {% if f.country == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+  </select>
+  <select class="form-select" name="status" onchange="this.form.submit()">
+    <option value="">All Statuses</option>
+    {% for s in STATUSES %}<option value="{{ s }}" {% if f.status == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+  </select>
+</form>
+
+{# ── Table ── #}
+<div class="table-wrap" style="overflow-x:auto">
+  {% if leads %}
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Lead / Business</th>
+        <th>Source</th>
+        <th class="hide-mobile">Industry</th>
+        <th>Status</th>
+        {% if u['role'] == 'admin' %}<th class="hide-mobile">Added by</th>{% endif %}
+        <th class="hide-mobile">Country</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in leads %}
+      <tr onclick="window.location='/crm/leads/{{ l['id'] }}'" style="cursor:pointer">
+        <td>
+          <div style="font-weight:600">{{ l['company_name'] }}{% if l['ig_handle'] %} <span class="text-muted">// @{{ l['ig_handle'] }}</span>{% endif %}</div>
+          {% if l['full_name'] %}<div class="text-muted" style="font-size:11px;margin-top:2px">{{ l['full_name'] }}{% if l['job_title'] %} · {{ l['job_title'] }}{% endif %}</div>{% endif %}
+        </td>
+        <td>
+          <span class="badge badge-source-{{ l['source']|lower }}">{{ l['source'] }}</span>
+        </td>
+        <td class="hide-mobile dim">{{ l['industry'] or '—' }}</td>
+        <td>
+          {% set scls = 's-' ~ (l['status']|lower|replace(' ', '-')) %}
+          <span class="badge badge-status {{ scls }}">{{ l['status'] }}</span>
+          {% if l['do_not_approach'] %}<span class="badge badge-dna" style="margin-left:6px">DNA</span>{% endif %}
+        </td>
+        {% if u['role'] == 'admin' %}
+        <td class="hide-mobile dim">{{ (l['creator_first'] or '') + ' ' + (l['creator_last'] or '') if l['creator_first'] else (l['creator_email'] or '—') }}</td>
+        {% endif %}
+        <td class="hide-mobile dim">{{ l['country'] or '—' }}</td>
+        <td style="text-align:right;width:1%">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:.4"><path d="M9 18l6-6-6-6"/></svg>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <div class="em-title">No leads match these filters</div>
+    <div class="em-sub">Try clearing a filter, or add the first lead.</div>
+    <button class="btn btn-primary" onclick="openAddModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+      Add Lead
+    </button>
+  </div>
+  {% endif %}
+</div>
+
+{# ── Add Lead modal ── #}
+<div class="modal-backdrop" id="add-modal" onclick="if(event.target===this) closeAddModal()">
+  <div class="modal" role="dialog" aria-labelledby="add-title">
+    <div class="modal-head">
+      <h3 id="add-title">Add New Lead</h3>
+      <button class="modal-close" type="button" aria-label="Close" onclick="closeAddModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <div class="alert alert-info" id="add-tip">
+        We'll check for duplicates by IG handle, email, and phone before saving.
+      </div>
+      <div class="alert alert-warn hidden" id="add-dupe">
+        <div style="font-weight:600;margin-bottom:4px">Possible duplicate.</div>
+        <div id="add-dupe-text"></div>
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <a class="btn btn-outline btn-sm" id="add-dupe-link" href="#">View existing lead</a>
+          <button class="btn btn-danger btn-sm" type="button" onclick="submitForm(true)">Save anyway</button>
+        </div>
+      </div>
+      <div class="alert alert-error hidden" id="add-error"></div>
+
+      <div class="form-section-label">Organization</div>
+      <div class="stack">
+        <div class="form-row">
+          <label class="form-label" for="f-company">Company Name *</label>
+          <input class="form-input" id="f-company" placeholder="e.g. Alphamed">
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="f-handle">Instagram Handle</label>
+          <input class="form-input" id="f-handle" placeholder="e.g. @alphamed.healthcare">
+        </div>
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label class="form-label" for="f-country">Country *</label>
+            <select class="form-select" id="f-country">
+              <option value="">Select country…</option>
+              {% for c in COUNTRIES %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label" for="f-industry">Industry *</label>
+            <select class="form-select" id="f-industry">
+              <option value="">Select industry…</option>
+              {% for i in INDUSTRIES %}<option value="{{ i }}">{{ i }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="f-source">Source *</label>
+          <select class="form-select" id="f-source">
+            {% for s in SOURCES %}<option value="{{ s }}" {% if s == 'Outbound' %}selected{% endif %}>{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section-label">Contact Person</div>
+      <div class="stack">
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label class="form-label" for="f-name">Full Name</label>
+            <input class="form-input" id="f-name" placeholder="John Doe">
+          </div>
+          <div class="form-row">
+            <label class="form-label" for="f-title">Job Title</label>
+            <input class="form-input" id="f-title" placeholder="e.g. Marketing Manager">
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="f-email">Email</label>
+          <input class="form-input" id="f-email" type="email" placeholder="contact@company.com">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Phone</label>
+          <div style="display:grid;grid-template-columns:90px 1fr;gap:8px">
+            <input class="form-input" id="f-phone-cc" placeholder="+961">
+            <input class="form-input" id="f-phone" placeholder="Phone number">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section-label">Lead Details</div>
+      <div class="stack">
+        <div class="form-row">
+          <label class="form-label" for="f-status">Status *</label>
+          <select class="form-select" id="f-status">
+            {% for s in STATUSES %}<option value="{{ s }}" {% if s == 'New' %}selected{% endif %}>{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="f-notes">Notes</label>
+          <textarea class="form-textarea" id="f-notes" placeholder="Anything worth remembering about this lead…"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" type="button" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-primary" type="button" id="add-submit" onclick="submitForm(false)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+        Create Lead
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function openAddModal() {
+    document.getElementById('add-modal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('f-company').focus(), 50);
+  }
+  function closeAddModal() {
+    document.getElementById('add-modal').classList.remove('show');
+    document.body.style.overflow = '';
+    document.getElementById('add-error').classList.add('hidden');
+    document.getElementById('add-dupe').classList.add('hidden');
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeAddModal();
+  });
+
+  async function submitForm(override) {
+    const btn = document.getElementById('add-submit');
+    const errBox = document.getElementById('add-error');
+    const dupBox = document.getElementById('add-dupe');
+    errBox.classList.add('hidden'); dupBox.classList.add('hidden');
+
+    const payload = {
+      company_name: document.getElementById('f-company').value.trim(),
+      ig_handle: document.getElementById('f-handle').value.trim(),
+      full_name: document.getElementById('f-name').value.trim(),
+      job_title: document.getElementById('f-title').value.trim(),
+      email: document.getElementById('f-email').value.trim(),
+      phone_country_code: document.getElementById('f-phone-cc').value.trim(),
+      phone: document.getElementById('f-phone').value.trim(),
+      country: document.getElementById('f-country').value,
+      industry: document.getElementById('f-industry').value,
+      source: document.getElementById('f-source').value,
+      status: document.getElementById('f-status').value,
+      notes: document.getElementById('f-notes').value.trim(),
+      override_dupe: override,
+    };
+    if (!payload.company_name) {
+      errBox.textContent = 'Company name is required.';
+      errBox.classList.remove('hidden');
+      return;
+    }
+
+    btn.disabled = true;
+    const r = await window.api('/crm/api/leads', { method: 'POST', body: payload });
+    btn.disabled = false;
+
+    if (r.ok) {
+      window.toast('Lead added', 'success');
+      window.location = '/crm/leads/' + r.data.id;
+      return;
+    }
+    if (r.status === 409 && r.data && r.data.duplicate) {
+      const ex = r.data.existing_lead;
+      const niceType = { ig: 'Instagram handle', email: 'email', phone: 'phone' }[r.data.match_type] || r.data.match_type;
+      document.getElementById('add-dupe-text').innerHTML =
+        'A lead with the same <strong>' + niceType + '</strong> already exists:<br>' +
+        '<strong>' + (ex.company_name || '') + (ex.ig_handle ? ' // @' + ex.ig_handle : '') + '</strong>' +
+        ' · ' + (ex.status || '') + ' · added by ' + (ex.created_by || '—');
+      document.getElementById('add-dupe-link').href = '/crm/leads/' + ex.id;
+      dupBox.classList.remove('hidden');
+      dupBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return;
+    }
+    errBox.textContent = (r.data && r.data.error) || 'Something went wrong.';
+    errBox.classList.remove('hidden');
+  }
+</script>
+{% endblock %}

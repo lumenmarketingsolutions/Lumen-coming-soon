@@ -1,0 +1,448 @@
+{% extends "crm/base.html" %}
+{% set active = 'leads' %}
+{% block title %}{{ lead['company_name'] }} — MK7 CRM{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:14px">
+  <a href="javascript:history.back()" class="btn btn-ghost btn-sm" style="padding-left:6px">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+    Back
+  </a>
+</div>
+
+<div class="page-header">
+  <div style="min-width:0">
+    <div class="page-title truncate">{{ lead['company_name'] }}{% if lead['ig_handle'] %} <span class="text-muted" style="font-weight:500">// @{{ lead['ig_handle'] }}</span>{% endif %}</div>
+    <div class="page-sub">
+      {{ lead['country'] or 'No country' }} · {{ lead['industry'] or 'No industry' }} · {{ lead['source'] }}
+      {% if u['role'] == 'admin' %}
+      <br><span class="text-muted">Added by
+        {% if lead['creator_first'] %}{{ lead['creator_first'] }} {{ lead['creator_last'] or '' }}{% else %}{{ lead['creator_email'] or '—' }}{% endif %}
+        · {{ lead['created_at'][:10] }}
+      </span>
+      {% endif %}
+    </div>
+  </div>
+  <div class="page-actions">
+    {% if not lead['do_not_approach'] %}
+    <button class="btn btn-outline" onclick="toggleDNA(true)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>
+      Mark Do Not Approach
+    </button>
+    {% else %}
+    <button class="btn btn-outline" onclick="toggleDNA(false)">Clear DNA</button>
+    {% endif %}
+    <button class="btn btn-primary" onclick="openMeetingModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25"/></svg>
+      Book Meeting
+    </button>
+  </div>
+</div>
+
+{% if lead['do_not_approach'] %}
+<div class="alert alert-error">
+  <strong>Do Not Approach.</strong>
+  {% if lead['do_not_approach_reason'] %} {{ lead['do_not_approach_reason'] }}{% endif %}
+</div>
+{% endif %}
+
+<div style="display:grid;grid-template-columns:1.5fr 1fr;gap:18px" id="detail-grid">
+
+  {# ── LEFT COLUMN ── #}
+  <div class="stack" style="gap:18px">
+
+    {# ── Status + assignment ── #}
+    <div class="card">
+      <div class="row-between" style="margin-bottom:14px">
+        <span class="form-label">Status & Assignment</span>
+        <span class="text-muted" style="font-size:11px">Updated {{ lead['updated_at'][:16].replace('T', ' ') }}</span>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label class="form-label" for="d-status">Status</label>
+          <select class="form-select" id="d-status" onchange="updateLead({status: this.value})">
+            {% for s in STATUSES %}<option value="{{ s }}" {% if lead['status'] == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="d-assignee">Assigned to</label>
+          <select class="form-select" id="d-assignee" onchange="updateLead({assigned_to_user_id: this.value ? parseInt(this.value) : null})">
+            <option value="">— Unassigned —</option>
+            {% for usr in users %}
+              <option value="{{ usr['id'] }}" {% if lead['assigned_to_user_id'] == usr['id'] %}selected{% endif %}>
+                {{ usr['first_name'] or '' }} {{ usr['last_name'] or '' }} {% if not usr['first_name'] %}({{ usr['email'] }}){% endif %}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    {# ── Add note ── #}
+    <div class="card">
+      <div class="form-row" style="margin-bottom:10px">
+        <label class="form-label" for="note-input">Add note</label>
+        <textarea class="form-textarea" id="note-input" placeholder="What happened with this lead?"></textarea>
+      </div>
+      <div style="display:flex;justify-content:flex-end">
+        <button class="btn btn-primary btn-sm" onclick="addNote()">Add note</button>
+      </div>
+    </div>
+
+    {# ── Meetings list ── #}
+    <div class="card">
+      <div class="row-between" style="margin-bottom:14px">
+        <span class="form-label">Meetings</span>
+        <button class="btn btn-outline btn-sm" onclick="openMeetingModal()">+ Book meeting</button>
+      </div>
+      {% if meetings %}
+        <div class="stack" style="gap:10px">
+        {% for m in meetings %}
+          <div style="padding:12px;border:1px solid var(--dark-border);border-radius:10px;background:var(--dark-card-2)">
+            <div class="row-between">
+              <div>
+                <div style="font-weight:600">{{ m['scheduled_at'][:16].replace('T', ' ') }} UTC</div>
+                <div class="text-muted" style="font-size:11px;margin-top:2px">
+                  {{ m['duration_min'] }} min · {{ m['setter_first'] or '' }} {{ m['setter_last'] or '' }}
+                </div>
+              </div>
+              <span class="badge badge-status s-{{ m['status']|replace('_','-') }}">{{ m['status']|replace('_', ' ')|title }}</span>
+            </div>
+            {% if m['gmeet_link'] %}
+              <a href="{{ m['gmeet_link'] }}" target="_blank" rel="noopener" class="text-dim" style="font-size:12px;margin-top:8px;display:inline-block">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px"><path d="M22 7l-7 5 7 5V7zM12 5H4a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2z"/></svg>
+                Google Meet link
+              </a>
+            {% endif %}
+            <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+              {% if m['status'] == 'scheduled' %}
+                <button class="btn btn-ghost btn-sm" onclick="updateMeeting({{ m['id'] }}, 'completed')">Mark completed</button>
+                <button class="btn btn-ghost btn-sm" onclick="updateMeeting({{ m['id'] }}, 'no_show')">No-show</button>
+                <button class="btn btn-danger btn-sm" onclick="deleteMeeting({{ m['id'] }})">Cancel</button>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-muted" style="font-size:13px;padding:8px 0">No meetings booked yet.</div>
+      {% endif %}
+    </div>
+
+    {# ── Activity timeline ── #}
+    <div class="card">
+      <div class="row-between" style="margin-bottom:14px">
+        <span class="form-label">Activity</span>
+      </div>
+      {% if activity %}
+        <div class="stack" style="gap:14px">
+        {% for a in activity %}
+          {% set p = a['payload']|tojson if false else (a['payload']) %}
+          <div style="display:grid;grid-template-columns:8px 1fr;gap:12px;align-items:flex-start">
+            <div style="width:8px;height:8px;border-radius:50%;background:var(--teal);margin-top:7px"></div>
+            <div>
+              <div style="font-size:13px">
+                {% set actor = (a['u_first'] or '') + ' ' + (a['u_last'] or '') %}
+                <strong>{{ actor.strip() or a['u_email'] or 'System' }}</strong>
+                {% if a['activity_type'] == 'created' %}
+                  created the lead
+                {% elif a['activity_type'] == 'status_change' %}
+                  changed status from <em>{{ (a['payload']|fromjson)['from'] }}</em> to <em>{{ (a['payload']|fromjson)['to'] }}</em>
+                {% elif a['activity_type'] == 'note' %}
+                  added a note
+                {% elif a['activity_type'] == 'meeting_booked' %}
+                  booked a meeting
+                {% elif a['activity_type'] == 'meeting_completed' %}
+                  marked meeting completed
+                {% elif a['activity_type'] == 'meeting_no_show' %}
+                  marked meeting no-show
+                {% elif a['activity_type'] == 'meeting_canceled' %}
+                  canceled a meeting
+                {% elif a['activity_type'] == 'dna_on' %}
+                  marked Do Not Approach
+                {% elif a['activity_type'] == 'dna_off' %}
+                  cleared Do Not Approach
+                {% elif a['activity_type'] == 'assigned' %}
+                  changed assignment
+                {% else %}
+                  {{ a['activity_type'] }}
+                {% endif %}
+              </div>
+              {% if a['activity_type'] == 'note' and a['payload'] %}
+                <div style="margin-top:6px;padding:10px 12px;background:var(--dark-card-2);border:1px solid var(--dark-border);border-radius:8px;font-size:13px;line-height:1.5;color:var(--text)">
+                  {{ (a['payload']|fromjson)['text'] }}
+                </div>
+              {% endif %}
+              <div class="text-muted" style="font-size:11px;margin-top:4px">{{ a['created_at'][:16].replace('T', ' ') }} UTC</div>
+            </div>
+          </div>
+        {% endfor %}
+        </div>
+      {% else %}
+        <div class="text-muted" style="font-size:13px">No activity yet.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── RIGHT COLUMN ── #}
+  <div class="stack" style="gap:18px">
+    <div class="card">
+      <div class="row-between" style="margin-bottom:14px">
+        <span class="form-label">Contact</span>
+        <button class="btn btn-ghost btn-sm" onclick="toggleEdit()">Edit</button>
+      </div>
+      <div id="contact-view" class="stack" style="gap:10px;font-size:13px">
+        <div><span class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:1px">Name</span><br>{{ lead['full_name'] or '—' }}</div>
+        <div><span class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:1px">Job Title</span><br>{{ lead['job_title'] or '—' }}</div>
+        <div><span class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:1px">Email</span><br>{% if lead['email'] %}<a href="mailto:{{ lead['email'] }}" style="color:var(--teal)">{{ lead['email'] }}</a>{% else %}—{% endif %}</div>
+        <div><span class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:1px">Phone</span><br>{{ ((lead['phone_country_code'] or '') + ' ' + (lead['phone'] or '')).strip() or '—' }}</div>
+        <div><span class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:1px">Instagram</span><br>{% if lead['ig_handle'] %}<a href="https://instagram.com/{{ lead['ig_handle'].lstrip('@') }}" target="_blank" rel="noopener" style="color:var(--teal)">@{{ lead['ig_handle'].lstrip('@') }}</a>{% else %}—{% endif %}</div>
+      </div>
+      <div id="contact-edit" class="stack hidden" style="gap:10px">
+        <div class="form-row"><label class="form-label">Full Name</label><input class="form-input" id="e-name" value="{{ lead['full_name'] or '' }}"></div>
+        <div class="form-row"><label class="form-label">Job Title</label><input class="form-input" id="e-title" value="{{ lead['job_title'] or '' }}"></div>
+        <div class="form-row"><label class="form-label">Email</label><input class="form-input" id="e-email" type="email" value="{{ lead['email'] or '' }}"></div>
+        <div class="form-row"><label class="form-label">Phone</label>
+          <div style="display:grid;grid-template-columns:90px 1fr;gap:8px">
+            <input class="form-input" id="e-phone-cc" value="{{ lead['phone_country_code'] or '' }}">
+            <input class="form-input" id="e-phone" value="{{ lead['phone'] or '' }}">
+          </div>
+        </div>
+        <div class="form-row"><label class="form-label">Instagram Handle</label><input class="form-input" id="e-handle" value="{{ lead['ig_handle'] or '' }}"></div>
+        <div class="form-row"><label class="form-label">Country</label>
+          <select class="form-select" id="e-country">
+            <option value="">—</option>
+            {% for c in COUNTRIES %}<option value="{{ c }}" {% if lead['country'] == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-row"><label class="form-label">Industry</label>
+          <select class="form-select" id="e-industry">
+            <option value="">—</option>
+            {% for i in INDUSTRIES %}<option value="{{ i }}" {% if lead['industry'] == i %}selected{% endif %}>{{ i }}</option>{% endfor %}
+          </select>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button class="btn btn-outline btn-sm" onclick="toggleEdit()">Cancel</button>
+          <button class="btn btn-primary btn-sm" onclick="saveContact()">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <span class="form-label">Source &amp; Industry</span>
+      <div class="form-grid-2" style="margin-top:10px">
+        <div class="form-row">
+          <label class="form-label">Source</label>
+          <select class="form-select" onchange="updateLead({source: this.value})">
+            {% for s in SOURCES %}<option value="{{ s }}" {% if lead['source'] == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Country</label>
+          <select class="form-select" onchange="updateLead({country: this.value})">
+            <option value="">—</option>
+            {% for c in COUNTRIES %}<option value="{{ c }}" {% if lead['country'] == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    {% if u['role'] == 'admin' %}
+    <div class="card" style="border-color:rgba(248,113,113,0.18)">
+      <span class="form-label" style="color:var(--red)">Danger zone</span>
+      <button class="btn btn-danger btn-sm" style="margin-top:10px" onclick="deleteLead()">Delete lead</button>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{# ── Book Meeting modal ── #}
+<div class="modal-backdrop" id="meeting-modal" onclick="if(event.target===this) closeMeetingModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Book a meeting</h3>
+      <button class="modal-close" onclick="closeMeetingModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-info">
+        The event will be added to <strong>your</strong> Google Calendar and will auto-invite
+        Kendall, Mary, and MaryKate. A Google Meet link is generated automatically.
+      </div>
+      <div class="alert alert-error hidden" id="m-error"></div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label class="form-label">Date</label>
+          <input class="form-input" type="date" id="m-date">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Time (your local)</label>
+          <input class="form-input" type="time" id="m-time">
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:12px">
+        <label class="form-label">Duration</label>
+        <select class="form-select" id="m-duration">
+          <option value="15">15 minutes</option>
+          <option value="30" selected>30 minutes</option>
+          <option value="45">45 minutes</option>
+          <option value="60">60 minutes</option>
+        </select>
+      </div>
+      <div class="form-row" style="margin-top:12px">
+        <label class="form-label">Notes (added to invite)</label>
+        <textarea class="form-textarea" id="m-notes" style="min-height:70px" placeholder="Optional"></textarea>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeMeetingModal()">Cancel</button>
+      <button class="btn btn-primary" id="m-submit" onclick="bookMeeting()">Book meeting</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const LEAD_ID = {{ lead['id'] }};
+
+  // Centralized lead patch — used by status/assignment dropdowns + contact edit.
+  async function updateLead(patch) {
+    const r = await window.api('/crm/api/leads/' + LEAD_ID, { method: 'PATCH', body: patch });
+    if (r.ok) {
+      window.toast('Saved', 'success');
+      // Refresh activity timeline by reloading; cheaper than rebuilding client-side.
+      setTimeout(() => window.location.reload(), 400);
+    } else {
+      window.toast('Save failed', 'error');
+    }
+  }
+
+  function toggleEdit() {
+    document.getElementById('contact-view').classList.toggle('hidden');
+    document.getElementById('contact-edit').classList.toggle('hidden');
+  }
+  async function saveContact() {
+    await updateLead({
+      full_name: document.getElementById('e-name').value.trim(),
+      job_title: document.getElementById('e-title').value.trim(),
+      email:     document.getElementById('e-email').value.trim(),
+      phone_country_code: document.getElementById('e-phone-cc').value.trim(),
+      phone:     document.getElementById('e-phone').value.trim(),
+      ig_handle: document.getElementById('e-handle').value.trim(),
+      country:   document.getElementById('e-country').value,
+      industry:  document.getElementById('e-industry').value,
+    });
+  }
+
+  async function addNote() {
+    const t = document.getElementById('note-input').value.trim();
+    if (!t) { window.toast('Note is empty', 'error'); return; }
+    const r = await window.api('/crm/api/leads/' + LEAD_ID + '/notes', { method: 'POST', body: { text: t } });
+    if (r.ok) {
+      document.getElementById('note-input').value = '';
+      window.location.reload();
+    } else {
+      window.toast('Could not add note', 'error');
+    }
+  }
+
+  async function toggleDNA(on) {
+    let reason = null;
+    if (on) {
+      reason = prompt('Reason for Do Not Approach? (optional)') || '';
+    }
+    await updateLead({ do_not_approach: on, do_not_approach_reason: reason });
+  }
+
+  async function deleteLead() {
+    if (!confirm('Delete this lead permanently? This cannot be undone.')) return;
+    const r = await window.api('/crm/api/leads/' + LEAD_ID, { method: 'DELETE' });
+    if (r.ok) {
+      window.toast('Lead deleted', 'success');
+      window.location = '/crm/leads';
+    } else {
+      window.toast('Delete failed', 'error');
+    }
+  }
+
+  function openMeetingModal() {
+    const m = document.getElementById('meeting-modal');
+    m.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    // Default date = today, time = next half-hour.
+    const now = new Date();
+    const date = now.toISOString().slice(0, 10);
+    now.setMinutes(now.getMinutes() + 30 - (now.getMinutes() % 30));
+    const time = now.toTimeString().slice(0, 5);
+    document.getElementById('m-date').value = date;
+    document.getElementById('m-time').value = time;
+  }
+  function closeMeetingModal() {
+    document.getElementById('meeting-modal').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeMeetingModal(); } });
+
+  async function bookMeeting() {
+    const date = document.getElementById('m-date').value;
+    const time = document.getElementById('m-time').value;
+    const dur = parseInt(document.getElementById('m-duration').value, 10) || 30;
+    const notes = document.getElementById('m-notes').value.trim();
+    const err = document.getElementById('m-error');
+    err.classList.add('hidden');
+    if (!date || !time) {
+      err.textContent = 'Pick a date and time.';
+      err.classList.remove('hidden');
+      return;
+    }
+    // Convert local datetime → UTC ISO string the server will accept.
+    const local = new Date(date + 'T' + time);
+    if (isNaN(local.getTime())) {
+      err.textContent = 'Invalid date/time.';
+      err.classList.remove('hidden');
+      return;
+    }
+    const utc = local.toISOString();
+    const btn = document.getElementById('m-submit');
+    btn.disabled = true;
+    const r = await window.api('/crm/api/meetings', { method: 'POST', body: {
+      lead_id: LEAD_ID,
+      scheduled_at: utc,
+      duration_min: dur,
+      notes: notes,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || '',
+    }});
+    btn.disabled = false;
+    if (r.ok) {
+      if (r.data.gcal_error) {
+        window.toast('Booked, but Calendar sync failed: ' + r.data.gcal_error, 'error');
+      } else {
+        window.toast('Meeting booked', 'success');
+      }
+      window.location.reload();
+    } else {
+      err.textContent = (r.data && r.data.error) || 'Could not book meeting.';
+      err.classList.remove('hidden');
+    }
+  }
+
+  async function updateMeeting(id, status) {
+    const r = await window.api('/crm/api/meetings/' + id, { method: 'PATCH', body: { status } });
+    if (r.ok) { window.location.reload(); } else { window.toast('Update failed', 'error'); }
+  }
+  async function deleteMeeting(id) {
+    if (!confirm('Cancel this meeting? Calendar event will also be removed.')) return;
+    const r = await window.api('/crm/api/meetings/' + id, { method: 'DELETE' });
+    if (r.ok) { window.location.reload(); } else { window.toast('Delete failed', 'error'); }
+  }
+
+  // Mobile: stack columns
+  function applyResponsiveGrid() {
+    const grid = document.getElementById('detail-grid');
+    if (window.innerWidth < 900) grid.style.gridTemplateColumns = '1fr';
+    else grid.style.gridTemplateColumns = '1.5fr 1fr';
+  }
+  applyResponsiveGrid();
+  window.addEventListener('resize', applyResponsiveGrid);
+</script>
+{% endblock %}

@@ -85,6 +85,10 @@ init_md_db()
 from sce_admin import sce_admin_bp
 app.register_blueprint(sce_admin_bp)
 
+# MK7 Setter CRM — see crm.py + templates/crm/* for the full module.
+from crm import crm_bp
+app.register_blueprint(crm_bp)
+
 ADMIN_PIN = "112501"
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAIL = "kendall@lumenmarketing.co"

@@ -1,0 +1,335 @@
+{% extends "crm/base.html" %}
+{% set active = 'admin' %}
+{% block title %}Meeting Setters — MK7 CRM{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Meeting Setters</div>
+    <div class="page-sub">Track leads and bookings per setter. Admin only.</div>
+  </div>
+  <div class="page-actions">
+    <button class="btn btn-primary" onclick="openAddUserModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+      Add user
+    </button>
+  </div>
+</div>
+
+{# ── Google Calendar connection status ── #}
+<div class="card" style="margin-bottom:18px">
+  <div class="row-between" style="margin-bottom:8px">
+    <span class="form-label">Shared Google Calendar</span>
+    {% if calendar.connected %}
+      <span class="badge" style="background:rgba(52,211,153,0.10);color:var(--green)">Connected</span>
+    {% else %}
+      <span class="badge" style="background:rgba(245,158,11,0.10);color:var(--amber)">Not connected</span>
+    {% endif %}
+  </div>
+  {% if calendar.connected %}
+    <p class="text-dim" style="font-size:13px;margin-bottom:12px">
+      Every meeting booked by any setter is added to <strong>{{ calendar.account_email or '?' }}</strong>'s calendar,
+      auto-inviting MaryKate, Mary, the setter, and the lead.
+    </p>
+    <a class="btn btn-outline btn-sm" href="/crm/admin/calendar/connect">Re-connect</a>
+  {% else %}
+    <p class="text-dim" style="font-size:13px;margin-bottom:12px">
+      Connect a Google account (use <strong>kendall@lumenmarketing.co</strong>) so booked meetings land on the team calendar with auto Google Meet links.
+    </p>
+    <a class="btn btn-primary btn-sm" href="/crm/admin/calendar/connect">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25"/></svg>
+      Connect Google Calendar
+    </a>
+  {% endif %}
+</div>
+
+{% if request.args.get('calendar') == 'connected' %}
+<div class="alert" style="background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.25);color:#bdebd2;margin-bottom:18px">
+  Calendar connected. Try booking a test meeting from any lead.
+</div>
+{% endif %}
+
+<div class="stat-grid">
+  <div class="stat-tile"><div class="label">Total Leads</div><div class="value">{{ stats.total }}</div></div>
+  <div class="stat-tile"><div class="label">Contacted</div><div class="value">{{ stats.contacted }}</div></div>
+  <div class="stat-tile"><div class="label">Meetings Booked</div><div class="value">{{ stats.booked }}</div></div>
+  <div class="stat-tile"><div class="label">Meetings Attended</div><div class="value">{{ stats.attended }}</div></div>
+  <div class="stat-tile"><div class="label">Converted</div><div class="value">{{ stats.converted }}</div><div class="sub">{{ stats.rate }}% conversion</div></div>
+</div>
+
+<div class="chips" style="margin-bottom:14px">
+  <a href="/crm/admin" class="chip {% if not country_filter %}active{% endif %}">All countries</a>
+  {% for c in COUNTRIES %}
+    <a href="/crm/admin?country={{ c|urlencode }}" class="chip {% if country_filter == c %}active{% endif %}">{{ c }}</a>
+  {% endfor %}
+</div>
+
+<div class="table-wrap" style="overflow-x:auto;margin-bottom:32px">
+  {% if setters %}
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Setter</th>
+        <th class="hide-mobile">Position</th>
+        <th class="hide-mobile">Country</th>
+        <th style="text-align:right">Leads</th>
+        <th style="text-align:right">Contacted</th>
+        <th style="text-align:right">Meetings</th>
+        <th style="text-align:right" class="hide-mobile">Attended</th>
+        <th style="text-align:right">Converted</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in setters %}
+      <tr>
+        <td>
+          <div style="font-weight:600">{{ s['first_name'] or '' }} {{ s['last_name'] or '' }}</div>
+          <div class="text-muted" style="font-size:11px">{{ s['email'] }}</div>
+        </td>
+        <td class="hide-mobile dim">{{ s['position'] or s['role'] }}</td>
+        <td class="hide-mobile dim">{{ s['country'] or '—' }}</td>
+        <td style="text-align:right;font-weight:600">{{ s['total_leads'] }}</td>
+        <td style="text-align:right" class="dim">{{ s['contacted'] }}</td>
+        <td style="text-align:right" class="dim">{{ s['meetings_booked'] }}</td>
+        <td style="text-align:right" class="dim hide-mobile">{{ s['meetings_attended'] }}</td>
+        <td style="text-align:right" class="text-green">{{ s['converted'] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <div class="em-title">No setters yet</div>
+    <div class="em-sub">Create your first user to get started.</div>
+    <button class="btn btn-primary" onclick="openAddUserModal()">Add user</button>
+  </div>
+  {% endif %}
+</div>
+
+<div class="page-header" style="margin-top:32px">
+  <div>
+    <div class="page-title" style="font-size:18px">Team</div>
+    <div class="page-sub">All users with CRM access.</div>
+  </div>
+</div>
+
+<div class="table-wrap" style="overflow-x:auto">
+  <table class="data">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th class="hide-mobile">Role</th>
+        <th class="hide-mobile">Position</th>
+        <th class="hide-mobile">Country</th>
+        <th>Active</th>
+        <th class="hide-mobile"></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for usr in all_users %}
+      <tr>
+        <td>
+          <div style="font-weight:600">{{ usr['first_name'] or '' }} {{ usr['last_name'] or '' }} {% if not usr['first_name'] %}—{% endif %}</div>
+          <div class="text-muted" style="font-size:11px">{{ usr['email'] }}</div>
+        </td>
+        <td class="hide-mobile">
+          <select class="form-select" style="padding:6px 28px 6px 10px;font-size:12px" onchange="updateUser({{ usr['id'] }}, {role: this.value})">
+            {% for r in ROLES %}<option value="{{ r }}" {% if usr['role'] == r %}selected{% endif %}>{{ r }}</option>{% endfor %}
+          </select>
+        </td>
+        <td class="hide-mobile">
+          <select class="form-select" style="padding:6px 28px 6px 10px;font-size:12px" onchange="updateUser({{ usr['id'] }}, {position: this.value})">
+            {% for p in POSITIONS %}<option value="{{ p }}" {% if usr['position'] == p %}selected{% endif %}>{{ p }}</option>{% endfor %}
+          </select>
+        </td>
+        <td class="hide-mobile">
+          <select class="form-select" style="padding:6px 28px 6px 10px;font-size:12px" onchange="updateUser({{ usr['id'] }}, {country: this.value})">
+            <option value="">—</option>
+            {% for c in COUNTRIES %}<option value="{{ c }}" {% if usr['country'] == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
+          </select>
+        </td>
+        <td>
+          <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer">
+            <input type="checkbox" {% if usr['is_active'] %}checked{% endif %} onchange="updateUser({{ usr['id'] }}, {is_active: this.checked})">
+            <span class="text-dim" style="font-size:12px">{% if usr['is_active'] %}Active{% else %}Disabled{% endif %}</span>
+          </label>
+        </td>
+        <td class="dim hide-mobile" style="font-size:11px">{% if usr['last_login_at'] %}Last login {{ usr['last_login_at'][:10] }}{% else %}Never logged in{% endif %}</td>
+        <td style="text-align:right">
+          <button class="btn btn-outline btn-sm" onclick="resetPassword({{ usr['id'] }}, '{{ usr['email'] }}')">Reset password</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{# ── Add User modal ── #}
+<div class="modal-backdrop" id="add-user-modal" onclick="if(event.target===this) closeAddUserModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Add a user</h3>
+      <button class="modal-close" onclick="closeAddUserModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-info">
+        A temporary password will be generated. You'll see it once — copy it now and share it however you usually do (Slack, text, etc).
+      </div>
+      <div class="alert alert-error hidden" id="au-error"></div>
+      <div class="stack">
+        <div class="form-row">
+          <label class="form-label">Email *</label>
+          <input class="form-input" id="au-email" type="email" placeholder="someone@gmail.com">
+        </div>
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label class="form-label">First name</label>
+            <input class="form-input" id="au-first">
+          </div>
+          <div class="form-row">
+            <label class="form-label">Last name</label>
+            <input class="form-input" id="au-last">
+          </div>
+        </div>
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label class="form-label">Role</label>
+            <select class="form-select" id="au-role">
+              {% for r in ROLES %}<option value="{{ r }}" {% if r == 'setter' %}selected{% endif %}>{{ r }}</option>{% endfor %}
+            </select>
+          </div>
+          <div class="form-row">
+            <label class="form-label">Position</label>
+            <select class="form-select" id="au-position">
+              {% for p in POSITIONS %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Country</label>
+          <select class="form-select" id="au-country">
+            <option value="">—</option>
+            {% for c in COUNTRIES %}<option value="{{ c }}">{{ c }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeAddUserModal()">Cancel</button>
+      <button class="btn btn-primary" id="au-submit" onclick="submitAddUser()">Create user</button>
+    </div>
+  </div>
+</div>
+
+{# ── Temp-password reveal modal (shown after create or reset) ── #}
+<div class="modal-backdrop" id="pw-reveal-modal" onclick="if(event.target===this) closePwReveal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Temporary password</h3>
+      <button class="modal-close" onclick="closePwReveal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-warn">
+        <strong>This is the only time you'll see this password.</strong> Copy it now and share it with the user. They'll be forced to change it on first login.
+      </div>
+      <div class="form-row">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="pw-reveal-email" readonly>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Temporary password</label>
+        <div style="display:flex;gap:8px">
+          <input class="form-input mono" id="pw-reveal-pw" readonly style="font-size:16px;letter-spacing:0.5px">
+          <button class="btn btn-outline" type="button" onclick="copyPw()">Copy</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" onclick="closePwReveal()">Done</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function openAddUserModal() {
+    document.getElementById('add-user-modal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('au-email').focus(), 50);
+  }
+  function closeAddUserModal() {
+    document.getElementById('add-user-modal').classList.remove('show');
+    document.body.style.overflow = '';
+    document.getElementById('au-error').classList.add('hidden');
+    ['au-email','au-first','au-last','au-country'].forEach(id => document.getElementById(id).value = '');
+  }
+  function openPwReveal(email, pw) {
+    document.getElementById('pw-reveal-email').value = email;
+    document.getElementById('pw-reveal-pw').value = pw;
+    document.getElementById('pw-reveal-modal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('pw-reveal-pw').select(), 100);
+  }
+  function closePwReveal() {
+    document.getElementById('pw-reveal-modal').classList.remove('show');
+    document.body.style.overflow = '';
+    // After dismissing, reload so the new user row shows up in the table.
+    window.location.reload();
+  }
+  async function copyPw() {
+    const v = document.getElementById('pw-reveal-pw').value;
+    try {
+      await navigator.clipboard.writeText(v);
+      window.toast('Password copied', 'success');
+    } catch {
+      document.getElementById('pw-reveal-pw').select();
+      window.toast('Press ⌘C to copy', 'error');
+    }
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeAddUserModal(); /* don't auto-close pwReveal */ }
+  });
+
+  async function submitAddUser() {
+    const err = document.getElementById('au-error');
+    err.classList.add('hidden');
+    const body = {
+      email: document.getElementById('au-email').value.trim(),
+      first_name: document.getElementById('au-first').value.trim(),
+      last_name: document.getElementById('au-last').value.trim(),
+      role: document.getElementById('au-role').value,
+      position: document.getElementById('au-position').value,
+      country: document.getElementById('au-country').value,
+    };
+    const btn = document.getElementById('au-submit');
+    btn.disabled = true;
+    const r = await window.api('/crm/api/users', { method: 'POST', body });
+    btn.disabled = false;
+    if (r.ok) {
+      closeAddUserModal();
+      openPwReveal(r.data.email, r.data.temp_password);
+    } else {
+      err.textContent = (r.data && r.data.error) || 'Could not create user.';
+      err.classList.remove('hidden');
+    }
+  }
+
+  async function resetPassword(id, email) {
+    if (!confirm(`Reset password for ${email}? They'll have to change it on next login.`)) return;
+    const r = await window.api('/crm/api/users/' + id + '/reset-password', { method: 'POST' });
+    if (r.ok) {
+      openPwReveal(r.data.email, r.data.temp_password);
+    } else {
+      window.toast((r.data && r.data.error) || 'Reset failed', 'error');
+    }
+  }
+
+  async function updateUser(id, patch) {
+    const r = await window.api('/crm/api/users/' + id, { method: 'PATCH', body: patch });
+    if (r.ok) window.toast('Saved', 'success');
+    else window.toast('Save failed', 'error');
+  }
+</script>
+{% endblock %}

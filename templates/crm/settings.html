@@ -1,0 +1,153 @@
+{% extends "crm/base.html" %}
+{% set active = 'settings' %}
+{% block title %}Settings — MK7 CRM{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Settings</div>
+    <div class="page-sub">Your profile and password.</div>
+  </div>
+</div>
+
+{% if u['must_change_password'] or request.args.get('change_password') %}
+<div class="alert alert-warn" style="margin-bottom:18px">
+  <strong>Your password is temporary.</strong> Set a new password below before you do anything else.
+</div>
+{% endif %}
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:18px" id="set-grid">
+
+  <div class="card">
+    <span class="form-label">Profile</span>
+    <div style="display:flex;align-items:center;gap:14px;margin:14px 0 20px">
+      <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--purple));overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700">
+        {% if u['picture_url'] %}<img src="{{ u['picture_url'] }}" alt="" style="width:100%;height:100%;object-fit:cover">{% else %}{{ (u['first_name'] or u['email'])[:1]|upper }}{% endif %}
+      </div>
+      <div>
+        <div style="font-weight:600">{{ (u['first_name'] or '') + ' ' + (u['last_name'] or '') if u['first_name'] else u['email'] }}</div>
+        <div class="text-muted" style="font-size:12px;text-transform:uppercase;letter-spacing:1px">{{ u['role'] }}{% if u['country'] %} · {{ u['country'] }}{% endif %}</div>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="form-row">
+        <label class="form-label">Email (cannot be changed)</label>
+        <input class="form-input" value="{{ u['email'] }}" disabled style="opacity:.6">
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label class="form-label">First name</label>
+          <input class="form-input" id="me-first" value="{{ u['first_name'] or '' }}">
+        </div>
+        <div class="form-row">
+          <label class="form-label">Last name</label>
+          <input class="form-input" id="me-last" value="{{ u['last_name'] or '' }}">
+        </div>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Phone</label>
+        <input class="form-input" id="me-phone" value="{{ u['phone'] or '' }}" placeholder="+961...">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Timezone</label>
+        <input class="form-input" id="me-tz" value="{{ u['timezone'] or '' }}" placeholder="Africa/Cairo, America/Denver, …">
+      </div>
+      <div style="display:flex;justify-content:flex-end">
+        <button class="btn btn-primary" onclick="saveMe()">Save profile</button>
+      </div>
+    </div>
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--dark-border)">
+      <span class="form-label">Role / Country / Position</span>
+      <p class="text-dim" style="font-size:12px;margin-top:6px">
+        Only admins can change these. Ask Kendall or Mary if you need updates.
+      </p>
+    </div>
+  </div>
+
+  <div class="card" id="password-card">
+    <span class="form-label">Change password</span>
+    <p class="text-dim" style="font-size:12px;margin-top:6px;margin-bottom:14px">
+      Use at least 10 characters. We use bcrypt-style hashing — your password is never stored in readable form.
+    </p>
+    <div class="alert alert-error hidden" id="pw-error"></div>
+    <div class="stack">
+      <div class="form-row">
+        <label class="form-label">Current password</label>
+        <input class="form-input" type="password" id="pw-cur" autocomplete="current-password">
+      </div>
+      <div class="form-row">
+        <label class="form-label">New password</label>
+        <input class="form-input" type="password" id="pw-new" autocomplete="new-password">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Confirm new password</label>
+        <input class="form-input" type="password" id="pw-new2" autocomplete="new-password">
+      </div>
+      <div style="display:flex;justify-content:flex-end">
+        <button class="btn btn-primary" onclick="changePassword()">Update password</button>
+      </div>
+    </div>
+
+    <div style="margin-top:24px;padding-top:14px;border-top:1px solid var(--dark-border)">
+      <span class="form-label">Sign out</span>
+      <p class="text-dim" style="font-size:12px;margin:6px 0 10px">Your session stays signed in for 60 days. Sign out manually if you're on a shared computer.</p>
+      <a href="/crm/logout" class="btn btn-outline btn-sm">Sign out of MK7 CRM</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  function applyGrid() {
+    document.getElementById('set-grid').style.gridTemplateColumns = window.innerWidth < 900 ? '1fr' : '1fr 1fr';
+  }
+  applyGrid(); window.addEventListener('resize', applyGrid);
+
+  async function saveMe() {
+    const r = await window.api('/crm/api/me', { method: 'PATCH', body: {
+      first_name: document.getElementById('me-first').value.trim(),
+      last_name:  document.getElementById('me-last').value.trim(),
+      phone:      document.getElementById('me-phone').value.trim(),
+      timezone:   document.getElementById('me-tz').value.trim(),
+    }});
+    if (r.ok) { window.toast('Saved', 'success'); }
+    else { window.toast('Save failed', 'error'); }
+  }
+
+  async function changePassword() {
+    const err = document.getElementById('pw-error');
+    err.classList.add('hidden');
+    const cur = document.getElementById('pw-cur').value;
+    const a = document.getElementById('pw-new').value;
+    const b = document.getElementById('pw-new2').value;
+    if (a !== b) {
+      err.textContent = "New passwords don't match.";
+      err.classList.remove('hidden'); return;
+    }
+    if (a.length < 10) {
+      err.textContent = 'Use at least 10 characters.';
+      err.classList.remove('hidden'); return;
+    }
+    const r = await window.api('/crm/api/me/password', { method: 'POST',
+      body: { current_password: cur, new_password: a } });
+    if (r.ok) {
+      window.toast('Password updated', 'success');
+      document.getElementById('pw-cur').value = '';
+      document.getElementById('pw-new').value = '';
+      document.getElementById('pw-new2').value = '';
+      // If they were forced here by must_change_password, send them to Leads.
+      if ({{ 'true' if u['must_change_password'] else 'false' }}) {
+        setTimeout(() => window.location = '/crm/leads', 600);
+      }
+    } else {
+      err.textContent = (r.data && r.data.error) || 'Could not change password.';
+      err.classList.remove('hidden');
+    }
+  }
+
+  // If they came here because must_change_password is on, autofocus + scroll to the password card.
+  {% if u['must_change_password'] or request.args.get('change_password') %}
+    document.getElementById('pw-cur').focus();
+    document.getElementById('password-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  {% endif %}
+</script>
+{% endblock %}
