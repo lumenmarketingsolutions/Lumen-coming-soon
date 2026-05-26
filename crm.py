@@ -101,10 +101,12 @@ BOOTSTRAP_ADMIN_EMAIL = os.environ.get(
 BOOTSTRAP_ADMIN_PASSWORD = os.environ.get("CRM_BOOTSTRAP_ADMIN_PASSWORD", "")
 
 # Admins who receive notification emails on lead-add / meeting-booked.
+# Mary (mary@mk7media.com) was dropped per Kendall's request — only Kendall
+# + MaryKate get the notifications now. Override via CRM_NOTIFY_ADMINS env.
 NOTIFY_ADMINS = [
     e.strip() for e in
     os.environ.get("CRM_NOTIFY_ADMINS",
-                   "kendall@lumenmarketing.co,marykatezarehghazarian@gmail.com,mary@mk7media.com")
+                   "kendall@lumenmarketing.co,marykatezarehghazarian@gmail.com")
         .split(",")
     if e.strip()
 ]
@@ -112,11 +114,12 @@ NOTIFY_ADMINS = [
 # Every Google Calendar event created by any setter is auto-attended by these
 # emails. They show up on the invite + get the event on their own GCal. The
 # event organizer (the setter who booked) is suppressed from this list so
-# Google doesn't double-invite them.
+# Google doesn't double-invite them. Mary removed per request — only Kendall
+# (organizer) + MaryKate get the calendar invites now.
 ALWAYS_INVITE = [
     e.strip().lower() for e in
     os.environ.get("CRM_ALWAYS_INVITE",
-                   "kendall@lumenmarketing.co,marykatezarehghazarian@gmail.com,mary@mk7media.com")
+                   "kendall@lumenmarketing.co,marykatezarehghazarian@gmail.com")
         .split(",")
     if e.strip()
 ]
