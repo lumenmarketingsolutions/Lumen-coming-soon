@@ -7,7 +7,7 @@
   <title>{% block title %}MK7 CRM{% endblock %}</title>
   <meta name="description" content="MK7 Setter CRM — lead tracker and appointment setter dashboard.">
   <link rel="icon" href="/static/favicon.svg">
-  <link rel="preload" href="/static/logo-lumen.svg" as="image">
+  <link rel="preload" href="/static/logo-lumen.png" as="image">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -66,7 +66,7 @@
       display: inline-flex; align-items: center; gap: 10px;
     }
     .brand-lockup .lumen-mark,
-    .brand-lockup .mk7-mark { height: 18px; display: block; }
+    .brand-lockup .mk7-mark { height: 28px; display: block; width: auto; }
     .brand-lockup .x {
       font-family: 'Inter', sans-serif;
       font-size: 12px; font-weight: 300; color: var(--text-muted);
@@ -429,7 +429,7 @@
     }
     .mobile-bar .logo { display: flex; align-items: center; gap: 8px; }
     .mobile-bar .logo .lumen-mark,
-    .mobile-bar .logo .mk7-mark { height: 14px; display: block; }
+    .mobile-bar .logo .mk7-mark { height: 22px; display: block; width: auto; }
     .mobile-bar .logo .x {
       font-family: 'Inter', sans-serif;
       font-size: 11px; font-weight: 300; color: var(--text-muted);
@@ -549,7 +549,7 @@
   {# ── Mobile top bar ────────────────────────────────────────────────────── #}
   <div class="mobile-bar">
     <a class="logo" href="/crm/leads">
-      <img class="lumen-mark" src="/static/logo-lumen.svg" alt="Lumen">
+      <img class="lumen-mark" src="/static/logo-lumen.png" alt="Lumen">
       <span class="x">×</span>
       <img class="mk7-mark" src="/static/logo-mk7.png" alt="MK7 Media">
       <span style="color:var(--text-muted);font-weight:300;margin-left:6px;font-size:13px">CRM</span>
@@ -564,7 +564,7 @@
     <aside class="sidebar">
       <div class="brand-row">
         <div class="brand-lockup">
-          <img class="lumen-mark" src="/static/logo-lumen.svg" alt="Lumen">
+          <img class="lumen-mark" src="/static/logo-lumen.png" alt="Lumen">
           <span class="x">×</span>
           <img class="mk7-mark" src="/static/logo-mk7.png" alt="MK7 Media">
         </div>
@@ -619,7 +619,7 @@
         </a>
         <div class="powered-by">
           Powered by
-          <img src="/static/logo-lumen.svg" alt="Lumen Marketing">
+          <img src="/static/logo-lumen.png" alt="Lumen Marketing">
         </div>
       </div>
     </aside>

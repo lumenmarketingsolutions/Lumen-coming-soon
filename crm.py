@@ -565,6 +565,48 @@ def notify_meeting_booked(meeting_id):
         _send_email(to, subject, html)
 
 
+def send_password_reset_email(email, first_name, temp_password, reset_by_first):
+    """Notify a user that their password was reset by an admin. Same brand
+    as the invite email, different copy."""
+    base = os.environ.get("CRM_BASE_URL", "https://lumenmarketing.co")
+    login_url = f"{base}/crm/login"
+    name = (first_name or "").strip() or "there"
+    by = (reset_by_first or "").strip() or "An admin"
+    subject = "Your MK7 CRM password was reset"
+    html = f"""\
+<div style="font-family:Inter,system-ui,sans-serif;background:#080809;padding:32px 16px;color:#e8e8f0">
+  <div style="max-width:480px;margin:0 auto;background:#111114;border:1px solid #1c1c24;border-radius:18px;padding:32px;color:#e8e8f0">
+    <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#56566a;margin-bottom:6px">
+      Lumen × MK7
+    </div>
+    <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;letter-spacing:-0.4px">
+      Password reset
+    </h1>
+    <p style="margin:0 0 16px;font-size:14px;line-height:1.6;color:#b8b8c8">
+      Hi {name} — {by} just reset your MK7 Setter CRM password. Use the new
+      temporary password below to sign in, then choose a new one of your own.
+    </p>
+    <table style="width:100%;font-size:14px;border-collapse:collapse;background:#15151a;border:1px solid #1c1c24;border-radius:10px;margin:0 0 22px">
+      <tr><td style="padding:14px 16px 6px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#56566a">Email</td></tr>
+      <tr><td style="padding:0 16px 12px;font-family:ui-monospace,Menlo,monospace;color:#e8e8f0">{email}</td></tr>
+      <tr><td style="padding:8px 16px 6px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#56566a;border-top:1px solid #1c1c24">New temporary password</td></tr>
+      <tr><td style="padding:0 16px 16px;font-family:ui-monospace,Menlo,monospace;font-size:16px;color:#e8e8f0;letter-spacing:0.5px">{temp_password}</td></tr>
+    </table>
+    <p style="margin:0 0 22px">
+      <a href="{login_url}"
+         style="display:inline-block;background:#128fc4;color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px">
+        Sign in
+      </a>
+    </p>
+    <p style="margin:0;font-size:12px;color:#56566a;line-height:1.6">
+      If you didn't ask for a reset, contact Kendall right away.
+    </p>
+  </div>
+</div>
+"""
+    _send_email(email, subject, html)
+
+
 def send_invite_email(email, first_name, temp_password, invited_by_first):
     """Send a welcome/invite email to a newly-created user with their temp
     credentials. They'll be forced to change the password on first login."""
@@ -1586,9 +1628,11 @@ def api_delete_user(user_id):
 @crm_bp.route("/api/users/<int:user_id>/reset-password", methods=["POST"])
 @admin_required
 def api_reset_password(user_id):
-    """Admin force-resets a user's password. Returns the new temp password once."""
+    """Admin force-resets a user's password. Returns the new temp password once
+    AND emails it to the user so the admin doesn't need to manually relay it."""
+    me = current_user()
     con = db()
-    row = con.execute("SELECT email FROM users WHERE id = ?", (user_id,)).fetchone()
+    row = con.execute("SELECT email, first_name FROM users WHERE id = ?", (user_id,)).fetchone()
     if not row:
         con.close(); abort(404)
     temp_pw = _gen_temp_password()
@@ -1596,7 +1640,13 @@ def api_reset_password(user_id):
                 (generate_password_hash(temp_pw), user_id))
     con.commit()
     con.close()
-    return jsonify({"ok": True, "email": row["email"], "temp_password": temp_pw})
+    try:
+        send_password_reset_email(row["email"], row["first_name"], temp_pw,
+                                  reset_by_first=(me["first_name"] if me else ""))
+    except Exception as e:
+        print(f"[crm-reset] email failed for {row['email']}: {e}")
+    return jsonify({"ok": True, "email": row["email"], "temp_password": temp_pw,
+                    "email_sent": bool(RESEND_API_KEY)})
 
 
 @crm_bp.route("/api/users/<int:user_id>", methods=["PATCH"])

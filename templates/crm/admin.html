@@ -322,7 +322,9 @@
     btn.disabled = false;
     if (r.ok) {
       closeAddUserModal();
-      openPwReveal(r.data.email, r.data.temp_password);
+      // Pass through the backend's email_sent flag so the modal shows
+      // the right banner (sent vs unsent).
+      openPwReveal(r.data.email, r.data.temp_password, r.data.email_sent);
     } else {
       err.textContent = (r.data && r.data.error) || 'Could not create user.';
       err.classList.remove('hidden');
@@ -333,7 +335,7 @@
     if (!confirm(`Reset password for ${email}? They'll have to change it on next login.`)) return;
     const r = await window.api('/crm/api/users/' + id + '/reset-password', { method: 'POST' });
     if (r.ok) {
-      openPwReveal(r.data.email, r.data.temp_password);
+      openPwReveal(r.data.email, r.data.temp_password, r.data.email_sent);
     } else {
       window.toast((r.data && r.data.error) || 'Reset failed', 'error');
     }
