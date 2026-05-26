@@ -104,7 +104,7 @@ BOOTSTRAP_ADMIN_PASSWORD = os.environ.get("CRM_BOOTSTRAP_ADMIN_PASSWORD", "")
 NOTIFY_ADMINS = [
     e.strip() for e in
     os.environ.get("CRM_NOTIFY_ADMINS",
-                   "kendall@lumenmarketing.co,marykatezarehgazarian@gmail.com,mary@mk7media.com")
+                   "kendall@lumenmarketing.co,marykatezarehghazarian@gmail.com,mary@mk7media.com")
         .split(",")
     if e.strip()
 ]
@@ -116,7 +116,7 @@ NOTIFY_ADMINS = [
 ALWAYS_INVITE = [
     e.strip().lower() for e in
     os.environ.get("CRM_ALWAYS_INVITE",
-                   "kendall@lumenmarketing.co,marykatezarehgazarian@gmail.com,mary@mk7media.com")
+                   "kendall@lumenmarketing.co,marykatezarehghazarian@gmail.com,mary@mk7media.com")
         .split(",")
     if e.strip()
 ]
