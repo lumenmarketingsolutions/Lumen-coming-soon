@@ -45,19 +45,23 @@
       margin-bottom: 28px;
     }
     .lockup {
-      display: inline-flex; align-items: center; gap: 14px;
-      margin-bottom: 16px;
+      display: inline-flex; align-items: center; gap: 16px;
+      margin-bottom: 18px;
     }
-    .lockup img { height: 22px; opacity: 0.92; }
+    /* Both marks share the same render height for perfect visual parity. */
+    .lockup .lumen-mark,
+    .lockup .mk7-mark {
+      height: 30px;
+      display: block;
+    }
     .lockup .x {
-      font-size: 14px; font-weight: 400; color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px; font-weight: 300;
+      color: var(--text-muted);
       letter-spacing: 0;
+      line-height: 1;
     }
-    .lockup .mk7 {
-      font-size: 22px; font-weight: 800; letter-spacing: -0.5px;
-      color: #fff;
-    }
-    .brand .title { font-size: 22px; font-weight: 800; letter-spacing: -0.4px; }
+    .brand .title { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; }
     .brand .sub {
       font-size: 11px; color: var(--text-muted);
       letter-spacing: 2px; text-transform: uppercase;
@@ -136,9 +140,14 @@
   <div class="wrap">
     <div class="brand">
       <div class="lockup">
-        <img src="/static/logo-lumen.svg" alt="Lumen">
+        <img class="lumen-mark" src="/static/logo-lumen.svg" alt="Lumen">
         <span class="x">×</span>
-        <span class="mk7">MK7</span>
+        {# MK7 mark uses identical SVG specs to logo-lumen.svg so they render at the exact same letter weight, color, and spacing. #}
+        <svg class="mk7-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 48" aria-label="MK7" role="img">
+          <text x="50" y="36" text-anchor="middle"
+                font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+                font-weight="400" font-size="36" fill="#e8e8f0" letter-spacing="-0.5">MK7</text>
+        </svg>
       </div>
       <div class="title">Setter CRM</div>
       <div class="sub">Lead tracking · Calendar</div>

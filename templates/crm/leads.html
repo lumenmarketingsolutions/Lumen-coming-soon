@@ -20,20 +20,48 @@
   </div>
 </div>
 
-{# ── View toggles ── #}
-<div class="chips" style="margin-bottom:14px">
-  <a href="?{{ {'view':'everyone'}|urlencode_with(f) }}" class="chip {% if f.view != 'mine' %}active{% endif %}">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75M9 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
-    Everyone
-  </a>
-  <a href="?{{ {'view':'mine'}|urlencode_with(f) }}" class="chip {% if f.view == 'mine' %}active{% endif %}">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
-    Mine
-  </a>
-  <a href="?{{ {'dna':'exclude'}|urlencode_with(f) }}" class="chip {% if f.dna == 'exclude' %}active{% endif %}">Exclude DNA</a>
-  <a href="?{{ {'dna':'only'}|urlencode_with(f) }}" class="chip {% if f.dna == 'only' %}active{% endif %}">Only DNA</a>
-  <a href="?{{ {'dna':'all'}|urlencode_with(f) }}" class="chip {% if f.dna == 'all' %}active{% endif %}">All</a>
+{# ── View toggles (two distinct groups: ownership + DNA status) ── #}
+<div class="filter-groups">
+  <div class="filter-group">
+    <span class="filter-group-label">View</span>
+    <div class="chips">
+      <a href="?{{ {'view':'everyone'}|urlencode_with(f) }}" class="chip {% if f.view != 'mine' %}active{% endif %}">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75M9 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
+        Everyone
+      </a>
+      <a href="?{{ {'view':'mine'}|urlencode_with(f) }}" class="chip {% if f.view == 'mine' %}active{% endif %}">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2M12 11a4 4 0 100-8 4 4 0 000 8z"/></svg>
+        Mine
+      </a>
+    </div>
+  </div>
+  <div class="filter-group">
+    <span class="filter-group-label">Do Not Approach</span>
+    <div class="chips">
+      <a href="?{{ {'dna':'exclude'}|urlencode_with(f) }}" class="chip {% if f.dna == 'exclude' %}active{% endif %}">Hide DNA</a>
+      <a href="?{{ {'dna':'only'}|urlencode_with(f) }}" class="chip {% if f.dna == 'only' %}active{% endif %}">Only DNA</a>
+      <a href="?{{ {'dna':'all'}|urlencode_with(f) }}" class="chip {% if f.dna == 'all' %}active{% endif %}">Show all</a>
+    </div>
+  </div>
 </div>
+
+<style>
+  .filter-groups {
+    display: flex; flex-wrap: wrap; align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 16px;
+  }
+  .filter-group { display: flex; flex-direction: column; gap: 6px; }
+  .filter-group-label {
+    font-size: 10px; font-weight: 700;
+    letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--text-muted);
+    padding-left: 4px;
+  }
+  @media (max-width: 600px) {
+    .filter-groups { gap: 14px; }
+  }
+</style>
 
 {# ── Filter bar (GET form so back-button cleanly steps through filter states) ── #}
 <form method="get" class="filter-bar" id="filter-form">

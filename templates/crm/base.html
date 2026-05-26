@@ -63,12 +63,14 @@
       align-items: flex-start;
     }
     .brand-lockup {
-      display: inline-flex; align-items: center; gap: 8px;
+      display: inline-flex; align-items: center; gap: 10px;
     }
-    .brand-lockup img { height: 16px; opacity: 0.9; }
-    .brand-lockup .x { font-size: 11px; color: var(--text-muted); font-weight: 400; }
-    .brand-lockup .mk7 {
-      font-size: 16px; font-weight: 800; color: #fff; letter-spacing: -0.4px;
+    .brand-lockup .lumen-mark,
+    .brand-lockup .mk7-mark { height: 18px; display: block; }
+    .brand-lockup .x {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px; font-weight: 300; color: var(--text-muted);
+      letter-spacing: 0; line-height: 1;
     }
     .brand-text {
       display: flex; flex-direction: column; line-height: 1.1;
@@ -418,10 +420,14 @@
       align-items: center; justify-content: space-between;
       z-index: 60;
     }
-    .mobile-bar .logo { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
-    .mobile-bar .logo img { height: 14px; opacity: 0.9; }
-    .mobile-bar .logo .x { font-size: 11px; color: var(--text-muted); font-weight: 400; }
-    .mobile-bar .logo .mk7 { font-weight: 800; letter-spacing: -0.3px; }
+    .mobile-bar .logo { display: flex; align-items: center; gap: 8px; }
+    .mobile-bar .logo .lumen-mark,
+    .mobile-bar .logo .mk7-mark { height: 14px; display: block; }
+    .mobile-bar .logo .x {
+      font-family: 'Inter', sans-serif;
+      font-size: 11px; font-weight: 300; color: var(--text-muted);
+      letter-spacing: 0; line-height: 1;
+    }
     .menu-btn {
       width: 38px; height: 38px;
       background: transparent; border: 1px solid var(--dark-border);
@@ -478,10 +484,14 @@
   {# ── Mobile top bar ────────────────────────────────────────────────────── #}
   <div class="mobile-bar">
     <a class="logo" href="/crm/leads">
-      <img src="/static/logo-lumen.svg" alt="Lumen">
+      <img class="lumen-mark" src="/static/logo-lumen.svg" alt="Lumen">
       <span class="x">×</span>
-      <span class="mk7">MK7</span>
-      <span style="color:var(--text-muted);font-weight:400;margin-left:4px">CRM</span>
+      <svg class="mk7-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 48" aria-label="MK7" role="img">
+        <text x="50" y="36" text-anchor="middle"
+              font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+              font-weight="400" font-size="36" fill="#e8e8f0" letter-spacing="-0.5">MK7</text>
+      </svg>
+      <span style="color:var(--text-muted);font-weight:300;margin-left:6px;font-size:13px">CRM</span>
     </a>
     <button class="menu-btn" type="button" aria-label="Menu" onclick="toggleSidebar()">
       <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h14M3 10h14M3 14h14"/></svg>
@@ -493,9 +503,13 @@
     <aside class="sidebar">
       <div class="brand-row">
         <div class="brand-lockup">
-          <img src="/static/logo-lumen.svg" alt="Lumen">
+          <img class="lumen-mark" src="/static/logo-lumen.svg" alt="Lumen">
           <span class="x">×</span>
-          <span class="mk7">MK7</span>
+          <svg class="mk7-mark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 48" aria-label="MK7" role="img">
+            <text x="50" y="36" text-anchor="middle"
+                  font-family="Inter, -apple-system, BlinkMacSystemFont, sans-serif"
+                  font-weight="400" font-size="36" fill="#e8e8f0" letter-spacing="-0.5">MK7</text>
+          </svg>
         </div>
         <div class="brand-text">
           <span class="b1">Setter CRM</span>

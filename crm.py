@@ -821,8 +821,10 @@ def create_google_calendar_event(setter_row, *, summary, description, start_iso_
     Attendees:
       - the lead's email (when known)
       - ALWAYS_INVITE list (Kendall, Mary, MaryKate)
-      - the setter's email (so they get the invite in their own inbox)
-    The shared account is the organizer, so we DO add the setter as an attendee.
+    The setter is intentionally NOT invited — the CRM is their system of record
+    for bookings, and they don't need a calendar invite for every meeting they
+    set. The shared service account is the organizer, so it's dropped from
+    the attendee list to avoid Google double-inviting itself.
     Returns (event_id, meet_link, error)."""
     tok = _shared_access_token()
     if not tok:
@@ -833,11 +835,6 @@ def create_google_calendar_event(setter_row, *, summary, description, start_iso_
         organizer_email = (get_setting("gcal_account_email") or "").lower()
         invited = set()
         attendees = []
-        # Setter goes first so they're at the top of the attendees list.
-        setter_email = (setter_row["email"] or "").lower() if setter_row else ""
-        if setter_email and setter_email != organizer_email:
-            attendees.append({"email": setter_email, "responseStatus": "accepted"})
-            invited.add(setter_email)
         if lead_email:
             e = lead_email.strip().lower()
             if e and e != organizer_email and e not in invited:
@@ -1433,13 +1430,18 @@ def _gen_temp_password(n=12):
 def api_create_user():
     """Admin creates a setter/sales/admin user directly with a temp password.
     Returns the password ONCE — admin shares it however they want; we only
-    store the hash. The user must change it on first login."""
+    store the hash. The user must change it on first login.
+
+    Position is the only user-facing field; role is derived server-side from
+    POSITION_TO_ROLE so the UI doesn't show a redundant 'Role' dropdown."""
     data = request.get_json(silent=True) or {}
     email = norm_email(data.get("email") or "")
     first = (data.get("first_name") or "").strip()
     last = (data.get("last_name") or "").strip()
-    role = (data.get("role") or "setter").strip().lower()
     position = (data.get("position") or "Meeting Setter").strip()
+    # Fall back to an explicit 'role' if some old client still sends it,
+    # otherwise derive from position.
+    role = (data.get("role") or POSITION_TO_ROLE.get(position, "setter")).strip().lower()
     country = (data.get("country") or "").strip() or None
     if not email or "@" not in email:
         return jsonify({"ok": False, "error": "Valid email required"}), 400
@@ -1492,6 +1494,11 @@ def api_update_user(user_id):
             elif isinstance(v, str):
                 v = v.strip() or None
             fields[k] = v
+    # If position changed but role wasn't explicitly set, derive role.
+    if "position" in fields and "role" not in fields:
+        derived = POSITION_TO_ROLE.get(fields["position"] or "")
+        if derived:
+            fields["role"] = derived
     if not fields:
         return jsonify({"ok": True, "noop": True})
     con = db()

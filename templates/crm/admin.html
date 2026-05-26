@@ -28,8 +28,7 @@
   </div>
   {% if calendar.connected %}
     <p class="text-dim" style="font-size:13px;margin-bottom:12px">
-      Every meeting booked by any setter is added to <strong>{{ calendar.account_email or '?' }}</strong>'s calendar,
-      auto-inviting MaryKate, Mary, the setter, and the lead.
+      Every meeting any setter books is added to <strong>{{ calendar.account_email or '?' }}</strong>'s calendar, also inviting MaryKate, Mary, and the lead.
     </p>
     <a class="btn btn-outline btn-sm" href="/crm/admin/calendar/connect">Re-connect</a>
   {% else %}
@@ -49,19 +48,27 @@
 </div>
 {% endif %}
 
+{# Country filter — drives the stat tiles below AND the per-setter table. #}
+<form method="get" action="/crm/admin"
+      style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+  <label class="form-label" style="margin:0">Filter by country</label>
+  <select class="form-select" name="country" onchange="this.form.submit()" style="max-width:260px">
+    <option value="">All countries</option>
+    {% for c in COUNTRIES %}
+      <option value="{{ c }}" {% if country_filter == c %}selected{% endif %}>{{ c }}</option>
+    {% endfor %}
+  </select>
+  {% if country_filter %}
+    <a href="/crm/admin" class="btn btn-ghost btn-sm">Clear</a>
+  {% endif %}
+</form>
+
 <div class="stat-grid">
-  <div class="stat-tile"><div class="label">Total Leads</div><div class="value">{{ stats.total }}</div></div>
+  <div class="stat-tile"><div class="label">Total Leads</div><div class="value">{{ stats.total }}</div>{% if country_filter %}<div class="sub">{{ country_filter }}</div>{% endif %}</div>
   <div class="stat-tile"><div class="label">Contacted</div><div class="value">{{ stats.contacted }}</div></div>
   <div class="stat-tile"><div class="label">Meetings Booked</div><div class="value">{{ stats.booked }}</div></div>
   <div class="stat-tile"><div class="label">Meetings Attended</div><div class="value">{{ stats.attended }}</div></div>
   <div class="stat-tile"><div class="label">Converted</div><div class="value">{{ stats.converted }}</div><div class="sub">{{ stats.rate }}% conversion</div></div>
-</div>
-
-<div class="chips" style="margin-bottom:14px">
-  <a href="/crm/admin" class="chip {% if not country_filter %}active{% endif %}">All countries</a>
-  {% for c in COUNTRIES %}
-    <a href="/crm/admin?country={{ c|urlencode }}" class="chip {% if country_filter == c %}active{% endif %}">{{ c }}</a>
-  {% endfor %}
 </div>
 
 <div class="table-wrap" style="overflow-x:auto;margin-bottom:32px">
@@ -118,7 +125,6 @@
     <thead>
       <tr>
         <th>User</th>
-        <th class="hide-mobile">Role</th>
         <th class="hide-mobile">Position</th>
         <th class="hide-mobile">Country</th>
         <th>Active</th>
@@ -134,11 +140,7 @@
           <div class="text-muted" style="font-size:11px">{{ usr['email'] }}</div>
         </td>
         <td class="hide-mobile">
-          <select class="form-select" style="padding:6px 28px 6px 10px;font-size:12px" onchange="updateUser({{ usr['id'] }}, {role: this.value})">
-            {% for r in ROLES %}<option value="{{ r }}" {% if usr['role'] == r %}selected{% endif %}>{{ r }}</option>{% endfor %}
-          </select>
-        </td>
-        <td class="hide-mobile">
+          {# Changing position also re-derives role server-side (see crm.py api_update_user). #}
           <select class="form-select" style="padding:6px 28px 6px 10px;font-size:12px" onchange="updateUser({{ usr['id'] }}, {position: this.value})">
             {% for p in POSITIONS %}<option value="{{ p }}" {% if usr['position'] == p %}selected{% endif %}>{{ p }}</option>{% endfor %}
           </select>
@@ -192,19 +194,12 @@
             <input class="form-input" id="au-last">
           </div>
         </div>
-        <div class="form-grid-2">
-          <div class="form-row">
-            <label class="form-label">Role</label>
-            <select class="form-select" id="au-role">
-              {% for r in ROLES %}<option value="{{ r }}" {% if r == 'setter' %}selected{% endif %}>{{ r }}</option>{% endfor %}
-            </select>
-          </div>
-          <div class="form-row">
-            <label class="form-label">Position</label>
-            <select class="form-select" id="au-position">
-              {% for p in POSITIONS %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
-            </select>
-          </div>
+        <div class="form-row">
+          <label class="form-label">Position</label>
+          <select class="form-select" id="au-position">
+            {% for p in POSITIONS %}<option value="{{ p }}" {% if p == 'Meeting Setter' %}selected{% endif %}>{{ p }}</option>{% endfor %}
+          </select>
+          <span class="text-muted" style="font-size:11px;margin-top:4px">Determines what they can see — Meeting Setter is the default.</span>
         </div>
         <div class="form-row">
           <label class="form-label">Country</label>
@@ -299,7 +294,6 @@
       email: document.getElementById('au-email').value.trim(),
       first_name: document.getElementById('au-first').value.trim(),
       last_name: document.getElementById('au-last').value.trim(),
-      role: document.getElementById('au-role').value,
       position: document.getElementById('au-position').value,
       country: document.getElementById('au-country').value,
     };
