@@ -493,6 +493,40 @@ def notify_new_lead(lead_id):
     subject = f"[MK7 CRM] {setter} added a lead: {row['company_name']}{handle}"
     base = os.environ.get("CRM_BASE_URL", "https://lumenmarketing.co")
     link = f"{base}/crm/leads/{lead_id}"
+
+    # Instagram row: stripped handle + a clickable link to the IG profile.
+    # On mobile, instagram.com URLs open the IG app automatically when installed.
+    ig_row = ""
+    if row["ig_handle"]:
+        h = str(row["ig_handle"]).lstrip("@")
+        ig_row = (
+            f'<tr><td style="padding:4px 12px 4px 0;color:#888">Instagram</td>'
+            f'<td><a href="https://instagram.com/{h}" '
+            f'style="color:#128fc4;text-decoration:none">@{h}</a></td></tr>'
+        )
+
+    # Email and phone get their own rows + clickable mailto/tel links.
+    email_row = (
+        f'<tr><td style="padding:4px 12px 4px 0;color:#888">Email</td>'
+        f'<td><a href="mailto:{row["email"]}" style="color:#128fc4;text-decoration:none">{row["email"]}</a></td></tr>'
+    ) if row["email"] else ""
+    phone_row = (
+        f'<tr><td style="padding:4px 12px 4px 0;color:#888">Phone</td>'
+        f'<td><a href="tel:{row["phone"]}" style="color:#128fc4;text-decoration:none">{row["phone"]}</a></td></tr>'
+    ) if row["phone"] else ""
+
+    # Notes section (only if present)
+    notes_html = ""
+    if row["notes"]:
+        notes_html = (
+            '<div style="margin-top:14px;padding:12px 14px;background:#f6f8fb;'
+            'border-radius:8px;font-size:13px;line-height:1.5;color:#333;white-space:pre-wrap">'
+            '<div style="font-size:10px;font-weight:700;letter-spacing:1.5px;'
+            'text-transform:uppercase;color:#888;margin-bottom:6px">Notes</div>'
+            f'{row["notes"]}'
+            '</div>'
+        )
+
     html = f"""
     <div style="font-family:Inter,system-ui,sans-serif;max-width:560px">
       <h2 style="margin:0 0 12px;font-size:18px">New lead added</h2>
@@ -500,13 +534,17 @@ def notify_new_lead(lead_id):
         <strong>{setter}</strong> just added a new lead in the CRM.
       </p>
       <table style="font-size:14px;color:#333;border-collapse:collapse">
-        <tr><td style="padding:4px 12px 4px 0;color:#888">Company</td><td>{row['company_name']}{handle}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#888">Company</td><td>{row['company_name']}</td></tr>
+        {ig_row}
         <tr><td style="padding:4px 12px 4px 0;color:#888">Industry</td><td>{row['industry'] or '—'}</td></tr>
         <tr><td style="padding:4px 12px 4px 0;color:#888">Country</td><td>{row['country'] or '—'}</td></tr>
         <tr><td style="padding:4px 12px 4px 0;color:#888">Source</td><td>{row['source']}</td></tr>
         <tr><td style="padding:4px 12px 4px 0;color:#888">Status</td><td>{row['status']}</td></tr>
-        <tr><td style="padding:4px 12px 4px 0;color:#888">Contact</td><td>{row['full_name'] or '—'} · {row['email'] or '—'} · {row['phone'] or '—'}</td></tr>
+        <tr><td style="padding:4px 12px 4px 0;color:#888">Contact</td><td>{row['full_name'] or '—'}</td></tr>
+        {email_row}
+        {phone_row}
       </table>
+      {notes_html}
       <p style="margin:20px 0 0">
         <a href="{link}" style="background:#128fc4;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600">Open lead</a>
       </p>
@@ -1123,6 +1161,12 @@ def api_create_lead():
     lead_id = cur.lastrowid
     write_dedupe_keys(con, lead_id, payload)
     log_activity(con, lead_id, u["id"], "created", {"override_dupe": override})
+    # If the creator typed an initial note in the Add Lead modal, log it as
+    # a 'note' activity entry too so it shows in the activity timeline on
+    # the lead detail page (otherwise it'd only live on the leads.notes
+    # column and never get surfaced).
+    if payload["notes"]:
+        log_activity(con, lead_id, u["id"], "note", {"text": payload["notes"]})
     con.commit()
     con.close()
 
