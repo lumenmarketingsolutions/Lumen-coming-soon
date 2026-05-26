@@ -565,6 +565,55 @@ def notify_meeting_booked(meeting_id):
         _send_email(to, subject, html)
 
 
+def send_invite_email(email, first_name, temp_password, invited_by_first):
+    """Send a welcome/invite email to a newly-created user with their temp
+    credentials. They'll be forced to change the password on first login."""
+    base = os.environ.get("CRM_BASE_URL", "https://lumenmarketing.co")
+    login_url = f"{base}/crm/login"
+    name = (first_name or "").strip() or "there"
+    by = (invited_by_first or "").strip() or "An admin"
+    subject = "You've been invited to the MK7 CRM"
+    html = f"""\
+<div style="font-family:Inter,system-ui,sans-serif;background:#080809;padding:32px 16px;color:#e8e8f0">
+  <div style="max-width:480px;margin:0 auto;background:#111114;border:1px solid #1c1c24;border-radius:18px;padding:32px;color:#e8e8f0">
+    <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#56566a;margin-bottom:6px">
+      Lumen × MK7
+    </div>
+    <h1 style="margin:0 0 16px;font-size:22px;font-weight:700;letter-spacing:-0.4px">
+      You're in.
+    </h1>
+    <p style="margin:0 0 18px;font-size:14px;line-height:1.6;color:#b8b8c8">
+      Hi {name} — {by} just added you to the <strong>MK7 Setter CRM</strong>.
+      Use the credentials below to sign in. You'll be asked to choose a new
+      password as soon as you're in.
+    </p>
+    <table style="width:100%;font-size:14px;border-collapse:collapse;background:#15151a;border:1px solid #1c1c24;border-radius:10px;margin:0 0 22px">
+      <tr>
+        <td style="padding:14px 16px 6px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#56566a">Email</td>
+      </tr>
+      <tr><td style="padding:0 16px 12px;font-family:ui-monospace,Menlo,monospace;color:#e8e8f0">{email}</td></tr>
+      <tr><td style="padding:8px 16px 6px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#56566a;border-top:1px solid #1c1c24">Temporary password</td></tr>
+      <tr><td style="padding:0 16px 16px;font-family:ui-monospace,Menlo,monospace;font-size:16px;color:#e8e8f0;letter-spacing:0.5px">{temp_password}</td></tr>
+    </table>
+    <p style="margin:0 0 22px">
+      <a href="{login_url}"
+         style="display:inline-block;background:#128fc4;color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px">
+        Sign in to MK7 CRM
+      </a>
+    </p>
+    <p style="margin:0;font-size:12px;color:#56566a;line-height:1.6">
+      Sessions stay signed in for 60 days. If you didn't expect this, just
+      ignore this email — no account is active until you sign in.
+    </p>
+    <div style="margin-top:24px;padding-top:16px;border-top:1px solid #1c1c24;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:#56566a">
+      Lumen × MK7 — Powered by Lumen Marketing
+    </div>
+  </div>
+</div>
+"""
+    _send_email(email, subject, html)
+
+
 # ── Email + password auth ─────────────────────────────────────────────────────
 LOGIN_THROTTLE_WINDOW_MIN = 15
 LOGIN_THROTTLE_MAX_ATTEMPTS = 8
@@ -1079,7 +1128,11 @@ def lead_detail(lead_id):
 
 
 @crm_bp.route("/api/leads/<int:lead_id>", methods=["PATCH"])
-@login_required
+@admin_required   # SECURITY: only admins can edit lead fields. Setters can
+                  # still ADD new leads and ADD notes, but they cannot mutate
+                  # existing lead data — prevents accidental or malicious
+                  # sabotage in a multi-setter team. Add-note has its own
+                  # endpoint that remains setter-accessible.
 def api_update_lead(lead_id):
     u = current_user()
     data = request.get_json(silent=True) or {}
@@ -1334,6 +1387,10 @@ def api_update_meeting(meeting_id):
     m = con.execute("SELECT * FROM meetings WHERE id = ?", (meeting_id,)).fetchone()
     if not m:
         con.close(); abort(404)
+    # Only the booking setter or an admin can update meeting status.
+    if u["role"] != "admin" and m["setter_user_id"] != u["id"]:
+        con.close()
+        return jsonify({"ok": False, "error": "Only the booking setter or an admin can update this meeting."}), 403
     new_status = data.get("status")
     if new_status and new_status in ("scheduled", "completed", "no_show", "canceled"):
         con.execute("UPDATE meetings SET status = ?, updated_at = ? WHERE id = ?",
@@ -1350,17 +1407,15 @@ def api_update_meeting(meeting_id):
 
 
 @crm_bp.route("/api/meetings/<int:meeting_id>", methods=["DELETE"])
-@login_required
+@admin_required   # SECURITY: cancel/delete a meeting is admin-only. Setters
+                  # can still mark a meeting completed or no-show via PATCH;
+                  # only an admin can wipe the record (and its GCal event).
 def api_delete_meeting(meeting_id):
     u = current_user()
     con = db()
     m = con.execute("SELECT * FROM meetings WHERE id = ?", (meeting_id,)).fetchone()
     if not m:
         con.close(); abort(404)
-    # Only the booking setter or an admin can delete.
-    if m["setter_user_id"] != u["id"] and u["role"] != "admin":
-        con.close()
-        return jsonify({"ok": False, "error": "Not allowed"}), 403
     delete_google_calendar_event(m["google_event_id"])
     con.execute("DELETE FROM meetings WHERE id = ?", (meeting_id,))
     log_activity(con, m["lead_id"], u["id"], "meeting_canceled", {"meeting_id": meeting_id})
@@ -1460,7 +1515,19 @@ def api_create_user():
           generate_password_hash(temp_pw), now_iso()))
     con.commit()
     con.close()
-    return jsonify({"ok": True, "email": email, "temp_password": temp_pw})
+
+    # Fire the welcome email with login credentials. Best-effort — if Resend
+    # is unconfigured we just log it; the admin can still copy the temp
+    # password from the modal that just rendered.
+    inviter = current_user()
+    try:
+        send_invite_email(email, first, temp_pw,
+                          invited_by_first=(inviter["first_name"] if inviter else ""))
+    except Exception as e:
+        print(f"[crm-invite] send failed for {email}: {e}")
+
+    return jsonify({"ok": True, "email": email, "temp_password": temp_pw,
+                    "email_sent": bool(RESEND_API_KEY)})
 
 
 @crm_bp.route("/api/users/<int:user_id>/reset-password", methods=["POST"])

@@ -225,8 +225,11 @@
       <button class="modal-close" onclick="closePwReveal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
     </div>
     <div class="modal-body">
-      <div class="alert alert-warn">
-        <strong>This is the only time you'll see this password.</strong> Copy it now and share it with the user. They'll be forced to change it on first login.
+      <div class="alert" id="pw-reveal-sent-banner" style="background:rgba(52,211,153,0.07);border:1px solid rgba(52,211,153,0.25);color:#bdebd2">
+        <strong>Welcome email sent.</strong> They've been emailed these credentials and will be asked to change the password on first sign-in.
+      </div>
+      <div class="alert alert-warn hidden" id="pw-reveal-unsent-banner">
+        <strong>Email could not be sent automatically</strong> (Resend not configured). Copy the password below and share it manually.
       </div>
       <div class="form-row">
         <label class="form-label">Email</label>
@@ -238,6 +241,9 @@
           <input class="form-input mono" id="pw-reveal-pw" readonly style="font-size:16px;letter-spacing:0.5px">
           <button class="btn btn-outline" type="button" onclick="copyPw()">Copy</button>
         </div>
+        <span class="text-muted" style="font-size:11px;margin-top:6px">
+          Won't be shown again — copy now if you want a backup.
+        </span>
       </div>
     </div>
     <div class="modal-foot">
@@ -260,9 +266,19 @@
     document.getElementById('au-error').classList.add('hidden');
     ['au-email','au-first','au-last','au-country'].forEach(id => document.getElementById(id).value = '');
   }
-  function openPwReveal(email, pw) {
+  function openPwReveal(email, pw, emailSent) {
     document.getElementById('pw-reveal-email').value = email;
     document.getElementById('pw-reveal-pw').value = pw;
+    // Toggle the two banner alerts based on whether Resend sent the welcome email.
+    const sentBanner = document.getElementById('pw-reveal-sent-banner');
+    const unsentBanner = document.getElementById('pw-reveal-unsent-banner');
+    if (emailSent) {
+      sentBanner.classList.remove('hidden');
+      unsentBanner.classList.add('hidden');
+    } else {
+      sentBanner.classList.add('hidden');
+      unsentBanner.classList.remove('hidden');
+    }
     document.getElementById('pw-reveal-modal').classList.add('show');
     document.body.style.overflow = 'hidden';
     setTimeout(() => document.getElementById('pw-reveal-pw').select(), 100);

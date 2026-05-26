@@ -24,13 +24,15 @@
     </div>
   </div>
   <div class="page-actions">
-    {% if not lead['do_not_approach'] %}
-    <button class="btn btn-outline" onclick="toggleDNA(true)">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>
-      Mark Do Not Approach
-    </button>
-    {% else %}
-    <button class="btn btn-outline" onclick="toggleDNA(false)">Clear DNA</button>
+    {% if u['role'] == 'admin' %}
+      {% if not lead['do_not_approach'] %}
+      <button class="btn btn-outline" onclick="toggleDNA(true)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M4.93 4.93l14.14 14.14"/></svg>
+        Mark Do Not Approach
+      </button>
+      {% else %}
+      <button class="btn btn-outline" onclick="toggleDNA(false)">Clear DNA</button>
+      {% endif %}
     {% endif %}
     <button class="btn btn-primary" onclick="openMeetingModal()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25"/></svg>
@@ -60,12 +62,20 @@
       <div class="form-grid-2">
         <div class="form-row">
           <label class="form-label" for="d-status">Status</label>
+          {% if u['role'] == 'admin' %}
           <select class="form-select" id="d-status" onchange="updateLead({status: this.value})">
             {% for s in STATUSES %}<option value="{{ s }}" {% if lead['status'] == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
           </select>
+          {% else %}
+          <div style="padding:11px 14px;background:var(--dark);border:1px solid var(--dark-border);border-radius:10px">
+            {% set scls = 's-' ~ (lead['status']|lower|replace(' ', '-')) %}
+            <span class="badge badge-status {{ scls }}">{{ lead['status'] }}</span>
+          </div>
+          {% endif %}
         </div>
         <div class="form-row">
           <label class="form-label" for="d-assignee">Assigned to</label>
+          {% if u['role'] == 'admin' %}
           <select class="form-select" id="d-assignee" onchange="updateLead({assigned_to_user_id: this.value ? parseInt(this.value) : null})">
             <option value="">— Unassigned —</option>
             {% for usr in users %}
@@ -74,6 +84,11 @@
               </option>
             {% endfor %}
           </select>
+          {% else %}
+          <div style="padding:11px 14px;background:var(--dark);border:1px solid var(--dark-border);border-radius:10px;color:var(--text-dim);font-size:13px">
+            {% if lead['assignee_first'] %}{{ lead['assignee_first'] }} {{ lead['assignee_last'] or '' }}{% else %}—{% endif %}
+          </div>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -116,9 +131,14 @@
             {% endif %}
             <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
               {% if m['status'] == 'scheduled' %}
-                <button class="btn btn-ghost btn-sm" onclick="updateMeeting({{ m['id'] }}, 'completed')">Mark completed</button>
-                <button class="btn btn-ghost btn-sm" onclick="updateMeeting({{ m['id'] }}, 'no_show')">No-show</button>
-                <button class="btn btn-danger btn-sm" onclick="deleteMeeting({{ m['id'] }})">Cancel</button>
+                {# Setter-or-admin can mark outcomes on this meeting. Cancel is admin-only. #}
+                {% if u['role'] == 'admin' or u['id'] == m['setter_user_id'] %}
+                  <button class="btn btn-ghost btn-sm" onclick="updateMeeting({{ m['id'] }}, 'completed')">Mark completed</button>
+                  <button class="btn btn-ghost btn-sm" onclick="updateMeeting({{ m['id'] }}, 'no_show')">No-show</button>
+                {% endif %}
+                {% if u['role'] == 'admin' %}
+                  <button class="btn btn-danger btn-sm" onclick="deleteMeeting({{ m['id'] }})">Cancel</button>
+                {% endif %}
               {% endif %}
             </div>
           </div>
@@ -189,7 +209,9 @@
     <div class="card">
       <div class="row-between" style="margin-bottom:14px">
         <span class="form-label">Contact</span>
+        {% if u['role'] == 'admin' %}
         <button class="btn btn-ghost btn-sm" onclick="toggleEdit()">Edit</button>
+        {% endif %}
       </div>
       <div id="contact-view" class="stack" style="gap:10px;font-size:13px">
         <div><span class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:1px">Name</span><br>{{ lead['full_name'] or '—' }}</div>
@@ -198,7 +220,11 @@
         <div><span class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:1px">Phone</span><br>{{ ((lead['phone_country_code'] or '') + ' ' + (lead['phone'] or '')).strip() or '—' }}</div>
         <div><span class="text-muted" style="font-size:11px;text-transform:uppercase;letter-spacing:1px">Instagram</span><br>{% if lead['ig_handle'] %}<a href="https://instagram.com/{{ lead['ig_handle'].lstrip('@') }}" target="_blank" rel="noopener" style="color:var(--teal)">@{{ lead['ig_handle'].lstrip('@') }}</a>{% else %}—{% endif %}</div>
       </div>
+      {# Edit form is admin-only so the dead-code "Cancel" button (which still
+         shows in the DOM even when hidden) doesn't bleed into setters' pages. #}
+      {% if u['role'] == 'admin' %}
       <div id="contact-edit" class="stack hidden" style="gap:10px">
+        <div class="form-row"><label class="form-label">Company Name *</label><input class="form-input" id="e-company" value="{{ lead['company_name'] or '' }}"></div>
         <div class="form-row"><label class="form-label">Full Name</label><input class="form-input" id="e-name" value="{{ lead['full_name'] or '' }}"></div>
         <div class="form-row"><label class="form-label">Job Title</label><input class="form-input" id="e-title" value="{{ lead['job_title'] or '' }}"></div>
         <div class="form-row"><label class="form-label">Email</label><input class="form-input" id="e-email" type="email" value="{{ lead['email'] or '' }}"></div>
@@ -226,23 +252,32 @@
           <button class="btn btn-primary btn-sm" onclick="saveContact()">Save</button>
         </div>
       </div>
+      {% endif %}
     </div>
 
     <div class="card">
-      <span class="form-label">Source &amp; Industry</span>
+      <span class="form-label">Source &amp; Country</span>
       <div class="form-grid-2" style="margin-top:10px">
         <div class="form-row">
           <label class="form-label">Source</label>
+          {% if u['role'] == 'admin' %}
           <select class="form-select" onchange="updateLead({source: this.value})">
             {% for s in SOURCES %}<option value="{{ s }}" {% if lead['source'] == s %}selected{% endif %}>{{ s }}</option>{% endfor %}
           </select>
+          {% else %}
+          <div style="padding:11px 14px;background:var(--dark);border:1px solid var(--dark-border);border-radius:10px;color:var(--text-dim);font-size:13px">{{ lead['source'] }}</div>
+          {% endif %}
         </div>
         <div class="form-row">
           <label class="form-label">Country</label>
+          {% if u['role'] == 'admin' %}
           <select class="form-select" onchange="updateLead({country: this.value})">
             <option value="">—</option>
             {% for c in COUNTRIES %}<option value="{{ c }}" {% if lead['country'] == c %}selected{% endif %}>{{ c }}</option>{% endfor %}
           </select>
+          {% else %}
+          <div style="padding:11px 14px;background:var(--dark);border:1px solid var(--dark-border);border-radius:10px;color:var(--text-dim);font-size:13px">{{ lead['country'] or '—' }}</div>
+          {% endif %}
         </div>
       </div>
     </div>
@@ -322,7 +357,13 @@
     document.getElementById('contact-edit').classList.toggle('hidden');
   }
   async function saveContact() {
+    const company = document.getElementById('e-company').value.trim();
+    if (!company) {
+      window.toast('Company name cannot be empty', 'error');
+      return;
+    }
     await updateLead({
+      company_name: company,
       full_name: document.getElementById('e-name').value.trim(),
       job_title: document.getElementById('e-title').value.trim(),
       email:     document.getElementById('e-email').value.trim(),

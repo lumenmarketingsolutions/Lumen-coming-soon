@@ -96,6 +96,26 @@
   </div>
 </div>
 
+{% if u['role'] == 'admin' %}
+<div class="card" style="margin-top:18px">
+  <div class="row-between" style="margin-bottom:10px">
+    <span class="form-label">Team management</span>
+    <span class="badge" style="background:rgba(128,47,222,0.10);color:#b78bff">Admin</span>
+  </div>
+  <p class="text-dim" style="font-size:13px;margin-bottom:14px">
+    Add a new setter or manage existing accounts. New users get an email with
+    their login credentials and are asked to choose a new password on first sign-in.
+  </p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <a href="/crm/admin?add=1" class="btn btn-primary btn-sm">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+      Add a user
+    </a>
+    <a href="/crm/admin" class="btn btn-outline btn-sm">Open team dashboard →</a>
+  </div>
+</div>
+{% endif %}
+
 <script>
   function applyGrid() {
     document.getElementById('set-grid').style.gridTemplateColumns = window.innerWidth < 900 ? '1fr' : '1fr 1fr';
