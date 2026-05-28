@@ -445,6 +445,7 @@ def init_db():
             phone TEXT DEFAULT '',
             goal TEXT DEFAULT '',
             timeline TEXT DEFAULT '',
+            budget TEXT DEFAULT '',
             utm_source TEXT DEFAULT '',
             utm_campaign TEXT DEFAULT '',
             utm_content TEXT DEFAULT '',
@@ -453,6 +454,11 @@ def init_db():
             created_at TEXT NOT NULL
         )
     """)
+    # Add budget column for tables created before V2 (idempotent)
+    try:
+        con.execute("ALTER TABLE mane_extension_quiz ADD COLUMN budget TEXT DEFAULT ''")
+    except sqlite3.OperationalError:
+        pass  # column already exists
     con.commit()
 
     # Avalon CRM onboarding form submissions
@@ -1628,14 +1634,19 @@ def mane_extensions():
 
 GOAL_LABELS = {
     "length": "More length",
-    "volume": "More volume",
-    "both": "Both length and volume",
     "density": "More density (hair has thinned)",
+    "both": "Both length and density",
 }
 TIMELINE_LABELS = {
     "soon": "In the next few weeks",
     "months": "Within a couple months",
     "exploring": "Just exploring for now",
+}
+BUDGET_LABELS = {
+    "1-2k":   "$1,000 – $2,000 (starter install)",
+    "2-3.5k": "$2,000 – $3,500 (most popular)",
+    "3.5k+":  "$3,500 and up (full transformation)",
+    "open":   "Open / wants recommendations",
 }
 
 @app.route("/manestyling/extension-funnel/submit", methods=["POST"])
@@ -1646,16 +1657,17 @@ def mane_extension_submit():
     phone = (data.get("phone") or "").strip()
     goal = (data.get("goal") or "").strip()
     timeline = (data.get("timeline") or "").strip()
+    budget = (data.get("budget") or "").strip()
 
     now = datetime.datetime.utcnow().isoformat()
     con = sqlite3.connect(DB_PATH)
     con.execute("""
         INSERT INTO mane_extension_quiz (
-            name, email, phone, goal, timeline,
+            name, email, phone, goal, timeline, budget,
             utm_source, utm_campaign, utm_content, fbclid, referrer, created_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
-        name, email, phone, goal, timeline,
+        name, email, phone, goal, timeline, budget,
         data.get("utm_source", ""),
         data.get("utm_campaign", ""),
         data.get("utm_content", ""),
@@ -1668,6 +1680,7 @@ def mane_extension_submit():
 
     goal_l = GOAL_LABELS.get(goal, goal)
     timeline_l = TIMELINE_LABELS.get(timeline, timeline)
+    budget_l = BUDGET_LABELS.get(budget, budget)
 
     def row(label, value):
         if not value:
@@ -1687,6 +1700,7 @@ def mane_extension_submit():
           {row("Phone", phone)}
           {row("Goal", goal_l)}
           {row("Timeline", timeline_l)}
+          {row("Budget", budget_l)}
           {row("UTM source", data.get("utm_source",""))}
           {row("UTM campaign", data.get("utm_campaign",""))}
           {row("UTM content", data.get("utm_content",""))}

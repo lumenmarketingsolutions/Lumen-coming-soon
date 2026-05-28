@@ -4,22 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Mane Styling Studio · Hand-Tied Extensions Consult</title>
-    <meta name="description" content="Hand-tied extensions, custom color-matched to your hair. Two quick questions and we'll set up your free consult. Take-home starter kit included with your install.">
+    <meta name="description" content="Hand-tied extensions for hair that's been changing. Custom color-matched, restored fullness, real results. A few quick questions and we'll set up your free consult.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg: #FAF6F1;
-            --surface: #FFFFFF;
+            --bg: #FFFFFF;
+            --surface: #FAF6F1;
             --ink: #1A1A1A;
             --muted: #6B5F56;
-            --line: rgba(26, 26, 26, 0.08);
-            --accent: #8B3552;
-            --accent-hover: #6E2A40;
-            --accent-soft: rgba(139, 53, 82, 0.08);
+            --line: rgba(26, 26, 26, 0.10);
+            --line-soft: rgba(26, 26, 26, 0.06);
+            --accent: #1A1A1A;
+            --accent-hover: #000000;
+            --accent-soft: rgba(26, 26, 26, 0.04);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -29,10 +30,11 @@
             overflow-x: hidden;
         }
         body {
-            font-family: 'Inter', -apple-system, sans-serif;
+            font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg);
             color: var(--ink);
             line-height: 1.6;
+            font-weight: 400;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             overflow-x: hidden;
@@ -53,16 +55,12 @@
             display: flex;
             justify-content: flex-start;
             align-items: center;
-            margin-bottom: 28px;
+            margin-bottom: 32px;
         }
         .brand-logo {
             height: 48px;
             width: auto;
             display: block;
-        }
-        @media (max-width: 640px) {
-            .brand { margin-bottom: 20px; }
-            .brand-logo { height: 40px; }
         }
 
         /* Progress bar (hidden on landing) */
@@ -71,14 +69,14 @@
             width: 100%;
             display: none;
             gap: 6px;
-            margin-bottom: 36px;
+            margin-bottom: 40px;
         }
         .progress.show { display: flex; }
         .progress-dot {
             flex: 1;
-            height: 3px;
-            border-radius: 2px;
-            background: rgba(26, 26, 26, 0.08);
+            height: 2px;
+            border-radius: 1px;
+            background: var(--line);
             transition: background 0.3s ease;
         }
         .progress-dot.filled { background: var(--accent); }
@@ -92,46 +90,44 @@
         }
 
         /* ─── Landing (step 0) ───────────────────────────────── */
-        .landing { text-align: center; margin: 28px 0 auto; }
+        .landing { text-align: center; margin: 12px 0 auto; }
 
         .eyebrow {
             display: inline-block;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 500;
             letter-spacing: 2.5px;
             text-transform: uppercase;
-            color: var(--accent);
-            padding: 7px 14px;
-            border: 1px solid var(--accent);
+            color: var(--ink);
+            padding: 8px 16px;
+            border: 1px solid var(--ink);
             border-radius: 100px;
-            margin-bottom: 28px;
+            margin-bottom: 36px;
         }
         .eyebrow strong { font-weight: 700; letter-spacing: 1px; }
 
         h1 {
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: 42px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 48px;
             font-weight: 600;
-            line-height: 1.14;
-            letter-spacing: -0.5px;
+            line-height: 1.08;
+            letter-spacing: -1px;
             color: var(--ink);
             margin-bottom: 22px;
-            text-wrap: balance;
         }
         h1 em {
             font-style: italic;
-            font-weight: 500;
-            color: var(--accent);
+            font-weight: 300;
+            color: var(--ink);
         }
 
         .sub {
-            font-size: 16px;
-            font-weight: 400;
-            line-height: 1.65;
+            font-size: 17px;
             color: var(--muted);
-            max-width: 440px;
-            margin: 0 auto 36px;
-            text-wrap: pretty;
+            max-width: 480px;
+            margin: 0 auto 38px;
+            line-height: 1.6;
+            font-weight: 400;
         }
 
         .cta {
@@ -140,468 +136,359 @@
             justify-content: center;
             gap: 10px;
             background: var(--accent);
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            font-size: 15px;
-            font-weight: 600;
-            letter-spacing: 0.2px;
-            padding: 18px 36px;
+            color: #FFFFFF;
             border: none;
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            padding: 18px 38px;
             border-radius: 100px;
             cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 6px 24px rgba(139, 53, 82, 0.18);
-            min-height: 52px;
+            transition: background 0.2s ease, transform 0.15s ease;
             text-decoration: none;
+            min-height: 54px;
+            -webkit-tap-highlight-color: transparent;
         }
-        .cta:hover {
-            background: var(--accent-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 10px 30px rgba(139, 53, 82, 0.24);
-        }
-        .cta:active { transform: translateY(0); }
-        .cta:disabled {
-            background: rgba(26, 26, 26, 0.12);
-            color: rgba(26, 26, 26, 0.4);
-            cursor: not-allowed;
-            box-shadow: none;
-            transform: none;
-        }
-        .cta .arrow { font-size: 17px; transition: transform 0.2s ease; }
-        .cta:hover:not(:disabled) .arrow { transform: translateX(3px); }
+        .cta:hover { background: var(--accent-hover); }
+        .cta:active { transform: scale(0.98); }
+        .cta .arrow { font-size: 17px; line-height: 1; }
 
         .reassure {
-            margin-top: 20px;
+            margin-top: 22px;
             font-size: 12px;
-            font-weight: 500;
-            letter-spacing: 0.4px;
             color: var(--muted);
+            letter-spacing: 0.4px;
+            font-weight: 400;
         }
-        .reassure span { margin: 0 8px; opacity: 0.5; }
+        .reassure span { margin: 0 6px; opacity: 0.5; }
 
-        /* Before/after strip on landing */
-        .ba-strip {
+        /* Hero photos — 2 large B/As stacked under the CTA */
+        .hero-photos {
+            margin-top: 56px;
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin: 56px auto 0;
-            max-width: 560px;
-            width: 100%;
+            grid-template-columns: 1fr;
+            gap: 16px;
         }
-        .ba-strip .ba {
-            aspect-ratio: 1 / 1;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #e8ddd0;
-            box-shadow: 0 4px 16px rgba(26, 26, 26, 0.06);
+        .hero-photos .ba {
             position: relative;
+            border-radius: 4px;
+            overflow: hidden;
+            background: var(--surface);
         }
-        .ba-strip .ba img {
+        .hero-photos .ba img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: auto;
             display: block;
         }
-        .ba-strip .ba[data-label]::after {
-            content: attr(data-label);
+        .hero-photos .ba::after {
+            content: 'BEFORE / AFTER';
             position: absolute;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
+            bottom: 14px;
+            left: 14px;
+            background: rgba(26, 26, 26, 0.85);
+            color: #FFFFFF;
             font-size: 10px;
             font-weight: 600;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #fff;
-            background: rgba(0, 0, 0, 0.45);
-            padding: 4px 10px;
-            border-radius: 100px;
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-            white-space: nowrap;
+            letter-spacing: 1.8px;
+            padding: 6px 10px;
+            border-radius: 2px;
         }
 
         .credibility {
-            margin-top: 28px;
-            padding-top: 28px;
+            margin-top: 56px;
+            padding-top: 32px;
             border-top: 1px solid var(--line);
-            text-align: center;
             font-size: 12px;
-            font-weight: 500;
-            letter-spacing: 1px;
-            text-transform: uppercase;
             color: var(--muted);
-            max-width: 560px;
-            width: 100%;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            font-weight: 500;
         }
         .credibility .stars {
-            color: var(--accent);
-            letter-spacing: 2px;
-            margin-bottom: 6px;
+            color: var(--ink);
+            letter-spacing: 4px;
+            margin-bottom: 8px;
             font-size: 11px;
         }
 
-        /* ─── Quiz steps ─────────────────────────────────────── */
+        /* ─── Quiz steps ────────────────────────────────────── */
         .step-eyebrow {
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 500;
             letter-spacing: 2.5px;
             text-transform: uppercase;
-            color: var(--accent);
+            color: var(--muted);
             margin-bottom: 14px;
             text-align: center;
         }
         .step h2 {
-            font-family: 'Playfair Display', Georgia, serif;
-            font-size: 30px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 32px;
             font-weight: 600;
-            line-height: 1.2;
-            letter-spacing: -0.3px;
+            line-height: 1.18;
+            letter-spacing: -0.5px;
+            color: var(--ink);
             text-align: center;
-            margin-bottom: 12px;
-            text-wrap: balance;
+            margin-bottom: 8px;
         }
-        .step h2 em { font-style: italic; color: var(--accent); font-weight: 500; }
+        .step h2 em {
+            font-style: italic;
+            font-weight: 300;
+        }
         .step .hint {
             text-align: center;
             font-size: 14px;
             color: var(--muted);
-            margin-bottom: 28px;
+            margin-bottom: 32px;
         }
 
-        /* Tile grids */
         .tiles {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 1fr;
             gap: 12px;
-            margin-bottom: 28px;
-        }
-        .tiles-2x2 {
-            grid-template-columns: repeat(2, 1fr);
+            margin-bottom: 32px;
         }
         .tile {
             cursor: pointer;
-            border-radius: 14px;
+            border-radius: 2px;
             overflow: hidden;
-            background: var(--surface);
-            border: 2px solid transparent;
-            transition: all 0.2s ease;
-            box-shadow: 0 2px 8px rgba(26, 26, 26, 0.04);
+            background: var(--bg);
+            border: 1px solid var(--line);
+            padding: 22px 24px;
+            transition: all 0.18s ease;
             -webkit-tap-highlight-color: transparent;
         }
         .tile:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 22px rgba(26, 26, 26, 0.10);
+            border-color: var(--ink);
+            transform: translateY(-1px);
         }
         .tile.selected {
-            border-color: var(--accent);
-            box-shadow: 0 8px 22px rgba(139, 53, 82, 0.18);
-        }
-        .tile-image {
-            aspect-ratio: 1 / 1;
-            position: relative;
-        }
-        .tile-image .swatch {
-            position: absolute;
-            inset: 0;
-        }
-        .tile-image img {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .tile-label {
-            padding: 12px 10px 14px;
-            text-align: center;
+            border-color: var(--ink);
+            background: var(--surface);
         }
         .tile-label .name {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             color: var(--ink);
             line-height: 1.3;
         }
         .tile-label .desc {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 400;
             color: var(--muted);
-            margin-top: 3px;
-            line-height: 1.4;
-        }
-        .tile.selected .tile-label .name { color: var(--accent); }
-
-        /* Text-only tiles (no swatch/image area) for extensions consult quiz */
-        .tiles-text { grid-template-columns: repeat(2, 1fr); }
-        .tiles-text .tile-label {
-            padding: 22px 18px;
-            text-align: left;
-        }
-        .tiles-text .tile-label .name {
-            font-size: 16px;
-            line-height: 1.3;
-        }
-        .tiles-text .tile-label .desc {
-            margin-top: 6px;
-            font-size: 13px;
-            line-height: 1.45;
-        }
-        .tiles-text.tiles-stack { grid-template-columns: 1fr; }
-
-        /* Included-with-install bullet list on result page */
-        .included {
-            background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: 14px;
-            padding: 22px 24px;
-            margin: 24px 0 28px;
-            text-align: left;
-        }
-        .included .h {
-            font-family: 'Inter', sans-serif;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            color: var(--muted);
-            margin-bottom: 14px;
-        }
-        .included ul { list-style: none; margin: 0; padding: 0; }
-        .included li {
-            font-size: 14px;
-            color: var(--ink);
-            padding: 7px 0 7px 22px;
-            position: relative;
+            margin-top: 5px;
             line-height: 1.5;
-        }
-        .included li::before {
-            content: '';
-            position: absolute;
-            left: 4px;
-            top: 14px;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent);
         }
 
         .step-nav {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             margin-top: 8px;
         }
         .btn-back {
             background: none;
             border: none;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            font-weight: 500;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
             color: var(--muted);
             cursor: pointer;
-            padding: 14px 4px;
-            transition: color 0.2s ease;
+            padding: 8px 0;
+            letter-spacing: 0.3px;
             -webkit-tap-highlight-color: transparent;
         }
         .btn-back:hover { color: var(--ink); }
 
-        /* ─── Email gate (step 3) ────────────────────────────── */
+        /* ─── Email gate ──────────────────────────────────────── */
         .gate {
             background: var(--surface);
-            border: 1px solid var(--line);
-            border-radius: 18px;
+            border-radius: 4px;
             padding: 36px 32px;
-            box-shadow: 0 8px 30px rgba(26, 26, 26, 0.05);
+            margin-bottom: 12px;
         }
         .gate .step-eyebrow { margin-bottom: 10px; }
-        .gate h2 { margin-bottom: 10px; font-size: 28px; }
-        .gate .gift {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--accent-soft);
-            border-radius: 10px;
-            padding: 12px 14px;
-            margin-bottom: 22px;
-            font-size: 13px;
-            color: var(--accent);
-            font-weight: 500;
-            line-height: 1.4;
-        }
-        .gate .gift-icon { font-size: 18px; line-height: 1; flex-shrink: 0; }
-        .field { margin-bottom: 14px; }
-        .field label {
-            display: block;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--ink);
-            margin-bottom: 6px;
-            letter-spacing: 0.2px;
-        }
-        .field input {
-            width: 100%;
-            font-family: 'Inter', sans-serif;
-            font-size: 16px;
-            padding: 14px 16px;
-            background: #fff;
-            border: 1px solid var(--line);
-            border-radius: 10px;
-            color: var(--ink);
-            outline: none;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        .field input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-soft);
-        }
-        .field input::placeholder { color: #bdb5ad; }
-        .gate .submit {
-            width: 100%;
-            margin-top: 10px;
-        }
-        .gate .legal {
-            margin-top: 14px;
-            text-align: center;
-            font-size: 11px;
-            color: var(--muted);
-            line-height: 1.5;
-        }
-
-        /* ─── Result (step 4) ─────────────────────────────────── */
-        .result { text-align: center; }
-        .result .badge {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 600;
-            letter-spacing: 2.5px;
-            text-transform: uppercase;
-            color: var(--accent);
-            background: var(--accent-soft);
-            padding: 7px 14px;
-            border-radius: 100px;
-            margin-bottom: 22px;
-        }
-        .result h2 {
-            font-size: 36px;
+        .gate h2 {
             margin-bottom: 8px;
-        }
-        .result .rec {
-            font-family: 'Playfair Display', Georgia, serif;
-            font-style: italic;
             font-size: 26px;
-            font-weight: 500;
-            color: var(--accent);
-            margin-bottom: 16px;
-            line-height: 1.2;
         }
-        .result .why {
-            font-size: 15px;
-            color: var(--muted);
-            max-width: 440px;
-            margin: 0 auto 32px;
-            line-height: 1.65;
-            text-wrap: pretty;
+        .gate .hint {
+            margin-bottom: 24px;
         }
-        .result-offer {
-            background: var(--surface);
+        .gate .gift {
+            background: var(--bg);
             border: 1px solid var(--line);
-            border-radius: 14px;
-            padding: 18px 22px;
+            border-radius: 2px;
+            padding: 14px 16px;
+            font-size: 13px;
+            color: var(--ink);
             margin-bottom: 22px;
             text-align: left;
             display: flex;
-            align-items: center;
-            gap: 14px;
+            align-items: flex-start;
+            gap: 10px;
+            line-height: 1.5;
         }
-        .result-offer .icon { font-size: 24px; line-height: 1; flex-shrink: 0; }
-        .result-offer .copy .h {
-            font-weight: 600;
-            font-size: 14px;
+        .gate .gift-icon {
+            font-size: 16px;
+            line-height: 1.4;
+            flex-shrink: 0;
+        }
+
+        .field { margin-bottom: 14px; }
+        .field label {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+        .field input {
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+            font-size: 15px;
+            padding: 14px 16px;
+            border: 1px solid var(--line);
+            border-radius: 2px;
+            background: var(--bg);
             color: var(--ink);
-            margin-bottom: 2px;
-            line-height: 1.3;
+            -webkit-appearance: none;
+            transition: border-color 0.15s ease;
+        }
+        .field input:focus {
+            outline: none;
+            border-color: var(--ink);
+        }
+
+        .gate .submit {
+            width: 100%;
+            margin-top: 14px;
+        }
+        .gate .legal {
+            margin-top: 16px;
+            font-size: 11px;
+            color: var(--muted);
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* ─── Result ──────────────────────────────────────────── */
+        .result { text-align: center; }
+        .result .badge {
+            display: inline-block;
+            background: var(--surface);
+            color: var(--ink);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            padding: 8px 16px;
+            border-radius: 100px;
+            margin-bottom: 18px;
+        }
+        .result h2 {
+            font-size: 36px;
+            margin-bottom: 18px;
+        }
+        .result .why {
+            font-size: 16px;
+            color: var(--muted);
+            max-width: 460px;
+            margin: 0 auto 30px;
+            line-height: 1.65;
+        }
+
+        .result-offer {
+            background: var(--surface);
+            border-radius: 4px;
+            padding: 20px 22px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            text-align: left;
+        }
+        .result-offer .icon { font-size: 22px; line-height: 1.2; flex-shrink: 0; }
+        .result-offer .copy .h {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 4px;
         }
         .result-offer .copy .s {
             font-size: 13px;
             color: var(--muted);
-            line-height: 1.4;
+            line-height: 1.5;
         }
-        .result .attach {
-            margin-top: 14px;
-            font-size: 12px;
-            color: var(--muted);
+
+        .included {
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            padding: 24px 26px;
+            margin: 32px 0 0;
+            text-align: left;
         }
-        .recent-work {
-            margin-top: 40px;
-        }
-        .recent-work-label {
+        .included .h {
+            font-family: 'Poppins', sans-serif;
             font-size: 11px;
-            font-weight: 600;
+            font-weight: 500;
             letter-spacing: 2px;
             text-transform: uppercase;
             color: var(--muted);
-            margin-bottom: 14px;
+            margin-bottom: 16px;
         }
-        .recent-work-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 14px;
+        .included ul { list-style: none; margin: 0; padding: 0; }
+        .included li {
+            font-size: 14px;
+            color: var(--ink);
+            padding: 8px 0 8px 18px;
+            position: relative;
+            line-height: 1.55;
         }
-        .recent-work-grid img {
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(26, 26, 26, 0.05);
+        .included li::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 16px;
+            width: 6px;
+            height: 1px;
+            background: var(--ink);
         }
+
         .result-foot {
             margin-top: 36px;
-            padding-top: 22px;
+            padding-top: 24px;
             border-top: 1px solid var(--line);
-            font-size: 12px;
+            font-size: 13px;
             color: var(--muted);
-            line-height: 1.7;
+            line-height: 1.8;
         }
         .result-foot a {
-            color: var(--accent);
+            color: var(--ink);
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 500;
         }
         .result-foot a:hover { text-decoration: underline; }
 
-        /* ─── Mobile breakpoints ─────────────────────────────── */
+        /* ─── Mobile ──────────────────────────────────────────── */
         @media (max-width: 640px) {
             .page { padding: 22px 18px; padding-bottom: max(48px, calc(36px + env(safe-area-inset-bottom))); }
-            .brand { margin-bottom: 26px; font-size: 10px; letter-spacing: 3.5px; }
-            h1 { font-size: 32px; line-height: 1.18; }
-            .step h2 { font-size: 24px; }
-            .eyebrow { font-size: 10px; padding: 6px 12px; margin-bottom: 22px; }
+            .brand { margin-bottom: 24px; }
+            .brand-logo { height: 40px; }
+            h1 { font-size: 36px; line-height: 1.12; letter-spacing: -0.5px; }
             .sub { font-size: 15px; margin-bottom: 30px; }
-            .cta { padding: 16px 32px; font-size: 14px; min-height: 50px; }
-            .tiles { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-            .tile-label { padding: 10px 8px 12px; }
-            .tile-label .name { font-size: 13px; }
-            .tile-label .desc { font-size: 11px; }
-            /* Stack text tiles single-column on mobile for bigger touch targets */
-            .tiles-text { grid-template-columns: 1fr; gap: 10px; }
-            .tiles-text .tile-label { padding: 18px 20px; }
-            .tiles-text .tile-label .name { font-size: 15px; }
-            .tiles-text .tile-label .desc { font-size: 13px; margin-top: 4px; }
-            .ba-strip { margin-top: 40px; grid-template-columns: 1fr; gap: 16px; }
-            .credibility { margin-top: 28px; padding-top: 22px; }
-            .gate { padding: 26px 20px; border-radius: 16px; }
-            .gate h2 { font-size: 24px; }
-            .result h2 { font-size: 28px; }
-            .result .rec { font-size: 22px; }
-            .result-offer { padding: 16px 18px; }
-        }
-        @media (max-width: 380px) {
-            h1 { font-size: 28px; }
-            .step h2 { font-size: 22px; }
-            .ba-strip { gap: 6px; }
-            .tiles { gap: 8px; }
+            .eyebrow { font-size: 10px; padding: 7px 14px; margin-bottom: 28px; }
+            .cta { padding: 16px 32px; font-size: 14px; min-height: 52px; }
+            .step h2 { font-size: 26px; }
+            .gate { padding: 28px 22px; }
+            .gate h2 { font-size: 23px; }
+            .result h2 { font-size: 30px; }
+            .hero-photos { margin-top: 40px; gap: 12px; }
+            .credibility { margin-top: 40px; padding-top: 24px; }
+            .tile { padding: 18px 20px; }
+            .included { padding: 20px 22px; }
         }
     </style>
 </head>
@@ -617,26 +504,26 @@
             <div class="progress-dot"></div>
             <div class="progress-dot"></div>
             <div class="progress-dot"></div>
+            <div class="progress-dot"></div>
         </div>
 
         <!-- ═══ Step 0: Landing ═══════════════════════════════════ -->
         <section class="step active landing" data-step="0">
             <div class="eyebrow">Free color-match consult + take-home kit · <strong>$200 value</strong></div>
-            <h1>More length. More volume. <em>More you.</em></h1>
+            <h1>Your hair, <em>the way you remember.</em></h1>
             <p class="sub">
-                Hand-tied extensions, custom color-matched to your hair. Two quick questions and we'll set up your free consult.
+                Hand-tied extensions, custom color-matched to your hair. A few quick questions and we'll set up your free consult.
             </p>
             <button type="button" class="cta" onclick="goToStep(1)">
                 Start the Quiz <span class="arrow">→</span>
             </button>
             <div class="reassure">
-                60 seconds <span>·</span> 2 quick questions <span>·</span> No pressure
+                2 minutes <span>·</span> 3 quick questions <span>·</span> No pressure
             </div>
 
-            <div class="ba-strip">
-                <div class="ba" data-label="Before / After"><img src="/static/mane/ext-ba-1.jpg" alt="Before and after, hand-tied extensions install" loading="lazy"></div>
-                <div class="ba" data-label="Before / After"><img src="/static/mane/ext-ba-2.jpg" alt="Before and after, hand-tied extensions install" loading="lazy"></div>
-                <div class="ba" data-label="Before / After"><img src="/static/mane/ext-ba-3.jpg" alt="Before and after, hand-tied extensions install" loading="lazy"></div>
+            <div class="hero-photos">
+                <div class="ba"><img src="/static/mane/ext-ba-blonde-mature.jpg" alt="Before and after, hand-tied extensions restoring fullness on blonde hair" loading="lazy"></div>
+                <div class="ba"><img src="/static/mane/ext-ba-brunette-mature.jpg" alt="Before and after, hand-tied extensions restoring fullness on brunette hair" loading="lazy"></div>
             </div>
 
             <div class="credibility">
@@ -647,50 +534,43 @@
 
         <!-- ═══ Step 1: Goal ══════════════════════════════════════ -->
         <section class="step" data-step="1">
-            <div class="step-eyebrow">Question 1 of 2</div>
+            <div class="step-eyebrow">Question 1 of 3</div>
             <h2>What are you <em>hoping for?</em></h2>
             <p class="hint">Pick the one that fits best.</p>
 
-            <div class="tiles tiles-text" id="tiles-goal">
+            <div class="tiles" id="tiles-goal">
                 <div class="tile" data-value="length">
                     <div class="tile-label">
                         <div class="name">More length</div>
                         <div class="desc">Add inches and let your hair fall longer.</div>
                     </div>
                 </div>
-                <div class="tile" data-value="volume">
+                <div class="tile" data-value="density">
                     <div class="tile-label">
-                        <div class="name">More volume</div>
-                        <div class="desc">Fuller-looking hair with no daily styling.</div>
+                        <div class="name">More density</div>
+                        <div class="desc">Restore fullness where your hair has thinned.</div>
                     </div>
                 </div>
                 <div class="tile" data-value="both">
                     <div class="tile-label">
-                        <div class="name">Both length and volume</div>
-                        <div class="desc">The most popular install.</div>
-                    </div>
-                </div>
-                <div class="tile" data-value="density">
-                    <div class="tile-label">
-                        <div class="name">More density</div>
-                        <div class="desc">If your hair has thinned and you want it back.</div>
+                        <div class="name">Both length and density</div>
+                        <div class="desc">The full transformation. Most clients pick this.</div>
                     </div>
                 </div>
             </div>
 
             <div class="step-nav">
                 <button type="button" class="btn-back" onclick="goToStep(0)">← Back</button>
-                <span></span>
             </div>
         </section>
 
         <!-- ═══ Step 2: Timeline ══════════════════════════════════ -->
         <section class="step" data-step="2">
-            <div class="step-eyebrow">Question 2 of 2</div>
+            <div class="step-eyebrow">Question 2 of 3</div>
             <h2>When are you <em>hoping to have them in?</em></h2>
             <p class="hint">So we can find the right consult slot.</p>
 
-            <div class="tiles tiles-text tiles-stack" id="tiles-timeline">
+            <div class="tiles" id="tiles-timeline">
                 <div class="tile" data-value="soon">
                     <div class="tile-label">
                         <div class="name">In the next few weeks</div>
@@ -713,19 +593,56 @@
 
             <div class="step-nav">
                 <button type="button" class="btn-back" onclick="goToStep(1)">← Back</button>
-                <span></span>
             </div>
         </section>
 
-        <!-- ═══ Step 3: Email gate ════════════════════════════════ -->
+        <!-- ═══ Step 3: Budget ════════════════════════════════════ -->
         <section class="step" data-step="3">
+            <div class="step-eyebrow">Question 3 of 3</div>
+            <h2>What's your <em>investment range?</em></h2>
+            <p class="hint">Installs run $1k to $4.5k. No wrong answer.</p>
+
+            <div class="tiles" id="tiles-budget">
+                <div class="tile" data-value="1-2k">
+                    <div class="tile-label">
+                        <div class="name">$1,000 – $2,000</div>
+                        <div class="desc">A starter install, single row.</div>
+                    </div>
+                </div>
+                <div class="tile" data-value="2-3.5k">
+                    <div class="tile-label">
+                        <div class="name">$2,000 – $3,500</div>
+                        <div class="desc">Our most popular range.</div>
+                    </div>
+                </div>
+                <div class="tile" data-value="3.5k+">
+                    <div class="tile-label">
+                        <div class="name">$3,500 and up</div>
+                        <div class="desc">A full transformation.</div>
+                    </div>
+                </div>
+                <div class="tile" data-value="open">
+                    <div class="tile-label">
+                        <div class="name">I'd like recommendations</div>
+                        <div class="desc">Tell me what's right for my hair.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-nav">
+                <button type="button" class="btn-back" onclick="goToStep(2)">← Back</button>
+            </div>
+        </section>
+
+        <!-- ═══ Step 4: Email gate ════════════════════════════════ -->
+        <section class="step" data-step="4">
             <div class="gate">
                 <div class="step-eyebrow">Your consult is ready</div>
                 <h2>Where should we send it?</h2>
                 <p class="hint">We'll text and email a confirmation.</p>
 
                 <div class="gift">
-                    <span class="gift-icon">🎁</span>
+                    <span class="gift-icon">◆</span>
                     <span>Free color-match consult, normally <strong>$25</strong>. Plus a take-home starter kit when you install, a <strong>$200 value</strong>.</span>
                 </div>
 
@@ -752,19 +669,18 @@
             </div>
 
             <div class="step-nav">
-                <button type="button" class="btn-back" onclick="goToStep(2)">← Back</button>
-                <span></span>
+                <button type="button" class="btn-back" onclick="goToStep(3)">← Back</button>
             </div>
         </section>
 
-        <!-- ═══ Step 4: Result ═══════════════════════════════════ -->
-        <section class="step result" data-step="4">
+        <!-- ═══ Step 5: Result ═══════════════════════════════════ -->
+        <section class="step result" data-step="5">
             <div class="badge">Your Consult</div>
             <h2>You're all set.</h2>
             <p class="why" id="rec-why">Walk in for a relaxed, no-pressure conversation. We'll map out the right install for you and color-match your extension hair on the spot.</p>
 
             <div class="result-offer">
-                <span class="icon">🎁</span>
+                <span class="icon">◆</span>
                 <div class="copy">
                     <div class="h">Your free consult is reserved.</div>
                     <div class="s">The $25 fee is on us. Take-home starter kit ($200 value) included with your install.</div>
@@ -786,15 +702,6 @@
                 </ul>
             </div>
 
-            <div class="recent-work">
-                <div class="recent-work-label">Recent installs from our chair</div>
-                <div class="recent-work-grid">
-                    <img src="/static/mane/ext-ba-5.jpg" alt="Before and after, hand-tied extensions install" loading="lazy">
-                    <img src="/static/mane/ext-ba-6.jpg" alt="Before and after, hand-tied extensions install" loading="lazy">
-                    <img src="/static/mane/ext-ba-7.jpg" alt="Before and after, hand-tied extensions install" loading="lazy">
-                </div>
-            </div>
-
             <div class="result-foot">
                 <div>Or call us at <a href="tel:+12088171683">208-817-1683</a></div>
                 <div>2929 W Navigator Dr, Suite #110, Meridian, ID</div>
@@ -808,6 +715,7 @@
         const state = {
             goal: null,
             timeline: null,
+            budget: null,
         };
 
         // ─── Step navigation ───────────────────────────────────
@@ -843,6 +751,7 @@
         }
         wireTiles('tiles-goal', 'goal', 2);
         wireTiles('tiles-timeline', 'timeline', 3);
+        wireTiles('tiles-budget', 'budget', 4);
 
         // ─── UTM / tracking params ─────────────────────────────
         function getTracking() {
@@ -856,14 +765,12 @@
             };
         }
 
-        // Per-goal "why" copy on the result page. No row-count recommendation
-        // by design — final install is mapped in consult once Keanna sees the
-        // client's hair density in person.
+        // Per-goal "why" copy. Volume dropped per Keanna's call — density and
+        // volume read as the same thing to her clients, so we collapsed to 3.
         const GOAL_COPY = {
             length:  "Hand-tied extensions add seamless length that grows out with your natural hair. We'll color-match exactly so the blend reads as your own.",
-            volume:  "Hand-tied extensions add fullness without any visible weight or bulk. Most clients say it's the most natural-feeling thing they've ever worn.",
-            both:    "Length and volume in one install. We'll map out the right configuration in your consult based on your hair density.",
             density: "If your hair has thinned, hand-tied extensions are the gentlest way to restore the density that's been changing. No damage to the hair you have.",
+            both:    "Length and density in one install. We'll map out the right configuration in your consult based on what your hair needs.",
         };
 
         function renderResult() {
@@ -884,6 +791,7 @@
                 phone: document.getElementById('lead-phone').value.trim(),
                 goal: state.goal || '',
                 timeline: state.timeline || '',
+                budget: state.budget || '',
                 ...getTracking(),
             };
 
@@ -896,7 +804,7 @@
                 if (!res.ok) throw new Error('submit failed');
                 // TODO(pixel): fire Meta Pixel `Lead` event here.
                 renderResult();
-                goToStep(4);
+                goToStep(5);
             } catch (err) {
                 btn.disabled = false;
                 btn.innerHTML = 'See My Consult <span class="arrow">→</span>';
@@ -905,7 +813,7 @@
             return false;
         }
 
-        // Mane's live Phorest booking link (same URL Mane links to from manestylingstudio.com).
+        // Mane's live Phorest booking link.
         document.getElementById('book-btn').href = 'https://www.phorest.com/salon/manestylingstudio/book/service-selection';
     </script>
 </body>
