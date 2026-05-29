@@ -761,18 +761,31 @@ def scrapers_list():
 @outreach_bp.route("/scrapers/new")
 @admin_required
 def scraper_new():
+    """Default: conversational Claude-powered setup wizard. Power-user form
+    is still accessible via ?advanced=1 so Kendall can skip the chat."""
     u = current_user()
+    if request.args.get("advanced") or not ANTHROPIC_API_KEY:
+        con = db()
+        templates = con.execute(
+            "SELECT id, name, subject FROM outreach_templates ORDER BY updated_at DESC"
+        ).fetchall()
+        con.close()
+        return render_template(
+            "crm/outreach_scraper_edit.html",
+            u=u, s=None, templates=templates,
+            default_countries=", ".join(DEFAULT_COUNTRIES),
+            default_industries="\n".join(DEFAULT_INDUSTRIES),
+            default_regions_json=json.dumps(DEFAULT_REGIONS, indent=2),
+        )
     con = db()
-    templates = con.execute(
-        "SELECT id, name, subject FROM outreach_templates ORDER BY updated_at DESC"
-    ).fetchall()
+    templates_count = con.execute(
+        "SELECT COUNT(*) FROM outreach_templates"
+    ).fetchone()[0]
     con.close()
     return render_template(
-        "crm/outreach_scraper_edit.html",
-        u=u, s=None, templates=templates,
-        default_countries=", ".join(DEFAULT_COUNTRIES),
-        default_industries="\n".join(DEFAULT_INDUSTRIES),
-        default_regions_json=json.dumps(DEFAULT_REGIONS, indent=2),
+        "crm/outreach_scraper_wizard.html",
+        u=u, claude_configured=bool(ANTHROPIC_API_KEY),
+        templates_count=templates_count,
     )
 
 
@@ -931,6 +944,195 @@ def api_delete_scraper(scraper_id):
     con.commit()
     con.close()
     return jsonify({"ok": True})
+
+
+# ── Conversational setup wizard ───────────────────────────────────────────────
+# A small Claude-powered chat that walks the user through agent configuration
+# one question at a time. The system prompt is cached so a multi-turn session
+# costs roughly $0.10-$0.20 total even at Sonnet 4.6 prices. Stateless backend:
+# the client sends the full conversation history each turn.
+
+_WIZARD_SYSTEM_TEMPLATE = """You are MK7's friendly setup assistant. Your job is to help the user configure a new daily Outreach Agent by asking ONE question at a time in a warm, brief, conversational tone — like a smart helpful colleague, not a form.
+
+## What the agent will do once configured
+- Wake once per UTC day at a scheduled hour.
+- Search the web for verified small-business leads with public emails in one country/industry combo.
+- Rotate the combo each day so it doesn't hit the same niche twice in a row.
+- Auto-launch a cold email campaign using a chosen template.
+
+## Fields you need to gather (in roughly this order)
+1. **name** — short internal label, e.g. "Lebanon Salons Daily"
+2. **description** — optional one-liner
+3. **countries** — list of country names. Common: USA, Canada, UK, Australia, Lebanon, UAE, Saudi Arabia
+4. **industries** — list of business-type phrases. Examples: "salons and med spas", "home services (HVAC, plumbing, roofing)", "fitness studios and pilates", "auto detailers and mobile car washes", "boutique retail", "restaurants and cafes", "real estate brokerages"
+5. **regions** — dict of country -> list of regions, e.g. {"USA": ["California", "Texas"]}. Default to an empty object {} if not specified.
+6. **daily_target** — integer, default 100
+7. **schedule_hour_utc** — integer 0-23, default 13 (= 9am ET / 6am PT)
+8. **send_window_hours** — number, default 4
+9. **template_id** — MUST pick an ID from the available templates listed below
+10. **status** — "active" or "paused", default "active"
+
+## Existing agents (so you don't double-book)
+{{SCRAPERS_SUMMARY}}
+
+## Available email templates (the user MUST pick one by ID)
+{{TEMPLATES_SUMMARY}}
+
+## Behavior rules
+- Ask ONE question per turn. Keep replies to 1-2 sentences. No long lectures, no bullet-point dumps in normal turns.
+- If the user's answer already covers multiple fields, acknowledge briefly and move to the next missing one.
+- If they want a country/industry combo that overlaps an existing active agent, gently flag it: e.g. "You already have 'X' covering Lebanon salons. Should this one focus on a different niche or region?"
+- If they're unsure on a field, suggest a sensible default and confirm.
+- If NO templates are available, your VERY FIRST response should be: "Looks like you don't have any email templates yet — I'll need one to launch campaigns. Pop over to /crm/outreach/templates/new, set one up, then come back." Don't ask any other questions.
+- No emojis. No "Great question!" or "I'd be happy to help!" filler.
+
+## How to finalize
+Once you have all fields, do this in TWO steps:
+
+STEP 1 (one turn): summarize the config in plain English and ask the user to confirm. NO JSON in this turn — just a clean recap and "Look good?" type prompt.
+
+STEP 2 (after the user confirms with something like "yes" / "go" / "looks right"): your ENTIRE reply must be ONLY a code block, like this:
+
+```json
+{
+  "ready": true,
+  "config": {
+    "name": "...",
+    "description": "...",
+    "countries": ["..."],
+    "industries": ["..."],
+    "regions": {},
+    "daily_target": 100,
+    "schedule_hour_utc": 13,
+    "send_window_hours": 4,
+    "template_id": 0,
+    "status": "active"
+  }
+}
+```
+
+No prose before or after the JSON block on the confirmation turn. Nothing else.
+
+Until the user explicitly confirms, NEVER emit a JSON block — only conversational replies."""
+
+
+def _build_wizard_context(con):
+    """Pull existing scrapers + templates so Claude can avoid double-booking
+    and pick a valid template_id."""
+    scrapers_rows = con.execute("""
+        SELECT name, status, countries_json, industries_json, daily_target,
+               schedule_hour_utc
+        FROM outreach_scrapers
+        ORDER BY created_at DESC
+    """).fetchall()
+    templates_rows = con.execute("""
+        SELECT id, name, subject FROM outreach_templates
+        ORDER BY updated_at DESC
+    """).fetchall()
+
+    if scrapers_rows:
+        lines = []
+        for s in scrapers_rows:
+            countries = _json_load(s["countries_json"], None) or "(defaults)"
+            industries = _json_load(s["industries_json"], None) or "(defaults)"
+            lines.append(
+                f"- \"{s['name']}\" ({s['status']}, {s['daily_target']}/day, "
+                f"wake {s['schedule_hour_utc']:02d}:00 UTC) covering "
+                f"countries={countries} industries={industries}"
+            )
+        scrapers_summary = "\n".join(lines)
+    else:
+        scrapers_summary = "(none yet — this will be the first)"
+
+    if templates_rows:
+        lines = []
+        for t in templates_rows:
+            subject = (t["subject"] or "")[:80]
+            lines.append(f"- template_id={t['id']}: \"{t['name']}\" — subject: \"{subject}\"")
+        templates_summary = "\n".join(lines)
+    else:
+        templates_summary = "(NO TEMPLATES YET — tell the user to create one first.)"
+
+    return scrapers_summary, templates_summary
+
+
+@outreach_bp.route("/api/scrapers/wizard", methods=["POST"])
+@admin_required
+def api_wizard_turn():
+    if not ANTHROPIC_API_KEY:
+        return jsonify({"ok": False, "error": "Claude API not configured"}), 503
+    data = request.get_json(silent=True) or {}
+    history = data.get("history") or []
+    if not isinstance(history, list) or not history:
+        return jsonify({"ok": False, "error": "history required"}), 400
+
+    # Sanitize: alternating user/assistant text only, must end with user turn.
+    clean = []
+    for m in history:
+        if not isinstance(m, dict):
+            continue
+        role = m.get("role")
+        content = m.get("content")
+        if role not in ("user", "assistant") or not isinstance(content, str) or not content.strip():
+            continue
+        clean.append({"role": role, "content": content.strip()})
+    if not clean or clean[-1]["role"] != "user":
+        return jsonify({"ok": False, "error": "history must end with a user message"}), 400
+
+    con = db()
+    scrapers_summary, templates_summary = _build_wizard_context(con)
+    con.close()
+    system_prompt = (
+        _WIZARD_SYSTEM_TEMPLATE
+        .replace("{{SCRAPERS_SUMMARY}}", scrapers_summary)
+        .replace("{{TEMPLATES_SUMMARY}}", templates_summary)
+    )
+
+    try:
+        import anthropic
+        client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+        resp = client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=1200,
+            system=[{
+                "type": "text",
+                "text": system_prompt,
+                "cache_control": {"type": "ephemeral"},
+            }],
+            messages=clean,
+        )
+    except Exception as e:
+        return jsonify({"ok": False, "error": f"Claude: {e}"}), 502
+
+    text = ""
+    for block in resp.content:
+        if getattr(block, "type", "") == "text":
+            text += block.text
+    text = text.strip()
+
+    # Detect a finalized config block. We allow optional language fence and
+    # tolerate leading/trailing whitespace.
+    config = None
+    fence = re.search(r"```(?:json)?\s*(\{[\s\S]*?\})\s*```", text)
+    if fence:
+        try:
+            parsed = json.loads(fence.group(1))
+            if isinstance(parsed, dict) and parsed.get("ready") and isinstance(parsed.get("config"), dict):
+                config = parsed["config"]
+                # Replace the user-facing text with a tiny placeholder; the UI
+                # will render a structured confirmation card instead.
+                text = ""
+        except Exception:
+            pass
+
+    # Cost telemetry for logs (not surfaced to the UI).
+    cost, _ = _estimate_cost(resp.usage)
+    print(f"[outreach-scrapers] wizard turn: {len(clean)} msgs · ${cost:.4f} · "
+          f"in={resp.usage.input_tokens} out={resp.usage.output_tokens} "
+          f"cache_r={getattr(resp.usage, 'cache_read_input_tokens', 0)} "
+          f"cache_w={getattr(resp.usage, 'cache_creation_input_tokens', 0)}")
+
+    return jsonify({"ok": True, "message": text, "config": config})
 
 
 @outreach_bp.route("/api/scrapers/<int:scraper_id>/run", methods=["POST"])
