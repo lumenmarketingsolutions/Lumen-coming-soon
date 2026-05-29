@@ -1,0 +1,204 @@
+{% extends "crm/base.html" %}
+{% set active = 'whatsapp' %}
+{% block title %}WhatsApp Outreach — Mission Control{% endblock %}
+
+{% block content %}
+<style>
+  /* ── WhatsApp brand green for accents ── */
+  :root {
+    --wa-green: #25d366;
+    --wa-green-dark: #128c7e;
+    --wa-green-glow: rgba(37,211,102,0.18);
+  }
+
+  .wa-pulse {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--amber);
+    box-shadow: 0 0 0 0 rgba(245,158,11,0.45);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(245,158,11,0.45); }
+    70%  { box-shadow: 0 0 0 12px rgba(245,158,11,0); }
+    100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+  }
+
+  .wa-hero {
+    background: linear-gradient(135deg, rgba(37,211,102,0.07) 0%, rgba(18,143,196,0.05) 100%);
+    border: 1px solid rgba(37,211,102,0.20);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 22px;
+  }
+  .wa-hero .eye {
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text-muted); display: flex; align-items: center; gap: 8px;
+    margin-bottom: 14px;
+  }
+  .wa-hero h1 {
+    font-size: 26px; font-weight: 700; letter-spacing: -0.5px;
+    margin-bottom: 10px;
+  }
+  .wa-hero .sub {
+    font-size: 14px; color: var(--text-dim); line-height: 1.6; max-width: 660px;
+  }
+  .wa-hero .meta {
+    display: flex; flex-wrap: wrap; gap: 24px; margin-top: 22px;
+    font-size: 12px; color: var(--text-dim);
+  }
+  .wa-hero .meta .v { color: var(--text); font-weight: 600; font-size: 14px; display: block; }
+
+  .country-warn {
+    background: rgba(245,158,11,0.05);
+    border: 1px solid rgba(245,158,11,0.22);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 22px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .country-warn .ico {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(245,158,11,0.18); color: var(--amber);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .country-warn h3 { font-size: 13px; font-weight: 700; color: var(--amber); margin-bottom: 4px; letter-spacing: 0.1px; }
+  .country-warn p { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+  .country-warn code { color: var(--text); background: rgba(255,255,255,0.04); padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+
+  .stat-grid-mini { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 22px; }
+  .mini-stat {
+    background: var(--dark-card); border: 1px solid var(--dark-border);
+    border-radius: 12px; padding: 14px 18px;
+  }
+  .mini-stat .l { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
+  .mini-stat .v { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; margin-top: 4px; }
+
+  .roadmap {
+    background: var(--dark-card); border: 1px solid var(--dark-border);
+    border-radius: 14px; padding: 22px 24px;
+    margin-bottom: 18px;
+  }
+  .roadmap h3 {
+    font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: 14px;
+  }
+  .roadmap-row {
+    display: grid; grid-template-columns: 28px 1fr;
+    gap: 14px; padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .roadmap-row:last-child { border-bottom: none; }
+  .roadmap-row .dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+  .roadmap-row .dot.done { background: var(--green); color: var(--dark); }
+  .roadmap-row .dot.now  { background: var(--amber); color: var(--dark); }
+  .roadmap-row .dot.next { background: transparent; border: 1px solid var(--text-muted); color: var(--text-muted); }
+  .roadmap-row .title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .roadmap-row .desc  { font-size: 12px; color: var(--text-dim); margin-top: 2px; line-height: 1.5; }
+
+  .bridge-card {
+    background: linear-gradient(135deg, rgba(18,143,196,0.06) 0%, rgba(37,211,102,0.05) 100%);
+    border: 1px solid rgba(18,143,196,0.22);
+    border-radius: 14px; padding: 20px 22px;
+  }
+  .bridge-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+  .bridge-card p { font-size: 13px; color: var(--text-dim); line-height: 1.55; margin-bottom: 12px; }
+</style>
+
+<div class="wa-hero">
+  <div class="eye">
+    <span class="wa-pulse"></span> Foundation Laid · WhatsApp Outreach Agent
+  </div>
+  <h1>WhatsApp outreach coming together.</h1>
+  <div class="sub">
+    Same mental model as the email side — audiences, templates, campaigns, agents — but the channel is WhatsApp instead of email. Your existing MK7 portal at <code style="color:var(--text)">whatsapp.mk7media.com/admin/whatsapp</code> is fully working with Meta Cloud API, system-user auth, inbound webhook + signature verification, and a Claude-powered auto-reply agent. The next step is porting that pipeline into this CRM so everything lives in one place.
+  </div>
+  <div class="meta">
+    <div><span class="v">{{ counts.templates }}</span> Templates</div>
+    <div><span class="v">{{ counts.audiences }}</span> Audiences</div>
+    <div><span class="v">{{ counts.campaigns }}</span> Campaigns</div>
+    <div><span class="v">{{ counts.contacts }}</span> Contacts</div>
+  </div>
+</div>
+
+<div class="country-warn">
+  <div class="ico">🇺🇸</div>
+  <div>
+    <h3>US numbers only</h3>
+    <p>
+      Your WhatsApp Business sender is <code>{{ sender_number }}</code> — a US Twilio number registered with Meta. WhatsApp Business policy requires the destination number to be reachable from your registered country, so this channel is limited to <strong>{{ country_constraint }}</strong> recipients. When you set up a WhatsApp Agent later, the wizard will auto-clamp the search to US states only and remind you of this constraint.
+    </p>
+  </div>
+</div>
+
+{% if counts.email_leads_with_phone > 0 %}
+<div class="bridge-card" style="margin-bottom:18px">
+  <h3>🔗 Cross-channel bridge</h3>
+  <p>
+    The email-side agent has scraped <strong>{{ '{:,}'.format(counts.email_leads_with_phone) }} leads</strong> that also have a phone number on file. Once the WhatsApp pipeline is wired, we'll be able to derive a WhatsApp audience from any of those email audiences with one click — same leads, second channel.
+  </p>
+  <a href="/crm/outreach" class="btn btn-outline btn-sm">View email side →</a>
+</div>
+{% endif %}
+
+<div class="roadmap">
+  <h3>Roadmap</h3>
+
+  <div class="roadmap-row">
+    <div class="dot done">✓</div>
+    <div>
+      <div class="title">Sidebar entry + Mission Control + schema</div>
+      <div class="desc">Database tables (<code>wa_contacts</code>, <code>wa_audiences</code>, <code>wa_templates</code>, <code>wa_campaigns</code>, <code>wa_sends</code>, <code>wa_messages</code>, <code>wa_suppressions</code>) are live in the CRM's SQLite DB so cross-channel joins are easy.</div>
+    </div>
+  </div>
+
+  <div class="roadmap-row">
+    <div class="dot now">⏳</div>
+    <div>
+      <div class="title">Port the send pipeline from MK7</div>
+      <div class="desc">Copy the working Meta Cloud API client + webhook receiver from <code>mk7media/agents/whatsapp_agent/</code>. Reuse the same env vars (<code>WHATSAPP_ACCESS_TOKEN</code>, <code>WHATSAPP_PHONE_NUMBER_ID</code>, <code>WHATSAPP_APP_SECRET</code>, <code>WHATSAPP_VERIFY_TOKEN</code>) on Railway — no new Meta setup needed.</div>
+    </div>
+  </div>
+
+  <div class="roadmap-row">
+    <div class="dot next">3</div>
+    <div>
+      <div class="title">Campaigns + audiences UI (same shape as email)</div>
+      <div class="desc">CSV upload, drip-paced sender, template picker (synced from Meta's approved templates list once we wire the Meta WABA API).</div>
+    </div>
+  </div>
+
+  <div class="roadmap-row">
+    <div class="dot next">4</div>
+    <div>
+      <div class="title">Inbox view + Claude-powered auto-reply</div>
+      <div class="desc">Bring across the existing auto-reply agent so replies get handled instantly. Admin can hand off and take over a conversation manually from inside the CRM.</div>
+    </div>
+  </div>
+
+  <div class="roadmap-row">
+    <div class="dot next">5</div>
+    <div>
+      <div class="title">WhatsApp lead-scraping agents</div>
+      <div class="desc">Same wizard flow as email, but prompts Claude to find <em>US businesses with public phone numbers</em>. Wizard's first question becomes: "Email or WhatsApp?"</div>
+    </div>
+  </div>
+
+  <div class="roadmap-row">
+    <div class="dot next">6</div>
+    <div>
+      <div class="title">Cross-channel bridge</div>
+      <div class="desc">"Build a WhatsApp audience from this email audience" → pulls phone numbers from <code>extra_json</code> on email audience members, MX-checks against country prefix (+1), creates a fresh <code>wa_audience</code>.</div>
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:14px;font-size:12px;color:var(--text-muted);text-align:center">
+  This is admin-only and Phase 1. The actual send/receive pipeline arrives in the next deploy.
+</div>
+{% endblock %}

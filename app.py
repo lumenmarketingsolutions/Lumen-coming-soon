@@ -97,6 +97,11 @@ from outreach import outreach_bp
 import outreach_scrapers  # noqa: F401  (registers /crm/outreach/scrapers/* routes)
 app.register_blueprint(outreach_bp)
 
+# MK7 WhatsApp Outreach Agent — Phase 1 foundation, mounted at /crm/whatsapp.
+# Send pipeline ports across from mk7media/agents/whatsapp_agent in Phase 2.
+from whatsapp_outreach import whatsapp_bp
+app.register_blueprint(whatsapp_bp)
+
 ADMIN_PIN = "112501"
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAIL = "kendall@lumenmarketing.co"
