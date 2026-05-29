@@ -1,97 +1,307 @@
 {% extends "crm/base.html" %}
 {% set active = 'outreach' %}
-{% block title %}Outreach Agent — MK7 CRM{% endblock %}
+{% block title %}Mission Control — Outreach Agent{% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <div>
-    <div class="page-title">Outreach Agent</div>
-    <div class="page-sub">Cold email blasts via Resend, sent from <code style="color:var(--teal)">{{ from_email }}</code>. Admin only.</div>
-  </div>
-  <div class="page-actions">
-    <a href="/crm/outreach/campaigns/new" class="btn btn-primary">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
-      New campaign
-    </a>
-  </div>
-</div>
+<style>
+  /* ── Agent "online" pulse ── */
+  .agent-pulse {
+    display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 0 rgba(52,211,153,0.45);
+    animation: pulse 2s infinite;
+  }
+  .agent-pulse.dim { background: var(--text-muted); animation: none; box-shadow: none; }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(52,211,153,0.45); }
+    70%  { box-shadow: 0 0 0 12px rgba(52,211,153,0); }
+    100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+  }
+
+  /* ── Hero ── */
+  .mc-hero {
+    background: linear-gradient(135deg, rgba(18,143,196,0.07) 0%, rgba(128,47,222,0.06) 100%);
+    border: 1px solid rgba(18,143,196,0.18);
+    border-radius: 16px;
+    padding: 28px 32px;
+    margin-bottom: 24px;
+  }
+  .mc-hero .mc-eyebrow {
+    font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+    color: var(--text-muted); display: flex; align-items: center; gap: 8px;
+    margin-bottom: 14px;
+  }
+  .mc-hero h1 {
+    font-size: 26px; font-weight: 700; letter-spacing: -0.5px;
+    margin-bottom: 10px;
+  }
+  .mc-hero .mc-sub {
+    font-size: 14px; color: var(--text-dim); line-height: 1.6; max-width: 640px;
+  }
+  .mc-hero .mc-meta {
+    display: flex; flex-wrap: wrap; gap: 24px; margin-top: 20px;
+    font-size: 12px; color: var(--text-dim);
+  }
+  .mc-hero .mc-meta .v { color: var(--text); font-weight: 600; font-size: 14px; display: block; }
+  .mc-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
+
+  /* ── Activity log ── */
+  .log {
+    background: var(--dark-card);
+    border: 1px solid var(--dark-border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .log-head {
+    padding: 14px 18px; border-bottom: 1px solid var(--dark-border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .log-head .t { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
+  .log-item {
+    display: grid; grid-template-columns: 14px 1fr auto;
+    gap: 14px; align-items: start;
+    padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.025);
+    font-size: 13px; line-height: 1.5;
+  }
+  .log-item:last-child { border-bottom: none; }
+  .log-item .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--text-muted); margin-top: 6px;
+  }
+  .log-item .dot.ok { background: var(--green); }
+  .log-item .dot.run { background: var(--teal); animation: pulse 2s infinite; }
+  .log-item .dot.fail { background: var(--red); }
+  .log-item .body .head { color: var(--text); }
+  .log-item .body .meta { color: var(--text-muted); font-size: 11px; margin-top: 2px; }
+  .log-item .when {
+    color: var(--text-muted); font-size: 11px; white-space: nowrap;
+    font-family: ui-monospace, Menlo, monospace;
+  }
+  .log .empty {
+    padding: 28px 18px; text-align: center; color: var(--text-dim); font-size: 13px;
+  }
+
+  /* ── Small stat row ── */
+  .mc-stats { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 24px; }
+  .mc-stat {
+    background: var(--dark-card); border: 1px solid var(--dark-border);
+    border-radius: 12px; padding: 14px 18px; flex: 1; min-width: 140px;
+  }
+  .mc-stat .l { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
+  .mc-stat .v { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; margin-top: 4px; }
+  .mc-stat .s { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+  /* ── Two-up ── */
+  .mc-grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
+  @media (min-width: 980px) {
+    .mc-grid { grid-template-columns: 1.6fr 1fr; }
+  }
+
+  /* ── Quick action card ── */
+  .quick-card {
+    background: var(--dark-card); border: 1px solid var(--dark-border);
+    border-radius: 14px; padding: 18px 20px;
+  }
+  .quick-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .quick-card p { font-size: 12px; color: var(--text-dim); line-height: 1.5; margin-bottom: 14px; }
+
+  /* ── Hide-by-default secondary nav ── */
+  .more-row {
+    display: flex; gap: 14px; flex-wrap: wrap;
+    margin-top: 26px; padding-top: 16px;
+    border-top: 1px solid var(--dark-border);
+  }
+  .more-row a {
+    font-size: 12px; color: var(--text-muted);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .more-row a:hover { color: var(--text-dim); }
+</style>
 
 {% if not mailing_address %}
 <div class="alert alert-warn" style="margin-bottom:20px">
   <strong>TODO · Mailing address not set.</strong>
-  Every cold email needs a physical postal address in the footer (CAN-SPAM requirement, also a Gmail/Outlook deliverability signal). Right now your sends will go out with the address line blank.
-  <div style="margin-top:8px;font-size:12px;line-height:1.6;opacity:0.85">
-    Pick one: your home/office address, a USPS PO Box, a virtual mailbox (Anytime Mailbox / iPostal1 ~$10/mo), or a registered-agent service that includes mail forwarding.
-    Then set <code>OUTREACH_MAILING_ADDRESS</code> on Railway and restart.
-  </div>
+  Every cold email needs a physical postal address in the footer (CAN-SPAM requirement). Set <code>OUTREACH_MAILING_ADDRESS</code> on Railway and restart.
 </div>
 {% endif %}
 
-{# ── Outreach sub-nav ── #}
-<div class="chips" style="margin-bottom:20px">
-  <a class="chip active" href="/crm/outreach">Overview</a>
-  <a class="chip" href="/crm/outreach/audiences">Audiences ({{ counts.audiences }})</a>
-  <a class="chip" href="/crm/outreach/templates">Templates ({{ counts.templates }})</a>
-  <a class="chip" href="/crm/outreach/campaigns">Campaigns ({{ counts.campaigns }})</a>
-  <a class="chip" href="/crm/outreach/suppressions">Suppression list ({{ counts.suppressed }})</a>
-</div>
+{# ── Hero: agent status ── #}
+<div class="mc-hero">
+  <div class="mc-eyebrow">
+    {% if counts.scrapers_active > 0 %}
+      <span class="agent-pulse"></span> Online · Outreach Agent
+    {% else %}
+      <span class="agent-pulse dim"></span> Standby · Outreach Agent
+    {% endif %}
+  </div>
+  <h1>
+    {% if counts.scrapers_active > 0 %}
+      {{ counts.scrapers_active }} agent{{ 's' if counts.scrapers_active != 1 else '' }} active, hunting for leads daily.
+    {% elif counts.scrapers_paused > 0 %}
+      You have agents configured but none are running.
+    {% else %}
+      No agents yet. Want me to start finding leads on autopilot?
+    {% endif %}
+  </h1>
+  <div class="mc-sub">
+    {% if counts.scrapers_active > 0 %}
+      Each agent wakes once a day, searches the web for verified business owners with public emails, and launches a campaign with your chosen template. You'll see every run land in the activity feed below.
+    {% else %}
+      Configure a Daily Agent and it'll scour the web every morning for new leads, dedupe them against anyone you've already emailed, and start the outreach sequence on its own.
+    {% endif %}
+  </div>
 
-<div class="stat-grid">
-  <div class="stat-tile"><div class="label">Sent</div><div class="value">{{ '{:,}'.format(lt.sent or 0) }}</div></div>
-  <div class="stat-tile"><div class="label">Delivered</div><div class="value">{{ '{:,}'.format(lt.delivered or 0) }}</div><div class="sub">{{ lt.delivered_pct }}%</div></div>
-  <div class="stat-tile"><div class="label">Opened</div><div class="value">{{ '{:,}'.format(lt.opened or 0) }}</div><div class="sub">{{ lt.open_pct }}%</div></div>
-  <div class="stat-tile"><div class="label">Clicked</div><div class="value">{{ '{:,}'.format(lt.clicked or 0) }}</div><div class="sub">{{ lt.click_pct }}%</div></div>
-  <div class="stat-tile"><div class="label">Bounced</div><div class="value">{{ '{:,}'.format(lt.bounced or 0) }}</div></div>
-  <div class="stat-tile"><div class="label">Unsubscribed</div><div class="value">{{ '{:,}'.format(lt.unsubscribed or 0) }}</div></div>
-</div>
+  <div class="mc-meta">
+    <div>
+      <span class="v">{{ '{:,}'.format(today.sent_today or 0) }}</span>
+      Emails sent today
+    </div>
+    <div>
+      <span class="v">{{ '{:,}'.format(today.opened_today or 0) }}</span>
+      Opens today
+    </div>
+    <div>
+      <span class="v">{{ '{:,}'.format(today.clicked_today or 0) }}</span>
+      Clicks today
+    </div>
+    {% if next_run_at %}
+    <div>
+      <span class="v" id="next-run">soon</span>
+      Next agent run
+    </div>
+    {% endif %}
+  </div>
 
-<div class="page-header" style="margin-top:24px;margin-bottom:14px">
-  <div>
-    <div class="page-title" style="font-size:18px">Recent campaigns</div>
-    <div class="page-sub">Last 10 campaigns across all audiences.</div>
+  <div class="mc-actions">
+    {% if counts.scrapers_active == 0 and counts.scrapers_paused == 0 %}
+      <a href="/crm/outreach/scrapers/new" class="btn btn-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+        Set up your first agent
+      </a>
+    {% else %}
+      <a href="/crm/outreach/scrapers" class="btn btn-primary">
+        See agents ({{ counts.scrapers_active + counts.scrapers_paused }})
+      </a>
+      <a href="/crm/outreach/scrapers/new" class="btn btn-outline">+ New agent</a>
+    {% endif %}
+    <button class="btn btn-ghost" onclick="document.location='/crm/outreach/audiences'" title="Upload a CSV list manually">
+      Upload a list manually
+    </button>
   </div>
 </div>
 
-<div class="table-wrap" style="overflow-x:auto">
-  {% if recent %}
-  <table class="data">
-    <thead>
-      <tr>
-        <th>Campaign</th>
-        <th class="hide-mobile">Audience</th>
-        <th class="hide-mobile">Template</th>
-        <th style="text-align:right">Sent</th>
-        <th style="text-align:right">Open %</th>
-        <th style="text-align:right">Click %</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for r in recent %}
-      <tr style="cursor:pointer" onclick="location.href='/crm/outreach/campaigns/{{ r.c.id }}'">
-        <td>
-          <div style="font-weight:600">{{ r.c.name }}</div>
-          <div class="text-muted" style="font-size:11px">{{ r.c.created_at[:10] }}</div>
-        </td>
-        <td class="hide-mobile dim">{{ r.c.audience_name or '—' }}</td>
-        <td class="hide-mobile dim">{{ r.c.template_name or '—' }}</td>
-        <td style="text-align:right;font-weight:600">{{ '{:,}'.format(r.s.sent or 0) }}</td>
-        <td style="text-align:right" class="dim">{{ r.s.open_pct }}%</td>
-        <td style="text-align:right" class="dim">{{ r.s.click_pct }}%</td>
-        <td>
-          {% set st = r.c.status %}
-          <span class="badge badge-status s-{{ st }}">{{ st }}</span>
-        </td>
-      </tr>
+{# ── Lifetime stats (smaller, less prominent) ── #}
+<div class="mc-stats">
+  <div class="mc-stat">
+    <div class="l">Total sent</div>
+    <div class="v">{{ '{:,}'.format(lt.sent or 0) }}</div>
+  </div>
+  <div class="mc-stat">
+    <div class="l">Open rate</div>
+    <div class="v">{{ lt.open_pct }}%</div>
+    <div class="s">{{ '{:,}'.format(lt.opened or 0) }} opens</div>
+  </div>
+  <div class="mc-stat">
+    <div class="l">Click rate</div>
+    <div class="v">{{ lt.click_pct }}%</div>
+    <div class="s">{{ '{:,}'.format(lt.clicked or 0) }} clicks</div>
+  </div>
+  <div class="mc-stat">
+    <div class="l">Bounce rate</div>
+    <div class="v">{{ '{:,}'.format(lt.bounced or 0) }}</div>
+    <div class="s">{{ ((lt.bounced or 0) * 100 / (lt.sent or 1))|round(1) }}%</div>
+  </div>
+  <div class="mc-stat">
+    <div class="l">Unsubscribed</div>
+    <div class="v">{{ '{:,}'.format(lt.unsubscribed or 0) }}</div>
+  </div>
+</div>
+
+{# ── Two-up: activity feed + quick actions ── #}
+<div class="mc-grid">
+  <div class="log">
+    <div class="log-head">
+      <span class="t">Agent activity</span>
+      <a href="/crm/outreach/scrapers" style="font-size:12px;color:var(--teal)">All runs →</a>
+    </div>
+    {% if agents_recent %}
+      {% for r in agents_recent %}
+      <div class="log-item">
+        <div class="dot {% if r['status'] == 'completed' and (r['leads_added'] or 0) > 0 %}ok{% elif r['status'] == 'running' %}run{% elif r['status'] == 'failed' %}fail{% endif %}"></div>
+        <div class="body">
+          <div class="head">
+            {% if r['status'] == 'running' %}
+              Searching the web for {{ r['industry'] or 'leads' }}{% if r['region'] %} in {{ r['region'] }}, {{ r['country'] }}{% elif r['country'] %} in {{ r['country'] }}{% endif %}…
+            {% elif r['status'] == 'completed' and (r['leads_added'] or 0) > 0 %}
+              Found <strong>{{ r['leads_added'] }}</strong> verified lead{{ 's' if r['leads_added'] != 1 else '' }} in {{ r['industry'] or '—' }}{% if r['region'] %}, {{ r['region'] }}{% endif %}{% if r['country'] %}, {{ r['country'] }}{% endif %}. Campaign launched.
+            {% elif r['status'] == 'completed' %}
+              Searched {{ r['industry'] or '—' }}{% if r['country'] %} in {{ r['country'] }}{% endif %} but found no new verified leads.
+            {% else %}
+              Run failed: {{ (r['error'] or 'unknown error')[:120] }}
+            {% endif %}
+          </div>
+          <div class="meta">
+            {{ r['scraper_name'] }}
+            {% if r['cost_estimate_usd'] and r['cost_estimate_usd'] > 0 %}
+              · ${{ '{:.2f}'.format(r['cost_estimate_usd']) }}
+            {% endif %}
+            {% if r['web_searches'] %} · {{ r['web_searches'] }} searches{% endif %}
+          </div>
+        </div>
+        <div class="when" title="{{ r['started_at'] }}">{{ r['started_at'][:16] | replace('T', ' ') }}</div>
+      </div>
       {% endfor %}
-    </tbody>
-  </table>
-  {% else %}
-  <div class="empty">
-    <div class="em-title">No campaigns yet</div>
-    <div class="em-sub">Upload an audience and write a template, then send your first blast.</div>
-    <a href="/crm/outreach/audiences" class="btn btn-primary">Upload audience</a>
+    {% else %}
+      <div class="empty">
+        No agent activity yet. Once you configure a Daily Agent it'll show up here every morning.
+      </div>
+    {% endif %}
   </div>
-  {% endif %}
+
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <div class="quick-card">
+      <h3>From address</h3>
+      <p>Sending cold from <code style="color:var(--teal)">{{ from_email }}</code><br>Replies route to <code style="color:var(--text-dim)">info@lumenmarketing.co</code></p>
+    </div>
+    <div class="quick-card">
+      <h3>Manual upload</h3>
+      <p>Got a CSV ready to blast? Upload it and pick a template — no agent needed.</p>
+      <a href="/crm/outreach/audiences" class="btn btn-outline btn-sm">Upload CSV</a>
+    </div>
+    <div class="quick-card">
+      <h3>Templates</h3>
+      <p>{{ counts.templates }} template{{ 's' if counts.templates != 1 else '' }} on file. Agents pick one of these for each batch.</p>
+      <a href="/crm/outreach/templates" class="btn btn-outline btn-sm">View templates</a>
+    </div>
+  </div>
 </div>
+
+{# ── Footer row: power-user nav ── #}
+<div class="more-row">
+  <a href="/crm/outreach/campaigns">All campaigns ({{ counts.campaigns }})</a>
+  <a href="/crm/outreach/audiences">All audiences ({{ counts.audiences }})</a>
+  <a href="/crm/outreach/suppressions">Suppression list ({{ counts.suppressed }})</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  {% if next_run_at %}
+  // Human-readable countdown to next agent run.
+  function fmtNextRun() {
+    const next = new Date("{{ next_run_at }}Z");
+    const now = new Date();
+    let s = Math.max(0, Math.floor((next - now) / 1000));
+    const el = document.getElementById('next-run');
+    if (!el) return;
+    if (s <= 60) { el.textContent = 'any moment'; return; }
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    if (h > 0) el.textContent = `in ${h}h ${m}m`;
+    else       el.textContent = `in ${m}m`;
+  }
+  fmtNextRun();
+  setInterval(fmtNextRun, 30000);
+  {% endif %}
+</script>
 {% endblock %}

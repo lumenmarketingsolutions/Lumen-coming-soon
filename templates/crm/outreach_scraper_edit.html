@@ -1,0 +1,146 @@
+{% extends "crm/base.html" %}
+{% set active = 'outreach' %}
+{% block title %}{% if s %}Edit{% else %}New{% endif %} agent — Outreach{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-sub"><a href="/crm/outreach/scrapers" style="color:var(--teal)">← Agents</a></div>
+    <div class="page-title">{% if s %}{{ s.name }}{% else %}New agent{% endif %}</div>
+    <div class="page-sub">Configure once. After that the agent runs on its own every morning.</div>
+  </div>
+</div>
+
+<div class="alert alert-error hidden" id="ag-error" style="margin-bottom:16px"></div>
+
+<div style="display:grid;gap:14px;max-width:720px">
+  <div class="card">
+    <div class="form-row" style="margin-bottom:14px">
+      <label class="form-label">Agent name *</label>
+      <input class="form-input" id="ag-name" placeholder="e.g. Global Salons Daily" value="{{ (s.name if s else '') }}">
+      <span class="text-muted" style="font-size:11px;margin-top:4px">Internal label only. You'll see this in Mission Control.</span>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">Description (optional)</label>
+      <input class="form-input" id="ag-desc" placeholder="What does this agent hunt for?" value="{{ (s.description if s else '') }}">
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="form-label" style="margin-bottom:6px">What to search</div>
+    <p class="text-dim" style="font-size:12px;margin-bottom:14px">
+      The agent rotates one entry per day. With 7 countries × 7 industries it cycles through 49 unique combinations before repeating.
+    </p>
+
+    <div class="form-row" style="margin-bottom:14px">
+      <label class="form-label">Countries (comma-separated)</label>
+      <input class="form-input" id="ag-countries" value="{{ (s.countries_json or '')|fromjson|tojson if s else default_countries }}" placeholder="USA, Canada, UK, Australia">
+    </div>
+
+    <div class="form-row" style="margin-bottom:14px">
+      <label class="form-label">Industries / business types (one per line)</label>
+      <textarea class="form-textarea" id="ag-industries" style="min-height:140px">{% if s %}{% for i in (s.industries_json or '')|fromjson %}{{ i }}
+{% endfor %}{% else %}{{ default_industries }}{% endif %}</textarea>
+      <span class="text-muted" style="font-size:11px;margin-top:4px">Be specific. "salons and med spas" works; "businesses" does not.</span>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">Regions per country (JSON, optional)</label>
+      <textarea class="form-textarea" id="ag-regions" style="min-height:120px;font-family:ui-monospace,Menlo,monospace;font-size:12px">{% if s and s.regions_json %}{{ s.regions_json }}{% else %}{{ default_regions_json }}{% endif %}</textarea>
+      <span class="text-muted" style="font-size:11px;margin-top:4px">Pick states/provinces/emirates. Leave empty <code>[]</code> for countries you want searched in full.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="form-label" style="margin-bottom:10px">Daily routine</div>
+
+    <div class="form-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="form-row">
+        <label class="form-label">Leads per day</label>
+        <input class="form-input" id="ag-target" type="number" min="10" max="2000" step="10" value="{{ s.daily_target if s else 100 }}">
+        <span class="text-muted" style="font-size:11px;margin-top:4px">Capped by the warmup curve during the first ~10 days.</span>
+      </div>
+      <div class="form-row">
+        <label class="form-label">Wake-up time (UTC hour)</label>
+        <input class="form-input" id="ag-hour" type="number" min="0" max="23" value="{{ s.schedule_hour_utc if s else 13 }}">
+        <span class="text-muted" style="font-size:11px;margin-top:4px">13 UTC = 9am ET / 6am PT.</span>
+      </div>
+    </div>
+
+    <div class="form-row" style="margin-top:14px">
+      <label class="form-label">Email template *</label>
+      <select class="form-select" id="ag-template">
+        <option value="">— select a template —</option>
+        {% for t in templates %}
+          <option value="{{ t.id }}" {% if s and s.template_id == t.id %}selected{% endif %}>{{ t.name }}{% if t.subject %} · "{{ t.subject[:60] }}{% if t.subject|length > 60 %}…{% endif %}"{% endif %}</option>
+        {% endfor %}
+      </select>
+      <span class="text-muted" style="font-size:11px;margin-top:4px">
+        The agent uses this template for every campaign it launches.
+        {% if not templates %}<a href="/crm/outreach/templates/new" style="color:var(--teal)">Create one first →</a>{% endif %}
+      </span>
+    </div>
+
+    <div class="form-row" style="margin-top:14px">
+      <label class="form-label">Send window (hours)</label>
+      <input class="form-input" id="ag-window" type="number" min="0.5" max="48" step="0.5" value="{{ s.send_window_hours if s else 4 }}">
+      <span class="text-muted" style="font-size:11px;margin-top:4px">Each batch is drip-paced over this window for better deliverability.</span>
+    </div>
+
+    <div class="form-row" style="margin-top:14px">
+      <label class="form-label">Status</label>
+      <select class="form-select" id="ag-status">
+        <option value="active" {% if s and s.status == 'active' %}selected{% endif %}>Active · runs daily</option>
+        <option value="paused" {% if not s or s.status == 'paused' %}selected{% endif %}>Paused · won't run until activated</option>
+      </select>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;justify-content:flex-end">
+    <a href="/crm/outreach/scrapers" class="btn btn-outline">Cancel</a>
+    <button class="btn btn-primary" id="ag-save" onclick="saveAgent()">{% if s %}Save changes{% else %}Create agent{% endif %}</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const AGENT_ID = {{ s.id if s else 'null' }};
+  function payload() {
+    return {
+      name: document.getElementById('ag-name').value.trim(),
+      description: document.getElementById('ag-desc').value.trim(),
+      countries: document.getElementById('ag-countries').value,
+      industries: document.getElementById('ag-industries').value,
+      regions: document.getElementById('ag-regions').value,
+      daily_target: parseInt(document.getElementById('ag-target').value || '100', 10),
+      schedule_hour_utc: parseInt(document.getElementById('ag-hour').value || '13', 10),
+      template_id: parseInt(document.getElementById('ag-template').value || '0', 10) || null,
+      send_window_hours: parseFloat(document.getElementById('ag-window').value || '4'),
+      status: document.getElementById('ag-status').value,
+    };
+  }
+  async function saveAgent() {
+    const err = document.getElementById('ag-error');
+    err.classList.add('hidden');
+    const p = payload();
+    if (!p.name) { err.textContent = 'Name required'; err.classList.remove('hidden'); window.scrollTo({top:0}); return; }
+    if (!p.template_id) { err.textContent = 'Pick an email template — the agent needs one to launch campaigns'; err.classList.remove('hidden'); window.scrollTo({top:0}); return; }
+    const btn = document.getElementById('ag-save');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const url = AGENT_ID ? `/crm/outreach/api/scrapers/${AGENT_ID}` : '/crm/outreach/api/scrapers';
+    const method = AGENT_ID ? 'PATCH' : 'POST';
+    try {
+      const r = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(p) });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || 'Save failed');
+      window.toast('Agent saved', 'success');
+      setTimeout(() => location.href = '/crm/outreach/scrapers', 500);
+    } catch (e) {
+      err.textContent = e.message; err.classList.remove('hidden');
+      btn.disabled = false; btn.textContent = AGENT_ID ? 'Save changes' : 'Create agent';
+    }
+  }
+</script>
+{% endblock %}

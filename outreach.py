@@ -25,6 +25,7 @@ from flask import (
     Blueprint, render_template, request, jsonify, abort, make_response,
 )
 import os, datetime, json, re, secrets, threading, time, hmac, hashlib, base64, csv, io, html as html_lib, random
+import sqlite3  # for catching OperationalError in dashboard when scraper tables aren't initialized yet
 import requests
 
 # Reuse the CRM's DB + auth helpers — outreach lives in the same SQLite file.
@@ -373,20 +374,86 @@ def dashboard():
     u = current_user()
     con = db()
     lt = _lifetime(con)
+
+    # Today's activity at a glance (UTC). Lightweight queries, all on indices.
+    today = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+    today_stats = con.execute("""
+        SELECT
+            SUM(CASE WHEN sent_at >= ? THEN 1 ELSE 0 END) AS sent_today,
+            SUM(CASE WHEN opened_at >= ? THEN 1 ELSE 0 END) AS opened_today,
+            SUM(CASE WHEN first_click_at >= ? THEN 1 ELSE 0 END) AS clicked_today
+        FROM outreach_sends
+    """, (today, today, today)).fetchone()
+    today_stats = {k: (today_stats[k] or 0) for k in today_stats.keys()}
+
+    # Scraper / "agent" status. These tables exist only after outreach_scrapers
+    # is imported — guard so a fresh DB still renders.
+    scrapers_active = scrapers_paused = 0
+    next_run_at = None
+    agents_recent = []
+    try:
+        scrapers_active = con.execute(
+            "SELECT COUNT(*) FROM outreach_scrapers WHERE status = 'active'"
+        ).fetchone()[0]
+        scrapers_paused = con.execute(
+            "SELECT COUNT(*) FROM outreach_scrapers WHERE status = 'paused'"
+        ).fetchone()[0]
+        # Next-scheduled-run: any active scraper whose schedule_hour is later
+        # today (or first thing tomorrow if all are past).
+        active_scrapers = con.execute(
+            "SELECT id, name, schedule_hour_utc, last_run_date FROM outreach_scrapers "
+            "WHERE status = 'active'"
+        ).fetchall()
+        if active_scrapers:
+            now = datetime.datetime.utcnow()
+            today_str = now.strftime("%Y-%m-%d")
+            candidates = []
+            for s in active_scrapers:
+                if s["last_run_date"] == today_str:
+                    # Already ran today; next is tomorrow at schedule_hour.
+                    nxt = (now + datetime.timedelta(days=1)).replace(
+                        hour=s["schedule_hour_utc"] or 13, minute=0, second=0, microsecond=0
+                    )
+                else:
+                    # Hasn't run yet today.
+                    nxt = now.replace(
+                        hour=s["schedule_hour_utc"] or 13, minute=0, second=0, microsecond=0
+                    )
+                    if nxt <= now:
+                        # Schedule hour already passed today — scheduler will pick up next tick.
+                        nxt = now
+                candidates.append((nxt, s["name"]))
+            candidates.sort()
+            next_run_at = candidates[0][0].isoformat()
+
+        # Recent agent activity (last 8 runs across all scrapers).
+        agents_recent = con.execute("""
+            SELECT r.*, s.name AS scraper_name
+            FROM outreach_scraper_runs r
+            JOIN outreach_scrapers s ON s.id = r.scraper_id
+            ORDER BY r.started_at DESC LIMIT 8
+        """).fetchall()
+    except sqlite3.OperationalError:
+        # outreach_scraper tables not yet created (init order race on first boot).
+        pass
+
+    # Recent campaigns (still useful as a secondary feed).
     recent = con.execute("""
         SELECT c.*, t.name AS template_name, a.name AS audience_name
         FROM outreach_campaigns c
         LEFT JOIN outreach_templates t ON t.id = c.template_id
         LEFT JOIN outreach_audiences a ON a.id = c.audience_id
-        ORDER BY c.created_at DESC LIMIT 10
+        ORDER BY c.created_at DESC LIMIT 5
     """).fetchall()
+
     counts = {
         "audiences": con.execute("SELECT COUNT(*) FROM outreach_audiences").fetchone()[0],
         "templates": con.execute("SELECT COUNT(*) FROM outreach_templates").fetchone()[0],
         "campaigns": con.execute("SELECT COUNT(*) FROM outreach_campaigns").fetchone()[0],
         "suppressed": con.execute("SELECT COUNT(*) FROM outreach_suppressions").fetchone()[0],
+        "scrapers_active": scrapers_active,
+        "scrapers_paused": scrapers_paused,
     }
-    # Enrich recent with stats so the dashboard table can show open/click rates.
     recent_stats = []
     for r in recent:
         s = campaign_stats(con, r["id"])
@@ -394,7 +461,8 @@ def dashboard():
     con.close()
     return render_template(
         "crm/outreach_dashboard.html",
-        u=u, lt=lt, counts=counts, recent=recent_stats,
+        u=u, lt=lt, today=today_stats, counts=counts, recent=recent_stats,
+        agents_recent=agents_recent, next_run_at=next_run_at,
         from_email=from_email(),
         mailing_address=MAILING_ADDRESS,
     )

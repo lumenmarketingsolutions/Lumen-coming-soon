@@ -1,0 +1,192 @@
+{% extends "crm/base.html" %}
+{% set active = 'outreach' %}
+{% block title %}Agents — Outreach{% endblock %}
+
+{% block content %}
+<style>
+  .ag-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 20px; }
+  @media (min-width: 880px) { .ag-grid { grid-template-columns: 1fr 1fr; } }
+  .ag-card {
+    background: var(--dark-card); border: 1px solid var(--dark-border);
+    border-radius: 14px; padding: 22px;
+    display: flex; flex-direction: column; gap: 12px;
+    transition: border-color .15s;
+    cursor: pointer;
+  }
+  .ag-card:hover { border-color: var(--text-muted); }
+  .ag-card .ag-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .ag-card .ag-name {
+    font-size: 16px; font-weight: 600; letter-spacing: -0.2px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .ag-pulse {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--green); box-shadow: 0 0 0 0 rgba(52,211,153,0.45);
+    animation: pulse 2s infinite;
+  }
+  .ag-pulse.dim { background: var(--text-muted); animation: none; box-shadow: none; }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(52,211,153,0.45); }
+    70%  { box-shadow: 0 0 0 10px rgba(52,211,153,0); }
+    100% { box-shadow: 0 0 0 0 rgba(52,211,153,0); }
+  }
+  .ag-status {
+    font-size: 11px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .ag-status.active { color: var(--green); }
+  .ag-meta {
+    font-size: 13px; color: var(--text-dim); line-height: 1.6;
+  }
+  .ag-last {
+    font-size: 12px; color: var(--text-muted); padding: 10px 0;
+    border-top: 1px solid rgba(255,255,255,0.04); border-bottom: 1px solid rgba(255,255,255,0.04);
+    line-height: 1.5;
+  }
+  .ag-last .l { color: var(--text-dim); }
+  .ag-numbers { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; }
+  .ag-numbers .n { color: var(--text); font-weight: 600; font-size: 14px; }
+  .ag-numbers .l { color: var(--text-muted); display: block; font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; }
+  .ag-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .pulse-warn {
+    background: rgba(245,158,11,0.05); border: 1px solid rgba(245,158,11,0.2);
+    border-radius: 12px; padding: 14px 18px; margin-bottom: 20px;
+    font-size: 13px; color: var(--amber); line-height: 1.6;
+  }
+</style>
+
+<div class="page-header">
+  <div>
+    <div class="page-sub"><a href="/crm/outreach" style="color:var(--teal)">← Mission Control</a></div>
+    <div class="page-title">Daily Agents</div>
+    <div class="page-sub">Each agent wakes once a day, searches the web for verified leads, and launches a campaign on its own.</div>
+  </div>
+  <div class="page-actions">
+    <a href="/crm/outreach/scrapers/new" class="btn btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+      New agent
+    </a>
+  </div>
+</div>
+
+{% if not anthropic_configured %}
+<div class="pulse-warn">
+  <strong>Claude API key not configured.</strong> Set <code>ANTHROPIC_API_KEY</code> on Railway and restart. Until then, agents won't run.
+</div>
+{% endif %}
+
+{% if warmup_cap is not none %}
+<div class="pulse-warn" style="background:rgba(96,165,250,0.05);border-color:rgba(96,165,250,0.2);color:var(--blue)">
+  <strong>Warmup ramp:</strong> Domain is still warming up. Today's send cap is <strong>{{ warmup_cap }}</strong> ({{ used_today }} used so far). Agents will scale down their daily target automatically to stay under the cap.
+</div>
+{% endif %}
+
+{% if scrapers %}
+<div class="ag-grid">
+  {% for s in scrapers %}
+  {% set last = last_runs.get(s['id']) %}
+  <div class="ag-card" onclick="location.href='/crm/outreach/scrapers/{{ s['id'] }}'">
+    <div class="ag-head">
+      <div class="ag-name">
+        <span class="ag-pulse {% if s['status'] != 'active' %}dim{% endif %}"></span>
+        {{ s['name'] }}
+      </div>
+      <span class="ag-status {% if s['status'] == 'active' %}active{% endif %}">{{ s['status'] }}</span>
+    </div>
+
+    <div class="ag-meta">
+      {% if s['description'] %}{{ s['description'] }}<br>{% endif %}
+      Hunting <strong>{{ s['daily_target'] }}</strong> leads/day · template:
+      <strong>{{ s['template_name'] or '— none set —' }}</strong> · wake at
+      <strong>{{ '%02d'|format(s['schedule_hour_utc']) }}:00 UTC</strong>
+    </div>
+
+    <div class="ag-last">
+      {% if last %}
+        <span class="l">Last run:</span>
+        {% if last['status'] == 'running' %}
+          <span style="color:var(--teal)">currently working...</span>
+        {% elif last['status'] == 'completed' and last['leads_added'] %}
+          found <strong>{{ last['leads_added'] }}</strong> leads in {{ last['country'] or '—' }}
+          {% if last['cost_estimate_usd'] %}· ${{ '{:.2f}'.format(last['cost_estimate_usd']) }}{% endif %}
+        {% elif last['status'] == 'completed' %}
+          ran clean but no new verified leads in {{ last['country'] or '—' }}
+        {% else %}
+          <span style="color:var(--red)">failed</span> · {{ (last['error'] or 'unknown')[:60] }}
+        {% endif %}
+        <br><span class="l">{{ last['started_at'][:16] | replace('T', ' at ') }} UTC</span>
+      {% else %}
+        <span class="l">No runs yet. Will start on next schedule, or trigger manually below.</span>
+      {% endif %}
+    </div>
+
+    <div class="ag-numbers">
+      <div>
+        <span class="l">Leads found</span>
+        <span class="n">{{ '{:,}'.format(s['total_leads_found'] or 0) }}</span>
+      </div>
+      <div>
+        <span class="l">Leads used</span>
+        <span class="n">{{ '{:,}'.format(s['total_leads_used'] or 0) }}</span>
+      </div>
+      <div>
+        <span class="l">Spent</span>
+        <span class="n">${{ '{:.2f}'.format(s['total_cost_usd'] or 0) }}</span>
+      </div>
+    </div>
+
+    <div class="ag-actions" onclick="event.stopPropagation()">
+      <button class="btn btn-outline btn-sm" onclick="runNow({{ s['id'] }}, '{{ s['name']|replace("'", "\\'") }}')">
+        ⚡ Run now
+      </button>
+      {% if s['status'] == 'active' %}
+        <button class="btn btn-ghost btn-sm" onclick="setStatus({{ s['id'] }}, 'paused')">Pause</button>
+      {% else %}
+        <button class="btn btn-ghost btn-sm" onclick="setStatus({{ s['id'] }}, 'active')">Activate</button>
+      {% endif %}
+      <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deleteAgent({{ s['id'] }}, '{{ s['name']|replace("'", "\\'") }}')">Delete</button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card" style="text-align:center;padding:48px 24px">
+  <div style="font-size:32px;margin-bottom:8px">⚙️</div>
+  <div style="font-size:18px;font-weight:600;margin-bottom:6px">No agents yet</div>
+  <div class="text-dim" style="margin-bottom:18px">Set up an agent and it'll start finding leads on its own every morning.</div>
+  <a href="/crm/outreach/scrapers/new" class="btn btn-primary">+ Configure your first agent</a>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function runNow(id, name) {
+    if (!confirm(`Run "${name}" right now? It'll take 1-3 minutes and cost about $0.50-$1.50 in Claude credits.`)) return;
+    const r = await fetch(`/crm/outreach/api/scrapers/${id}/run`, { method: 'POST' });
+    const j = await r.json();
+    if (j.ok) {
+      window.toast('Agent started · refresh in a minute to see the run', 'success');
+    } else {
+      window.toast(j.error || 'Failed to start', 'error');
+    }
+  }
+  async function setStatus(id, status) {
+    const r = await fetch(`/crm/outreach/api/scrapers/${id}`, {
+      method: 'PATCH', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ status })
+    });
+    const j = await r.json();
+    if (j.ok) { window.toast(status === 'active' ? 'Activated' : 'Paused', 'success'); location.reload(); }
+  }
+  async function deleteAgent(id, name) {
+    if (!confirm(`Delete agent "${name}"? Past runs and audiences stay; the agent stops running.`)) return;
+    const r = await fetch(`/crm/outreach/api/scrapers/${id}`, { method: 'DELETE' });
+    const j = await r.json();
+    if (j.ok) { window.toast('Deleted', 'success'); location.reload(); }
+  }
+</script>
+{% endblock %}

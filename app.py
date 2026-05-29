@@ -90,7 +90,11 @@ from crm import crm_bp
 app.register_blueprint(crm_bp)
 
 # MK7 Outreach Agent — admin-only cold-email blast tool, mounted at /crm/outreach.
+# Order matters: outreach_scrapers attaches routes to outreach_bp at import time,
+# so it must be imported BEFORE register_blueprint() — Flask freezes blueprints
+# on registration and rejects further .route() decorators with an AssertionError.
 from outreach import outreach_bp
+import outreach_scrapers  # noqa: F401  (registers /crm/outreach/scrapers/* routes)
 app.register_blueprint(outreach_bp)
 
 ADMIN_PIN = "112501"

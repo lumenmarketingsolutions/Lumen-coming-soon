@@ -1,0 +1,142 @@
+{% extends "crm/base.html" %}
+{% set active = 'outreach' %}
+{% block title %}{{ s.name }} — Agent{% endblock %}
+
+{% block content %}
+<style>
+  .runs { background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: 14px; overflow: hidden; }
+  .run-row {
+    display: grid; grid-template-columns: 14px 1fr auto auto;
+    gap: 14px; align-items: start;
+    padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.025);
+    font-size: 13px;
+  }
+  .run-row:last-child { border-bottom: none; }
+  .run-row .dot { width:8px;height:8px;border-radius:50%;background:var(--text-muted);margin-top:6px; }
+  .run-row .dot.ok { background: var(--green); }
+  .run-row .dot.run { background: var(--teal); animation: pulse 2s infinite; }
+  .run-row .dot.fail { background: var(--red); }
+  @keyframes pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(18,143,196,0.45); }
+    70%  { box-shadow: 0 0 0 10px rgba(18,143,196,0); }
+    100% { box-shadow: 0 0 0 0 rgba(18,143,196,0); }
+  }
+  .run-row .body .head { color: var(--text); }
+  .run-row .body .meta { color: var(--text-muted); font-size: 11px; margin-top: 3px; }
+  .run-row .cost { color: var(--text-dim); font-size: 11px; font-family: ui-monospace,Menlo,monospace; }
+  .run-row .when { color: var(--text-muted); font-size: 11px; font-family: ui-monospace,Menlo,monospace; white-space: nowrap; }
+  .ag-pulse { display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;margin-right:8px;vertical-align:middle; }
+  .ag-pulse.dim { background: var(--text-muted); animation: none; }
+</style>
+
+<div class="page-header">
+  <div>
+    <div class="page-sub"><a href="/crm/outreach/scrapers" style="color:var(--teal)">← Agents</a></div>
+    <div class="page-title">
+      <span class="ag-pulse {% if s['status'] != 'active' %}dim{% endif %}"></span>
+      {{ s['name'] }}
+    </div>
+    <div class="page-sub">
+      {% if s['status'] == 'active' %}
+        Active · wakes daily at {{ '%02d'|format(s['schedule_hour_utc']) }}:00 UTC
+      {% else %}
+        Paused · won't run until you activate it
+      {% endif %}
+      · target: {{ s['daily_target'] }} leads/day
+      · template: {{ s['template_name'] or '— none —' }}
+    </div>
+  </div>
+  <div class="page-actions">
+    <button class="btn btn-outline" onclick="runNow()">⚡ Run now</button>
+    {% if s['status'] == 'active' %}
+      <button class="btn btn-ghost" onclick="setStatus('paused')">Pause</button>
+    {% else %}
+      <button class="btn btn-primary" onclick="setStatus('active')">Activate</button>
+    {% endif %}
+    <a href="/crm/outreach/scrapers/{{ s['id'] }}/edit" class="btn btn-outline">Edit config</a>
+  </div>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-tile"><div class="label">Total leads found</div><div class="value">{{ '{:,}'.format(s['total_leads_found'] or 0) }}</div></div>
+  <div class="stat-tile"><div class="label">Used in campaigns</div><div class="value">{{ '{:,}'.format(s['total_leads_used'] or 0) }}</div></div>
+  <div class="stat-tile"><div class="label">Total spent</div><div class="value">${{ '{:.2f}'.format(s['total_cost_usd'] or 0) }}</div></div>
+  <div class="stat-tile"><div class="label">Total runs</div><div class="value">{{ s['run_counter'] or 0 }}</div></div>
+</div>
+
+<div class="page-header" style="margin-top:24px;margin-bottom:14px">
+  <div>
+    <div class="page-title" style="font-size:18px">Recent runs</div>
+    <div class="page-sub">Last 30 runs.</div>
+  </div>
+</div>
+
+<div class="runs">
+  {% if runs %}
+    {% for r in runs %}
+    <div class="run-row">
+      <div class="dot {% if r['status'] == 'completed' and (r['leads_added'] or 0) > 0 %}ok{% elif r['status'] == 'running' %}run{% elif r['status'] == 'failed' %}fail{% endif %}"></div>
+      <div class="body">
+        <div class="head">
+          {% if r['status'] == 'running' %}
+            Searching{% if r['industry'] %} for {{ r['industry'] }}{% endif %}{% if r['country'] %} in {{ r['region'] or r['country'] }}{% endif %}…
+          {% elif r['status'] == 'completed' and r['leads_added'] %}
+            Found <strong>{{ r['leads_added'] }}</strong> verified lead{{ 's' if r['leads_added'] != 1 else '' }}
+            ({{ r['leads_returned'] or 0 }} returned, {{ r['leads_valid'] or 0 }} passed validation)
+            {% if r['campaign_id'] %}
+              · <a href="/crm/outreach/campaigns/{{ r['campaign_id'] }}" style="color:var(--teal)">view campaign →</a>
+            {% endif %}
+          {% elif r['status'] == 'completed' %}
+            Run completed with no new verified leads ({{ r['leads_returned'] or 0 }} candidates returned, {{ r['leads_valid'] or 0 }} passed).
+          {% else %}
+            Run failed: {{ (r['error'] or 'unknown')[:160] }}
+          {% endif %}
+        </div>
+        <div class="meta">
+          {{ r['country'] or '—' }}{% if r['industry'] %} · {{ r['industry'] }}{% endif %}{% if r['region'] %} · {{ r['region'] }}{% endif %}
+          {% if r['web_searches'] %} · {{ r['web_searches'] }} web searches{% endif %}
+          {% if r['triggered_by'] == 'manual' %} · manual trigger{% endif %}
+        </div>
+      </div>
+      <div class="cost">{% if r['cost_estimate_usd'] %}${{ '{:.2f}'.format(r['cost_estimate_usd']) }}{% endif %}</div>
+      <div class="when">{{ r['started_at'][:16] | replace('T', ' ') }}</div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div style="padding:28px;text-align:center;color:var(--text-dim)">
+      No runs yet. Trigger one now or wait for tomorrow's scheduled wake-up.
+    </div>
+  {% endif %}
+</div>
+
+<div style="margin-top:20px;padding:14px 18px;background:var(--dark-card);border:1px solid var(--dark-border);border-radius:12px">
+  <div class="form-label" style="margin-bottom:8px">Current rotation</div>
+  <div style="font-size:12px;color:var(--text-dim);line-height:1.7">
+    <strong>Countries:</strong> {{ countries|join(', ') }}<br>
+    <strong>Industries:</strong> {{ industries|join(' · ') }}<br>
+    <strong>Next combo:</strong> country = <code style="color:var(--teal)">{{ countries[(s['run_counter'] or 0) % countries|length] if countries else '—' }}</code>,
+    industry = <code style="color:var(--teal)">{{ industries[(s['run_counter'] or 0) % industries|length] if industries else '—' }}</code>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const AGENT_ID = {{ s['id'] }};
+  async function runNow() {
+    if (!confirm("Run now? Takes 1-3 minutes and costs about $0.50-$1.50 in Claude credits.")) return;
+    const r = await fetch(`/crm/outreach/api/scrapers/${AGENT_ID}/run`, { method: 'POST' });
+    const j = await r.json();
+    if (j.ok) { window.toast('Started · refresh in a minute', 'success'); }
+    else { window.toast(j.error || 'Failed', 'error'); }
+  }
+  async function setStatus(status) {
+    const r = await fetch(`/crm/outreach/api/scrapers/${AGENT_ID}`, {
+      method: 'PATCH', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ status })
+    });
+    const j = await r.json();
+    if (j.ok) { window.toast(status === 'active' ? 'Activated' : 'Paused', 'success'); setTimeout(() => location.reload(), 400); }
+  }
+</script>
+{% endblock %}
