@@ -322,6 +322,59 @@ def refresh_audience_count(con, audience_id):
     return n
 
 
+# ── Admin notifications (review-mode review-ready) ───────────────────────────
+def notify_agent_draft_ready(scraper_name, campaign_id, audience_id,
+                             member_count, country=None, industry=None, region=None):
+    """Email the CRM admins when an agent run in review mode produces a draft
+    campaign that needs a human to click Launch. Best-effort: failure is
+    logged but doesn't break the scraper run."""
+    from crm import _send_email, NOTIFY_ADMINS
+    if not NOTIFY_ADMINS:
+        return
+    base = os.environ.get("CRM_BASE_URL", "https://lumenmarketing.co").rstrip("/")
+    link = f"{base}/crm/outreach/campaigns/{campaign_id}"
+    where_bits = []
+    if industry: where_bits.append(industry)
+    if region:   where_bits.append(region)
+    if country:  where_bits.append(country)
+    where_str = " · ".join(where_bits) if where_bits else "—"
+    subject = f"[Outreach Agent] '{scraper_name}' found {member_count} leads — review and launch"
+    html = f"""
+    <div style="font-family:Inter,system-ui,sans-serif;background:#080809;padding:32px 16px;color:#e8e8f0">
+      <div style="max-width:480px;margin:0 auto;background:#111114;border:1px solid #1c1c24;border-radius:18px;padding:32px">
+        <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#56566a;margin-bottom:6px">
+          MK7 Outreach Agent
+        </div>
+        <h1 style="margin:0 0 14px;font-size:22px;font-weight:700;letter-spacing:-0.4px">
+          Ready for your review
+        </h1>
+        <p style="margin:0 0 18px;font-size:14px;line-height:1.6;color:#b8b8c8">
+          <strong>{scraper_name}</strong> just finished a run and found
+          <strong>{member_count}</strong> verified leads in
+          <strong>{where_str}</strong>. A draft campaign is waiting — nothing
+          has been sent yet.
+        </p>
+        <p style="margin:0 0 22px">
+          <a href="{link}"
+             style="display:inline-block;background:#128fc4;color:#fff;padding:12px 22px;border-radius:10px;text-decoration:none;font-weight:600;font-size:14px">
+            Review and launch
+          </a>
+        </p>
+        <p style="margin:0;font-size:12px;color:#56566a;line-height:1.6">
+          You'll see the audience, the template, and the send window before
+          anything actually goes out. Click Launch to start the drip, or
+          Cancel to discard.
+        </p>
+      </div>
+    </div>
+    """
+    for to in NOTIFY_ADMINS:
+        try:
+            _send_email(to, subject, html)
+        except Exception as e:
+            print(f"[outreach] notify_agent_draft_ready error for {to}: {e}")
+
+
 # ── Stat aggregation ──────────────────────────────────────────────────────────
 def campaign_stats(con, campaign_id):
     """Computed on read — at tens of thousands of rows this is plenty fast and

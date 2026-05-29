@@ -95,6 +95,17 @@
         <option value="paused" {% if not s or s.status == 'paused' %}selected{% endif %}>Paused · won't run until activated</option>
       </select>
     </div>
+
+    <div class="form-row" style="margin-top:14px">
+      <label class="form-label">When the agent finds leads</label>
+      <select class="form-select" id="ag-autolaunch">
+        <option value="0" {% if not s or not s.auto_launch %}selected{% endif %}>Review first · create a draft campaign and email me before anything sends (Recommended)</option>
+        <option value="1" {% if s and s.auto_launch %}selected{% endif %}>Auto-launch · start sending immediately, no confirmation needed</option>
+      </select>
+      <span class="text-muted" style="font-size:11px;margin-top:4px">
+        Switch to auto-launch only once you've watched a few runs and trust the agent.
+      </span>
+    </div>
   </div>
 
   <div style="display:flex;gap:10px;justify-content:flex-end">
@@ -119,6 +130,7 @@
       template_id: parseInt(document.getElementById('ag-template').value || '0', 10) || null,
       send_window_hours: parseFloat(document.getElementById('ag-window').value || '4'),
       status: document.getElementById('ag-status').value,
+      auto_launch: document.getElementById('ag-autolaunch').value === '1',
     };
   }
   async function saveAgent() {

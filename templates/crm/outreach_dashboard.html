@@ -147,7 +147,7 @@
     {% if counts.scrapers_active > 0 %}
       Each agent wakes once a day, searches the web for verified business owners with public emails, and launches a campaign with your chosen template. You'll see every run land in the activity feed below.
     {% else %}
-      Configure a Daily Agent and it'll scour the web every morning for new leads, dedupe them against anyone you've already emailed, and start the outreach sequence on its own.
+      Build a Daily Agent and it'll look on the web every morning for new leads, and start the outreach on its own.
     {% endif %}
   </div>
 
@@ -233,7 +233,10 @@
             {% if r['status'] == 'running' %}
               Searching the web for {{ r['industry'] or 'leads' }}{% if r['region'] %} in {{ r['region'] }}, {{ r['country'] }}{% elif r['country'] %} in {{ r['country'] }}{% endif %}…
             {% elif r['status'] == 'completed' and (r['leads_added'] or 0) > 0 %}
-              Found <strong>{{ r['leads_added'] }}</strong> verified lead{{ 's' if r['leads_added'] != 1 else '' }} in {{ r['industry'] or '—' }}{% if r['region'] %}, {{ r['region'] }}{% endif %}{% if r['country'] %}, {{ r['country'] }}{% endif %}. Campaign launched.
+              Found <strong>{{ r['leads_added'] }}</strong> verified lead{{ 's' if r['leads_added'] != 1 else '' }} in {{ r['industry'] or '—' }}{% if r['region'] %}, {{ r['region'] }}{% endif %}{% if r['country'] %}, {{ r['country'] }}{% endif %}.
+              {% if r['campaign_id'] %}
+                <a href="/crm/outreach/campaigns/{{ r['campaign_id'] }}" style="color:var(--teal)">Review draft →</a>
+              {% endif %}
             {% elif r['status'] == 'completed' %}
               Searched {{ r['industry'] or '—' }}{% if r['country'] %} in {{ r['country'] }}{% endif %} but found no new verified leads.
             {% else %}

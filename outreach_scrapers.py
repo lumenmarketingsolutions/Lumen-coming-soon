@@ -179,6 +179,11 @@ def init_scraper_db():
         schedule_hour_utc INTEGER NOT NULL DEFAULT 13,  -- 13 UTC ≈ 9am ET
         template_id INTEGER REFERENCES outreach_templates(id),
         status TEXT NOT NULL DEFAULT 'paused',  -- active | paused
+        -- auto_launch=1 → campaign starts sending immediately after lead scrape.
+        -- auto_launch=0 → campaign is created in 'draft' and an admin must
+        -- review + click Launch before any emails go out. Defaults to 0 so
+        -- the first run after wizard setup is always reviewable.
+        auto_launch INTEGER NOT NULL DEFAULT 0,
         run_counter INTEGER NOT NULL DEFAULT 0,
         last_run_at TEXT,
         last_run_date TEXT,           -- YYYY-MM-DD UTC — for once-per-day gating
@@ -215,6 +220,11 @@ def init_scraper_db():
     CREATE INDEX IF NOT EXISTS idx_runs_scraper ON outreach_scraper_runs(scraper_id);
     CREATE INDEX IF NOT EXISTS idx_runs_started ON outreach_scraper_runs(started_at);
     """)
+    # Idempotent migration for the auto_launch column — existing scrapers
+    # created before this column was added get auto_launch=0 (safe default).
+    cols = {r[1] for r in con.execute("PRAGMA table_info(outreach_scrapers)").fetchall()}
+    if "auto_launch" not in cols:
+        con.execute("ALTER TABLE outreach_scrapers ADD COLUMN auto_launch INTEGER NOT NULL DEFAULT 0")
     con.commit()
     con.close()
 
@@ -585,35 +595,60 @@ def execute_scraper_run(scraper_id, triggered_by="scheduler"):
             refresh_audience_count(con, audience_id)
             con.commit()
 
-            # Auto-launch campaign with the scraper's chosen template.
+            # Create the campaign. If the scraper is in review mode
+            # (auto_launch=0), the campaign sits as 'draft' until an admin
+            # clicks Launch in the UI; nothing is queued until then. If
+            # auto_launch=1, we queue sends immediately so the worker fires.
             scraper_row = con.execute(
                 "SELECT * FROM outreach_scrapers WHERE id = ?", (scraper_id,)
             ).fetchone()
             template_id = scraper_row["template_id"]
+            auto_launch = bool(scraper_row["auto_launch"]) if "auto_launch" in scraper_row.keys() else False
             if template_id:
                 tmpl = con.execute("SELECT 1 FROM outreach_templates WHERE id = ?",
                                    (template_id,)).fetchone()
                 if tmpl:
                     campaign_name = f"Auto · {scraper_row['name']} · {_today_utc()}"
+                    initial_status = "sending" if auto_launch else "draft"
+                    started_at = now_iso() if auto_launch else None
                     cur.execute("""
                         INSERT INTO outreach_campaigns
                             (name, template_id, audience_id, status, send_window_hours,
                              started_at, created_at)
-                        VALUES (?, ?, ?, 'sending', ?, ?, ?)
-                    """, (campaign_name, template_id, audience_id,
-                          scraper_row["send_window_hours"], now_iso(), now_iso()))
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    """, (campaign_name, template_id, audience_id, initial_status,
+                          scraper_row["send_window_hours"], started_at, now_iso()))
                     campaign_id = cur.lastrowid
-                    queued = _queue_campaign_sends(
-                        con, campaign_id, audience_id, scraper_row["send_window_hours"]
-                    )
-                    con.execute("UPDATE outreach_campaigns SET total_queued = ? WHERE id = ?",
-                                (queued, campaign_id))
+                    if auto_launch:
+                        queued = _queue_campaign_sends(
+                            con, campaign_id, audience_id, scraper_row["send_window_hours"]
+                        )
+                        con.execute(
+                            "UPDATE outreach_campaigns SET total_queued = ? WHERE id = ?",
+                            (queued, campaign_id)
+                        )
                     con.commit()
                 else:
                     error_msg = "Scraper template was deleted; audience created but no campaign launched"
             else:
                 error_msg = "No template assigned to scraper; audience created but no campaign launched"
             con.close()
+
+            # If we just created a draft campaign for review, ping the admins
+            # so they know to come look. Best-effort — failure is logged but
+            # doesn't fail the run.
+            if campaign_id and not auto_launch:
+                try:
+                    from outreach import notify_agent_draft_ready
+                    notify_agent_draft_ready(
+                        scraper_name=scraper_row["name"],
+                        campaign_id=campaign_id,
+                        audience_id=audience_id,
+                        member_count=len(valid_members),
+                        country=country, industry=industry, region=region,
+                    )
+                except Exception as e:
+                    print(f"[outreach-scrapers] notify_agent_draft_ready failed: {e}")
         elif not error_msg:
             error_msg = "0 leads passed validation"
 
@@ -868,8 +903,8 @@ def api_create_scraper():
         INSERT INTO outreach_scrapers
             (name, description, countries_json, industries_json, regions_json,
              daily_target, send_window_hours, schedule_hour_utc, template_id, status,
-             created_by_user_id, created_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             auto_launch, created_by_user_id, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         name, (data.get("description") or "").strip() or None,
         json.dumps(countries) if countries else None,
@@ -880,6 +915,7 @@ def api_create_scraper():
         int(data.get("schedule_hour_utc") or 13),
         data.get("template_id") or None,
         (data.get("status") or "paused").strip(),
+        1 if data.get("auto_launch") else 0,
         u["id"], now_iso(),
     ))
     sid = cur.lastrowid
@@ -907,6 +943,8 @@ def api_update_scraper(scraper_id):
         fields["schedule_hour_utc"] = int(data["schedule_hour_utc"])
     if "template_id" in data:
         fields["template_id"] = data["template_id"] or None
+    if "auto_launch" in data:
+        fields["auto_launch"] = 1 if data["auto_launch"] else 0
     if "countries" in data:
         c = data["countries"]
         if isinstance(c, str):
@@ -989,7 +1027,7 @@ _WIZARD_SYSTEM_TEMPLATE = """You are MK7's friendly setup assistant. Your job is
 ## How to finalize
 Once you have all fields, do this in TWO steps:
 
-STEP 1 (one turn): summarize the config in plain English and ask the user to confirm. NO JSON in this turn — just a clean recap and "Look good?" type prompt.
+STEP 1 (one turn): summarize the config in plain English and **make sure the user knows the agent will run in review mode** — i.e. when it finds leads it'll create a draft campaign and email the admins, and nothing actually sends until they click Launch. End with "Look good?" type prompt. NO JSON in this turn.
 
 STEP 2 (after the user confirms with something like "yes" / "go" / "looks right"): your ENTIRE reply must be ONLY a code block, like this:
 
@@ -1006,10 +1044,13 @@ STEP 2 (after the user confirms with something like "yes" / "go" / "looks right"
     "schedule_hour_utc": 13,
     "send_window_hours": 4,
     "template_id": 0,
-    "status": "active"
+    "status": "active",
+    "auto_launch": false
   }
 }
 ```
+
+Always emit `"auto_launch": false` — never `true`. The whole point of the wizard is safe setup; the user can flip this in the advanced settings later once they trust the agent.
 
 No prose before or after the JSON block on the confirmation turn. Nothing else.
 
