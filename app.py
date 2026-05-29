@@ -1633,9 +1633,9 @@ def mane_extensions():
     return render_template("mane_extensions.html")
 
 GOAL_LABELS = {
-    "length": "More length",
-    "density": "More density (hair has thinned)",
-    "both": "Both length and density",
+    "volume": "Volume (hair has thinned / lost fullness)",
+    "length": "Length",
+    "both":   "Best of both worlds",
 }
 TIMELINE_LABELS = {
     "soon": "In the next few weeks",
@@ -1643,10 +1643,10 @@ TIMELINE_LABELS = {
     "exploring": "Just exploring for now",
 }
 BUDGET_LABELS = {
-    "1-2k":   "$1,000 – $2,000 (starter install)",
-    "2-3.5k": "$2,000 – $3,500 (most popular)",
-    "3.5k+":  "$3,500 and up (full transformation)",
-    "open":   "Open / wants recommendations",
+    "800-1500":  "$800 – $1,500",
+    "1600-2200": "$1,600 – $2,200",
+    "2300-4000": "$2,300 – $4,000",
+    "open":      "Whatever it takes for dream hair",
 }
 
 @app.route("/manestyling/extension-funnel/submit", methods=["POST"])

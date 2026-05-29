@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Mane Styling Studio · Hand-Tied Extensions Consult</title>
-    <meta name="description" content="Hand-tied extensions for hair that's been changing. Custom color-matched, restored fullness, real results. A few quick questions and we'll set up your free consult.">
+    <meta name="description" content="Soft, natural-looking hand-tied extensions that blend seamlessly into your existing hair. Custom color-matched, restored fullness. A few quick questions and we'll set up your consult.">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -281,6 +281,29 @@
             line-height: 1.5;
         }
 
+        /* Statement tiles (Q1) — small caps label on top, italic client-voice quote below */
+        .tiles-statement .tile-label {
+            padding: 24px 26px;
+        }
+        .tiles-statement .tile-label .name {
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+        .tiles-statement .tile-label .desc {
+            margin-top: 12px;
+            font-size: 15px;
+            font-style: italic;
+            font-weight: 300;
+            color: var(--ink);
+            line-height: 1.55;
+        }
+        .tiles-statement .tile.selected .tile-label .name {
+            color: var(--ink);
+        }
+
         .step-nav {
             display: flex;
             justify-content: flex-start;
@@ -509,10 +532,9 @@
 
         <!-- ═══ Step 0: Landing ═══════════════════════════════════ -->
         <section class="step active landing" data-step="0">
-            <div class="eyebrow">Free color-match consult + take-home kit · <strong>$200 value</strong></div>
             <h1>Your hair, <em>the way you remember.</em></h1>
             <p class="sub">
-                Hand-tied extensions, custom color-matched to your hair. A few quick questions and we'll set up your free consult.
+                At MANE, we specialize in soft, natural-looking transformations that blend seamlessly into your existing hair so you still feel like you — just with fuller, healthier-looking hair.
             </p>
             <button type="button" class="cta" onclick="goToStep(1)">
                 Start the Quiz <span class="arrow">→</span>
@@ -538,23 +560,23 @@
             <h2>What are you <em>hoping for?</em></h2>
             <p class="hint">Pick the one that fits best.</p>
 
-            <div class="tiles" id="tiles-goal">
-                <div class="tile" data-value="length">
+            <div class="tiles tiles-statement" id="tiles-goal">
+                <div class="tile" data-value="volume">
                     <div class="tile-label">
-                        <div class="name">More length</div>
-                        <div class="desc">Add inches and let your hair fall longer.</div>
+                        <div class="name">Volume</div>
+                        <div class="desc">“My hair doesn't feel like ‘me’ anymore, it's become thinner and harder to feel confident in.”</div>
                     </div>
                 </div>
-                <div class="tile" data-value="density">
+                <div class="tile" data-value="length">
                     <div class="tile-label">
-                        <div class="name">More density</div>
-                        <div class="desc">Restore fullness where your hair has thinned.</div>
+                        <div class="name">Length</div>
+                        <div class="desc">“No matter what I do, my hair won't grow past a certain length and I'm tired of feeling stuck.”</div>
                     </div>
                 </div>
                 <div class="tile" data-value="both">
                     <div class="tile-label">
-                        <div class="name">Both length and density</div>
-                        <div class="desc">The full transformation. Most clients pick this.</div>
+                        <div class="name">Best of both worlds</div>
+                        <div class="desc">“I miss having thick, full, longer hair that makes me feel feminine, confident, and put together.”</div>
                     </div>
                 </div>
             </div>
@@ -600,31 +622,27 @@
         <section class="step" data-step="3">
             <div class="step-eyebrow">Question 3 of 3</div>
             <h2>What's your <em>investment range?</em></h2>
-            <p class="hint">Installs run $1k to $4.5k. No wrong answer.</p>
+            <p class="hint">No wrong answer.</p>
 
             <div class="tiles" id="tiles-budget">
-                <div class="tile" data-value="1-2k">
+                <div class="tile" data-value="800-1500">
                     <div class="tile-label">
-                        <div class="name">$1,000 – $2,000</div>
-                        <div class="desc">A starter install, single row.</div>
+                        <div class="name">$800 – $1,500</div>
                     </div>
                 </div>
-                <div class="tile" data-value="2-3.5k">
+                <div class="tile" data-value="1600-2200">
                     <div class="tile-label">
-                        <div class="name">$2,000 – $3,500</div>
-                        <div class="desc">Our most popular range.</div>
+                        <div class="name">$1,600 – $2,200</div>
                     </div>
                 </div>
-                <div class="tile" data-value="3.5k+">
+                <div class="tile" data-value="2300-4000">
                     <div class="tile-label">
-                        <div class="name">$3,500 and up</div>
-                        <div class="desc">A full transformation.</div>
+                        <div class="name">$2,300 – $4,000</div>
                     </div>
                 </div>
                 <div class="tile" data-value="open">
                     <div class="tile-label">
-                        <div class="name">I'd like recommendations</div>
-                        <div class="desc">Tell me what's right for my hair.</div>
+                        <div class="name">Whatever it takes for my dream hair</div>
                     </div>
                 </div>
             </div>
@@ -640,11 +658,6 @@
                 <div class="step-eyebrow">Your consult is ready</div>
                 <h2>Where should we send it?</h2>
                 <p class="hint">We'll text and email a confirmation.</p>
-
-                <div class="gift">
-                    <span class="gift-icon">◆</span>
-                    <span>Free color-match consult, normally <strong>$25</strong>. Plus a take-home starter kit when you install, a <strong>$200 value</strong>.</span>
-                </div>
 
                 <form id="lead-form" onsubmit="return submitLead(event)">
                     <div class="field">
@@ -682,8 +695,8 @@
             <div class="result-offer">
                 <span class="icon">◆</span>
                 <div class="copy">
-                    <div class="h">Your free consult is reserved.</div>
-                    <div class="s">The $25 fee is on us. Take-home starter kit ($200 value) included with your install.</div>
+                    <div class="h">Your consult is reserved.</div>
+                    <div class="s">We'll see you in studio. Book your time below.</div>
                 </div>
             </div>
 
@@ -698,7 +711,6 @@
                     <li>Premium Covet &amp; Mane hand-tied extension hair</li>
                     <li>Custom color-matched to your hair, no guesswork</li>
                     <li>Install, cut, and blend so it reads as your own</li>
-                    <li>Take-home starter kit with education and care products</li>
                 </ul>
             </div>
 
@@ -765,12 +777,11 @@
             };
         }
 
-        // Per-goal "why" copy. Volume dropped per Keanna's call — density and
-        // volume read as the same thing to her clients, so we collapsed to 3.
+        // Per-goal "why" copy. Keys mirror Q1 tile values.
         const GOAL_COPY = {
-            length:  "Hand-tied extensions add seamless length that grows out with your natural hair. We'll color-match exactly so the blend reads as your own.",
-            density: "If your hair has thinned, hand-tied extensions are the gentlest way to restore the density that's been changing. No damage to the hair you have.",
-            both:    "Length and density in one install. We'll map out the right configuration in your consult based on what your hair needs.",
+            volume: "Hand-tied extensions restore the fullness your hair has been losing. The blend reads as your own, no one knows but you.",
+            length: "Hand-tied extensions add seamless length that grows out with your natural hair. We'll color-match exactly so the blend reads as your own.",
+            both:   "Length and fullness in one install. We'll map out the right configuration in your consult based on what your hair needs.",
         };
 
         function renderResult() {
