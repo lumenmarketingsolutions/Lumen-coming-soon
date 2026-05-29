@@ -89,6 +89,10 @@ app.register_blueprint(sce_admin_bp)
 from crm import crm_bp
 app.register_blueprint(crm_bp)
 
+# MK7 Outreach Agent — admin-only cold-email blast tool, mounted at /crm/outreach.
+from outreach import outreach_bp
+app.register_blueprint(outreach_bp)
+
 ADMIN_PIN = "112501"
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAIL = "kendall@lumenmarketing.co"

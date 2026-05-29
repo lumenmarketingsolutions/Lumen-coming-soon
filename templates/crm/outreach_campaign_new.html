@@ -1,0 +1,131 @@
+{% extends "crm/base.html" %}
+{% set active = 'outreach' %}
+{% block title %}New campaign — Outreach Agent{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-sub"><a href="/crm/outreach/campaigns" style="color:var(--teal)">← Campaigns</a></div>
+    <div class="page-title">New campaign</div>
+    <div class="page-sub">One audience × one template, paced over a window. Sending from <code>{{ from_email }}</code>.</div>
+  </div>
+</div>
+
+{% if not mailing_address %}
+<div class="alert alert-warn" style="margin-bottom:16px">
+  <strong>Heads up:</strong> no mailing address is configured, so this campaign's footer will only show the unsubscribe link. CAN-SPAM requires a physical address. Set <code>OUTREACH_MAILING_ADDRESS</code> on Railway before scaling beyond test sends.
+</div>
+{% endif %}
+
+<div class="alert alert-error hidden" id="cc-error" style="margin-bottom:16px"></div>
+
+<div style="display:grid;gap:14px;max-width:720px">
+  <div class="card">
+    <div class="form-row" style="margin-bottom:14px">
+      <label class="form-label">Campaign name *</label>
+      <input class="form-input" id="cc-name" placeholder="e.g. Lebanon SMBs · Initial · 2026-05-28">
+      <span class="text-muted" style="font-size:11px;margin-top:4px">Internal label only. Recipients don't see this.</span>
+    </div>
+
+    <div class="form-row" style="margin-bottom:14px">
+      <label class="form-label">Audience *</label>
+      <select class="form-select" id="cc-audience">
+        <option value="">Select an audience…</option>
+        {% for a in audiences %}
+          <option value="{{ a.id }}" data-count="{{ a.member_count or 0 }}">
+            {{ a.name }} · {{ '{:,}'.format(a.member_count or 0) }} recipients{% if a.derivation_type %} · {{ a.derivation_type }}{% endif %}
+          </option>
+        {% endfor %}
+      </select>
+      <span class="text-muted" id="cc-aud-note" style="font-size:11px;margin-top:4px">Suppressed emails are skipped automatically.</span>
+    </div>
+
+    <div class="form-row" style="margin-bottom:14px">
+      <label class="form-label">Template *</label>
+      <select class="form-select" id="cc-template">
+        <option value="">Select a template…</option>
+        {% for t in templates %}
+          <option value="{{ t.id }}">{{ t.name }} · "{{ t.subject[:60] }}{% if t.subject|length > 60 %}…{% endif %}"</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label class="form-label">Send window (hours)</label>
+      <input class="form-input" id="cc-window" type="number" min="0.1" max="72" step="0.5" value="4">
+      <span class="text-muted" style="font-size:11px;margin-top:4px">
+        Spreads sends evenly across this window. 4 hours is a safe default — slower = better deliverability. Don't go below 1 hour for sends over a few thousand.
+      </span>
+    </div>
+  </div>
+
+  <div class="card" style="background:rgba(245,158,11,0.05);border-color:rgba(245,158,11,0.2)">
+    <div class="form-label" style="color:var(--amber);margin-bottom:8px">Warmup reminder</div>
+    <div class="text-dim" style="font-size:13px;line-height:1.6">
+      Your <code>go.lumenmarketing.co</code> subdomain is brand new. For the first ~10 days, ramp gradually:
+      <strong>day 1 ≈ 100, day 3 ≈ 500, day 5 ≈ 1k, day 7 ≈ 2.5k, day 10 ≈ 5–10k</strong>.
+      If you've got a large audience, send to a 10–20% slice today and the rest over the next week.
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;justify-content:flex-end">
+    <button class="btn btn-outline" onclick="submitCampaign(false)" id="cc-draft">Save as draft</button>
+    <button class="btn btn-primary" onclick="submitCampaign(true)" id="cc-launch">Launch now</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Preselect audience from query string (set when arriving from audience detail).
+  const params = new URLSearchParams(location.search);
+  const preselect = params.get('audience_id');
+  if (preselect) document.getElementById('cc-audience').value = preselect;
+
+  document.getElementById('cc-audience').addEventListener('change', e => {
+    const opt = e.target.selectedOptions[0];
+    const n = opt && opt.dataset.count ? parseInt(opt.dataset.count, 10) : 0;
+    document.getElementById('cc-aud-note').textContent =
+      n ? `${n.toLocaleString()} recipients (minus anyone already on suppression list).`
+        : 'Suppressed emails are skipped automatically.';
+  });
+
+  async function submitCampaign(launch) {
+    const err = document.getElementById('cc-error');
+    err.classList.add('hidden');
+    const name = document.getElementById('cc-name').value.trim();
+    const audience_id = document.getElementById('cc-audience').value;
+    const template_id = document.getElementById('cc-template').value;
+    const send_window_hours = parseFloat(document.getElementById('cc-window').value || '4');
+    if (!name || !audience_id || !template_id) {
+      err.textContent = 'Name, audience, and template are required.';
+      err.classList.remove('hidden');
+      window.scrollTo({top:0, behavior:'smooth'});
+      return;
+    }
+    if (launch && !confirm(`Launch "${name}" now? Sends start within seconds and spread over ${send_window_hours} hour(s).`)) return;
+    const btn = document.getElementById(launch ? 'cc-launch' : 'cc-draft');
+    const otherBtn = document.getElementById(launch ? 'cc-draft' : 'cc-launch');
+    btn.disabled = true; otherBtn.disabled = true;
+    btn.textContent = launch ? 'Launching…' : 'Saving…';
+    try {
+      const r = await fetch('/crm/outreach/api/campaigns', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name, audience_id, template_id, send_window_hours, launch })
+      });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || 'Failed');
+      if (launch) {
+        window.toast(`Launched · ${j.queued.toLocaleString()} sends queued`, 'success');
+      } else {
+        window.toast('Saved as draft', 'success');
+      }
+      setTimeout(() => location.href = `/crm/outreach/campaigns/${j.campaign_id}`, 500);
+    } catch (e) {
+      err.textContent = e.message; err.classList.remove('hidden');
+      btn.disabled = false; otherBtn.disabled = false;
+      btn.textContent = launch ? 'Launch now' : 'Save as draft';
+    }
+  }
+</script>
+{% endblock %}

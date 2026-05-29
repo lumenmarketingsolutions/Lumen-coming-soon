@@ -1,0 +1,101 @@
+{% extends "crm/base.html" %}
+{% set active = 'outreach' %}
+{% block title %}Suppression list — Outreach Agent{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Suppression list</div>
+    <div class="page-sub">{{ '{:,}'.format(total) }} total. Emails on this list are never sent to. Auto-populated by unsubscribes, hard bounces, and spam complaints.</div>
+  </div>
+  <div class="page-actions">
+    <button class="btn btn-outline" onclick="openAddSup()">Add manually</button>
+  </div>
+</div>
+
+<div class="chips" style="margin-bottom:20px">
+  <a class="chip" href="/crm/outreach">Overview</a>
+  <a class="chip" href="/crm/outreach/audiences">Audiences</a>
+  <a class="chip" href="/crm/outreach/templates">Templates</a>
+  <a class="chip" href="/crm/outreach/campaigns">Campaigns</a>
+  <a class="chip active" href="/crm/outreach/suppressions">Suppression list</a>
+</div>
+
+<div class="table-wrap" style="overflow-x:auto">
+  {% if rows %}
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Reason</th>
+        <th class="hide-mobile">Added</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr>
+        <td class="dim">{{ r.email }}</td>
+        <td>
+          {% set color = {'unsubscribe':'var(--amber)', 'bounce':'var(--red)', 'complaint':'var(--red)', 'manual':'var(--text-dim)'}[r.reason] %}
+          <span class="badge" style="color:{{ color }};background:rgba(255,255,255,0.04)">{{ r.reason }}</span>
+        </td>
+        <td class="hide-mobile dim" style="font-size:11px">{{ r.created_at[:10] }}</td>
+        <td style="text-align:right">
+          <button class="btn btn-outline btn-sm" onclick="removeSup('{{ r.email }}')">Unsuppress</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if total > 500 %}
+    <div class="text-muted" style="text-align:center;padding:14px;font-size:12px">Showing 500 most recent of {{ '{:,}'.format(total) }}.</div>
+  {% endif %}
+  {% else %}
+  <div class="empty">
+    <div class="em-title">Nothing suppressed yet</div>
+    <div class="em-sub">Bounces, complaints, and unsubscribes will show up here.</div>
+  </div>
+  {% endif %}
+</div>
+
+<div class="modal-backdrop" id="sup-modal" onclick="if(event.target===this) closeAddSup()">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <h3>Add to suppression list</h3>
+      <button class="modal-close" onclick="closeAddSup()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <label class="form-label">Email *</label>
+        <input class="form-input" id="sup-email" type="email">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeAddSup()">Cancel</button>
+      <button class="btn btn-primary" onclick="submitSup()">Add</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function openAddSup() { document.getElementById('sup-modal').classList.add('show'); document.body.style.overflow='hidden'; setTimeout(()=>document.getElementById('sup-email').focus(),50); }
+  function closeAddSup() { document.getElementById('sup-modal').classList.remove('show'); document.body.style.overflow=''; document.getElementById('sup-email').value=''; }
+  async function submitSup() {
+    const email = document.getElementById('sup-email').value.trim();
+    if (!email) return;
+    const r = await fetch('/crm/outreach/api/suppressions', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+    const j = await r.json();
+    if (j.ok) { window.toast('Added', 'success'); location.reload(); }
+    else { window.toast(j.error || 'Failed', 'error'); }
+  }
+  async function removeSup(email) {
+    if (!confirm(`Remove ${email} from suppression list? They'll be sendable again.`)) return;
+    const r = await fetch('/crm/outreach/api/suppressions', { method:'DELETE', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+    const j = await r.json();
+    if (j.ok) { window.toast('Removed', 'success'); location.reload(); }
+  }
+</script>
+{% endblock %}

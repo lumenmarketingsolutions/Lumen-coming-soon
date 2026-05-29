@@ -1,0 +1,154 @@
+{% extends "crm/base.html" %}
+{% set active = 'outreach' %}
+{% block title %}Audiences — Outreach Agent{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Audiences</div>
+    <div class="page-sub">CSV recipient lists. Each upload becomes its own audience you can blast.</div>
+  </div>
+  <div class="page-actions">
+    <button class="btn btn-primary" onclick="openUploadModal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+      Upload CSV
+    </button>
+  </div>
+</div>
+
+<div class="chips" style="margin-bottom:20px">
+  <a class="chip" href="/crm/outreach">Overview</a>
+  <a class="chip active" href="/crm/outreach/audiences">Audiences</a>
+  <a class="chip" href="/crm/outreach/templates">Templates</a>
+  <a class="chip" href="/crm/outreach/campaigns">Campaigns</a>
+  <a class="chip" href="/crm/outreach/suppressions">Suppression list</a>
+</div>
+
+<div class="table-wrap" style="overflow-x:auto">
+  {% if audiences %}
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Audience</th>
+        <th style="text-align:right">Recipients</th>
+        <th class="hide-mobile">Source</th>
+        <th class="hide-mobile">Created by</th>
+        <th class="hide-mobile">Created</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for a in audiences %}
+      <tr style="cursor:pointer" onclick="if (!event.target.closest('button,a.action')) location.href='/crm/outreach/audiences/{{ a.id }}'">
+        <td>
+          <div style="font-weight:600">{{ a.name }}</div>
+          {% if a.note %}<div class="text-muted" style="font-size:11px">{{ a.note }}</div>{% endif %}
+        </td>
+        <td style="text-align:right;font-weight:600">{{ '{:,}'.format(a.member_count or 0) }}</td>
+        <td class="hide-mobile dim">
+          {% if a.source == 'derived' %}
+            <span class="badge" style="background:rgba(128,47,222,0.12);color:#b78bff">{{ a.derivation_type }}</span>
+          {% else %}
+            CSV
+          {% endif %}
+        </td>
+        <td class="hide-mobile dim">{{ (a.creator_first or '') ~ ' ' ~ (a.creator_last or '') if a.creator_first else '—' }}</td>
+        <td class="hide-mobile dim" style="font-size:11px">{{ a.created_at[:10] }}</td>
+        <td style="text-align:right;white-space:nowrap">
+          <a class="btn btn-outline btn-sm action" href="/crm/outreach/audiences/{{ a.id }}/export">Export</a>
+          <button class="btn btn-danger btn-sm" style="margin-left:6px" onclick="deleteAudience({{ a.id }}, '{{ a.name|replace("'", "\\'") }}')">Delete</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <div class="em-title">No audiences yet</div>
+    <div class="em-sub">Upload your first CSV. Required column: <code>email</code>. Optional: <code>first_name</code>, <code>last_name</code>, <code>company</code>.</div>
+    <button class="btn btn-primary" onclick="openUploadModal()">Upload CSV</button>
+  </div>
+  {% endif %}
+</div>
+
+{# ── Upload modal ── #}
+<div class="modal-backdrop" id="upload-modal" onclick="if(event.target===this) closeUploadModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h3>Upload audience CSV</h3>
+      <button class="modal-close" onclick="closeUploadModal()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-info">
+        Required column: <code>email</code>. Optional: <code>first_name</code>, <code>last_name</code>, <code>company</code>. Invalid emails and within-file duplicates are dropped automatically.
+      </div>
+      <div class="alert alert-error hidden" id="up-error"></div>
+      <div class="form-row">
+        <label class="form-label">Audience name *</label>
+        <input class="form-input" id="up-name" placeholder="e.g. Lebanon SMBs · {{ '2026-05-28' }}">
+      </div>
+      <div class="form-row">
+        <label class="form-label">Note (optional)</label>
+        <input class="form-input" id="up-note" placeholder="Where did this list come from?">
+      </div>
+      <div class="form-row">
+        <label class="form-label">CSV file *</label>
+        <input class="form-input" id="up-file" type="file" accept=".csv,text/csv" style="padding:8px">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeUploadModal()">Cancel</button>
+      <button class="btn btn-primary" id="up-submit" onclick="submitUpload()">Upload</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function openUploadModal() {
+    document.getElementById('upload-modal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('up-name').focus(), 50);
+  }
+  function closeUploadModal() {
+    document.getElementById('upload-modal').classList.remove('show');
+    document.body.style.overflow = '';
+    document.getElementById('up-error').classList.add('hidden');
+    ['up-name','up-note','up-file'].forEach(id => { const el = document.getElementById(id); if (el.type === 'file') el.value = ''; else el.value = ''; });
+  }
+  async function submitUpload() {
+    const err = document.getElementById('up-error');
+    err.classList.add('hidden');
+    const name = document.getElementById('up-name').value.trim();
+    const note = document.getElementById('up-note').value.trim();
+    const file = document.getElementById('up-file').files[0];
+    if (!name) { err.textContent = 'Name required'; err.classList.remove('hidden'); return; }
+    if (!file) { err.textContent = 'Choose a CSV file'; err.classList.remove('hidden'); return; }
+    const btn = document.getElementById('up-submit');
+    btn.disabled = true; btn.textContent = 'Uploading…';
+    const fd = new FormData();
+    fd.append('name', name);
+    fd.append('note', note);
+    fd.append('file', file);
+    try {
+      const r = await fetch('/crm/outreach/audiences', { method: 'POST', body: fd });
+      const j = await r.json();
+      if (!j.ok) { throw new Error(j.error || 'Upload failed'); }
+      window.toast(`Uploaded ${j.accepted.toLocaleString()} recipients · ${j.invalid} invalid · ${j.duped_in_file} duplicates`, 'success');
+      setTimeout(() => location.href = `/crm/outreach/audiences/${j.audience_id}`, 600);
+    } catch (e) {
+      err.textContent = e.message;
+      err.classList.remove('hidden');
+      btn.disabled = false; btn.textContent = 'Upload';
+    }
+  }
+  async function deleteAudience(id, name) {
+    if (!confirm(`Delete audience "${name}"? Its members will be removed. Past campaigns that used it stay intact.`)) return;
+    const r = await fetch(`/crm/outreach/audiences/${id}`, { method: 'DELETE' });
+    const j = await r.json();
+    if (j.ok) { window.toast('Audience deleted', 'success'); location.reload(); }
+    else { window.toast(j.error || 'Delete failed', 'error'); }
+  }
+</script>
+{% endblock %}

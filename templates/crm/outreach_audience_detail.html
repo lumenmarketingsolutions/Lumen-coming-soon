@@ -1,0 +1,149 @@
+{% extends "crm/base.html" %}
+{% set active = 'outreach' %}
+{% block title %}{{ a.name }} — Audience{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-sub"><a href="/crm/outreach/audiences" style="color:var(--teal)">← Audiences</a></div>
+    <div class="page-title">{{ a.name }}</div>
+    <div class="page-sub">
+      {{ '{:,}'.format(a.member_count or 0) }} recipients
+      {% if suppressed_in_audience %}
+        · <span style="color:var(--amber)">{{ '{:,}'.format(suppressed_in_audience) }} on suppression list (will be skipped)</span>
+      {% endif %}
+      {% if a.note %} · {{ a.note }}{% endif %}
+    </div>
+  </div>
+  <div class="page-actions">
+    <a class="btn btn-outline" href="/crm/outreach/audiences/{{ a.id }}/export">Export CSV</a>
+    <a class="btn btn-primary" href="/crm/outreach/campaigns/new?audience_id={{ a.id }}">Send campaign</a>
+  </div>
+</div>
+
+{% if campaigns %}
+<div class="card" style="margin-bottom:20px">
+  <div class="form-label" style="margin-bottom:12px">Campaigns to this audience</div>
+  <div class="table-wrap" style="margin:0">
+    <table class="data">
+      <thead>
+        <tr><th>Campaign</th><th class="hide-mobile">Template</th><th>Status</th><th class="hide-mobile">Created</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for c in campaigns %}
+        <tr style="cursor:pointer" onclick="if (!event.target.closest('button')) location.href='/crm/outreach/campaigns/{{ c.id }}'">
+          <td><div style="font-weight:600">{{ c.name }}</div></td>
+          <td class="hide-mobile dim">{{ c.template_name or '—' }}</td>
+          <td><span class="badge badge-status s-{{ c.status }}">{{ c.status }}</span></td>
+          <td class="hide-mobile dim" style="font-size:11px">{{ c.created_at[:10] }}</td>
+          <td style="text-align:right;white-space:nowrap">
+            {% if c.status in ('completed', 'sending') %}
+            <button class="btn btn-outline btn-sm" onclick="openDeriveModal({{ c.id }}, 'opened', 'Opened — {{ c.name|replace("'", "\\'") }}')">→ Opened</button>
+            <button class="btn btn-outline btn-sm" style="margin-left:6px" onclick="openDeriveModal({{ c.id }}, 'not_opened', 'No-open — {{ c.name|replace("'", "\\'") }}')">→ Not opened</button>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="row-between" style="margin-bottom:12px">
+    <span class="form-label">Sample (first 25)</span>
+    <span class="text-muted" style="font-size:11px">Use Export to grab the full list.</span>
+  </div>
+  {% if sample %}
+  <div class="table-wrap" style="margin:0">
+    <table class="data">
+      <thead>
+        <tr><th>Email</th><th class="hide-mobile">First</th><th class="hide-mobile">Last</th><th class="hide-mobile">Company</th></tr>
+      </thead>
+      <tbody>
+        {% for m in sample %}
+        <tr>
+          <td>{{ m.email }}</td>
+          <td class="hide-mobile dim">{{ m.first_name or '—' }}</td>
+          <td class="hide-mobile dim">{{ m.last_name or '—' }}</td>
+          <td class="hide-mobile dim">{{ m.company or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="text-dim" style="text-align:center;padding:20px">Audience is empty.</div>
+  {% endif %}
+</div>
+
+{# ── Derive audience modal ── #}
+<div class="modal-backdrop" id="derive-modal" onclick="if(event.target===this) closeDerive()">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="derive-title">Create child audience</h3>
+      <button class="modal-close" onclick="closeDerive()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-info" id="derive-help"></div>
+      <div class="alert alert-error hidden" id="derive-error"></div>
+      <div class="form-row">
+        <label class="form-label">New audience name *</label>
+        <input class="form-input" id="derive-name">
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="closeDerive()">Cancel</button>
+      <button class="btn btn-primary" id="derive-submit" onclick="submitDerive()">Create audience</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const AUDIENCE_ID = {{ a.id }};
+  let deriveCtx = { campaignId: null, kind: null };
+  function openDeriveModal(campaignId, kind, suggestedName) {
+    deriveCtx = { campaignId, kind };
+    document.getElementById('derive-title').textContent =
+      kind === 'opened' ? 'Create "opened" audience' :
+      kind === 'not_opened' ? 'Create "did not open" audience' :
+      kind === 'clicked' ? 'Create "clicked" audience' : 'Create child audience';
+    document.getElementById('derive-help').textContent =
+      kind === 'opened' ? 'Copies every recipient from this campaign whose email was opened.' :
+      kind === 'not_opened' ? 'Copies every recipient who was sent the campaign but never opened it — your follow-up list.' :
+      'Copies recipients matching the criteria into a new audience.';
+    document.getElementById('derive-name').value = suggestedName;
+    document.getElementById('derive-modal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('derive-name').focus(), 50);
+  }
+  function closeDerive() {
+    document.getElementById('derive-modal').classList.remove('show');
+    document.body.style.overflow = '';
+    document.getElementById('derive-error').classList.add('hidden');
+  }
+  async function submitDerive() {
+    const name = document.getElementById('derive-name').value.trim();
+    const err = document.getElementById('derive-error');
+    if (!name) { err.textContent = 'Name required'; err.classList.remove('hidden'); return; }
+    const btn = document.getElementById('derive-submit');
+    btn.disabled = true; btn.textContent = 'Creating…';
+    try {
+      const r = await fetch(`/crm/outreach/audiences/${AUDIENCE_ID}/derive`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ campaign_id: deriveCtx.campaignId, kind: deriveCtx.kind, name })
+      });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || 'Failed');
+      window.toast('Audience created', 'success');
+      setTimeout(() => location.href = `/crm/outreach/audiences/${j.audience_id}`, 500);
+    } catch (e) {
+      err.textContent = e.message; err.classList.remove('hidden');
+      btn.disabled = false; btn.textContent = 'Create audience';
+    }
+  }
+</script>
+{% endblock %}

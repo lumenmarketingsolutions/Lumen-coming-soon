@@ -1,0 +1,97 @@
+{% extends "crm/base.html" %}
+{% set active = 'outreach' %}
+{% block title %}Outreach Agent — MK7 CRM{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Outreach Agent</div>
+    <div class="page-sub">Cold email blasts via Resend, sent from <code style="color:var(--teal)">{{ from_email }}</code>. Admin only.</div>
+  </div>
+  <div class="page-actions">
+    <a href="/crm/outreach/campaigns/new" class="btn btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+      New campaign
+    </a>
+  </div>
+</div>
+
+{% if not mailing_address %}
+<div class="alert alert-warn" style="margin-bottom:20px">
+  <strong>TODO · Mailing address not set.</strong>
+  Every cold email needs a physical postal address in the footer (CAN-SPAM requirement, also a Gmail/Outlook deliverability signal). Right now your sends will go out with the address line blank.
+  <div style="margin-top:8px;font-size:12px;line-height:1.6;opacity:0.85">
+    Pick one: your home/office address, a USPS PO Box, a virtual mailbox (Anytime Mailbox / iPostal1 ~$10/mo), or a registered-agent service that includes mail forwarding.
+    Then set <code>OUTREACH_MAILING_ADDRESS</code> on Railway and restart.
+  </div>
+</div>
+{% endif %}
+
+{# ── Outreach sub-nav ── #}
+<div class="chips" style="margin-bottom:20px">
+  <a class="chip active" href="/crm/outreach">Overview</a>
+  <a class="chip" href="/crm/outreach/audiences">Audiences ({{ counts.audiences }})</a>
+  <a class="chip" href="/crm/outreach/templates">Templates ({{ counts.templates }})</a>
+  <a class="chip" href="/crm/outreach/campaigns">Campaigns ({{ counts.campaigns }})</a>
+  <a class="chip" href="/crm/outreach/suppressions">Suppression list ({{ counts.suppressed }})</a>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-tile"><div class="label">Sent</div><div class="value">{{ '{:,}'.format(lt.sent or 0) }}</div></div>
+  <div class="stat-tile"><div class="label">Delivered</div><div class="value">{{ '{:,}'.format(lt.delivered or 0) }}</div><div class="sub">{{ lt.delivered_pct }}%</div></div>
+  <div class="stat-tile"><div class="label">Opened</div><div class="value">{{ '{:,}'.format(lt.opened or 0) }}</div><div class="sub">{{ lt.open_pct }}%</div></div>
+  <div class="stat-tile"><div class="label">Clicked</div><div class="value">{{ '{:,}'.format(lt.clicked or 0) }}</div><div class="sub">{{ lt.click_pct }}%</div></div>
+  <div class="stat-tile"><div class="label">Bounced</div><div class="value">{{ '{:,}'.format(lt.bounced or 0) }}</div></div>
+  <div class="stat-tile"><div class="label">Unsubscribed</div><div class="value">{{ '{:,}'.format(lt.unsubscribed or 0) }}</div></div>
+</div>
+
+<div class="page-header" style="margin-top:24px;margin-bottom:14px">
+  <div>
+    <div class="page-title" style="font-size:18px">Recent campaigns</div>
+    <div class="page-sub">Last 10 campaigns across all audiences.</div>
+  </div>
+</div>
+
+<div class="table-wrap" style="overflow-x:auto">
+  {% if recent %}
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Campaign</th>
+        <th class="hide-mobile">Audience</th>
+        <th class="hide-mobile">Template</th>
+        <th style="text-align:right">Sent</th>
+        <th style="text-align:right">Open %</th>
+        <th style="text-align:right">Click %</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in recent %}
+      <tr style="cursor:pointer" onclick="location.href='/crm/outreach/campaigns/{{ r.c.id }}'">
+        <td>
+          <div style="font-weight:600">{{ r.c.name }}</div>
+          <div class="text-muted" style="font-size:11px">{{ r.c.created_at[:10] }}</div>
+        </td>
+        <td class="hide-mobile dim">{{ r.c.audience_name or '—' }}</td>
+        <td class="hide-mobile dim">{{ r.c.template_name or '—' }}</td>
+        <td style="text-align:right;font-weight:600">{{ '{:,}'.format(r.s.sent or 0) }}</td>
+        <td style="text-align:right" class="dim">{{ r.s.open_pct }}%</td>
+        <td style="text-align:right" class="dim">{{ r.s.click_pct }}%</td>
+        <td>
+          {% set st = r.c.status %}
+          <span class="badge badge-status s-{{ st }}">{{ st }}</span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <div class="em-title">No campaigns yet</div>
+    <div class="em-sub">Upload an audience and write a template, then send your first blast.</div>
+    <a href="/crm/outreach/audiences" class="btn btn-primary">Upload audience</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

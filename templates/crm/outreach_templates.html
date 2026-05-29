@@ -1,0 +1,73 @@
+{% extends "crm/base.html" %}
+{% set active = 'outreach' %}
+{% block title %}Templates — Outreach Agent{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Templates</div>
+    <div class="page-sub">Reusable subject + body. Use <code>{{ '{{' }}first_name{{ '}}' }}</code>, <code>{{ '{{' }}last_name{{ '}}' }}</code>, <code>{{ '{{' }}company{{ '}}' }}</code> as merge tags.</div>
+  </div>
+  <div class="page-actions">
+    <a href="/crm/outreach/templates/new" class="btn btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+      New template
+    </a>
+  </div>
+</div>
+
+<div class="chips" style="margin-bottom:20px">
+  <a class="chip" href="/crm/outreach">Overview</a>
+  <a class="chip" href="/crm/outreach/audiences">Audiences</a>
+  <a class="chip active" href="/crm/outreach/templates">Templates</a>
+  <a class="chip" href="/crm/outreach/campaigns">Campaigns</a>
+  <a class="chip" href="/crm/outreach/suppressions">Suppression list</a>
+</div>
+
+<div class="table-wrap" style="overflow-x:auto">
+  {% if templates %}
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Template</th>
+        <th class="hide-mobile">Subject</th>
+        <th style="text-align:right">Campaigns</th>
+        <th class="hide-mobile">Updated</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for t in templates %}
+      <tr style="cursor:pointer" onclick="if (!event.target.closest('button')) location.href='/crm/outreach/templates/{{ t.id }}'">
+        <td><div style="font-weight:600">{{ t.name }}</div></td>
+        <td class="hide-mobile dim">{{ t.subject[:70] }}{% if t.subject|length > 70 %}…{% endif %}</td>
+        <td style="text-align:right;font-weight:600">{{ t.use_count or 0 }}</td>
+        <td class="hide-mobile dim" style="font-size:11px">{{ t.updated_at[:10] }}</td>
+        <td style="text-align:right;white-space:nowrap">
+          <button class="btn btn-danger btn-sm" onclick="deleteTemplate({{ t.id }}, '{{ t.name|replace("'", "\\'") }}')">Delete</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <div class="em-title">No templates yet</div>
+    <div class="em-sub">Write a reusable subject + body once, then use it for any campaign.</div>
+    <a href="/crm/outreach/templates/new" class="btn btn-primary">New template</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  async function deleteTemplate(id, name) {
+    if (!confirm(`Delete template "${name}"?`)) return;
+    const r = await fetch(`/crm/outreach/api/templates/${id}`, { method: 'DELETE' });
+    const j = await r.json();
+    if (j.ok) { window.toast('Template deleted', 'success'); location.reload(); }
+    else { window.toast(j.error || 'Delete failed', 'error'); }
+  }
+</script>
+{% endblock %}

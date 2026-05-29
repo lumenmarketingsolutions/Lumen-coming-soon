@@ -1,0 +1,149 @@
+{% extends "crm/base.html" %}
+{% set active = 'outreach' %}
+{% block title %}{% if t %}Edit{% else %}New{% endif %} template — Outreach{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-sub"><a href="/crm/outreach/templates" style="color:var(--teal)">← Templates</a></div>
+    <div class="page-title">{% if t %}{{ t.name }}{% else %}New template{% endif %}</div>
+    <div class="page-sub">
+      Merge tags: <code>{{ '{{' }}first_name{{ '}}' }}</code>, <code>{{ '{{' }}last_name{{ '}}' }}</code>, <code>{{ '{{' }}company{{ '}}' }}</code>.
+      Drop <code>{{ '{{' }}unsubscribe_url{{ '}}' }}</code> anywhere in the body if you want to place the unsub link yourself — otherwise we auto-append a compliant footer.
+    </div>
+  </div>
+  <div class="page-actions">
+    <button class="btn btn-outline" onclick="previewTemplate()">Preview</button>
+    <button class="btn btn-primary" id="save-btn" onclick="saveTemplate()">{% if t %}Save changes{% else %}Create template{% endif %}</button>
+  </div>
+</div>
+
+<div class="alert alert-error hidden" id="te-error" style="margin-bottom:16px"></div>
+
+<div style="display:grid;grid-template-columns: 1fr; gap:14px;max-width:880px">
+  <div class="card">
+    <div class="form-row" style="margin-bottom:14px">
+      <label class="form-label">Template name *</label>
+      <input class="form-input" id="te-name" placeholder="e.g. Initial cold outreach" value="{{ (t.name if t else '') }}">
+    </div>
+    <div class="form-row" style="margin-bottom:14px">
+      <label class="form-label">Subject line *</label>
+      <input class="form-input" id="te-subject" placeholder="Quick question for {{ '{{' }}company{{ '}}' }}" value="{{ (t.subject if t else '') }}">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Body (HTML) *</label>
+      <textarea class="form-textarea" id="te-body-html" style="min-height:340px;font-family:ui-monospace,Menlo,monospace;font-size:13px" placeholder="<p>Hi {{ '{{' }}first_name{{ '}}' }},</p>&#10;<p>Quick note — saw what you're doing at {{ '{{' }}company{{ '}}' }}…</p>">{{ (t.body_html if t else '') }}</textarea>
+      <span class="text-muted" style="font-size:11px;margin-top:6px">Plain HTML. No need to include &lt;html&gt; or &lt;body&gt; — we wrap it.</span>
+    </div>
+    <div class="form-row" style="margin-top:14px">
+      <label class="form-label">Plaintext fallback (optional)</label>
+      <textarea class="form-textarea" id="te-body-text" style="min-height:160px;font-family:ui-monospace,Menlo,monospace;font-size:13px" placeholder="Leave blank to auto-derive from the HTML.">{{ (t.body_text if t else '') }}</textarea>
+      <span class="text-muted" style="font-size:11px;margin-top:6px">Inbox providers prefer to see a plaintext version. We'll auto-strip the HTML if you leave this empty.</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="form-label" style="margin-bottom:10px">Sender identity</div>
+    <div class="form-grid-2" style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div class="form-row">
+        <label class="form-label">From name</label>
+        <input class="form-input" id="te-from-name" placeholder="Lumen Marketing" value="{{ (t.from_name if t else '') }}">
+        <span class="text-muted" style="font-size:11px;margin-top:4px">Defaults to global setting if blank.</span>
+      </div>
+      <div class="form-row">
+        <label class="form-label">From local part</label>
+        <input class="form-input" id="te-from-local" placeholder="info" value="{{ (t.from_local if t else '') }}">
+        <span class="text-muted" style="font-size:11px;margin-top:4px">Will become <code>local@{{ from_email.split('@')[1] }}</code></span>
+      </div>
+    </div>
+    <div class="form-row" style="margin-top:14px">
+      <label class="form-label">Reply-to address</label>
+      <input class="form-input" id="te-reply-to" placeholder="{{ default_reply_to }}" value="{{ (t.reply_to if t else '') }}">
+      <span class="text-muted" style="font-size:11px;margin-top:4px">Where recipient replies land. Defaults to <code>{{ default_reply_to }}</code>.</span>
+    </div>
+  </div>
+</div>
+
+{# ── Preview modal ── #}
+<div class="modal-backdrop" id="preview-modal" onclick="if(event.target===this) closePreview()">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-head">
+      <h3>Preview</h3>
+      <button class="modal-close" onclick="closePreview()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="text-muted" style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">Subject</div>
+      <div id="pv-subject" style="font-weight:600;margin-bottom:14px"></div>
+      <div class="text-muted" style="font-size:11px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px">Body</div>
+      <iframe id="pv-iframe" style="width:100%;height:420px;border:1px solid var(--dark-border);border-radius:10px;background:#fff"></iframe>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const TEMPLATE_ID = {{ t.id if t else 'null' }};
+  function fields() {
+    return {
+      name: document.getElementById('te-name').value.trim(),
+      subject: document.getElementById('te-subject').value.trim(),
+      body_html: document.getElementById('te-body-html').value,
+      body_text: document.getElementById('te-body-text').value,
+      from_name: document.getElementById('te-from-name').value.trim(),
+      from_local: document.getElementById('te-from-local').value.trim(),
+      reply_to: document.getElementById('te-reply-to').value.trim(),
+    };
+  }
+  function renderMerge(s) {
+    return (s || '')
+      .replace(/\{\{first_name\}\}/g, 'Jamie')
+      .replace(/\{\{last_name\}\}/g, 'Reyes')
+      .replace(/\{\{company\}\}/g, 'Acme Industries')
+      .replace(/\{\{email\}\}/g, 'jamie@acme.com')
+      .replace(/\{\{unsubscribe_url\}\}/g, '#');
+  }
+  function previewTemplate() {
+    const f = fields();
+    document.getElementById('pv-subject').textContent = renderMerge(f.subject) || '(no subject)';
+    const iframe = document.getElementById('pv-iframe');
+    const doc = iframe.contentDocument || iframe.contentWindow.document;
+    doc.open();
+    doc.write(`<style>body{font-family:Inter,system-ui,sans-serif;padding:20px;color:#111;font-size:14px;line-height:1.6}</style>${renderMerge(f.body_html)}`);
+    doc.close();
+    document.getElementById('preview-modal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+  function closePreview() {
+    document.getElementById('preview-modal').classList.remove('show');
+    document.body.style.overflow = '';
+  }
+  async function saveTemplate() {
+    const err = document.getElementById('te-error');
+    err.classList.add('hidden');
+    const f = fields();
+    if (!f.name || !f.subject || !f.body_html) {
+      err.textContent = 'Name, subject, and body are required.';
+      err.classList.remove('hidden');
+      window.scrollTo({top:0, behavior:'smooth'});
+      return;
+    }
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    const url = TEMPLATE_ID ? `/crm/outreach/api/templates/${TEMPLATE_ID}` : '/crm/outreach/api/templates';
+    const method = TEMPLATE_ID ? 'PATCH' : 'POST';
+    try {
+      const r = await fetch(url, {
+        method, headers: {'Content-Type': 'application/json'}, body: JSON.stringify(f)
+      });
+      const j = await r.json();
+      if (!j.ok) throw new Error(j.error || 'Save failed');
+      window.toast('Template saved', 'success');
+      setTimeout(() => location.href = `/crm/outreach/templates`, 500);
+    } catch (e) {
+      err.textContent = e.message; err.classList.remove('hidden');
+      btn.disabled = false; btn.textContent = TEMPLATE_ID ? 'Save changes' : 'Create template';
+    }
+  }
+</script>
+{% endblock %}

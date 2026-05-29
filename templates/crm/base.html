@@ -290,6 +290,13 @@
     .badge-status.s-proposal-sent { background: rgba(245,158,11,0.10); color: var(--amber); }
     .badge-status.s-negotiation { background: rgba(245,158,11,0.14); color: var(--amber); }
     .badge-status.s-closed { background: rgba(52,211,153,0.12); color: var(--green); }
+    /* Outreach campaign statuses */
+    .badge-status.s-draft { background: rgba(255,255,255,0.06); color: var(--text-dim); }
+    .badge-status.s-scheduled { background: rgba(96,165,250,0.10); color: var(--blue); }
+    .badge-status.s-sending { background: rgba(18,143,196,0.14); color: var(--teal); }
+    .badge-status.s-paused { background: rgba(245,158,11,0.10); color: var(--amber); }
+    .badge-status.s-completed { background: rgba(52,211,153,0.12); color: var(--green); }
+    .badge-status.s-canceled { background: rgba(248,113,113,0.10); color: var(--red); }
     .badge-dna { background: rgba(248,113,113,0.12); color: var(--red); }
     .badge-pill {
       display: inline-flex; align-items: center; gap: 4px;
@@ -605,6 +612,10 @@
         <a href="/crm/admin" class="{% if active == 'admin' %}active{% endif %}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 13.13C3 12.5 3.5 12 4.13 12h2.25c.62 0 1.12.5 1.12 1.13v6.75c0 .62-.5 1.12-1.12 1.12H4.13C3.5 21 3 20.5 3 19.88v-6.75zM9.75 8.63c0-.62.5-1.13 1.13-1.13h2.25c.62 0 1.13.5 1.13 1.13v11.25c0 .62-.5 1.12-1.13 1.12h-2.25c-.63 0-1.13-.5-1.13-1.12V8.63zM16.5 4.13C16.5 3.5 17 3 17.63 3h2.25C20.5 3 21 3.5 21 4.13v15.75c0 .62-.5 1.12-1.13 1.12h-2.25c-.62 0-1.12-.5-1.12-1.12V4.13z"/></svg>
           Meeting Setters
+        </a>
+        <a href="/crm/outreach" class="{% if active == 'outreach' %}active{% endif %}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3.4 20.4l17.45-7.48a1 1 0 000-1.84L3.4 3.6a1 1 0 00-1.39 1.16l1.99 6.74 8.85 1L3.99 13.5l-1.98 6.74a1 1 0 001.39 1.16z"/></svg>
+          Outreach Agent
         </a>
         {% endif %}
         <div class="nav-divider"></div>

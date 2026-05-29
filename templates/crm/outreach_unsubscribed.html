@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unsubscribe — Lumen Marketing</title>
+  <link rel="icon" href="/static/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #080809; color: #e8e8f0;
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .card {
+      max-width: 460px; width: 100%;
+      background: #111114; border: 1px solid #1c1c24; border-radius: 18px;
+      padding: 36px 32px;
+      text-align: center;
+    }
+    .brand {
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: #56566a; margin-bottom: 18px;
+    }
+    h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 14px; }
+    p { font-size: 14px; line-height: 1.6; color: #b8b8c8; margin-bottom: 18px; }
+    .email-pill {
+      display: inline-block;
+      background: #15151a; border: 1px solid #1c1c24; border-radius: 8px;
+      padding: 8px 14px;
+      font-family: ui-monospace, Menlo, monospace; font-size: 13px;
+      color: #e8e8f0; margin: 0 0 22px;
+    }
+    .btn {
+      display: inline-block;
+      background: #128fc4; color: #fff;
+      padding: 13px 28px; border-radius: 10px;
+      font-size: 14px; font-weight: 600;
+      text-decoration: none; border: none; cursor: pointer;
+      font-family: inherit;
+    }
+    .btn:hover { background: #1aabe8; }
+    .btn-ghost {
+      background: transparent; color: #8b8ba0;
+      border: 1px solid #1c1c24;
+      margin-left: 8px;
+    }
+    .btn-ghost:hover { color: #e8e8f0; border-color: #56566a; }
+    form { display: inline; }
+    .foot {
+      margin-top: 26px; padding-top: 18px; border-top: 1px solid #1c1c24;
+      font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+      color: #56566a;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">Lumen Marketing</div>
+
+    {% if status == 'confirm' %}
+      <h1>Unsubscribe?</h1>
+      <p>We'll stop emailing this address from any future campaigns.</p>
+      <div class="email-pill">{{ email }}</div>
+      <form method="POST" action="/crm/outreach/u/{{ token }}">
+        <button class="btn" type="submit">Confirm unsubscribe</button>
+      </form>
+
+    {% elif status == 'done' %}
+      <h1>You're unsubscribed</h1>
+      <p>We won't email this address again.</p>
+      <div class="email-pill">{{ email }}</div>
+      <p style="font-size:12px;color:#56566a">If this was a mistake, just reply to any past email and we'll add you back.</p>
+
+    {% else %}
+      <h1>Invalid link</h1>
+      <p>This unsubscribe link is expired or invalid. If you want to stop receiving emails, reply "unsubscribe" to the most recent email you got and we'll handle it manually.</p>
+    {% endif %}
+
+    <div class="foot">Powered by Lumen</div>
+  </div>
+</body>
+</html>

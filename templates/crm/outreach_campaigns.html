@@ -1,0 +1,69 @@
+{% extends "crm/base.html" %}
+{% set active = 'outreach' %}
+{% block title %}Campaigns — Outreach Agent{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Campaigns</div>
+    <div class="page-sub">Each campaign blasts one template to one audience, paced over a window.</div>
+  </div>
+  <div class="page-actions">
+    <a href="/crm/outreach/campaigns/new" class="btn btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+      New campaign
+    </a>
+  </div>
+</div>
+
+<div class="chips" style="margin-bottom:20px">
+  <a class="chip" href="/crm/outreach">Overview</a>
+  <a class="chip" href="/crm/outreach/audiences">Audiences</a>
+  <a class="chip" href="/crm/outreach/templates">Templates</a>
+  <a class="chip active" href="/crm/outreach/campaigns">Campaigns</a>
+  <a class="chip" href="/crm/outreach/suppressions">Suppression list</a>
+</div>
+
+<div class="table-wrap" style="overflow-x:auto">
+  {% if rows %}
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Campaign</th>
+        <th class="hide-mobile">Audience</th>
+        <th class="hide-mobile">Template</th>
+        <th style="text-align:right">Sent / Total</th>
+        <th style="text-align:right">Open %</th>
+        <th style="text-align:right">Click %</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in rows %}
+      <tr style="cursor:pointer" onclick="location.href='/crm/outreach/campaigns/{{ r.c.id }}'">
+        <td>
+          <div style="font-weight:600">{{ r.c.name }}</div>
+          <div class="text-muted" style="font-size:11px">{{ r.c.created_at[:10] }}</div>
+        </td>
+        <td class="hide-mobile dim">{{ r.c.audience_name or '—' }}<br><span class="text-muted" style="font-size:11px">{{ '{:,}'.format(r.c.audience_size or 0) }} recipients</span></td>
+        <td class="hide-mobile dim">{{ r.c.template_name or '—' }}</td>
+        <td style="text-align:right">
+          <div style="font-weight:600">{{ '{:,}'.format(r.s.sent or 0) }}</div>
+          <div class="text-muted" style="font-size:11px">of {{ '{:,}'.format(r.s.total or 0) }}</div>
+        </td>
+        <td style="text-align:right" class="dim">{{ r.s.open_pct }}%</td>
+        <td style="text-align:right" class="dim">{{ r.s.click_pct }}%</td>
+        <td><span class="badge badge-status s-{{ r.c.status }}">{{ r.c.status }}</span></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty">
+    <div class="em-title">No campaigns yet</div>
+    <div class="em-sub">Upload an audience and write a template, then launch your first blast.</div>
+    <a href="/crm/outreach/campaigns/new" class="btn btn-primary">New campaign</a>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

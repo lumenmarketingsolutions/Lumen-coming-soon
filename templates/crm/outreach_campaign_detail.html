@@ -1,0 +1,144 @@
+{% extends "crm/base.html" %}
+{% set active = 'outreach' %}
+{% block title %}{{ c.name }} — Campaign{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-sub"><a href="/crm/outreach/campaigns" style="color:var(--teal)">← Campaigns</a></div>
+    <div class="page-title">{{ c.name }} <span class="badge badge-status s-{{ c.status }}" id="cd-status" style="margin-left:8px;font-size:11px;vertical-align:middle">{{ c.status }}</span></div>
+    <div class="page-sub">
+      <strong>{{ c.audience_name or '—' }}</strong> ({{ '{:,}'.format(c.audience_size or 0) }} recipients)
+      · <strong>{{ c.template_name or '—' }}</strong>
+      · "{{ c.template_subject[:80] if c.template_subject else '—' }}"
+    </div>
+  </div>
+  <div class="page-actions">
+    {% if c.status == 'draft' %}
+      <button class="btn btn-primary" onclick="launchCampaign()">Launch now</button>
+    {% elif c.status == 'sending' %}
+      <button class="btn btn-outline" onclick="pauseCampaign()">Pause</button>
+      <button class="btn btn-danger" onclick="cancelCampaign()">Cancel</button>
+    {% elif c.status == 'paused' %}
+      <button class="btn btn-primary" onclick="launchCampaign()">Resume</button>
+      <button class="btn btn-danger" onclick="cancelCampaign()">Cancel</button>
+    {% endif %}
+    {% if c.status in ('completed', 'canceled', 'draft') %}
+      <button class="btn btn-danger" onclick="deleteCampaign()">Delete</button>
+    {% endif %}
+  </div>
+</div>
+
+<div class="stat-grid" id="cd-stats">
+  <div class="stat-tile"><div class="label">Queued</div><div class="value" data-stat="queued">{{ '{:,}'.format(s.queued or 0) }}</div></div>
+  <div class="stat-tile"><div class="label">Sent</div><div class="value" data-stat="sent">{{ '{:,}'.format(s.sent or 0) }}</div><div class="sub">of {{ '{:,}'.format(s.total or 0) }}</div></div>
+  <div class="stat-tile"><div class="label">Delivered</div><div class="value" data-stat="delivered">{{ '{:,}'.format(s.delivered or 0) }}</div><div class="sub" data-stat-sub="delivered_pct">{{ s.delivered_pct }}%</div></div>
+  <div class="stat-tile"><div class="label">Opened</div><div class="value" data-stat="opened">{{ '{:,}'.format(s.opened or 0) }}</div><div class="sub" data-stat-sub="open_pct">{{ s.open_pct }}%</div></div>
+  <div class="stat-tile"><div class="label">Clicked</div><div class="value" data-stat="clicked">{{ '{:,}'.format(s.clicked or 0) }}</div><div class="sub" data-stat-sub="click_pct">{{ s.click_pct }}%</div></div>
+  <div class="stat-tile"><div class="label">Bounced</div><div class="value" data-stat="bounced">{{ '{:,}'.format(s.bounced or 0) }}</div><div class="sub" data-stat-sub="bounce_pct">{{ s.bounce_pct }}%</div></div>
+  <div class="stat-tile"><div class="label">Unsubscribed</div><div class="value" data-stat="unsubscribed">{{ '{:,}'.format(s.unsubscribed or 0) }}</div></div>
+  <div class="stat-tile"><div class="label">Failed</div><div class="value" data-stat="failed">{{ '{:,}'.format(s.failed or 0) }}</div></div>
+</div>
+
+<div class="page-header" style="margin-top:24px;margin-bottom:14px">
+  <div>
+    <div class="page-title" style="font-size:18px">Recent activity</div>
+    <div class="page-sub">Latest 30 sends with their current state.</div>
+  </div>
+</div>
+
+<div class="table-wrap" style="overflow-x:auto">
+  {% if recent %}
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th class="hide-mobile">Sent</th>
+        <th class="hide-mobile">Delivered</th>
+        <th>Opened</th>
+        <th class="hide-mobile">Clicked</th>
+        <th>State</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for e in recent %}
+      <tr>
+        <td class="dim">{{ e.email }}</td>
+        <td class="hide-mobile dim" style="font-size:11px">{{ e.sent_at[11:16] if e.sent_at else '—' }}</td>
+        <td class="hide-mobile dim" style="font-size:11px">{{ e.delivered_at[11:16] if e.delivered_at else '—' }}</td>
+        <td class="dim" style="font-size:11px">{{ e.opened_at[11:16] if e.opened_at else '—' }}</td>
+        <td class="hide-mobile dim" style="font-size:11px">{{ e.first_click_at[11:16] if e.first_click_at else '—' }}</td>
+        <td>
+          {% if e.bounced_at %}<span class="badge" style="background:rgba(248,113,113,0.12);color:var(--red)">bounced</span>
+          {% elif e.unsubscribed_at %}<span class="badge" style="background:rgba(245,158,11,0.10);color:var(--amber)">unsub</span>
+          {% elif e.first_click_at %}<span class="badge" style="background:rgba(52,211,153,0.12);color:var(--green)">clicked</span>
+          {% elif e.opened_at %}<span class="badge" style="background:rgba(96,165,250,0.10);color:var(--blue)">opened</span>
+          {% elif e.delivered_at %}<span class="badge badge-status">delivered</span>
+          {% elif e.status == 'failed' %}<span class="badge" style="background:rgba(248,113,113,0.12);color:var(--red)">failed</span>
+          {% elif e.status == 'suppressed' %}<span class="badge" style="background:rgba(245,158,11,0.10);color:var(--amber)">suppressed</span>
+          {% else %}<span class="badge badge-status">{{ e.status }}</span>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="text-dim" style="text-align:center;padding:20px">No sends yet. Launch the campaign to start.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const CID = {{ c.id }};
+  async function launchCampaign() {
+    const r = await fetch(`/crm/outreach/api/campaigns/${CID}/launch`, { method: 'POST' });
+    const j = await r.json();
+    if (j.ok) { window.toast(j.queued ? `Launched · ${j.queued.toLocaleString()} queued` : 'Resumed', 'success'); setTimeout(() => location.reload(), 500); }
+    else { window.toast(j.error || 'Failed', 'error'); }
+  }
+  async function pauseCampaign() {
+    if (!confirm('Pause sending? In-flight sends finish; remaining queue is held.')) return;
+    const r = await fetch(`/crm/outreach/api/campaigns/${CID}/pause`, { method: 'POST' });
+    const j = await r.json();
+    if (j.ok) { window.toast('Paused', 'success'); setTimeout(() => location.reload(), 500); }
+  }
+  async function cancelCampaign() {
+    if (!confirm('Cancel this campaign? Already-sent emails stay sent; queued ones are discarded. Cannot be undone.')) return;
+    const r = await fetch(`/crm/outreach/api/campaigns/${CID}/cancel`, { method: 'POST' });
+    const j = await r.json();
+    if (j.ok) { window.toast('Canceled', 'success'); setTimeout(() => location.reload(), 500); }
+  }
+  async function deleteCampaign() {
+    if (!confirm('Delete this campaign and all its send records? Cannot be undone.')) return;
+    const r = await fetch(`/crm/outreach/api/campaigns/${CID}`, { method: 'DELETE' });
+    const j = await r.json();
+    if (j.ok) { window.toast('Deleted', 'success'); setTimeout(() => location.href = '/crm/outreach/campaigns', 500); }
+  }
+
+  // Live-refresh stats every 4s while the campaign is actively sending.
+  async function refreshStats() {
+    try {
+      const r = await fetch(`/crm/outreach/api/campaigns/${CID}/stats`);
+      const j = await r.json();
+      if (!j.ok) return;
+      for (const k of Object.keys(j.stats)) {
+        const v = document.querySelector(`[data-stat="${k}"]`);
+        if (v) v.textContent = typeof j.stats[k] === 'number' && k !== 'open_pct' && k !== 'click_pct' && k !== 'delivered_pct' && k !== 'bounce_pct' ? j.stats[k].toLocaleString() : j.stats[k];
+        const sub = document.querySelector(`[data-stat-sub="${k}"]`);
+        if (sub) sub.textContent = `${j.stats[k]}%`;
+      }
+      const badge = document.getElementById('cd-status');
+      if (badge && j.status && badge.textContent.trim() !== j.status) {
+        badge.textContent = j.status;
+        badge.className = `badge badge-status s-${j.status}`;
+        // Status changed — reload so the action buttons re-render correctly.
+        setTimeout(() => location.reload(), 800);
+      }
+    } catch {}
+  }
+  {% if c.status in ('sending', 'queued', 'paused') %}
+    setInterval(refreshStats, 4000);
+  {% endif %}
+</script>
+{% endblock %}
