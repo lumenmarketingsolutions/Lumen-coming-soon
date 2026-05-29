@@ -40,10 +40,19 @@ from outreach import (
 # ── Config ────────────────────────────────────────────────────────────────────
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 CLAUDE_MODEL = os.environ.get("OUTREACH_SCRAPER_MODEL", "claude-sonnet-4-6")
-# Cap web searches per call — keeps cost predictable on a misbehaving run.
-WEB_SEARCH_MAX_USES = int(os.environ.get("OUTREACH_SCRAPER_WEB_SEARCH_MAX", "40"))
-# Server-side tool loop hits 10 iterations → pause_turn; we let it resume N times.
-PAUSE_TURN_MAX_RESUMES = 4
+# Cap web searches per call. Sized at 20 because each search costs ~$0.01 +
+# 5-20 sec of wall time and a misbehaving run was burning the budget without
+# converging on the JSON. Lowered from 40 after 2026-05-28 incident.
+WEB_SEARCH_MAX_USES = int(os.environ.get("OUTREACH_SCRAPER_WEB_SEARCH_MAX", "20"))
+# Server-side tool loop hits 10 iterations → pause_turn. We previously allowed
+# 4 resumes, but each resume re-sends the full conversation history (input
+# tokens grow linearly per resume) so a runaway combo of high target + many
+# searches blew up cost. 1 resume = ~10 min hard ceiling per call.
+PAUSE_TURN_MAX_RESUMES = 1
+# Output token cap per call. Sized for ~25 leads' worth of JSON + thinking.
+# Bigger doesn't help — if Claude hasn't returned JSON by here, it's stuck
+# in a search loop and we want to bail rather than keep burning tokens.
+CLAUDE_MAX_TOKENS = int(os.environ.get("OUTREACH_SCRAPER_MAX_TOKENS", "16000"))
 
 # Defaults the user can override per-scraper. Keep these tight — the scraper
 # rotates one entry per day so big lists mean longer cycles before repeat.
@@ -225,6 +234,16 @@ def init_scraper_db():
     cols = {r[1] for r in con.execute("PRAGMA table_info(outreach_scrapers)").fetchall()}
     if "auto_launch" not in cols:
         con.execute("ALTER TABLE outreach_scrapers ADD COLUMN auto_launch INTEGER NOT NULL DEFAULT 0")
+    # Sweep stuck runs left in 'running' from before a worker exit (deploy or
+    # crash). The thread that owned them is gone; nothing will ever update
+    # them. Mark them failed so the UI doesn't show stale spinners forever.
+    con.execute("""
+        UPDATE outreach_scraper_runs
+        SET status = 'failed',
+            completed_at = ?,
+            error = COALESCE(error, 'worker exited before run completed (likely a redeploy)')
+        WHERE status = 'running'
+    """, (now_iso(),))
     con.commit()
     con.close()
 
@@ -406,10 +425,12 @@ def call_claude_for_leads(country, industry, region, target):
     # finishes in 1-3 minutes; streaming costs us nothing extra and lets us
     # use a generous max_tokens for the JSON output.
     last_response = None
+    started = time.time()
+    print(f"[outreach-scrapers] Claude call starting · target={target} country={country} industry={industry[:30]}")
     for attempt in range(PAUSE_TURN_MAX_RESUMES + 1):
         with client.messages.stream(
             model=CLAUDE_MODEL,
-            max_tokens=48000,
+            max_tokens=CLAUDE_MAX_TOKENS,
             system=[{
                 "type": "text",
                 "text": SCRAPER_SYSTEM_PROMPT,
@@ -424,6 +445,10 @@ def call_claude_for_leads(country, industry, region, target):
         ) as stream:
             last_response = stream.get_final_message()
 
+        elapsed = time.time() - started
+        print(f"[outreach-scrapers] attempt={attempt} stop_reason={last_response.stop_reason} "
+              f"elapsed={elapsed:.0f}s usage_in={last_response.usage.input_tokens} "
+              f"out={last_response.usage.output_tokens}")
         if last_response.stop_reason != "pause_turn":
             break
         # Server-side loop hit 10 iterations; resume by echoing the assistant
@@ -432,7 +457,7 @@ def call_claude_for_leads(country, industry, region, target):
         messages = messages + [{"role": "assistant", "content": last_response.content}]
     else:
         return [], (last_response.usage if last_response else None), \
-               f"hit pause_turn cap ({PAUSE_TURN_MAX_RESUMES})"
+               f"hit pause_turn cap ({PAUSE_TURN_MAX_RESUMES} resumes) — try a smaller daily_target"
 
     # Concatenate every text block in the final message — the JSON might be
     # split across multiple blocks if the model emitted text + tool_use mixed.
@@ -1004,7 +1029,7 @@ _WIZARD_SYSTEM_TEMPLATE = """You are MK7's friendly setup assistant. Your job is
 3. **countries** — list of country names. Common: USA, Canada, UK, Australia, Lebanon, UAE, Saudi Arabia
 4. **industries** — list of business-type phrases. Examples: "salons and med spas", "home services (HVAC, plumbing, roofing)", "fitness studios and pilates", "auto detailers and mobile car washes", "boutique retail", "restaurants and cafes", "real estate brokerages"
 5. **regions** — dict of country -> list of regions, e.g. {"USA": ["California", "Texas"]}. Default to an empty object {} if not specified.
-6. **daily_target** — integer, default 100
+6. **daily_target** — integer. Default **25** (recommended for first runs while we tune deliverability). Anything over 50 starts hitting Claude's server-side iteration cap and gets expensive fast. Suggest staying under 50 unless the user is sure.
 7. **schedule_hour_utc** — integer 0-23, default 13 (= 9am ET / 6am PT)
 8. **send_window_hours** — number, default 4
 9. **template_id** — MUST pick an ID from the available templates listed below
@@ -1040,7 +1065,7 @@ STEP 2 (after the user confirms with something like "yes" / "go" / "looks right"
     "countries": ["..."],
     "industries": ["..."],
     "regions": {},
-    "daily_target": 100,
+    "daily_target": 25,
     "schedule_hour_utc": 13,
     "send_window_hours": 4,
     "template_id": 0,
