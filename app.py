@@ -110,13 +110,16 @@ OWNER_IPS = {"209.127.238.130"}
 # ── Meta Conversions API (Mane funnels) ────────────────────────────────────
 # Pixel ID is hardcoded since it's public anyway. Access token comes from env;
 # without it, CAPI is a no-op and only the client-side Pixel fires.
-# Get a token: Meta Business Suite → Events Manager → pick pixel → Settings →
-# Conversions API → Generate access token. Set as META_CAPI_ACCESS_TOKEN on
-# Railway. Optionally set META_TEST_EVENT_CODE while QAing in Events Manager
-# Test Events.
+# Env vars are MANE_-prefixed (matches LUMEN_ pattern below) so each client's
+# token stays clearly scoped on Railway even though one System User may carry
+# tokens for multiple clients.
+# Get a token: Meta Business Settings → System Users → pick (or create) one →
+# assign Mane's pixel → Generate Token with ads_management scope. Set as
+# MANE_META_CAPI_ACCESS_TOKEN on Railway. Optionally set
+# MANE_META_TEST_EVENT_CODE while QAing in Events Manager Test Events.
 MANE_META_PIXEL_ID = "1062505765656658"
-META_CAPI_ACCESS_TOKEN = os.environ.get("META_CAPI_ACCESS_TOKEN", "")
-META_TEST_EVENT_CODE  = os.environ.get("META_TEST_EVENT_CODE", "")
+MANE_META_CAPI_ACCESS_TOKEN = os.environ.get("MANE_META_CAPI_ACCESS_TOKEN", "")
+MANE_META_TEST_EVENT_CODE  = os.environ.get("MANE_META_TEST_EVENT_CODE", "")
 
 def _meta_hash(value):
     if not value:
@@ -125,12 +128,12 @@ def _meta_hash(value):
 
 def send_meta_capi_event(event_name, event_id, user_data, custom_data=None, source_url=None, pixel_id=None):
     """Fire a Meta Conversions API event. Fire-and-forget — logs but never
-    raises. No-op when META_CAPI_ACCESS_TOKEN is unset.
+    raises. No-op when MANE_META_CAPI_ACCESS_TOKEN is unset.
 
     user_data: dict with optional keys: email, phone, first_name, client_ip,
                user_agent, fbp, fbc, fbclid.
     """
-    if not META_CAPI_ACCESS_TOKEN:
+    if not MANE_META_CAPI_ACCESS_TOKEN:
         return  # CAPI not configured
 
     pixel_id = pixel_id or MANE_META_PIXEL_ID
@@ -170,10 +173,10 @@ def send_meta_capi_event(event_name, event_id, user_data, custom_data=None, sour
         event["custom_data"] = custom_data
 
     payload = {"data": [event]}
-    if META_TEST_EVENT_CODE:
-        payload["test_event_code"] = META_TEST_EVENT_CODE
+    if MANE_META_TEST_EVENT_CODE:
+        payload["test_event_code"] = MANE_META_TEST_EVENT_CODE
 
-    url = f"https://graph.facebook.com/v18.0/{pixel_id}/events?access_token={META_CAPI_ACCESS_TOKEN}"
+    url = f"https://graph.facebook.com/v18.0/{pixel_id}/events?access_token={MANE_META_CAPI_ACCESS_TOKEN}"
     try:
         r = requests.post(url, json=payload, timeout=5)
         if not r.ok:
