@@ -10,6 +10,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
 
+    <!-- Meta Pixel -->
+    <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1062505765656658');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1062505765656658&ev=PageView&noscript=1"/></noscript>
+    <!-- End Meta Pixel -->
+
     <style>
         :root {
             --bg: #FFFFFF;
@@ -796,6 +810,35 @@
             };
         }
 
+        // ─── Meta CAPI helpers ─────────────────────────────────
+        // Generates a UUID for event deduplication between Pixel + CAPI.
+        function newEventId() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                const r = Math.random() * 16 | 0;
+                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        }
+        function getFbCookies() {
+            const out = { fbp: '', fbc: '' };
+            document.cookie.split(';').forEach(c => {
+                const [k, v] = c.trim().split('=');
+                if (k === '_fbp') out.fbp = v || '';
+                if (k === '_fbc') out.fbc = v || '';
+            });
+            return out;
+        }
+        function fbqTrack(eventName, params, eventId) {
+            if (typeof fbq === 'undefined') return;
+            try {
+                fbq('track', eventName, params || {}, eventId ? { eventID: eventId } : undefined);
+            } catch (e) { /* swallow */ }
+        }
+
+        // Fire ViewContent when user starts the quiz (engagement signal).
+        document.querySelectorAll('.landing .cta').forEach(b => {
+            b.addEventListener('click', () => fbqTrack('ViewContent', { content_name: 'color_quiz_start' }));
+        });
+
         // ─── Recommendation logic ──────────────────────────────
         const RECS = {
             balayage: {
@@ -848,6 +891,9 @@
             btn.disabled = true;
             btn.innerHTML = 'Sending...';
 
+            const eventId = newEventId();
+            const fb = getFbCookies();
+
             const payload = {
                 name: document.getElementById('lead-name').value.trim(),
                 email: document.getElementById('lead-email').value.trim(),
@@ -855,6 +901,9 @@
                 current_color: state.current || '',
                 dream_look: state.dream || '',
                 recommendation: pickRec(state.current, state.dream),
+                event_id: eventId,
+                fbp: fb.fbp,
+                fbc: fb.fbc,
                 ...getTracking(),
             };
 
@@ -865,7 +914,8 @@
                     body: JSON.stringify(payload),
                 });
                 if (!res.ok) throw new Error('submit failed');
-                // TODO(pixel): fire Meta Pixel `Lead` event here.
+                // Pixel Lead event (CAPI fires same event_id server-side for dedup).
+                fbqTrack('Lead', { content_category: 'color_funnel' }, eventId);
                 renderResult();
                 goToStep(4);
             } catch (err) {
@@ -877,7 +927,9 @@
         }
 
         // Mane's live Phorest booking link (same URL is currently linked from manestylingstudio.com).
-        document.getElementById('book-btn').href = 'https://www.phorest.com/salon/manestylingstudio/book/service-selection?showSpecialOffers=false';
+        const bookBtn = document.getElementById('book-btn');
+        bookBtn.href = 'https://www.phorest.com/salon/manestylingstudio/book/service-selection?showSpecialOffers=false';
+        bookBtn.addEventListener('click', () => fbqTrack('Schedule', { content_category: 'color_funnel' }));
     </script>
 </body>
 </html>

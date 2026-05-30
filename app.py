@@ -107,6 +107,80 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAIL = "kendall@lumenmarketing.co"
 OWNER_IPS = {"209.127.238.130"}
 
+# ── Meta Conversions API (Mane funnels) ────────────────────────────────────
+# Pixel ID is hardcoded since it's public anyway. Access token comes from env;
+# without it, CAPI is a no-op and only the client-side Pixel fires.
+# Get a token: Meta Business Suite → Events Manager → pick pixel → Settings →
+# Conversions API → Generate access token. Set as META_CAPI_ACCESS_TOKEN on
+# Railway. Optionally set META_TEST_EVENT_CODE while QAing in Events Manager
+# Test Events.
+MANE_META_PIXEL_ID = "1062505765656658"
+META_CAPI_ACCESS_TOKEN = os.environ.get("META_CAPI_ACCESS_TOKEN", "")
+META_TEST_EVENT_CODE  = os.environ.get("META_TEST_EVENT_CODE", "")
+
+def _meta_hash(value):
+    if not value:
+        return None
+    return hashlib.sha256(str(value).strip().lower().encode("utf-8")).hexdigest()
+
+def send_meta_capi_event(event_name, event_id, user_data, custom_data=None, source_url=None, pixel_id=None):
+    """Fire a Meta Conversions API event. Fire-and-forget — logs but never
+    raises. No-op when META_CAPI_ACCESS_TOKEN is unset.
+
+    user_data: dict with optional keys: email, phone, first_name, client_ip,
+               user_agent, fbp, fbc, fbclid.
+    """
+    if not META_CAPI_ACCESS_TOKEN:
+        return  # CAPI not configured
+
+    pixel_id = pixel_id or MANE_META_PIXEL_ID
+
+    hashed = {}
+    if user_data.get("email"):
+        hashed["em"] = [_meta_hash(user_data["email"])]
+    if user_data.get("phone"):
+        # Strip non-digits before hashing (Meta wants E.164-ish; digits-only works)
+        digits = "".join(c for c in str(user_data["phone"]) if c.isdigit())
+        if digits:
+            hashed["ph"] = [_meta_hash(digits)]
+    if user_data.get("first_name"):
+        hashed["fn"] = [_meta_hash(user_data["first_name"])]
+    if user_data.get("client_ip"):
+        hashed["client_ip_address"] = user_data["client_ip"]
+    if user_data.get("user_agent"):
+        hashed["client_user_agent"] = user_data["user_agent"]
+    if user_data.get("fbp"):
+        hashed["fbp"] = user_data["fbp"]
+    if user_data.get("fbc"):
+        hashed["fbc"] = user_data["fbc"]
+    elif user_data.get("fbclid"):
+        # Construct fbc from raw fbclid: fb.1.{ts}.{fbclid}
+        hashed["fbc"] = f"fb.1.{int(time.time())}.{user_data['fbclid']}"
+
+    event = {
+        "event_name": event_name,
+        "event_time": int(time.time()),
+        "event_id": event_id or "",
+        "action_source": "website",
+        "user_data": hashed,
+    }
+    if source_url:
+        event["event_source_url"] = source_url
+    if custom_data:
+        event["custom_data"] = custom_data
+
+    payload = {"data": [event]}
+    if META_TEST_EVENT_CODE:
+        payload["test_event_code"] = META_TEST_EVENT_CODE
+
+    url = f"https://graph.facebook.com/v18.0/{pixel_id}/events?access_token={META_CAPI_ACCESS_TOKEN}"
+    try:
+        r = requests.post(url, json=payload, timeout=5)
+        if not r.ok:
+            print(f"[meta-capi] {event_name} → HTTP {r.status_code}: {r.text[:240]}")
+    except Exception as e:
+        print(f"[meta-capi] {event_name} → exception: {e}")
+
 # ── Tristan Dare external-site tracking (Squarespace tristandareshop.com) ──
 # Shared token gates the public /t/td endpoint; the value is also pasted into
 # the tracker <script> on the Squarespace page. Override on Railway if needed.
@@ -1636,6 +1710,27 @@ def mane_color_submit():
     except Exception:
         pass
 
+    # Meta CAPI Lead event (deduped with client Pixel via event_id)
+    send_meta_capi_event(
+        event_name="Lead",
+        event_id=data.get("event_id", ""),
+        user_data={
+            "email": email,
+            "phone": phone,
+            "first_name": name if name != "Anonymous" else "",
+            "client_ip": (request.headers.get("X-Forwarded-For", request.remote_addr or "") or "").split(",")[0].strip(),
+            "user_agent": request.headers.get("User-Agent", ""),
+            "fbp": data.get("fbp", ""),
+            "fbc": data.get("fbc", ""),
+            "fbclid": data.get("fbclid", ""),
+        },
+        custom_data={
+            "content_category": "color_funnel",
+            "recommendation": recommendation,
+        },
+        source_url=data.get("referrer", "") or "https://lumenmarketing.co/manestyling/color-funnel",
+    )
+
     return jsonify({"ok": True})
 
 # ---------------------------------------------------------------------------
@@ -1727,6 +1822,29 @@ def mane_extension_submit():
         send_email(NOTIFY_EMAIL, f"Mane extensions lead: {name}", body)
     except Exception:
         pass
+
+    # Meta CAPI Lead event (deduped with client Pixel via event_id)
+    send_meta_capi_event(
+        event_name="Lead",
+        event_id=data.get("event_id", ""),
+        user_data={
+            "email": email,
+            "phone": phone,
+            "first_name": name if name != "Anonymous" else "",
+            "client_ip": (request.headers.get("X-Forwarded-For", request.remote_addr or "") or "").split(",")[0].strip(),
+            "user_agent": request.headers.get("User-Agent", ""),
+            "fbp": data.get("fbp", ""),
+            "fbc": data.get("fbc", ""),
+            "fbclid": data.get("fbclid", ""),
+        },
+        custom_data={
+            "content_category": "extensions_funnel",
+            "goal": goal,
+            "timeline": timeline,
+            "budget": budget,
+        },
+        source_url=data.get("referrer", "") or "https://lumenmarketing.co/manestyling/extension-funnel",
+    )
 
     return jsonify({"ok": True})
 
