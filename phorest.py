@@ -33,11 +33,16 @@ _BASE = os.environ.get(
     "MANE_PHOREST_BASE",
     "https://api-gateway-us.phorest.com/third-party-api-server",
 )
-_USERNAME    = os.environ.get("MANE_PHOREST_USERNAME", "")
-_PASSWORD    = os.environ.get("MANE_PHOREST_PASSWORD", "")
-_BUSINESS_ID = os.environ.get("MANE_PHOREST_BUSINESS_ID", "")
-_BRANCH_ID   = os.environ.get("MANE_PHOREST_BRANCH_ID", "")
-_TIMEOUT     = 8  # seconds
+_USERNAME           = os.environ.get("MANE_PHOREST_USERNAME", "")
+_PASSWORD           = os.environ.get("MANE_PHOREST_PASSWORD", "")
+_BUSINESS_ID        = os.environ.get("MANE_PHOREST_BUSINESS_ID", "")
+_BRANCH_ID          = os.environ.get("MANE_PHOREST_BRANCH_ID", "")
+# Optional: tag every funnel-sourced client with this Phorest category so
+# Keanna can filter her Client list. Empty → no tag applied. Phorest doesn't
+# expose a "list categories" API, so the ID is fished out of a client that
+# already wears the category (see project_mane_phorest.md memory for steps).
+_LEAD_CATEGORY_ID   = os.environ.get("MANE_PHOREST_LEAD_CATEGORY_ID", "")
+_TIMEOUT            = 8  # seconds
 
 
 def _configured() -> bool:
@@ -111,6 +116,8 @@ def create_client(
         "emailReminderConsent": True,
         "smsReminderConsent": True,
     }
+    if _LEAD_CATEGORY_ID:
+        payload["clientCategoryIds"] = [_LEAD_CATEGORY_ID]
     # Trim None values — Phorest dislikes nulls on optional fields
     payload = {k: v for k, v in payload.items() if v is not None}
 
