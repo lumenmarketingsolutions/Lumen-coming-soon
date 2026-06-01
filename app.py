@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for, make_response
 import os, sqlite3, datetime, uuid, json, threading, requests, csv, io, time, base64, re, hashlib
 from email.mime.text import MIMEText
+import phorest as mane_phorest  # Mane → Phorest client sync (no-op if env vars unset)
 
 try:
     from zoneinfo import ZoneInfo
@@ -183,6 +184,160 @@ def send_meta_capi_event(event_name, event_id, user_data, custom_data=None, sour
             print(f"[meta-capi] {event_name} → HTTP {r.status_code}: {r.text[:240]}")
     except Exception as e:
         print(f"[meta-capi] {event_name} → exception: {e}")
+
+# ── Phorest → Meta booking-attribution worker ──────────────────────────────
+# Polls Phorest every MANE_PHOREST_POLL_SECS for new appointments. For any
+# appointment whose clientId matches a phorest_client_id we stamped on a
+# funnel lead, fire a Meta CAPI `Schedule` event back to Mane's pixel so
+# Meta optimizes on real bookings, not just form fills. No-op when Phorest
+# isn't configured. Worker is daemon-threaded — dies with the app, restarts
+# clean on Railway redeploy (state persisted in SQLite).
+MANE_PHOREST_POLL_SECS = int(os.environ.get("MANE_PHOREST_POLL_SECS", "900"))  # 15 min
+
+def _ensure_phorest_state_table():
+    con = sqlite3.connect(DB_PATH)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS mane_phorest_state (
+            k TEXT PRIMARY KEY,
+            v TEXT NOT NULL
+        )
+    """)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS mane_phorest_fired_appts (
+            appointment_id TEXT PRIMARY KEY,
+            fired_at TEXT NOT NULL
+        )
+    """)
+    con.commit()
+    con.close()
+
+def _phorest_state_get(key, default=None):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.execute("SELECT v FROM mane_phorest_state WHERE k = ?", (key,))
+    row = cur.fetchone()
+    con.close()
+    return row[0] if row else default
+
+def _phorest_state_set(key, value):
+    con = sqlite3.connect(DB_PATH)
+    con.execute("INSERT OR REPLACE INTO mane_phorest_state (k, v) VALUES (?, ?)", (key, value))
+    con.commit()
+    con.close()
+
+def _phorest_appt_already_fired(appt_id):
+    con = sqlite3.connect(DB_PATH)
+    cur = con.execute("SELECT 1 FROM mane_phorest_fired_appts WHERE appointment_id = ?", (appt_id,))
+    found = cur.fetchone() is not None
+    con.close()
+    return found
+
+def _phorest_appt_mark_fired(appt_id):
+    con = sqlite3.connect(DB_PATH)
+    con.execute("INSERT OR IGNORE INTO mane_phorest_fired_appts (appointment_id, fired_at) VALUES (?, ?)",
+                (appt_id, datetime.datetime.utcnow().isoformat()))
+    con.commit()
+    con.close()
+
+def _phorest_lookup_lead(phorest_client_id):
+    """Returns (table, email, phone, first_name, funnel_label) for the matching
+    lead, or None if no funnel lead is tied to this Phorest client."""
+    con = sqlite3.connect(DB_PATH)
+    con.row_factory = sqlite3.Row
+    for table, label in [("mane_extension_quiz", "extensions_funnel"),
+                         ("mane_color_quiz",     "color_funnel")]:
+        try:
+            row = con.execute(
+                f"SELECT name, email, phone FROM {table} WHERE phorest_client_id = ? LIMIT 1",
+                (phorest_client_id,),
+            ).fetchone()
+        except sqlite3.OperationalError:
+            continue
+        if row:
+            con.close()
+            return (table, row["email"], row["phone"], row["name"], label)
+    con.close()
+    return None
+
+def _phorest_poll_once():
+    if not mane_phorest._configured():
+        return
+    _ensure_phorest_state_table()
+
+    # Cursor: high-water-mark of updated_from. First run = now (don't fire
+    # CAPI for historical appointments — only forward).
+    cursor_iso = _phorest_state_get("appt_cursor")
+    if not cursor_iso:
+        cursor_iso = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        _phorest_state_set("appt_cursor", cursor_iso)
+    try:
+        cursor_dt = datetime.datetime.strptime(cursor_iso, "%Y-%m-%dT%H:%M:%SZ")
+    except Exception:
+        cursor_dt = datetime.datetime.utcnow()
+
+    new_high = cursor_dt
+    matched = 0
+    for appt in mane_phorest.list_appointments_since(cursor_dt):
+        appt_id = appt.get("appointmentId")
+        client_id = appt.get("clientId")
+        updated = appt.get("updatedAt") or appt.get("createdAt")
+        if appt_id and updated:
+            try:
+                u = datetime.datetime.strptime(updated[:19], "%Y-%m-%dT%H:%M:%S")
+                if u > new_high:
+                    new_high = u
+            except Exception:
+                pass
+        if not appt_id or not client_id:
+            continue
+        if _phorest_appt_already_fired(appt_id):
+            continue
+        lead = _phorest_lookup_lead(client_id)
+        if not lead:
+            continue  # walk-in or non-funnel client, ignore
+        table, email, phone, first_name, funnel_label = lead
+        send_meta_capi_event(
+            event_name="Schedule",
+            event_id=f"phorest-schedule-{appt_id}",
+            user_data={
+                "email": email,
+                "phone": phone,
+                "first_name": first_name if first_name and first_name != "Anonymous" else "",
+            },
+            custom_data={
+                "content_category": funnel_label,
+                "phorest_appointment_id": appt_id,
+            },
+        )
+        _phorest_appt_mark_fired(appt_id)
+        matched += 1
+
+    # Advance cursor to the latest updatedAt we saw (or "now" if no rows)
+    if new_high == cursor_dt:
+        new_high = datetime.datetime.utcnow()
+    _phorest_state_set("appt_cursor", new_high.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    if matched:
+        print(f"[phorest-poll] fired Schedule for {matched} matched appointment(s)")
+
+def _phorest_poll_loop():
+    # Stagger startup so we don't slam Phorest immediately on deploy
+    time.sleep(30)
+    while True:
+        try:
+            _phorest_poll_once()
+        except Exception as e:
+            print(f"[phorest-poll] error: {e}")
+        time.sleep(MANE_PHOREST_POLL_SECS)
+
+def _maybe_start_phorest_poller():
+    if not mane_phorest._configured():
+        return
+    t = threading.Thread(target=_phorest_poll_loop, daemon=True, name="mane-phorest-poller")
+    t.start()
+    print(f"[phorest-poll] worker started (every {MANE_PHOREST_POLL_SECS}s)")
+
+# Start the worker once at import time. Idempotent — only starts if Phorest
+# env vars are set, so it's a no-op locally without credentials.
+_maybe_start_phorest_poller()
 
 # ── Tristan Dare external-site tracking (Squarespace tristandareshop.com) ──
 # Shared token gates the public /t/td endpoint; the value is also pasted into
@@ -544,11 +699,16 @@ def init_db():
             created_at TEXT NOT NULL
         )
     """)
-    # Add budget column for tables created before V2 (idempotent)
-    try:
-        con.execute("ALTER TABLE mane_extension_quiz ADD COLUMN budget TEXT DEFAULT ''")
-    except sqlite3.OperationalError:
-        pass  # column already exists
+    # Idempotent column adds for tables created before each column existed
+    for _table, _col in [
+        ("mane_extension_quiz", "budget TEXT DEFAULT ''"),
+        ("mane_extension_quiz", "phorest_client_id TEXT DEFAULT ''"),
+        ("mane_color_quiz",     "phorest_client_id TEXT DEFAULT ''"),
+    ]:
+        try:
+            con.execute(f"ALTER TABLE {_table} ADD COLUMN {_col}")
+        except sqlite3.OperationalError:
+            pass  # column already exists
     con.commit()
 
     # Avalon CRM onboarding form submissions
@@ -1730,7 +1890,8 @@ def mane_color_submit():
 
     now = datetime.datetime.utcnow().isoformat()
     con = sqlite3.connect(DB_PATH)
-    con.execute("""
+    cur = con.cursor()
+    cur.execute("""
         INSERT INTO mane_color_quiz (
             name, email, phone, current_color, dream_look, recommendation,
             utm_source, utm_campaign, utm_content, fbclid, referrer, created_at
@@ -1744,6 +1905,7 @@ def mane_color_submit():
         data.get("referrer", ""),
         now,
     ))
+    lead_row_id = cur.lastrowid
     con.commit()
     con.close()
 
@@ -1805,6 +1967,29 @@ def mane_color_submit():
         source_url=data.get("referrer", "") or "https://lumenmarketing.co/manestyling/color-funnel",
     )
 
+    # Phorest client sync — fire-and-forget. Returns client_id we persist for
+    # later booking-attribution polling. No-op if Phorest env vars not set.
+    phorest_notes = (
+        f"Current color: {cur_l}\nDream: {dream_l}\nRecommendation: {rec_l}"
+    )
+    phorest_client_id = mane_phorest.create_client(
+        name=name if name != "Anonymous" else "",
+        email=email,
+        phone=phone,
+        source="color",
+        notes=phorest_notes,
+        external_id=f"color-{lead_row_id}",
+    )
+    if phorest_client_id:
+        try:
+            con = sqlite3.connect(DB_PATH)
+            con.execute("UPDATE mane_color_quiz SET phorest_client_id = ? WHERE id = ?",
+                        (phorest_client_id, lead_row_id))
+            con.commit()
+            con.close()
+        except Exception:
+            pass
+
     return jsonify({"ok": True})
 
 # ---------------------------------------------------------------------------
@@ -1843,7 +2028,8 @@ def mane_extension_submit():
 
     now = datetime.datetime.utcnow().isoformat()
     con = sqlite3.connect(DB_PATH)
-    con.execute("""
+    cur = con.cursor()
+    cur.execute("""
         INSERT INTO mane_extension_quiz (
             name, email, phone, goal, timeline, budget,
             utm_source, utm_campaign, utm_content, fbclid, referrer, created_at
@@ -1857,6 +2043,7 @@ def mane_extension_submit():
         data.get("referrer", ""),
         now,
     ))
+    lead_row_id = cur.lastrowid
     con.commit()
     con.close()
 
@@ -1919,6 +2106,28 @@ def mane_extension_submit():
         },
         source_url=data.get("referrer", "") or "https://lumenmarketing.co/manestyling/extension-funnel",
     )
+
+    # Phorest client sync
+    phorest_notes = (
+        f"Goal: {goal_l}\nTimeline: {timeline_l}\nBudget: {budget_l}"
+    )
+    phorest_client_id = mane_phorest.create_client(
+        name=name if name != "Anonymous" else "",
+        email=email,
+        phone=phone,
+        source="extension",
+        notes=phorest_notes,
+        external_id=f"ext-{lead_row_id}",
+    )
+    if phorest_client_id:
+        try:
+            con = sqlite3.connect(DB_PATH)
+            con.execute("UPDATE mane_extension_quiz SET phorest_client_id = ? WHERE id = ?",
+                        (phorest_client_id, lead_row_id))
+            con.commit()
+            con.close()
+        except Exception:
+            pass
 
     return jsonify({"ok": True})
 
