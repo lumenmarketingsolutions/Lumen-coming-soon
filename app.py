@@ -1264,6 +1264,68 @@ def lumenlb_inquiry():
     return jsonify({"ok": True})
 
 
+# ── Harker Outdoors contact form (harkeroutdoors.com Shopify contact page) ──
+# The Shopify native contact form still emails the store's contact address as
+# normal. This endpoint is a PARALLEL copy: the form JS also POSTs here so we
+# email kendall@ a clean notification. Best-effort — never blocks the form.
+HARKER_ALLOWED_ORIGINS = {
+    "https://harkeroutdoors.com",
+    "https://www.harkeroutdoors.com",
+    "https://harker-outdoors.myshopify.com",
+}
+
+def _harker_cors_origin():
+    origin = (request.headers.get("Origin") or "").strip()
+    return origin if origin in HARKER_ALLOWED_ORIGINS else "https://harkeroutdoors.com"
+
+@app.route("/harker/contact", methods=["POST", "OPTIONS"])
+def harker_contact():
+    if request.method == "OPTIONS":
+        resp = jsonify({"ok": True})
+        resp.headers["Access-Control-Allow-Origin"] = _harker_cors_origin()
+        resp.headers["Access-Control-Allow-Methods"] = "POST, OPTIONS"
+        resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+        return resp
+
+    data = request.get_json(silent=True) or {}
+    name = (data.get("name") or "").strip()
+    email = (data.get("email") or "").strip()
+    phone = (data.get("phone") or "").strip()
+    interest = (data.get("interest") or "").strip()
+    message = (data.get("message") or "").strip()
+
+    # Light validation; if it's junk we still 200 so the form UX never breaks.
+    if not name and not email and not message:
+        resp = jsonify({"ok": False, "error": "empty"})
+        resp.headers["Access-Control-Allow-Origin"] = _harker_cors_origin()
+        return resp, 200
+
+    dash = "—"
+    import html as _html
+    def esc(v):
+        return _html.escape(v) if v else dash
+    body = (
+        '<div style="font-family:Inter,-apple-system,sans-serif;background:#0a0a0f;padding:32px 20px;color:#e8e8f0;">'
+        '<div style="max-width:560px;margin:0 auto;background:#111118;border:1px solid #1a1a25;border-radius:14px;padding:32px;">'
+        '<div style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#f75d44;margin-bottom:10px;">New Harker Outdoors Inquiry</div>'
+        f'<h2 style="font-size:22px;font-weight:700;margin:0 0 22px;color:#fff;">{esc(name)}</h2>'
+        '<table style="width:100%;border-collapse:collapse;font-size:14px;">'
+        f'<tr><td style="padding:10px 0;color:#8b8ba0;width:140px;">Email</td><td style="padding:10px 0;color:#e8e8f0;font-weight:600;">{esc(email)}</td></tr>'
+        f'<tr><td style="padding:10px 0;color:#8b8ba0;">Phone</td><td style="padding:10px 0;color:#e8e8f0;">{esc(phone)}</td></tr>'
+        f'<tr><td style="padding:10px 0;color:#8b8ba0;">Inquiry about</td><td style="padding:10px 0;color:#e8e8f0;">{esc(interest)}</td></tr>'
+        f'<tr><td style="padding:10px 0;color:#8b8ba0;vertical-align:top;">Message</td><td style="padding:10px 0;color:#e8e8f0;white-space:pre-wrap;">{esc(message)}</td></tr>'
+        '</table>'
+        '<p style="margin:22px 0 0;color:#666;font-size:12px;">Sent from the harkeroutdoors.com contact form. The store inbox also received this via Shopify.</p>'
+        '</div></div>'
+    )
+    subj = f"New Harker inquiry: {name or email or 'website contact'}"
+    send_email(NOTIFY_EMAIL, subj, body)
+
+    resp = jsonify({"ok": True})
+    resp.headers["Access-Control-Allow-Origin"] = _harker_cors_origin()
+    return resp
+
+
 @app.route("/about")
 def about():
     return render_template("about.html")
