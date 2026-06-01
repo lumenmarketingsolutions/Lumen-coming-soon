@@ -331,6 +331,13 @@ def _phorest_poll_loop():
 def _maybe_start_phorest_poller():
     if not mane_phorest._configured():
         return
+    # Gated by explicit env flag so we don't fire Schedule events to Meta until
+    # the client explicitly opts in. Kendall's current strategy is Lead-event
+    # optimization only — no Schedule attribution. Flip to "true" later if we
+    # want bookings to feed Meta's optimizer.
+    if os.environ.get("MANE_PHOREST_POLL_ENABLED", "false").lower() not in ("true", "1", "yes"):
+        print("[phorest-poll] worker dormant (MANE_PHOREST_POLL_ENABLED not set)")
+        return
     t = threading.Thread(target=_phorest_poll_loop, daemon=True, name="mane-phorest-poller")
     t.start()
     print(f"[phorest-poll] worker started (every {MANE_PHOREST_POLL_SECS}s)")
