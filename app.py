@@ -193,6 +193,14 @@ def send_meta_capi_event(event_name, event_id, user_data, custom_data=None, sour
 # isn't configured. Worker is daemon-threaded — dies with the app, restarts
 # clean on Railway redeploy (state persisted in SQLite).
 MANE_PHOREST_POLL_SECS = int(os.environ.get("MANE_PHOREST_POLL_SECS", "900"))  # 15 min
+# Mane's Phorest account id (shown on the branch response as accountId). Used
+# to build "Open in Phorest" deep-links inside the lead notification emails.
+MANE_PHOREST_ACCOUNT_ID = os.environ.get("MANE_PHOREST_ACCOUNT_ID", "27762")
+
+def _phorest_client_url(client_id):
+    if not client_id:
+        return ""
+    return f"https://my.phorest.com/a/{MANE_PHOREST_ACCOUNT_ID}/clients/{client_id}/overview"
 
 def _ensure_phorest_state_table():
     con = sqlite3.connect(DB_PATH)
@@ -1920,11 +1928,39 @@ def mane_color_submit():
     dream_l = DREAM_LABELS.get(dream_look, dream_look)
     rec_l = REC_LABELS.get(recommendation, recommendation)
 
+    # Phorest client sync runs BEFORE the email so we can include the
+    # "Open in Phorest" deep-link button. No-op if Phorest env vars unset.
+    phorest_notes = (
+        f"Current color: {cur_l}\nDream: {dream_l}\nRecommendation: {rec_l}"
+    )
+    phorest_client_id = mane_phorest.create_client(
+        name=name if name != "Anonymous" else "",
+        email=email,
+        phone=phone,
+        source="color",
+        notes=phorest_notes,
+        external_id=f"color-{lead_row_id}",
+    )
+    if phorest_client_id:
+        try:
+            con = sqlite3.connect(DB_PATH)
+            con.execute("UPDATE mane_color_quiz SET phorest_client_id = ? WHERE id = ?",
+                        (phorest_client_id, lead_row_id))
+            con.commit()
+            con.close()
+        except Exception:
+            pass
+
     def row(label, value):
         if not value:
             return ""
         safe = str(value).replace("\n", "<br>")
         return f'<tr><td style="padding:12px 0; border-bottom:1px solid #1a1a25; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#7c4dff; width:40%; vertical-align:top;">{label}</td><td style="padding:12px 0 12px 16px; border-bottom:1px solid #1a1a25; font-size:14px; color:#e8e8f0; line-height:1.6;">{safe}</td></tr>'
+
+    phorest_url = _phorest_client_url(phorest_client_id)
+    phorest_button = f'''
+        <a href="{phorest_url}" target="_blank" style="display:inline-block; background:#7c4dff; color:#ffffff; text-decoration:none; font-weight:600; font-size:13px; letter-spacing:1px; text-transform:uppercase; padding:14px 26px; border-radius:10px; margin:0 0 24px 0;">Open in Phorest →</a>
+    ''' if phorest_url else ""
 
     body = f"""
     <div style="font-family: -apple-system, Inter, sans-serif; background:#0a0a0f; padding:32px 20px; color:#e8e8f0;">
@@ -1932,6 +1968,7 @@ def mane_color_submit():
         <div style="font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#7c4dff; margin-bottom:10px;">New Color Lead</div>
         <h2 style="font-size:22px; font-weight:700; margin:0 0 6px 0; color:#fff;">Mane Styling Studio</h2>
         <p style="font-size:13px; color:#8b8ba0; margin:0 0 24px 0;">{name}{' · ' + phone if phone else ''}{' · ' + email if email else ''}</p>
+        {phorest_button}
         <table style="width:100%; border-collapse:collapse;">
           {row("Name", name)}
           {row("Email", email)}
@@ -1973,29 +2010,6 @@ def mane_color_submit():
         },
         source_url=data.get("referrer", "") or "https://lumenmarketing.co/manestyling/color-funnel",
     )
-
-    # Phorest client sync — fire-and-forget. Returns client_id we persist for
-    # later booking-attribution polling. No-op if Phorest env vars not set.
-    phorest_notes = (
-        f"Current color: {cur_l}\nDream: {dream_l}\nRecommendation: {rec_l}"
-    )
-    phorest_client_id = mane_phorest.create_client(
-        name=name if name != "Anonymous" else "",
-        email=email,
-        phone=phone,
-        source="color",
-        notes=phorest_notes,
-        external_id=f"color-{lead_row_id}",
-    )
-    if phorest_client_id:
-        try:
-            con = sqlite3.connect(DB_PATH)
-            con.execute("UPDATE mane_color_quiz SET phorest_client_id = ? WHERE id = ?",
-                        (phorest_client_id, lead_row_id))
-            con.commit()
-            con.close()
-        except Exception:
-            pass
 
     return jsonify({"ok": True})
 
@@ -2058,11 +2072,39 @@ def mane_extension_submit():
     timeline_l = TIMELINE_LABELS.get(timeline, timeline)
     budget_l = BUDGET_LABELS.get(budget, budget)
 
+    # Phorest client sync runs BEFORE the email so we can include the
+    # "Open in Phorest" deep-link button. No-op if Phorest env vars unset.
+    phorest_notes = (
+        f"Goal: {goal_l}\nTimeline: {timeline_l}\nBudget: {budget_l}"
+    )
+    phorest_client_id = mane_phorest.create_client(
+        name=name if name != "Anonymous" else "",
+        email=email,
+        phone=phone,
+        source="extension",
+        notes=phorest_notes,
+        external_id=f"ext-{lead_row_id}",
+    )
+    if phorest_client_id:
+        try:
+            con = sqlite3.connect(DB_PATH)
+            con.execute("UPDATE mane_extension_quiz SET phorest_client_id = ? WHERE id = ?",
+                        (phorest_client_id, lead_row_id))
+            con.commit()
+            con.close()
+        except Exception:
+            pass
+
     def row(label, value):
         if not value:
             return ""
         safe = str(value).replace("\n", "<br>")
         return f'<tr><td style="padding:12px 0; border-bottom:1px solid #1a1a25; font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:#7c4dff; width:40%; vertical-align:top;">{label}</td><td style="padding:12px 0 12px 16px; border-bottom:1px solid #1a1a25; font-size:14px; color:#e8e8f0; line-height:1.6;">{safe}</td></tr>'
+
+    phorest_url = _phorest_client_url(phorest_client_id)
+    phorest_button = f'''
+        <a href="{phorest_url}" target="_blank" style="display:inline-block; background:#7c4dff; color:#ffffff; text-decoration:none; font-weight:600; font-size:13px; letter-spacing:1px; text-transform:uppercase; padding:14px 26px; border-radius:10px; margin:0 0 24px 0;">Open in Phorest →</a>
+    ''' if phorest_url else ""
 
     body = f"""
     <div style="font-family: -apple-system, Inter, sans-serif; background:#0a0a0f; padding:32px 20px; color:#e8e8f0;">
@@ -2070,6 +2112,7 @@ def mane_extension_submit():
         <div style="font-size:11px; font-weight:600; letter-spacing:3px; text-transform:uppercase; color:#7c4dff; margin-bottom:10px;">New Extensions Consult Lead</div>
         <h2 style="font-size:22px; font-weight:700; margin:0 0 6px 0; color:#fff;">Mane Styling Studio</h2>
         <p style="font-size:13px; color:#8b8ba0; margin:0 0 24px 0;">{name}{' · ' + phone if phone else ''}{' · ' + email if email else ''}</p>
+        {phorest_button}
         <table style="width:100%; border-collapse:collapse;">
           {row("Name", name)}
           {row("Email", email)}
@@ -2113,28 +2156,6 @@ def mane_extension_submit():
         },
         source_url=data.get("referrer", "") or "https://lumenmarketing.co/manestyling/extension-funnel",
     )
-
-    # Phorest client sync
-    phorest_notes = (
-        f"Goal: {goal_l}\nTimeline: {timeline_l}\nBudget: {budget_l}"
-    )
-    phorest_client_id = mane_phorest.create_client(
-        name=name if name != "Anonymous" else "",
-        email=email,
-        phone=phone,
-        source="extension",
-        notes=phorest_notes,
-        external_id=f"ext-{lead_row_id}",
-    )
-    if phorest_client_id:
-        try:
-            con = sqlite3.connect(DB_PATH)
-            con.execute("UPDATE mane_extension_quiz SET phorest_client_id = ? WHERE id = ?",
-                        (phorest_client_id, lead_row_id))
-            con.commit()
-            con.close()
-        except Exception:
-            pass
 
     return jsonify({"ok": True})
 
