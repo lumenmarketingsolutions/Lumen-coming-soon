@@ -1287,7 +1287,16 @@ def harker_contact():
         resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
         return resp
 
-    data = request.get_json(silent=True) or {}
+    # The form sends the body as text/plain (so sendBeacon avoids a CORS
+    # preflight), so parse JSON manually rather than relying on the
+    # Content-Type header. Fall back to Flask's parser / form fields.
+    data = request.get_json(silent=True)
+    if not data:
+        try:
+            data = json.loads(request.get_data(as_text=True) or "{}")
+        except Exception:
+            data = request.form.to_dict() or {}
+    data = data or {}
     name = (data.get("name") or "").strip()
     email = (data.get("email") or "").strip()
     phone = (data.get("phone") or "").strip()
