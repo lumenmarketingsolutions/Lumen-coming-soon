@@ -8,4 +8,3 @@ twilio
 openpyxl
 anthropic
 dnspython
-tzdata

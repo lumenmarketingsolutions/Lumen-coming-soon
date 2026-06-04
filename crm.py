@@ -125,67 +125,6 @@ ALWAYS_INVITE = [
 _DATA_DIR = "/data" if os.path.isdir("/data") else os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.environ.get("CRM_DB_PATH", os.path.join(_DATA_DIR, "setters.db"))
 
-# ── Booking blackout window ────────────────────────────────────────────────────
-# Setters may not book a meeting whose START time falls inside Kendall's daily
-# unavailability window, evaluated in his local timezone (DST-aware). Default:
-# 1:30 AM – 10:00 AM Mountain Time (Boise). All three values are env-overridable
-# so the window can be moved without a code change. Enforced server-side in
-# api_create_meeting; the booking form also greys out blocked slots, but the
-# server is the source of truth.
-try:
-    from zoneinfo import ZoneInfo
-    BLACKOUT_TZ = ZoneInfo(os.environ.get("CRM_BLACKOUT_TZ", "America/Denver"))
-except Exception:
-    # zoneinfo/tzdata missing on the host — guard fails OPEN (booking allowed).
-    BLACKOUT_TZ = None
-
-
-def _parse_hhmm(s, default):
-    try:
-        h, m = s.split(":")
-        return (int(h), int(m))
-    except Exception:
-        return default
-
-
-BLACKOUT_START = _parse_hhmm(os.environ.get("CRM_BLACKOUT_START", "01:30"), (1, 30))
-BLACKOUT_END   = _parse_hhmm(os.environ.get("CRM_BLACKOUT_END", "10:00"), (10, 0))
-
-
-def _fmt_ampm(hm):
-    h, m = hm
-    ap = "AM" if h < 12 else "PM"
-    h12 = ((h + 11) % 12) + 1
-    return f"{h12}:{m:02d} {ap}"
-
-
-def booking_blackout_error(start_iso_utc):
-    """Return a user-facing error string if a meeting starting at start_iso_utc
-    (UTC ISO 8601) would BEGIN inside the daily blackout window in BLACKOUT_TZ;
-    otherwise return None. Only the start time is checked (per spec). Fails OPEN
-    (returns None) if tz data is unavailable or the timestamp can't be parsed."""
-    if BLACKOUT_TZ is None:
-        return None
-    try:
-        start_utc = datetime.datetime.fromisoformat(
-            start_iso_utc.strip().replace("Z", "")
-        ).replace(tzinfo=datetime.timezone.utc)
-    except Exception:
-        return None
-    local = start_utc.astimezone(BLACKOUT_TZ)
-    minutes = local.hour * 60 + local.minute
-    lo = BLACKOUT_START[0] * 60 + BLACKOUT_START[1]
-    hi = BLACKOUT_END[0] * 60 + BLACKOUT_END[1]
-    # Normal window (lo <= hi); the else branch supports a window crossing midnight.
-    blocked = (lo <= minutes < hi) if lo <= hi else (minutes >= lo or minutes < hi)
-    if not blocked:
-        return None
-    tzlabel = local.tzname() or "local time"
-    return (f"That time is inside the {_fmt_ampm(BLACKOUT_START)}–"
-            f"{_fmt_ampm(BLACKOUT_END)} {tzlabel} window reserved for Kendall. "
-            f"Pick a start time outside that window.")
-
-
 # ── Enums ─────────────────────────────────────────────────────────────────────
 INDUSTRIES = [
     "Finance", "Manufacturing", "Real Estate", "Retail", "Education",
@@ -1498,10 +1437,6 @@ def api_create_meeting():
     timezone = (data.get("timezone") or "").strip()
     if not lead_id or not scheduled_at:
         return jsonify({"ok": False, "error": "lead_id and scheduled_at required"}), 400
-
-    blackout_err = booking_blackout_error(scheduled_at)
-    if blackout_err:
-        return jsonify({"ok": False, "error": blackout_err}), 400
 
     con = db()
     lead = con.execute("SELECT * FROM leads WHERE id = ?", (lead_id,)).fetchone()
