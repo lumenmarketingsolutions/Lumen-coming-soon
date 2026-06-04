@@ -713,6 +713,10 @@
           </div>
         </div>
 
+        <p class="text-muted" style="font-size:11px;text-transform:none;letter-spacing:0;margin:8px 0 0">
+          Slots marked "unavailable" fall in Kendall's reserved block (1:30&nbsp;AM&ndash;10:00&nbsp;AM Mountain) and can't be booked.
+        </p>
+
         <div class="form-row" style="margin-top:14px">
           <label class="form-label" for="cb-tz">Timezone</label>
           <select class="form-select" id="cb-tz"></select>
@@ -783,6 +787,12 @@
         'Asia/Karachi','Asia/Kolkata','Asia/Bangkok','Asia/Singapore',
         'Asia/Hong_Kong','Asia/Tokyo','Australia/Sydney',
       ];
+
+      // Kendall's daily unavailability window. The server (booking_blackout_error
+      // in crm.py) is the source of truth; this only greys out blocked slots in
+      // the picker so setters get instant feedback. Keep in sync with the server
+      // env vars CRM_BLACKOUT_TZ / CRM_BLACKOUT_START / CRM_BLACKOUT_END.
+      const BLACKOUT = { tz: 'America/Denver', startMin: 1 * 60 + 30, endMin: 10 * 60 };
 
       const state = { leadId: null, selectedDate: null, calYear: 0, calMonth: 0 };
 
@@ -886,6 +896,7 @@
           { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
         $('cb-cal').classList.add('hidden');
         renderCal();
+        refreshTimeOptions();
       }
 
       // Convert a wall-clock date+time in a given timezone to a UTC ISO string.
@@ -904,6 +915,54 @@
         const renderedUtc = Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour, +parts.minute, +parts.second);
         const offset = renderedUtc - naive;
         return new Date(naive - offset).toISOString();
+      }
+
+      // ── Blackout-window helpers (mirror booking_blackout_error in crm.py) ──
+      function isBlockedMinute(min) {
+        const lo = BLACKOUT.startMin, hi = BLACKOUT.endMin;
+        return lo <= hi ? (min >= lo && min < hi) : (min >= lo || min < hi);
+      }
+
+      // Minutes-after-midnight, in the blackout timezone, for a wall-clock
+      // date+time entered in `tz`. Routes through the same UTC conversion the
+      // server sees, so DST is handled correctly on both ends.
+      function blackoutMinutesFor(dateStr, timeStr, tz) {
+        const utc = new Date(wallToUTC(dateStr, timeStr, tz));
+        const dtf = new Intl.DateTimeFormat('en-US', {
+          timeZone: BLACKOUT.tz, hour12: false, hour: '2-digit', minute: '2-digit',
+        });
+        const parts = {};
+        dtf.formatToParts(utc).forEach(p => parts[p.type] = p.value);
+        let hh = +parts.hour; if (hh === 24) hh = 0;
+        return hh * 60 + (+parts.minute);
+      }
+
+      // Disable any time option that would start inside the blackout window for
+      // the chosen date + timezone. No-op until a date is picked (the UTC offset
+      // depends on the date). Bumps the selection off a blocked slot.
+      function refreshTimeOptions() {
+        const sel = $('cb-time');
+        const opts = Array.from(sel.options);
+        if (!state.selectedDate) {
+          opts.forEach(o => {
+            o.disabled = false;
+            if (o.dataset.baseLabel) o.textContent = o.dataset.baseLabel;
+          });
+          return;
+        }
+        const sd = state.selectedDate;
+        const dateStr = sd.getFullYear() + '-' + pad(sd.getMonth() + 1) + '-' + pad(sd.getDate());
+        const tz = $('cb-tz').value || 'UTC';
+        let firstOpen = null;
+        opts.forEach(o => {
+          if (!o.dataset.baseLabel) o.dataset.baseLabel = o.textContent;
+          const blocked = isBlockedMinute(blackoutMinutesFor(dateStr, o.value, tz));
+          o.disabled = blocked;
+          o.textContent = blocked ? o.dataset.baseLabel + ' · unavailable' : o.dataset.baseLabel;
+          if (!blocked && firstOpen === null) firstOpen = o.value;
+        });
+        const cur = sel.options[sel.selectedIndex];
+        if (cur && cur.disabled && firstOpen !== null) sel.value = firstOpen;
       }
 
       function open(opts) {
@@ -926,6 +985,7 @@
         }
         populateTimes();
         populateTzs();
+        refreshTimeOptions();
         $('cb-notes').value = '';
         $('cb-duration').value = '30';
         $('cb-error').classList.add('hidden');
@@ -974,6 +1034,11 @@
         const tz = $('cb-tz').value || 'UTC';
         const dur = parseInt($('cb-duration').value, 10) || 30;
         const notes = $('cb-notes').value.trim();
+        if (isBlockedMinute(blackoutMinutesFor(dateStr, time, tz))) {
+          err.textContent = 'That start time is inside the 1:30–10:00 AM Mountain window reserved for Kendall. Pick another time.';
+          err.classList.remove('hidden');
+          return;
+        }
         const utcISO = wallToUTC(dateStr, time, tz);
 
         const btn = $('cb-submit');
@@ -998,6 +1063,11 @@
           err.classList.remove('hidden');
         }
       }
+
+      // Re-evaluate blocked slots when the timezone changes (the window is
+      // anchored to Mountain time, so the same wall-clock slot in a different
+      // tz can move in or out of the block).
+      $('cb-tz').addEventListener('change', refreshTimeOptions);
 
       // Escape key closes
       document.addEventListener('keydown', e => {
