@@ -1874,7 +1874,9 @@ def mane_onboarding_submit():
 @app.route("/manestyling/color-funnel")
 @app.route("/mane-color")  # dev alias
 def mane_color():
-    return render_template("mane_color.html")
+    # Ads point to this URL; serve the simplified v2 funnel (preserve fbclid/UTMs).
+    qs = request.query_string.decode()
+    return redirect("/manestyling/color-v2" + (("?" + qs) if qs else ""), code=302)
 
 REC_LABELS = {
     "balayage": "Balayage",
@@ -2023,7 +2025,9 @@ def mane_color_submit():
 # ---------------------------------------------------------------------------
 @app.route("/manestyling/extension-funnel")
 def mane_extensions():
-    return render_template("mane_extensions.html")
+    # Ads point to this URL; serve the simplified v2 funnel (preserve fbclid/UTMs).
+    qs = request.query_string.decode()
+    return redirect("/manestyling/extensions-v2" + (("?" + qs) if qs else ""), code=302)
 
 GOAL_LABELS = {
     "volume": "Volume (hair has thinned / lost fullness)",
