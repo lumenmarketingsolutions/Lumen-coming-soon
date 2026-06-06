@@ -105,6 +105,11 @@
         .credibility { margin-top:32px; padding-top:24px; border-top:1px solid var(--line); text-align:center; font-size:12px; font-weight:500; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); }
         .credibility .stars { color:var(--ink); letter-spacing:4px; margin-bottom:8px; font-size:11px; }
 
+        .ba-strip { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin:4px auto 26px; width:100%; }
+        .ba-strip .ba { aspect-ratio:1/1; border-radius:6px; overflow:hidden; background:var(--surface); position:relative; }
+        .ba-strip .ba img { width:100%; height:100%; object-fit:cover; display:block; }
+        .ba-strip .ba[data-label]::after { content:attr(data-label); position:absolute; bottom:8px; left:50%; transform:translateX(-50%); font-size:8px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:#fff; background:rgba(26,26,26,0.85); padding:3px 8px; border-radius:2px; white-space:nowrap; }
+
         @media (max-width:640px) {
             .page { padding:22px 18px; }
             h1 { font-size:34px; }
@@ -123,7 +128,11 @@
             <h1>Fuller, longer hair <em>that still looks like you.</em></h1>
             <p class="sub">Soft, natural hand-tied extensions, custom color-matched to blend seamlessly. Tell us your goal and we'll text you to set up your consult.</p>
 
-            <div class="hero"><img src="/static/mane/ext-ba-brunette-mature.jpg" alt="Before and after, hand-tied extensions restoring fullness" loading="lazy"></div>
+            <div class="ba-strip">
+                <div class="ba" data-label="Before / After"><img src="/static/mane/ext-ba-blonde-mature.jpg" alt="Before and after, hand-tied extensions on blonde hair" loading="lazy"></div>
+                <div class="ba"><img src="/static/mane/ext-install-reveal.jpg" alt="Hand-tied extensions install, wefts hidden under the top section" loading="lazy"></div>
+                <div class="ba" data-label="Before / After"><img src="/static/mane/ext-ba-brunette-mature.jpg" alt="Before and after, hand-tied extensions on brunette hair" loading="lazy"></div>
+            </div>
 
             <div class="q-label">What are you hoping for?</div>
             <div class="tiles" id="tiles-goal">
