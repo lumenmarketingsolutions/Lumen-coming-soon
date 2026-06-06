@@ -118,7 +118,7 @@ OWNER_IPS = {"209.127.238.130"}
 # assign Mane's pixel → Generate Token with ads_management scope. Set as
 # MANE_META_CAPI_ACCESS_TOKEN on Railway. Optionally set
 # MANE_META_TEST_EVENT_CODE while QAing in Events Manager Test Events.
-MANE_META_PIXEL_ID = "1517333043381759"
+MANE_META_PIXEL_ID = "983900467721637"
 MANE_META_CAPI_ACCESS_TOKEN = os.environ.get("MANE_META_CAPI_ACCESS_TOKEN", "")
 MANE_META_TEST_EVENT_CODE  = os.environ.get("MANE_META_TEST_EVENT_CODE", "")
 
