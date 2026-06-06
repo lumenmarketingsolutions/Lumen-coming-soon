@@ -27,6 +27,40 @@ from functools import wraps
 from urllib.parse import urlencode, quote_plus
 from werkzeug.security import generate_password_hash as _gph_raw, check_password_hash
 
+# Mountain Time, DST-aware. Used to enforce the no-bookings-overnight window
+# (2:30am-7:00am MT) — meetings during this window get rejected by the API
+# regardless of the timezone the booker is in.
+try:
+    from zoneinfo import ZoneInfo
+    _MTN_TZ = ZoneInfo("America/Denver")
+except Exception:
+    _MTN_TZ = None  # zoneinfo unavailable → blocked-time check falls open
+
+
+# Blocked booking window — local Mountain Time, [start, end).
+BOOKING_BLOCK_START_MIN = 2 * 60 + 30   # 2:30am MT
+BOOKING_BLOCK_END_MIN   = 7 * 60        # 7:00am MT
+
+
+def is_booking_time_blocked(iso_utc):
+    """Returns True if the meeting start time lands in the 2:30am-7:00am
+    Mountain Time blocked window. DST handled automatically because the
+    America/Denver zone shifts MST/MDT correctly. Falls open (returns False)
+    if zoneinfo isn't available or the input doesn't parse — we'd rather
+    accept a borderline booking than reject a valid one on infra error."""
+    if not _MTN_TZ:
+        return False
+    try:
+        s = (iso_utc or "").replace("Z", "")
+        dt = datetime.datetime.fromisoformat(s)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=datetime.timezone.utc)
+        local = dt.astimezone(_MTN_TZ)
+        minutes_of_day = local.hour * 60 + local.minute
+        return BOOKING_BLOCK_START_MIN <= minutes_of_day < BOOKING_BLOCK_END_MIN
+    except Exception:
+        return False
+
 
 def generate_password_hash(pw):
     """Wrap werkzeug to force pbkdf2:sha256 — the default ('scrypt') depends
@@ -1437,6 +1471,15 @@ def api_create_meeting():
     timezone = (data.get("timezone") or "").strip()
     if not lead_id or not scheduled_at:
         return jsonify({"ok": False, "error": "lead_id and scheduled_at required"}), 400
+
+    # Hard block: no meetings between 2:30am and 7:00am Mountain Time. We check
+    # here (server-side, authoritative) so it's enforced regardless of which
+    # client is sending — the UI also blocks, but never trust the client.
+    if is_booking_time_blocked(scheduled_at):
+        return jsonify({
+            "ok": False,
+            "error": "Meetings can't be booked between 2:30am and 7:00am Mountain Time. Pick a slot outside that window.",
+        }), 400
 
     con = db()
     lead = con.execute("SELECT * FROM leads WHERE id = ?", (lead_id,)).fetchone()
