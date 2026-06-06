@@ -32,7 +32,8 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 # everyone including the client, which is exactly what we're avoiding.
 TEAM_RECIPIENTS = [
     "kendall@lumenmarketing.co",
-    "marykatezarehghazarian@gmail.com",
+    "marykatezarehghazarian@gmail.com",   # Mary's personal gmail
+    "mary@mk7media.com",                   # Mary's MK7 work address
 ]
 
 REPLAY_WINDOW_SECONDS = 5 * 60
