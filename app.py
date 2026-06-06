@@ -106,6 +106,8 @@ app.register_blueprint(whatsapp_bp)
 ADMIN_PIN = "112501"
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAIL = "kendall@lumenmarketing.co"
+# Mane funnel leads notify Lumen AND the salon front desk so they can follow up fast
+MANE_LEAD_TO = [NOTIFY_EMAIL, "manestylingstudio@gmail.com"]
 OWNER_IPS = {"209.127.238.130"}
 
 # ── Meta Conversions API (Mane funnels) ────────────────────────────────────
@@ -415,7 +417,7 @@ def send_email(to, subject, html_body):
                 },
                 json={
                     "from": "Lumen <kendall@lumenmarketing.co>",
-                    "to": [to],
+                    "to": to if isinstance(to, list) else [to],
                     "subject": subject,
                     "html": html_body,
                 },
@@ -1989,7 +1991,7 @@ def mane_color_submit():
     </div>
     """
     try:
-        send_email(NOTIFY_EMAIL, f"Mane color lead: {name}", body)
+        send_email(MANE_LEAD_TO, f"Mane color lead: {name}", body)
     except Exception:
         pass
 
@@ -2133,7 +2135,7 @@ def mane_extension_submit():
     </div>
     """
     try:
-        send_email(NOTIFY_EMAIL, f"Mane extensions lead: {name}", body)
+        send_email(MANE_LEAD_TO, f"Mane extensions lead: {name}", body)
     except Exception:
         pass
 
@@ -2240,7 +2242,7 @@ def mane_color_v2_submit():
     </div>
     """
     try:
-        send_email(NOTIFY_EMAIL, f"Mane color lead [TEST-2]: {name}", body)
+        send_email(MANE_LEAD_TO, f"Mane color lead [TEST-2]: {name}", body)
     except Exception:
         pass
 
@@ -2319,7 +2321,7 @@ def mane_extensions_v2_submit():
     </div>
     """
     try:
-        send_email(NOTIFY_EMAIL, f"Mane extensions lead [TEST-2]: {name}", body)
+        send_email(MANE_LEAD_TO, f"Mane extensions lead [TEST-2]: {name}", body)
     except Exception:
         pass
 
