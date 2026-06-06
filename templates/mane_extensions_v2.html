@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Mane Styling Studio · Hand-Tied Extensions</title>
+    <meta name="description" content="Soft, natural-looking hand-tied extensions at MANE Styling Studio in Meridian, Idaho. Tell us your goal and we'll text you to set up your consult.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap" rel="stylesheet">
+
+    <!-- Meta Pixel -->
+    <script>
+    !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+    n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
+    document,'script','https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1517333043381759');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1517333043381759&ev=PageView&noscript=1"/></noscript>
+    <!-- End Meta Pixel -->
+
+    <style>
+        :root {
+            --bg:#FFFFFF; --surface:#FAF6F1; --ink:#1A1A1A; --muted:#6B5F56;
+            --line:rgba(26,26,26,0.10); --accent:#1A1A1A; --accent-hover:#000000;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        html { -webkit-text-size-adjust:100%; scroll-behavior:smooth; overflow-x:hidden; }
+        body {
+            font-family:'Poppins',-apple-system,BlinkMacSystemFont,sans-serif;
+            background:var(--bg); color:var(--ink); line-height:1.6; font-weight:400;
+            -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; overflow-x:hidden;
+        }
+        .page {
+            min-height:100vh; min-height:100dvh; display:flex; flex-direction:column;
+            align-items:center; padding:28px 24px;
+            padding-bottom:max(60px,calc(48px + env(safe-area-inset-bottom)));
+        }
+        .brand { width:100%; max-width:520px; display:flex; justify-content:flex-start; align-items:center; margin-bottom:30px; }
+        .brand-logo { height:46px; width:auto; display:block; }
+
+        .step { display:none; width:100%; max-width:520px; }
+        .step.active { display:block; animation:fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity:0; transform:translateY(8px);} to { opacity:1; transform:translateY(0);} }
+
+        .eyebrow {
+            display:inline-block; font-size:11px; font-weight:500; letter-spacing:2.5px;
+            text-transform:uppercase; color:var(--ink); padding:8px 16px; border:1px solid var(--ink);
+            border-radius:100px; margin-bottom:26px;
+        }
+        h1 { font-size:42px; font-weight:600; line-height:1.1; letter-spacing:-1px; margin-bottom:18px; text-wrap:balance; }
+        h1 em { font-style:italic; font-weight:300; }
+        .sub { font-size:17px; color:var(--muted); margin-bottom:30px; text-wrap:pretty; }
+
+        .q-label { font-size:13px; font-weight:500; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
+        .tiles { display:grid; grid-template-columns:1fr; gap:12px; margin-bottom:8px; }
+        .tile {
+            cursor:pointer; border-radius:8px; background:var(--bg); border:1px solid var(--line);
+            padding:18px 18px; text-align:left; transition:all 0.16s ease; -webkit-tap-highlight-color:transparent;
+        }
+        .tile:hover { border-color:var(--ink); transform:translateY(-1px); }
+        .tile.selected { border-color:var(--ink); background:var(--surface); }
+        .tile .name { font-size:16px; font-weight:600; color:var(--ink); }
+        .tile .desc { font-size:13px; color:var(--muted); margin-top:4px; line-height:1.45; }
+
+        .cta {
+            display:inline-flex; align-items:center; justify-content:center; gap:10px;
+            background:var(--accent); color:#fff; font-family:'Poppins',sans-serif; font-size:15px;
+            font-weight:500; letter-spacing:0.3px; padding:18px 38px; border:none; border-radius:100px;
+            cursor:pointer; transition:background 0.2s ease, transform 0.15s ease; min-height:54px;
+            text-decoration:none; -webkit-tap-highlight-color:transparent; width:100%;
+        }
+        .cta:hover:not(:disabled) { background:var(--accent-hover); }
+        .cta:active { transform:scale(0.99); }
+        .cta:disabled { background:rgba(26,26,26,0.20); color:rgba(255,255,255,0.7); cursor:not-allowed; }
+        .cta .arrow { font-size:17px; line-height:1; }
+
+        .field { margin-bottom:14px; text-align:left; }
+        .field label { display:block; font-size:11px; font-weight:500; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+        .field input {
+            width:100%; font-family:'Poppins',sans-serif; font-size:16px; padding:15px 16px;
+            background:var(--bg); border:1px solid var(--line); border-radius:8px; color:var(--ink);
+            outline:none; transition:border-color 0.15s ease; -webkit-appearance:none; appearance:none;
+        }
+        .field input:focus { border-color:var(--ink); }
+        .field input::placeholder { color:#bdb5ad; }
+        .legal { margin-top:16px; font-size:11px; color:var(--muted); line-height:1.5; text-align:center; }
+        .reassure { margin-top:18px; font-size:12px; color:var(--muted); text-align:center; }
+        .reassure span { margin:0 6px; opacity:0.5; }
+
+        .result { text-align:center; }
+        .result .badge { display:inline-block; font-size:11px; font-weight:500; letter-spacing:2.5px; text-transform:uppercase; color:var(--ink); background:var(--surface); padding:8px 16px; border-radius:100px; margin-bottom:18px; }
+        .result h2 { font-size:32px; font-weight:600; margin-bottom:12px; }
+        .result p { font-size:16px; color:var(--muted); margin:0 auto 26px; max-width:420px; }
+        .result-foot { margin-top:34px; padding-top:22px; border-top:1px solid var(--line); font-size:13px; color:var(--muted); line-height:1.8; }
+        .result-foot a { color:var(--ink); text-decoration:none; font-weight:500; }
+
+        .hero { width:100%; max-width:520px; border-radius:10px; overflow:hidden; margin-bottom:28px; aspect-ratio:16/10; }
+        .hero img { width:100%; height:100%; object-fit:cover; display:block; }
+        .credibility { margin-top:32px; padding-top:24px; border-top:1px solid var(--line); text-align:center; font-size:12px; font-weight:500; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); }
+        .credibility .stars { color:var(--ink); letter-spacing:4px; margin-bottom:8px; font-size:11px; }
+
+        @media (max-width:640px) {
+            .page { padding:22px 18px; }
+            h1 { font-size:34px; }
+            .sub { font-size:15px; }
+            .result h2 { font-size:27px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <div class="brand"><img src="/static/mane/logo.png" alt="Mane Styling Studio" class="brand-logo"></div>
+
+        <!-- ═══ Step 0: Hook + one quick tap ═══ -->
+        <section class="step active" data-step="0">
+            <span class="eyebrow">Hand-Tied Extensions · Meridian, ID</span>
+            <h1>Fuller, longer hair <em>that still looks like you.</em></h1>
+            <p class="sub">Soft, natural hand-tied extensions, custom color-matched to blend seamlessly. Tell us your goal and we'll text you to set up your consult.</p>
+
+            <div class="hero"><img src="/static/mane/ext-ba-brunette-mature.jpg" alt="Before and after, hand-tied extensions restoring fullness" loading="lazy"></div>
+
+            <div class="q-label">What are you hoping for?</div>
+            <div class="tiles" id="tiles-goal">
+                <div class="tile" data-value="volume"><div class="name">More volume</div><div class="desc">My hair has thinned and lost its fullness.</div></div>
+                <div class="tile" data-value="length"><div class="name">More length</div><div class="desc">My hair won't grow past a certain point.</div></div>
+                <div class="tile" data-value="both"><div class="name">Both, the full transformation</div><div class="desc">Thick, full, longer hair that feels like me again.</div></div>
+            </div>
+
+            <div class="credibility">
+                <div class="stars">★ ★ ★ ★ ★</div>
+                Idaho's Premier Laid Back Luxury Salon
+            </div>
+        </section>
+
+        <!-- ═══ Step 1: Name + phone ═══ -->
+        <section class="step" data-step="1">
+            <span class="eyebrow">Almost there</span>
+            <h1>Where do we <em>text you?</em></h1>
+            <p class="sub">We'll reach out to set up your relaxed, no-pressure consult and color-match your extension hair.</p>
+
+            <form id="lead-form" onsubmit="return submitLead(event)">
+                <div class="field">
+                    <label for="lead-name">First name</label>
+                    <input type="text" id="lead-name" name="name" placeholder="Jane" required autocomplete="given-name" autocapitalize="words">
+                </div>
+                <div class="field">
+                    <label for="lead-phone">Phone</label>
+                    <input type="tel" id="lead-phone" name="phone" placeholder="(208) 555-5555" required autocomplete="tel" inputmode="tel">
+                </div>
+                <button type="submit" class="cta" id="submit-btn">Set Up My Consult <span class="arrow">→</span></button>
+                <div class="legal">By submitting you agree to receive texts from Mane Styling Studio. Reply STOP anytime.</div>
+            </form>
+            <div class="reassure">No pressure <span>·</span> Color-matched on the spot <span>·</span> Real stylists</div>
+        </section>
+
+        <!-- ═══ Step 2: Confirmation ═══ -->
+        <section class="step result" data-step="2">
+            <div class="badge">You're on the list</div>
+            <h2>We'll text you shortly.</h2>
+            <p>Keep an eye on your phone, we'll reach out to set up your consult and map out the right install for your hair. Want to grab a time now?</p>
+            <a href="#" class="cta" id="book-btn" target="_blank" rel="noopener">Book My Consult Now <span class="arrow">→</span></a>
+            <div class="result-foot">
+                <div>Or call us at <a href="tel:+12088171683">208-817-1683</a></div>
+                <div>2929 W Navigator Dr, Suite #110, Meridian, ID</div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const state = { goal: null };
+
+        function goToStep(n) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            const t = document.querySelector(`.step[data-step="${n}"]`);
+            if (!t) return;
+            t.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        const tiles = document.querySelectorAll('#tiles-goal .tile');
+        tiles.forEach(tile => tile.addEventListener('click', () => {
+            tiles.forEach(x => x.classList.remove('selected'));
+            tile.classList.add('selected');
+            state.goal = tile.dataset.value;
+            fbqTrack('ViewContent', { content_name: 'extensions_v2_goal' });
+            setTimeout(() => goToStep(1), 220);
+        }));
+
+        function getTracking() {
+            const p = new URLSearchParams(window.location.search);
+            return {
+                utm_source: p.get('utm_source') || '', utm_campaign: p.get('utm_campaign') || '',
+                utm_content: p.get('utm_content') || '', fbclid: p.get('fbclid') || '',
+                referrer: document.referrer || '',
+            };
+        }
+        function newEventId() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                const r = Math.random() * 16 | 0; return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        }
+        function getFbCookies() {
+            const out = { fbp: '', fbc: '' };
+            document.cookie.split(';').forEach(c => {
+                const [k, v] = c.trim().split('='); if (k === '_fbp') out.fbp = v || ''; if (k === '_fbc') out.fbc = v || '';
+            });
+            return out;
+        }
+        function fbqTrack(name, params, eventId) {
+            if (typeof fbq === 'undefined') return;
+            try { fbq('track', name, params || {}, eventId ? { eventID: eventId } : undefined); } catch (e) {}
+        }
+
+        async function submitLead(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true; btn.innerHTML = 'Sending...';
+            const eventId = newEventId();
+            const fb = getFbCookies();
+            const payload = {
+                name: document.getElementById('lead-name').value.trim(),
+                phone: document.getElementById('lead-phone').value.trim(),
+                goal: state.goal || '',
+                event_id: eventId, fbp: fb.fbp, fbc: fb.fbc,
+                ...getTracking(),
+            };
+            try {
+                const res = await fetch('/manestyling/extensions-v2/submit', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+                });
+                if (!res.ok) throw new Error('submit failed');
+                fbqTrack('Lead', { content_category: 'extensions_funnel_v2' }, eventId);
+                goToStep(2);
+            } catch (err) {
+                btn.disabled = false; btn.innerHTML = 'Set Up My Consult <span class="arrow">→</span>';
+                alert('Something went wrong. Try again in a moment.');
+            }
+            return false;
+        }
+
+        const bookBtn = document.getElementById('book-btn');
+        bookBtn.href = 'https://www.phorest.com/salon/manestylingstudio/book/service-selection?showSpecialOffers=false';
+        bookBtn.addEventListener('click', () => fbqTrack('Schedule', { content_category: 'extensions_funnel_v2' }));
+    </script>
+</body>
+</html>

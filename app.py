@@ -118,7 +118,7 @@ OWNER_IPS = {"209.127.238.130"}
 # assign Mane's pixel → Generate Token with ads_management scope. Set as
 # MANE_META_CAPI_ACCESS_TOKEN on Railway. Optionally set
 # MANE_META_TEST_EVENT_CODE while QAing in Events Manager Test Events.
-MANE_META_PIXEL_ID = "1062505765656658"
+MANE_META_PIXEL_ID = "1517333043381759"
 MANE_META_CAPI_ACCESS_TOKEN = os.environ.get("MANE_META_CAPI_ACCESS_TOKEN", "")
 MANE_META_TEST_EVENT_CODE  = os.environ.get("MANE_META_TEST_EVENT_CODE", "")
 
@@ -719,6 +719,9 @@ def init_db():
         ("mane_extension_quiz", "budget TEXT DEFAULT ''"),
         ("mane_extension_quiz", "phorest_client_id TEXT DEFAULT ''"),
         ("mane_color_quiz",     "phorest_client_id TEXT DEFAULT ''"),
+        # A/B test tagging: '' / 'test-1' = original quiz funnels, 'test-2' = simplified v2
+        ("mane_extension_quiz", "variant TEXT DEFAULT ''"),
+        ("mane_color_quiz",     "variant TEXT DEFAULT ''"),
     ]:
         try:
             con.execute(f"ALTER TABLE {_table} ADD COLUMN {_col}")
@@ -2156,6 +2159,183 @@ def mane_extension_submit():
         },
         source_url=data.get("referrer", "") or "https://lumenmarketing.co/manestyling/extension-funnel",
     )
+
+    return jsonify({"ok": True})
+
+# ---------------------------------------------------------------------------
+# Mane Styling Studio — SIMPLIFIED v2 funnels  (A/B TEST: variant 'test-2')
+# Pure form + one quick tap, name + phone only. Original quiz funnels above
+# are the control (variant ''=test-1). Score the test by counting leads:
+#   SELECT variant, COUNT(*) FROM mane_color_quiz GROUP BY variant;
+#   SELECT variant, COUNT(*) FROM mane_extension_quiz GROUP BY variant;
+# DB insert + Phorest are wrapped so a hiccup can never silently drop a lead.
+# ---------------------------------------------------------------------------
+def _client_ip():
+    return (request.headers.get("X-Forwarded-For", request.remote_addr or "") or "").split(",")[0].strip()
+
+def _phorest_email_button(phorest_client_id):
+    phorest_url = _phorest_client_url(phorest_client_id)
+    if not phorest_url:
+        return ""
+    return (f'<a href="{phorest_url}" target="_blank" style="display:inline-block;background:#7c4dff;'
+            f'color:#fff;text-decoration:none;font-weight:600;font-size:13px;letter-spacing:1px;'
+            f'text-transform:uppercase;padding:14px 26px;border-radius:10px;margin:0 0 20px 0;">Open in Phorest →</a>')
+
+@app.route("/manestyling/color-v2")
+def mane_color_v2():
+    return render_template("mane_color_v2.html")
+
+@app.route("/manestyling/color-v2/submit", methods=["POST"])
+def mane_color_v2_submit():
+    data = request.get_json() or {}
+    name = (data.get("name") or "").strip() or "Anonymous"
+    phone = (data.get("phone") or "").strip()
+    goal = (data.get("goal") or "").strip()  # brighter|richer|covergray|refresh
+    now = datetime.datetime.utcnow().isoformat()
+
+    lead_row_id = None
+    try:
+        con = sqlite3.connect(DB_PATH)
+        cur = con.cursor()
+        cur.execute("""
+            INSERT INTO mane_color_quiz (
+                name, email, phone, current_color, dream_look, recommendation,
+                utm_source, utm_campaign, utm_content, fbclid, referrer, variant, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            name, "", phone, "", goal, "",
+            data.get("utm_source", ""), data.get("utm_campaign", ""), data.get("utm_content", ""),
+            data.get("fbclid", ""), data.get("referrer", ""), "test-2", now,
+        ))
+        lead_row_id = cur.lastrowid
+        con.commit()
+        con.close()
+    except Exception as e:
+        print(f"[mane-color-v2] db insert failed: {e}")
+
+    phorest_client_id = None
+    try:
+        phorest_client_id = mane_phorest.create_client(
+            name=name if name != "Anonymous" else "", email="", phone=phone,
+            source="color", notes=f"[v2 simplified] Looking to: {goal}",
+            external_id=f"color-v2-{lead_row_id}" if lead_row_id else "",
+        )
+        if phorest_client_id and lead_row_id:
+            con = sqlite3.connect(DB_PATH)
+            con.execute("UPDATE mane_color_quiz SET phorest_client_id = ? WHERE id = ?", (phorest_client_id, lead_row_id))
+            con.commit()
+            con.close()
+    except Exception as e:
+        print(f"[mane-color-v2] phorest sync failed: {e}")
+
+    body = f"""
+    <div style="font-family:-apple-system,Inter,sans-serif;background:#0a0a0f;padding:32px 20px;color:#e8e8f0;">
+      <div style="max-width:560px;margin:0 auto;background:#111118;border:1px solid #1a1a25;border-radius:14px;padding:32px;">
+        <div style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#7c4dff;margin-bottom:10px;">New Color Lead · TEST-2 (simplified)</div>
+        <h2 style="font-size:22px;font-weight:700;margin:0 0 6px 0;color:#fff;">Mane Styling Studio</h2>
+        <p style="font-size:14px;color:#e8e8f0;margin:0 0 20px 0;">{name}{' · ' + phone if phone else ''}</p>
+        {_phorest_email_button(phorest_client_id)}
+        <p style="font-size:13px;color:#8b8ba0;margin:0;">Looking to: {goal or '—'}</p>
+      </div>
+    </div>
+    """
+    try:
+        send_email(NOTIFY_EMAIL, f"Mane color lead [TEST-2]: {name}", body)
+    except Exception:
+        pass
+
+    try:
+        send_meta_capi_event(
+            event_name="Lead", event_id=data.get("event_id", ""),
+            user_data={
+                "phone": phone, "first_name": name if name != "Anonymous" else "",
+                "client_ip": _client_ip(), "user_agent": request.headers.get("User-Agent", ""),
+                "fbp": data.get("fbp", ""), "fbc": data.get("fbc", ""), "fbclid": data.get("fbclid", ""),
+            },
+            custom_data={"content_category": "color_funnel_v2", "variant": "test-2", "goal": goal},
+            source_url=data.get("referrer", "") or "https://lumenmarketing.co/manestyling/color-v2",
+        )
+    except Exception:
+        pass
+
+    return jsonify({"ok": True})
+
+@app.route("/manestyling/extensions-v2")
+def mane_extensions_v2():
+    return render_template("mane_extensions_v2.html")
+
+@app.route("/manestyling/extensions-v2/submit", methods=["POST"])
+def mane_extensions_v2_submit():
+    data = request.get_json() or {}
+    name = (data.get("name") or "").strip() or "Anonymous"
+    phone = (data.get("phone") or "").strip()
+    goal = (data.get("goal") or "").strip()  # volume|length|both
+    now = datetime.datetime.utcnow().isoformat()
+
+    lead_row_id = None
+    try:
+        con = sqlite3.connect(DB_PATH)
+        cur = con.cursor()
+        cur.execute("""
+            INSERT INTO mane_extension_quiz (
+                name, email, phone, goal, timeline, budget,
+                utm_source, utm_campaign, utm_content, fbclid, referrer, variant, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            name, "", phone, goal, "", "",
+            data.get("utm_source", ""), data.get("utm_campaign", ""), data.get("utm_content", ""),
+            data.get("fbclid", ""), data.get("referrer", ""), "test-2", now,
+        ))
+        lead_row_id = cur.lastrowid
+        con.commit()
+        con.close()
+    except Exception as e:
+        print(f"[mane-ext-v2] db insert failed: {e}")
+
+    phorest_client_id = None
+    try:
+        phorest_client_id = mane_phorest.create_client(
+            name=name if name != "Anonymous" else "", email="", phone=phone,
+            source="extension", notes=f"[v2 simplified] Goal: {goal}",
+            external_id=f"ext-v2-{lead_row_id}" if lead_row_id else "",
+        )
+        if phorest_client_id and lead_row_id:
+            con = sqlite3.connect(DB_PATH)
+            con.execute("UPDATE mane_extension_quiz SET phorest_client_id = ? WHERE id = ?", (phorest_client_id, lead_row_id))
+            con.commit()
+            con.close()
+    except Exception as e:
+        print(f"[mane-ext-v2] phorest sync failed: {e}")
+
+    body = f"""
+    <div style="font-family:-apple-system,Inter,sans-serif;background:#0a0a0f;padding:32px 20px;color:#e8e8f0;">
+      <div style="max-width:560px;margin:0 auto;background:#111118;border:1px solid #1a1a25;border-radius:14px;padding:32px;">
+        <div style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#7c4dff;margin-bottom:10px;">New Extensions Lead · TEST-2 (simplified)</div>
+        <h2 style="font-size:22px;font-weight:700;margin:0 0 6px 0;color:#fff;">Mane Styling Studio</h2>
+        <p style="font-size:14px;color:#e8e8f0;margin:0 0 20px 0;">{name}{' · ' + phone if phone else ''}</p>
+        {_phorest_email_button(phorest_client_id)}
+        <p style="font-size:13px;color:#8b8ba0;margin:0;">Goal: {goal or '—'}</p>
+      </div>
+    </div>
+    """
+    try:
+        send_email(NOTIFY_EMAIL, f"Mane extensions lead [TEST-2]: {name}", body)
+    except Exception:
+        pass
+
+    try:
+        send_meta_capi_event(
+            event_name="Lead", event_id=data.get("event_id", ""),
+            user_data={
+                "phone": phone, "first_name": name if name != "Anonymous" else "",
+                "client_ip": _client_ip(), "user_agent": request.headers.get("User-Agent", ""),
+                "fbp": data.get("fbp", ""), "fbc": data.get("fbc", ""), "fbclid": data.get("fbclid", ""),
+            },
+            custom_data={"content_category": "extensions_funnel_v2", "variant": "test-2", "goal": goal},
+            source_url=data.get("referrer", "") or "https://lumenmarketing.co/manestyling/extensions-v2",
+        )
+    except Exception:
+        pass
 
     return jsonify({"ok": True})
 
