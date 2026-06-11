@@ -83,6 +83,10 @@ from sce_mothersday import sce_md_bp, init_md_db
 app.register_blueprint(sce_md_bp)
 init_md_db()
 
+from sce_fathersday import sce_fd_bp, init_fd_db
+app.register_blueprint(sce_fd_bp)
+init_fd_db()
+
 from sce_admin import sce_admin_bp
 app.register_blueprint(sce_admin_bp)
 
@@ -1166,10 +1170,12 @@ def track_td():
 
 @app.route("/")
 def index():
-    # On the SCE subdomain, route the root to the Mother's Day funnel.
+    # On the SCE subdomain, route the root to the active SCE campaign.
+    # Currently: Father's Day. Switch this back to sce_md.landing for Mother's
+    # Day (or another funnel) by editing the redirect target below.
     host = (request.host or "").lower()
     if host.startswith("supercarexp."):
-        return redirect(url_for("sce_md.landing"))
+        return redirect(url_for("sce_fd.landing"))
     return render_template("home.html")
 
 @app.route("/qualify")

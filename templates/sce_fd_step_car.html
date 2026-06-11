@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pick the car · SCE Boise Father's Day</title>
+<meta name="description" content="Build the perfect Father's Day gift. Start by picking the car.">
+<link rel="icon" href="data:,">
+{% include "_sce_fd_shell.html" %}
+<style>
+  .car-list { display: grid; gap: 14px; }
+  .car-card {
+    background: var(--surface);
+    border: 2px solid var(--line);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.18s;
+    display: flex;
+    align-items: stretch;
+    text-decoration: none;
+    color: var(--text);
+  }
+  .car-card:active { transform: scale(0.992); }
+  .car-card:hover { border-color: var(--line-strong); }
+  .car-card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 8px 22px rgba(255, 77, 0, 0.16);
+  }
+  .car-photo {
+    flex: 0 0 130px; width: 130px;
+    background: #e8e1d6;
+    overflow: hidden;
+  }
+  .car-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .car-info {
+    flex: 1; min-width: 0;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .car-info h3 {
+    margin: 0 0 4px;
+    font-size: 17px; font-weight: 700; letter-spacing: -0.005em;
+    line-height: 1.2;
+  }
+  .car-info p {
+    margin: 0;
+    color: var(--muted); font-size: 13px; line-height: 1.4;
+  }
+  .car-arrow {
+    flex: 0 0 22px;
+    color: var(--accent);
+    font-size: 22px;
+    align-self: center;
+    padding-right: 14px;
+    transition: transform 0.15s;
+  }
+  .car-card:hover .car-arrow { transform: translateX(2px); }
+
+  @media (max-width: 380px) {
+    .car-photo { flex: 0 0 100px; width: 100px; }
+  }
+</style>
+{% if pixel_id %}
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','{{ pixel_id }}');
+fbq('track','PageView');
+</script>
+{% endif %}
+</head>
+<body>
+
+<div class="topbar">Father's Day · <strong>June 21</strong></div>
+
+<nav class="nav">
+  <span class="back-placeholder"></span>
+  <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
+  <span class="step-pill">Step {{ step }} of {{ step_total }}</span>
+</nav>
+<div class="progress"><div class="progress-fill" style="width: {{ (step / step_total * 100) | round(0) }}%"></div></div>
+
+<main class="wrap">
+  <header class="hero">
+    <div class="hero-eyebrow">Step 1 · Build His Gift</div>
+    <h1 class="hero-title">Pick the car.</h1>
+    <p class="hero-sub">Which one is the one he's been talking about?</p>
+  </header>
+
+  <div class="car-list" role="list">
+    {% for c in cars %}
+      <a class="car-card{% if build.car == c.id %} selected{% endif %}"
+         href="{{ next_url_base }}?car={{ c.id }}&ar={{ build.ar or 0 }}&mbs={{ build.mbs or 0 }}"
+         role="listitem"
+         data-car="{{ c.id }}">
+        <div class="car-photo">
+          <img src="{{ url_for('static', filename='sce-fathersday/' ~ c.image) }}" alt="{{ c.name }}" loading="lazy">
+        </div>
+        <div class="car-info">
+          <h3>{{ c.name }}</h3>
+          <p>{{ c.blurb }}</p>
+        </div>
+        <div class="car-arrow">→</div>
+      </a>
+    {% endfor %}
+  </div>
+</main>
+
+<footer>
+  <div class="phone-cta">Questions? Call <a href="tel:{{ support_phone_tel }}" style="color:var(--text);">{{ support_phone }}</a></div>
+  <div style="margin-top: 12px;"><a href="/sce/sms-privacy">Privacy</a>·<a href="/sce/sms-terms">Terms</a></div>
+  <div style="margin-top: 12px;">© Supercar Experience Boise</div>
+</footer>
+
+</body>
+</html>

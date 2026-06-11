@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Add BBQ gear? · SCE Boise Father's Day</title>
+<link rel="icon" href="data:,">
+{% include "_sce_fd_shell.html" %}
+<style>
+  .partner-card {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 22px;
+    box-shadow: 0 1px 2px rgba(26,26,26,0.025), 0 4px 12px rgba(26,26,26,0.035);
+  }
+  .partner-icon {
+    flex: 0 0 44px; width: 44px; height: 44px;
+    border-radius: 12px; background: #1a1a1a;
+    display: flex; align-items: center; justify-content: center;
+    color: #ff4d00; font-size: 18px; font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .partner-info { flex: 1; min-width: 0; }
+  .partner-name {
+    font-size: 15px; font-weight: 700; color: var(--text);
+    margin-bottom: 2px;
+  }
+  .partner-desc {
+    font-size: 12.5px; color: var(--muted); line-height: 1.45;
+  }
+</style>
+{% if pixel_id %}
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','{{ pixel_id }}');
+fbq('track','PageView');
+</script>
+{% endif %}
+</head>
+<body>
+
+<div class="topbar">Father's Day · <strong>June 21</strong></div>
+
+<nav class="nav">
+  <a class="back" href="{{ back_url }}">Back</a>
+  <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
+  <span class="step-pill">Step {{ step }} of {{ step_total }}</span>
+</nav>
+<div class="progress"><div class="progress-fill" style="width: {{ (step / step_total * 100) | round(0) }}%"></div></div>
+
+<main class="wrap">
+  <header class="hero">
+    <div class="hero-eyebrow">Step 4 · Optional</div>
+    <h1 class="hero-title">Add grilling gear?</h1>
+    <p class="hero-sub">Throw in a gift card to Modern BBQ Supply, the Boise spot for rubs, sauces, and serious cooking tools.</p>
+  </header>
+
+  <div class="partner-card">
+    <div class="partner-icon">MBS</div>
+    <div class="partner-info">
+      <div class="partner-name">Modern BBQ Supply</div>
+      <div class="partner-desc">Gift card redeems in-store. Boise-based.</div>
+    </div>
+  </div>
+
+  <div class="chips three">
+    {% for v in mbs_values %}
+      <a class="chip{% if build.mbs == v %} selected{% endif %}"
+         href="{{ next_url_base }}?car={{ car.id }}&dur={{ duration.id }}&ar={{ build.ar or 0 }}&mbs={{ v }}">
+        ${{ v }}
+      </a>
+    {% endfor %}
+  </div>
+
+  <div class="skip-row">
+    <a class="skip-link"
+       href="{{ next_url_base }}?car={{ car.id }}&dur={{ duration.id }}&ar={{ build.ar or 0 }}&mbs=0">
+      Skip BBQ gear →
+    </a>
+  </div>
+</main>
+
+<footer>
+  <div class="phone-cta">Questions? Call <a href="tel:{{ support_phone_tel }}" style="color:var(--text);">{{ support_phone }}</a></div>
+  <div style="margin-top: 12px;"><a href="/sce/sms-privacy">Privacy</a>·<a href="/sce/sms-terms">Terms</a></div>
+  <div style="margin-top: 12px;">© Supercar Experience Boise</div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>How long? · SCE Boise Father's Day</title>
+<link rel="icon" href="data:,">
+{% include "_sce_fd_shell.html" %}
+<style>
+  /* Selected-car preview header */
+  .picked-car {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 22px;
+    box-shadow: 0 1px 2px rgba(26,26,26,0.025), 0 4px 12px rgba(26,26,26,0.035);
+  }
+  .picked-thumb {
+    flex: 0 0 56px; width: 56px; height: 56px;
+    border-radius: 10px; overflow: hidden; background: #e8e1d6;
+  }
+  .picked-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .picked-info { flex: 1; min-width: 0; }
+  .picked-label {
+    font-size: 10px; letter-spacing: 0.18em;
+    text-transform: uppercase; color: var(--accent);
+    font-weight: 700; margin-bottom: 2px;
+  }
+  .picked-name {
+    font-size: 15px; font-weight: 700;
+    color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* Duration chips — vertical on mobile for clean stacking */
+  .duration-list { display: grid; gap: 12px; grid-template-columns: 1fr; }
+  .dur-card {
+    background: var(--surface);
+    border: 2px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 18px;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text);
+    display: flex; align-items: center; gap: 14px;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.18s;
+  }
+  .dur-card:active { transform: scale(0.99); }
+  .dur-card:hover { border-color: var(--line-strong); }
+  .dur-info { flex: 1; min-width: 0; }
+  .dur-label {
+    font-size: 18px; font-weight: 700; letter-spacing: -0.005em;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+  .dur-desc {
+    font-size: 13px; color: var(--muted); line-height: 1.4;
+  }
+  .dur-price {
+    flex: 0 0 auto;
+    font-size: 17px; font-weight: 700;
+    color: var(--accent);
+    font-feature-settings: "tnum" 1;
+  }
+</style>
+{% if pixel_id %}
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','{{ pixel_id }}');
+fbq('track','PageView');
+</script>
+{% endif %}
+</head>
+<body>
+
+<div class="topbar">Father's Day · <strong>June 21</strong></div>
+
+<nav class="nav">
+  <a class="back" href="{{ back_url }}">Back</a>
+  <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
+  <span class="step-pill">Step {{ step }} of {{ step_total }}</span>
+</nav>
+<div class="progress"><div class="progress-fill" style="width: {{ (step / step_total * 100) | round(0) }}%"></div></div>
+
+<main class="wrap">
+  <div class="picked-car">
+    <div class="picked-thumb"><img src="{{ url_for('static', filename='sce-fathersday/' ~ car.image) }}" alt=""></div>
+    <div class="picked-info">
+      <div class="picked-label">Your pick</div>
+      <div class="picked-name">{{ car.name }}</div>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="hero-eyebrow">Step 2 · Build His Gift</div>
+    <h1 class="hero-title">How long does he drive?</h1>
+    <p class="hero-sub">Half day, full day, or overnight. He picks the day, Nate coordinates pickup.</p>
+  </header>
+
+  <div class="duration-list">
+    {% for d in durations %}
+      <a class="dur-card"
+         href="{{ next_url_base }}?car={{ car.id }}&dur={{ d.id }}&ar={{ build.ar or 0 }}&mbs={{ build.mbs or 0 }}">
+        <div class="dur-info">
+          <div class="dur-label">{{ d.label }}</div>
+          <div class="dur-desc">{{ d.desc }}</div>
+        </div>
+        <div class="dur-price">${{ '{:,}'.format(d.base_price) }}</div>
+      </a>
+    {% endfor %}
+  </div>
+</main>
+
+<footer>
+  <div class="phone-cta">Questions? Call <a href="tel:{{ support_phone_tel }}" style="color:var(--text);">{{ support_phone }}</a></div>
+  <div style="margin-top: 12px;"><a href="/sce/sms-privacy">Privacy</a>·<a href="/sce/sms-terms">Terms</a></div>
+  <div style="margin-top: 12px;">© Supercar Experience Boise</div>
+</footer>
+
+</body>
+</html>
