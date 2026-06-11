@@ -234,7 +234,7 @@ fbq('track','InitiateCheckout', {value: {{ total }}, currency: 'USD'});
 {% elif request.args.get('err') == 'email' %}
   <div class="notice">We need a real email to send the receipt. Try again below.</div>
 {% elif request.args.get('err') == 'stripe' %}
-  <div class="notice">Saved your info, checkout had a hiccup. Nate will reach out within the hour to finish the booking.</div>
+  <div class="notice">Saved your info, checkout had a hiccup. We'll reach out within the hour to finish the booking.</div>
 {% endif %}
 
 <main class="wrap">
@@ -323,7 +323,7 @@ fbq('track','InitiateCheckout', {value: {{ total }}, currency: 'USD'});
   </div>
 
   <div class="redeem-note">
-    <strong>Heads up:</strong> the gift is reservable for Father's Day weekend, but the actual drive day is flexible. Nate will text you to coordinate a day that works for the lead. Free door-to-door delivery within 10 miles of Ten Mile &amp; Franklin.
+    <strong>Heads up:</strong> the gift is reservable for Father's Day, but the actual drive day is flexible. Free door-to-door delivery within 10 miles of Ten Mile &amp; Franklin.
   </div>
 
   <form method="post" action="{{ url_for('sce_fd.optin') }}" id="fdForm" class="form-card">
@@ -339,8 +339,7 @@ fbq('track','InitiateCheckout', {value: {{ total }}, currency: 'USD'});
     <input type="hidden" name="utm_content"  id="utm_content">
     <input type="hidden" name="utm_term"     id="utm_term">
 
-    <h3 class="form-title">Where do we send the receipt?</h3>
-    <p class="form-sub">Stripe sends your receipt. Nate texts to coordinate the drive day.</p>
+    <h3 class="form-title" style="margin-bottom: 18px;">Where do we send the receipt?</h3>
 
     <div class="field-grid">
       <label>
