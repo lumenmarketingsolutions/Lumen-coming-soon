@@ -66,11 +66,11 @@ CAR_BY_ID = {c["id"]: c for c in CARS}
 
 DURATIONS = [
     {"id": "4h",  "label": "4 hours",  "hours": 4,
-     "desc": "Half day. Cruise the canyon, dinner downtown."},
+     "desc": "Half day. Cruise the mountains, dinner downtown."},
     {"id": "8h",  "label": "8 hours",  "hours": 8,
-     "desc": "Full day. Plenty of time for breakfast in Sun Valley."},
+     "desc": "Full day. Real road trip, take the long way home."},
     {"id": "24h", "label": "24 hours", "hours": 24,
-     "desc": "Overnight. Keep it for the full Father's Day weekend run."},
+     "desc": "Keep it for the full Father's Day weekend run."},
 ]
 DURATION_BY_ID = {d["id"]: d for d in DURATIONS}
 
