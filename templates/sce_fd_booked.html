@@ -175,7 +175,15 @@ fbq('track','Purchase', { currency: 'USD', value: 0 }, { eventID: '{{ session_id
 </head>
 <body>
 
-<div class="topbar">You're all set · <strong>Father's Day</strong></div>
+<div class="topbar">
+  <div class="topbar-inner">
+    <span class="topbar-label">You're all set · <strong>Father's Day</strong></span>
+    <span class="topbar-countdown" id="fdCountdown">
+      <span class="cd-dot"></span>
+      <span class="cd-text">…</span>
+    </span>
+  </div>
+</div>
 
 <nav class="nav">
   <a class="wordmark" href="/fathersday">
