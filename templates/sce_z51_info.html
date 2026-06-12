@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Your info · Corvette C8 Z51 · SCE Boise</title>
+<meta name="description" content="Quick info, then live availability.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFFFFF; --surface: #FFFFFF;
+    --surface-muted: #FAFAFB;
+    --text: #1A1A1A; --muted: #5C5C5C;
+    --accent: #ff4d00; --accent-dark: #d94100;
+    --accent-soft: rgba(255, 77, 0, 0.08);
+    --accent-mid: rgba(255, 77, 0, 0.18);
+    --line: rgba(26, 26, 26, 0.07);
+    --line-strong: rgba(26, 26, 26, 0.16);
+    --card-shadow:
+      0 1px 2px rgba(26,26,26,0.04),
+      0 10px 28px rgba(26,26,26,0.06),
+      0 4px 30px rgba(255, 77, 0, 0.04);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 96px;
+    animation: page-fade-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes page-fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; }
+
+  /* ─── Header ─── */
+  .nav {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 14px 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px;
+    min-height: 56px;
+  }
+  .nav-back {
+    color: var(--muted); font-size: 13px; font-weight: 500;
+    white-space: nowrap;
+    padding: 6px 10px 6px 4px;
+    margin-left: -4px;
+    display: inline-flex; align-items: center; gap: 4px;
+    flex: 0 0 auto;
+  }
+  .nav-back::before { content: '←'; font-size: 16px; }
+  .nav-back:hover { color: var(--text); }
+  .nav-logo {
+    display: inline-flex; align-items: center;
+    flex: 0 0 auto;
+  }
+  .nav-logo img {
+    height: 24px; width: auto; display: block;
+    filter: brightness(0); opacity: 0.92;
+  }
+  @media (max-width: 540px) {
+    .nav-inner { padding: 12px 16px; gap: 10px; min-height: 52px; }
+    .nav-logo img { height: 20px; }
+    .nav-back { font-size: 12.5px; }
+  }
+  @media (max-width: 380px) {
+    .nav-logo img { height: 18px; }
+  }
+
+  /* ─── Layout ─── */
+  .wrap {
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 26px 18px 24px;
+  }
+  .hero-meta {
+    text-align: center;
+    margin-bottom: 22px;
+  }
+  .hero-eyebrow {
+    color: var(--accent);
+    font-size: 11px; letter-spacing: 0.24em;
+    text-transform: uppercase; font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .hero-title {
+    font-size: clamp(24px, 6vw, 32px);
+    line-height: 1.15; letter-spacing: -0.015em;
+    font-weight: 800;
+    margin: 0 0 6px;
+  }
+  .hero-sub {
+    color: var(--muted);
+    font-size: clamp(13px, 3.2vw, 15px);
+    margin: 0;
+  }
+
+  /* ─── Summary card ─── */
+  .summary {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+    box-shadow: var(--card-shadow);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .summary-thumb {
+    flex: 0 0 64px; width: 64px; height: 64px;
+    border-radius: 12px; overflow: hidden;
+    background: #1a1a1a;
+  }
+  .summary-thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center;
+  }
+  .summary-info { flex: 1; min-width: 0; }
+  .summary-label {
+    font-size: 10.5px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--accent);
+    font-weight: 700; margin-bottom: 4px;
+  }
+  .summary-car {
+    font-size: 15px; font-weight: 700; letter-spacing: -0.005em;
+    color: var(--text); line-height: 1.2;
+    margin-bottom: 3px;
+  }
+  .summary-dur {
+    font-size: 12.5px; color: var(--muted);
+  }
+  .summary-price {
+    flex: 0 0 auto;
+    font-size: 18px; font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.01em;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* ─── Form card ─── */
+  .form-card {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 22px 20px;
+    box-shadow: var(--card-shadow);
+  }
+  .form-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 18px;
+  }
+  .form-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-size: 13px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: 0 0 28px;
+  }
+  .form-title {
+    font-size: 17px; font-weight: 700; letter-spacing: -0.005em;
+    line-height: 1.2;
+  }
+  .form-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 540px) {
+    .form-grid.row-two { grid-template-columns: 1fr 1fr; }
+  }
+  label { display: block; }
+  .lbl {
+    font-size: 12px; color: var(--muted);
+    margin-bottom: 6px; font-weight: 600; letter-spacing: 0.04em;
+  }
+  input[type=text], input[type=email], input[type=tel], textarea {
+    width: 100%; padding: 14px 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: 11px;
+    background: var(--surface);
+    font-family: inherit; font-size: 16px; color: var(--text);
+    transition: border-color 0.18s, box-shadow 0.18s;
+    -webkit-appearance: none;
+    box-shadow: 0 1px 2px rgba(26, 26, 26, 0.025);
+  }
+  textarea { min-height: 76px; resize: vertical; line-height: 1.5; }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft), 0 1px 2px rgba(26, 26, 26, 0.025);
+  }
+  .consent {
+    display: flex; gap: 10px; align-items: flex-start;
+    color: var(--muted); font-size: 12.5px;
+    margin-top: 4px; line-height: 1.55;
+  }
+  .consent input {
+    margin-top: 3px; flex: 0 0 18px; width: 18px; height: 18px;
+    accent-color: var(--accent);
+  }
+  .secured {
+    text-align: center; color: var(--muted);
+    font-size: 11px; margin-top: 14px;
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  .secured::before { content: '🔒'; margin-right: 6px; opacity: 0.6; }
+
+  /* ─── Sticky CTA ─── */
+  .sticky-cta {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(255,255,255,0.98);
+    backdrop-filter: saturate(180%) blur(10px);
+    -webkit-backdrop-filter: saturate(180%) blur(10px);
+    border-top: 1px solid var(--line);
+    padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+    z-index: 50;
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.06);
+  }
+  .sticky-inner {
+    max-width: 640px; margin: 0 auto;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .sticky-price { flex: 0 0 auto; line-height: 1.1; }
+  .sticky-price .lbl-p {
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;
+  }
+  .sticky-price .v-p {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.015em;
+    color: var(--text);
+    font-feature-settings: "tnum" 1;
+    margin-top: 2px;
+  }
+  .btn {
+    flex: 1 1 auto;
+    background: var(--accent); color: #fff;
+    padding: 16px 18px; border-radius: 12px;
+    font-weight: 700; font-size: 16px;
+    border: 0; cursor: pointer;
+    transition: background 0.15s, transform 0.18s;
+    box-shadow: 0 2px 4px rgba(255, 77, 0, 0.2), 0 8px 22px rgba(255, 77, 0, 0.24);
+  }
+  .btn:hover, .btn:focus { background: var(--accent-dark); }
+  .btn:active { transform: scale(0.985); }
+
+  .notice {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-mid);
+    color: var(--accent-dark);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    margin: 16px auto 0;
+    max-width: 640px;
+    line-height: 1.5;
+  }
+
+  footer {
+    padding: 28px 22px;
+    text-align: center;
+    color: var(--muted); font-size: 12px;
+    margin-top: 22px;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+  }
+  footer a { color: var(--muted); margin: 0 8px; }
+</style>
+{% if pixel_id %}
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','{{ pixel_id }}');
+fbq('track','PageView');
+fbq('track','InitiateCheckout', {content_ids: ['Z51-{{ duration.id|upper }}'], content_type: 'product', value: {{ duration.price }}, currency: 'USD'});
+</script>
+{% endif %}
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a class="nav-back" href="{{ back_url }}">Back</a>
+    <a href="/z51" class="nav-logo" aria-label="Supercar Experience Boise">
+      <img src="{{ url_for('static', filename='sce-z51/logo.webp') }}" alt="Supercar Experience Boise">
+    </a>
+  </div>
+</nav>
+
+{% if request.args.get('err') == 'email' %}
+  <div class="notice">Add your email and try again.</div>
+{% endif %}
+
+<main class="wrap">
+  <header class="hero-meta">
+    <div class="hero-eyebrow">Step 2 · Your info</div>
+    <h1 class="hero-title">Where do we send the receipt?</h1>
+  </header>
+
+  <!-- Summary of selected build -->
+  <div class="summary">
+    <div class="summary-thumb">
+      <img src="{{ url_for('static', filename='sce-z51/c8z51.jpg') }}" alt="Corvette C8 Z51">
+    </div>
+    <div class="summary-info">
+      <div class="summary-label">Your build</div>
+      <div class="summary-car">Corvette C8 Z51</div>
+      <div class="summary-dur">{{ duration.label }}</div>
+    </div>
+    <div class="summary-price">${{ '{:,}'.format(duration.price) }}</div>
+  </div>
+
+  <!-- Contact form -->
+  <form id="resForm" method="post" action="{{ url_for('sce_z51.optin') }}" class="form-card">
+    <input type="hidden" name="duration" value="{{ duration.id }}">
+    <input type="hidden" name="event_id" value="{{ event_id }}">
+    <input type="hidden" name="session_id" id="session_id">
+    <input type="hidden" name="utm_source"   id="utm_source">
+    <input type="hidden" name="utm_medium"   id="utm_medium">
+    <input type="hidden" name="utm_campaign" id="utm_campaign">
+    <input type="hidden" name="utm_content"  id="utm_content">
+    <input type="hidden" name="utm_term"     id="utm_term">
+
+    <div class="form-grid">
+      <label>
+        <div class="lbl">Full name</div>
+        <input type="text" name="name" required autocomplete="name" placeholder="First and last">
+      </label>
+      <div class="form-grid row-two">
+        <label>
+          <div class="lbl">Phone</div>
+          <input type="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="(208) 555-0123">
+        </label>
+        <label>
+          <div class="lbl">Email</div>
+          <input type="email" name="email" required autocomplete="email" inputmode="email" placeholder="you@example.com">
+        </label>
+      </div>
+      <label>
+        <div class="lbl">Anything we should know? (optional)</div>
+        <textarea name="special_notes" placeholder="Specific day in mind, pickup spot, etc."></textarea>
+      </label>
+      <label class="consent">
+        <input type="checkbox" required>
+        <span>I agree to be contacted by Supercar Experience Boise about this inquiry. Standard message and data rates may apply.</span>
+      </label>
+    </div>
+
+    <div class="secured">Next step shows live availability</div>
+  </form>
+</main>
+
+<!-- Sticky CTA -->
+<div class="sticky-cta">
+  <div class="sticky-inner">
+    <div class="sticky-price">
+      <div class="lbl-p">Total</div>
+      <div class="v-p">${{ '{:,}'.format(duration.price) }}</div>
+    </div>
+    <button type="submit" form="resForm" class="btn">See Availability · ${{ '{:,}'.format(duration.price) }}</button>
+  </div>
+</div>
+
+<footer>
+  <div>Questions? Call <a href="tel:{{ support_phone_tel }}" style="color:var(--text);font-weight:600;">{{ support_phone }}</a></div>
+  <div style="margin-top: 12px;">
+    <a href="/sce/sms-privacy">Privacy</a>·<a href="/sce/sms-terms">Terms</a>
+  </div>
+  <div style="margin-top: 12px;">© Supercar Experience Boise</div>
+</footer>
+
+<script>
+  // Pull UTM + session id from localStorage (set on landing page)
+  (function() {
+    ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(function(k) {
+      var v = localStorage.getItem('sce_'+k) || '';
+      var el = document.getElementById(k);
+      if (el) el.value = v;
+    });
+    var sid = localStorage.getItem('sce_z51_sid') ||
+              (Date.now().toString(36) + Math.random().toString(36).slice(2,10));
+    localStorage.setItem('sce_z51_sid', sid);
+    var sidEl = document.getElementById('session_id');
+    if (sidEl) sidEl.value = sid;
+  })();
+
+  // Submit → fire Lead with Advanced Matching, same event_id as server
+  document.getElementById('resForm').addEventListener('submit', function(ev) {
+    if (!window.fbq) return;
+    try {
+      var email = (ev.target.querySelector('[name=email]') || {}).value || '';
+      var phone = ((ev.target.querySelector('[name=phone]') || {}).value || '').replace(/\D/g,'');
+      var name  = ((ev.target.querySelector('[name=name]')  || {}).value || '').trim();
+      var parts = name.split(/\s+/);
+      var fn = (parts[0] || '').toLowerCase();
+      var ln = (parts.slice(1).join(' ') || '').toLowerCase();
+      fbq('init','{{ pixel_id }}', {em: email.toLowerCase(), ph: phone, fn: fn, ln: ln});
+      fbq('track','Lead', {
+        content_name: 'Corvette C8 Z51 inquiry',
+        content_ids: ['Z51-{{ duration.id|upper }}'],
+        value: {{ duration.price }},
+        currency: 'USD'
+      }, {eventID: '{{ event_id }}'});
+    } catch(e) {}
+  });
+
+  // Visit tracking
+  (function() {
+    var sid = localStorage.getItem('sce_z51_sid') || '';
+    if (!sid) return;
+    fetch('/z51/track', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ sid: sid, page: 'info', kind: 'view', ref: document.referrer || '' })
+    }).catch(function(){});
+  })();
+</script>
+
+</body>
+</html>

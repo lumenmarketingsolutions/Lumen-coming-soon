@@ -54,34 +54,13 @@
   .nav-inner {
     max-width: 760px;
     margin: 0 auto;
-    padding: 16px 22px;
+    padding: 14px 22px;
     display: flex; align-items: center; justify-content: space-between;
     gap: 16px;
+    min-height: 56px;
   }
-  .wordmark {
-    font-size: 13px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    font-weight: 700;
-    white-space: nowrap;
-    color: var(--text);
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-  }
-  /* Small accent dot before the wordmark for refinement */
-  .wordmark::before {
-    content: '';
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 0 4px var(--accent-soft);
-    display: inline-block;
-    flex: 0 0 7px;
-  }
-  .wordmark .dot { color: var(--accent); }
   .nav-phone {
-    font-size: 13px; color: var(--muted); font-weight: 500;
+    font-size: 12.5px; color: var(--muted); font-weight: 500;
     white-space: nowrap;
   }
   .nav-phone a {
@@ -95,15 +74,36 @@
     display: inline-block;
   }
   .nav-phone a:hover { background: var(--accent-soft); color: var(--accent); }
+  .nav-back {
+    color: var(--muted); font-size: 13px; font-weight: 500;
+    white-space: nowrap;
+    padding: 6px 10px 6px 4px;
+    margin-left: -4px;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .nav-back::before { content: '←'; font-size: 16px; }
+  .nav-logo {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 0 auto;
+  }
+  .nav-logo img {
+    height: 24px;
+    width: auto;
+    display: block;
+    /* Logo file is light-on-transparent — invert to black for white nav bg */
+    filter: brightness(0);
+    opacity: 0.92;
+  }
   @media (max-width: 540px) {
-    .nav-inner { padding: 14px 16px; gap: 10px; }
-    .wordmark { font-size: 11.5px; letter-spacing: 0.12em; gap: 8px; }
-    .wordmark::before { width: 6px; height: 6px; flex: 0 0 6px; box-shadow: 0 0 0 3px var(--accent-soft); }
+    .nav-inner { padding: 12px 16px; gap: 10px; min-height: 52px; }
     .nav-phone { font-size: 12px; }
-    .nav-phone a { padding: 7px 12px; }
+    .nav-phone a { padding: 7px 11px; }
+    .nav-logo img { height: 20px; }
   }
   @media (max-width: 380px) {
     .nav-phone a { background: transparent; padding: 4px 0; }
+    .nav-logo img { height: 18px; }
   }
 
   /* ─── Hero (framed photo with layered orange-tinted shadow) ─── */
@@ -411,8 +411,10 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
 
 <nav class="nav">
   <div class="nav-inner">
-    <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
     <span class="nav-phone"><a href="tel:{{ support_phone_tel }}">{{ support_phone }}</a></span>
+    <a href="/z51" class="nav-logo" aria-label="Supercar Experience Boise">
+      <img src="{{ url_for('static', filename='sce-z51/logo.webp') }}" alt="Supercar Experience Boise">
+    </a>
   </div>
 </nav>
 
@@ -447,17 +449,8 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
   <p>Mid-engine 6.2L V8. The Z51 Performance Package adds upgraded suspension, sport exhaust, and Brembo brakes. Available now in Boise.</p>
 </section>
 
-<!-- Reservation form -->
-<form id="resForm" method="post" action="{{ url_for('sce_z51.optin') }}" class="builder">
-  <input type="hidden" name="event_id" value="{{ event_id }}">
-  <input type="hidden" name="session_id" id="session_id">
-  <input type="hidden" name="utm_source"   id="utm_source">
-  <input type="hidden" name="utm_medium"   id="utm_medium">
-  <input type="hidden" name="utm_campaign" id="utm_campaign">
-  <input type="hidden" name="utm_content"  id="utm_content">
-  <input type="hidden" name="utm_term"     id="utm_term">
-
-  <!-- 1. Duration -->
+<!-- Step 1 only — pick duration -->
+<div class="builder">
   <div class="step">
     <div class="step-head">
       <span class="step-num">1</span>
@@ -465,52 +458,21 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
     </div>
     <div class="duration-list">
       {% for d in durations %}
-        <label class="dur-card" data-dur="{{ d.id }}" data-price="{{ d.price }}">
-          <input type="radio" name="duration" value="{{ d.id }}" required>
+        <a class="dur-card{% if preset_duration == d.id %} selected{% endif %}"
+           href="{{ url_for('sce_z51.info') }}?dur={{ d.id }}"
+           data-dur="{{ d.id }}" data-price="{{ d.price }}">
           <div class="dur-info">
             <div class="dur-label">{{ d.label }}</div>
             <div class="dur-sub">{{ d.sub }}</div>
           </div>
           <div class="dur-price">${{ '{:,}'.format(d.price) }}</div>
-        </label>
+        </a>
       {% endfor %}
     </div>
   </div>
 
-  <!-- 2. Contact -->
-  <div class="step">
-    <div class="step-head">
-      <span class="step-num">2</span>
-      <span class="step-title">Your info</span>
-    </div>
-    <div class="form-grid">
-      <label>
-        <div class="lbl">Full name</div>
-        <input type="text" name="name" required autocomplete="name" placeholder="First and last">
-      </label>
-      <div class="form-grid row-two">
-        <label>
-          <div class="lbl">Phone</div>
-          <input type="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="(208) 555-0123">
-        </label>
-        <label>
-          <div class="lbl">Email</div>
-          <input type="email" name="email" required autocomplete="email" inputmode="email" placeholder="you@example.com">
-        </label>
-      </div>
-      <label>
-        <div class="lbl">Anything we should know? (optional)</div>
-        <textarea name="special_notes" placeholder="Specific day in mind, pickup spot, etc."></textarea>
-      </label>
-      <label class="consent">
-        <input type="checkbox" required>
-        <span>I agree to be contacted by Supercar Experience Boise about this inquiry. Standard message and data rates may apply.</span>
-      </label>
-    </div>
-  </div>
-
-  <div class="secured">Next step shows live availability</div>
-</form>
+  <div class="secured">Next step is your info, then live availability</div>
+</div>
 
 <!-- Sticky CTA -->
 <div class="sticky-cta">
@@ -519,7 +481,7 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
       <div class="lbl-p">Total</div>
       <div class="v-p" id="stickyTotal">—</div>
     </div>
-    <button type="submit" form="resForm" class="btn disabled" id="stickyBtn">Pick how long</button>
+    <a class="btn disabled" id="stickyBtn" role="button">Pick a duration</a>
   </div>
 </div>
 
@@ -532,45 +494,40 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
 </footer>
 
 <script>
-  // Persist UTM + session
+  // Persist UTM + session in localStorage so step 2 picks them up
   (function() {
     var qs = new URLSearchParams(window.location.search);
-    var keys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
-    keys.forEach(function(k) {
-      var v = qs.get(k) || localStorage.getItem('sce_'+k) || '';
+    ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'].forEach(function(k) {
       if (qs.get(k)) localStorage.setItem('sce_'+k, qs.get(k));
-      var el = document.getElementById(k);
-      if (el) el.value = v;
     });
-    var sid = localStorage.getItem('sce_z51_sid') || (Date.now().toString(36) + Math.random().toString(36).slice(2,10));
-    localStorage.setItem('sce_z51_sid', sid);
-    var sidEl = document.getElementById('session_id');
-    if (sidEl) sidEl.value = sid;
+    if (!localStorage.getItem('sce_z51_sid')) {
+      localStorage.setItem('sce_z51_sid', Date.now().toString(36) + Math.random().toString(36).slice(2,10));
+    }
   })();
 
-  // Duration selection → update sticky CTA
-  var selectedPrice = null;
+  // Duration card hover-preview updates sticky CTA so the user sees pricing
+  // before they commit by clicking. AddToCart fires on click (via href nav).
+  var btn = document.getElementById('stickyBtn');
+  var total = document.getElementById('stickyTotal');
   document.querySelectorAll('.dur-card').forEach(function(el) {
-    el.addEventListener('click', function() {
-      document.querySelectorAll('.dur-card').forEach(function(s) { s.classList.remove('selected'); });
-      el.classList.add('selected');
-      var input = el.querySelector('input');
-      if (input) input.checked = true;
-      selectedPrice = parseInt(el.getAttribute('data-price'), 10) || 0;
-
-      var fmt = '$' + selectedPrice.toLocaleString('en-US');
-      document.getElementById('stickyTotal').textContent = fmt;
-      var btn = document.getElementById('stickyBtn');
+    function preview() {
+      var price = parseInt(el.getAttribute('data-price'), 10) || 0;
+      var fmt = '$' + price.toLocaleString('en-US');
+      total.textContent = fmt;
       btn.classList.remove('disabled');
-      btn.textContent = 'See Availability · ' + fmt;
-
-      // AddToCart fbq event
+      btn.textContent = 'Continue · ' + fmt;
+      btn.setAttribute('href', el.getAttribute('href'));
+    }
+    el.addEventListener('mouseenter', preview);
+    el.addEventListener('focus', preview);
+    el.addEventListener('touchstart', preview, {passive: true});
+    el.addEventListener('click', function() {
       try {
         if (window.fbq) {
           fbq('track','AddToCart', {
             content_ids: ['Z51-' + el.getAttribute('data-dur').toUpperCase()],
             content_type: 'product',
-            value: selectedPrice,
+            value: parseInt(el.getAttribute('data-price'), 10),
             currency: 'USD'
           });
         }
@@ -578,48 +535,15 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
     });
   });
 
-  // Submit → fire Lead event with Advanced Matching
-  document.getElementById('resForm').addEventListener('submit', function(ev) {
-    if (selectedPrice == null) {
-      ev.preventDefault();
-      alert('Pick how long you want it first.');
-      return;
-    }
-    if (!window.fbq) return;
-    try {
-      var email = (ev.target.querySelector('[name=email]') || {}).value || '';
-      var phone = ((ev.target.querySelector('[name=phone]') || {}).value || '').replace(/\D/g,'');
-      var name  = ((ev.target.querySelector('[name=name]')  || {}).value || '').trim();
-      var parts = name.split(/\s+/);
-      var fn = (parts[0] || '').toLowerCase();
-      var ln = (parts.slice(1).join(' ') || '').toLowerCase();
-      fbq('init','{{ pixel_id }}', {em: email.toLowerCase(), ph: phone, fn: fn, ln: ln});
-      fbq('track','Lead', {
-        content_name: 'Corvette C8 Z51 inquiry',
-        content_ids: ['Z51'],
-        value: selectedPrice,
-        currency: 'USD'
-      }, {eventID: '{{ event_id }}'});
-    } catch(e) {}
-  });
-
   // Visit tracking
   (function() {
-    var sid = (document.getElementById('session_id') || {}).value || '';
+    var sid = localStorage.getItem('sce_z51_sid') || '';
     if (!sid) return;
     fetch('/z51/track', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ sid: sid, page: 'landing', kind: 'view', ref: document.referrer || '' })
     }).catch(function(){});
-    var startedAt = Date.now();
-    window.addEventListener('beforeunload', function() {
-      var ms = Date.now() - startedAt;
-      navigator.sendBeacon && navigator.sendBeacon(
-        '/z51/track',
-        new Blob([JSON.stringify({sid: sid, page: 'landing', kind: 'time', ms: ms})], {type:'application/json'})
-      );
-    });
   })();
 </script>
 

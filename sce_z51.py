@@ -275,10 +275,29 @@ def _ctx():
 
 @sce_z51_bp.route("/z51")
 def landing():
-    event_id = uuid.uuid4().hex
+    # Step 1 — pick duration. Preserve any preset choice via ?dur=...
+    preset = (request.args.get("dur") or "").strip()
     return render_template(
         "sce_z51_landing.html",
-        durations=DURATIONS, event_id=event_id,
+        durations=DURATIONS,
+        preset_duration=preset if preset in DURATION_BY_ID else "",
+        **_ctx(),
+    )
+
+
+@sce_z51_bp.route("/z51/info")
+def info():
+    # Step 2 — contact form. Requires a duration in query params.
+    duration_id = (request.args.get("dur") or "").strip()
+    if duration_id not in DURATION_BY_ID:
+        return redirect(url_for("sce_z51.landing"))
+    duration = DURATION_BY_ID[duration_id]
+    event_id = uuid.uuid4().hex
+    return render_template(
+        "sce_z51_info.html",
+        duration=duration,
+        event_id=event_id,
+        back_url=url_for("sce_z51.landing") + f"?dur={duration_id}",
         **_ctx(),
     )
 
