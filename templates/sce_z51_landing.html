@@ -46,11 +46,15 @@
   .topbar strong { color: var(--accent); font-weight: 600; }
 
   .nav {
-    padding: 12px 16px;
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 10px;
     background: var(--surface);
     border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 12px 22px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px;
   }
   .wordmark {
     font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
@@ -63,25 +67,33 @@
   }
   .nav-phone a { color: var(--text); font-weight: 600; }
   @media (max-width: 540px) {
+    .nav-inner { padding: 12px 16px; }
     .wordmark { font-size: 11px; letter-spacing: 0.1em; }
   }
   @media (max-width: 360px) {
     .nav-phone { display: none; }
   }
 
-  /* ─── Hero (full-width photo) ─── */
+  /* ─── Hero (full-width photo, edge-to-edge) ─── */
   .hero-photo {
-    aspect-ratio: 16 / 10;
+    width: 100%;
+    height: 56vh;
+    min-height: 280px;
+    max-height: 620px;
     background: #1a1a1a;
     overflow: hidden;
     position: relative;
   }
-  @media (min-width: 720px) {
-    .hero-photo { aspect-ratio: 21 / 9; max-height: 520px; }
+  @media (min-width: 1100px) {
+    .hero-photo { height: 62vh; max-height: 680px; }
+  }
+  @media (max-width: 540px) {
+    .hero-photo { height: 44vh; min-height: 240px; }
   }
   .hero-photo img {
     width: 100%; height: 100%;
     object-fit: cover; object-position: center;
+    display: block;
   }
 
   .hero-meta {
@@ -365,8 +377,10 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
 <div class="topbar">Boise · <strong>New Arrival</strong></div>
 
 <nav class="nav">
-  <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
-  <span class="nav-phone">Call <a href="tel:{{ support_phone_tel }}">{{ support_phone }}</a></span>
+  <div class="nav-inner">
+    <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
+    <span class="nav-phone">Call <a href="tel:{{ support_phone_tel }}">{{ support_phone }}</a></span>
+  </div>
 </nav>
 
 {% if request.args.get('err') == 'email' %}
@@ -394,17 +408,9 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
   <div class="spec"><div class="spec-label">Color</div><div class="spec-val">Torch Red</div></div>
 </section>
 
-<!-- Reassurance -->
-<section class="reassurance">
-  <div class="r"><strong>Real availability</strong>Live calendar</div>
-  <div class="r"><strong>Free delivery</strong>10 miles of Boise</div>
-  <div class="r"><strong>BYO insurance</strong>Full coverage</div>
-</section>
-
 <!-- Story / description -->
 <section class="story">
-  <p>The Corvette C8 Z51 proves America builds supercars. Finished in Torch Red, it packs a 6.2-liter V8 with 495 horsepower, launching you to 60 mph in under 3 seconds with a sound that turns heads from a block away.</p>
-  <p>The Z51 Performance Package brings upgraded exhaust, suspension, and enlarged Brembo brakes, making it as capable on a canyon road as it is jaw-dropping in a parking lot. This is the car that changed what a Corvette is, and once you drive it, you'll understand why.</p>
+  <p>Mid-engine 6.2L V8. The Z51 Performance Package adds upgraded suspension, sport exhaust, and Brembo brakes. Available now in Boise.</p>
 </section>
 
 <!-- Reservation form -->
@@ -469,7 +475,7 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
     </div>
   </div>
 
-  <div class="secured">Next step shows live availability via Valara</div>
+  <div class="secured">Next step shows live availability</div>
 </form>
 
 <!-- Sticky CTA -->
