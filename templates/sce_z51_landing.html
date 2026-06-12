@@ -11,13 +11,22 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #FAF7F2; --surface: #FFFFFF;
+    --bg: #FFFFFF; --surface: #FFFFFF;
+    --surface-muted: #FAFAFB;
     --text: #1A1A1A; --muted: #5C5C5C;
     --accent: #ff4d00; --accent-dark: #d94100;
     --accent-soft: rgba(255, 77, 0, 0.08);
     --accent-mid: rgba(255, 77, 0, 0.18);
-    --line: rgba(26, 26, 26, 0.08);
-    --line-strong: rgba(26, 26, 26, 0.18);
+    --line: rgba(26, 26, 26, 0.07);
+    --line-strong: rgba(26, 26, 26, 0.16);
+    /* Layered card shadow with subtle orange accent for warm depth */
+    --card-shadow:
+      0 1px 2px rgba(26,26,26,0.04),
+      0 10px 28px rgba(26,26,26,0.06),
+      0 4px 30px rgba(255, 77, 0, 0.04);
+    --card-shadow-soft:
+      0 1px 2px rgba(26,26,26,0.03),
+      0 6px 20px rgba(26,26,26,0.045);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
@@ -74,21 +83,32 @@
     .nav-phone { display: none; }
   }
 
-  /* ─── Hero (full-width photo, edge-to-edge) ─── */
+  /* ─── Hero (framed photo with layered orange-tinted shadow) ─── */
+  .hero-wrap {
+    max-width: 1080px;
+    margin: 22px auto 0;
+    padding: 0 18px;
+  }
   .hero-photo {
     width: 100%;
-    height: 56vh;
+    height: 52vh;
     min-height: 280px;
-    max-height: 620px;
+    max-height: 560px;
     background: #1a1a1a;
     overflow: hidden;
+    border-radius: 22px;
+    box-shadow:
+      0 2px 4px rgba(26,26,26,0.06),
+      0 20px 50px rgba(26,26,26,0.12),
+      0 10px 40px rgba(255, 77, 0, 0.10);
     position: relative;
   }
   @media (min-width: 1100px) {
-    .hero-photo { height: 62vh; max-height: 680px; }
+    .hero-photo { height: 58vh; max-height: 640px; }
   }
   @media (max-width: 540px) {
-    .hero-photo { height: 44vh; min-height: 240px; }
+    .hero-wrap { margin-top: 16px; padding: 0 14px; }
+    .hero-photo { height: 42vh; min-height: 240px; border-radius: 18px; }
   }
   .hero-photo img {
     width: 100%; height: 100%;
@@ -98,7 +118,7 @@
 
   .hero-meta {
     max-width: 720px; margin: 0 auto;
-    padding: 24px 22px 8px;
+    padding: 26px 22px 4px;
     text-align: center;
   }
   .hero-eyebrow {
@@ -111,12 +131,6 @@
     font-size: clamp(28px, 6.5vw, 40px);
     line-height: 1.1; letter-spacing: -0.02em;
     font-weight: 800;
-    margin: 0 0 8px;
-  }
-  .hero-sub {
-    color: var(--muted);
-    font-size: clamp(14px, 3.4vw, 16px);
-    font-weight: 500;
     margin: 0;
   }
 
@@ -126,15 +140,14 @@
     padding: 0 18px;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
+    gap: 10px;
   }
   .spec {
     background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 12px 8px;
+    border-radius: 14px;
+    padding: 14px 8px;
     text-align: center;
-    box-shadow: 0 1px 2px rgba(26,26,26,0.025);
+    box-shadow: var(--card-shadow-soft);
   }
   .spec-label {
     font-size: 9.5px; letter-spacing: 0.14em;
@@ -174,11 +187,10 @@
   }
   .step {
     background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 16px;
+    border-radius: 18px;
     padding: 22px 20px;
     margin-bottom: 16px;
-    box-shadow: 0 1px 2px rgba(26,26,26,0.025), 0 6px 16px rgba(26,26,26,0.035);
+    box-shadow: var(--card-shadow);
   }
   .step-head {
     display: flex; align-items: center; gap: 12px;
@@ -199,8 +211,8 @@
   /* ─── Duration list ─── */
   .duration-list { display: grid; gap: 10px; grid-template-columns: 1fr; }
   .dur-card {
-    background: var(--surface);
-    border: 2px solid var(--line);
+    background: var(--surface-muted);
+    border: 2px solid transparent;
     border-radius: 13px;
     padding: 14px 16px;
     cursor: pointer;
@@ -389,15 +401,16 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
   <div class="notice">Pick how long you want it.</div>
 {% endif %}
 
-<!-- Hero photo -->
-<div class="hero-photo">
-  <img src="{{ url_for('static', filename='sce-z51/c8z51.jpg') }}" alt="Corvette C8 Z51 in Torch Red">
+<!-- Hero photo (framed) -->
+<div class="hero-wrap">
+  <div class="hero-photo">
+    <img src="{{ url_for('static', filename='sce-z51/c8z51.jpg') }}" alt="Corvette C8 Z51 in Torch Red">
+  </div>
 </div>
 
 <header class="hero-meta">
   <div class="hero-eyebrow">New to the fleet</div>
   <h1 class="hero-title">Corvette C8 Z51</h1>
-  <p class="hero-sub">Torch Red. 495hp. 0–60 in under 3 seconds.</p>
 </header>
 
 <!-- Specs strip -->
