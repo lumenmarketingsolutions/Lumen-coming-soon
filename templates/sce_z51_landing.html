@@ -46,41 +46,64 @@
   a { color: inherit; text-decoration: none; }
   button { font-family: inherit; }
 
-  /* ─── Topbar / Nav ─── */
-  .topbar {
-    background: #1A1A1A; color: #fff;
-    text-align: center; padding: 11px 24px;
-    font-size: 13px; letter-spacing: 0.04em;
-  }
-  .topbar strong { color: var(--accent); font-weight: 600; }
-
+  /* ─── Header (single refined bar) ─── */
   .nav {
     background: var(--surface);
     border-bottom: 1px solid var(--line);
   }
   .nav-inner {
-    max-width: 1080px;
+    max-width: 760px;
     margin: 0 auto;
-    padding: 12px 22px;
+    padding: 16px 22px;
     display: flex; align-items: center; justify-content: space-between;
-    gap: 10px;
+    gap: 16px;
   }
   .wordmark {
-    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
-    font-weight: 700; white-space: nowrap;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  /* Small accent dot before the wordmark for refinement */
+  .wordmark::before {
+    content: '';
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft);
+    display: inline-block;
+    flex: 0 0 7px;
   }
   .wordmark .dot { color: var(--accent); }
   .nav-phone {
-    font-size: 12px; color: var(--muted); font-weight: 500;
+    font-size: 13px; color: var(--muted); font-weight: 500;
     white-space: nowrap;
   }
-  .nav-phone a { color: var(--text); font-weight: 600; }
-  @media (max-width: 540px) {
-    .nav-inner { padding: 12px 16px; }
-    .wordmark { font-size: 11px; letter-spacing: 0.1em; }
+  .nav-phone a {
+    color: var(--text); font-weight: 700;
+    letter-spacing: -0.005em;
+    font-feature-settings: "tnum" 1;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--surface-muted);
+    transition: background 0.15s, color 0.15s;
+    display: inline-block;
   }
-  @media (max-width: 360px) {
-    .nav-phone { display: none; }
+  .nav-phone a:hover { background: var(--accent-soft); color: var(--accent); }
+  @media (max-width: 540px) {
+    .nav-inner { padding: 14px 16px; gap: 10px; }
+    .wordmark { font-size: 11.5px; letter-spacing: 0.12em; gap: 8px; }
+    .wordmark::before { width: 6px; height: 6px; flex: 0 0 6px; box-shadow: 0 0 0 3px var(--accent-soft); }
+    .nav-phone { font-size: 12px; }
+    .nav-phone a { padding: 7px 12px; }
+  }
+  @media (max-width: 380px) {
+    .nav-phone a { background: transparent; padding: 4px 0; }
   }
 
   /* ─── Hero (framed photo with layered orange-tinted shadow) ─── */
@@ -386,12 +409,10 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
 </head>
 <body>
 
-<div class="topbar">Boise · <strong>New Arrival</strong></div>
-
 <nav class="nav">
   <div class="nav-inner">
     <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
-    <span class="nav-phone">Call <a href="tel:{{ support_phone_tel }}">{{ support_phone }}</a></span>
+    <span class="nav-phone"><a href="tel:{{ support_phone_tel }}">{{ support_phone }}</a></span>
   </div>
 </nav>
 
