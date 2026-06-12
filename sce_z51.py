@@ -38,19 +38,12 @@ sce_z51_bp = Blueprint("sce_z51", __name__)
 
 BASE_URL = os.environ.get("Z51_BASE_URL", "https://supercarexp.lumenmarketing.co")
 
-# The full Valara iframe booking URL (single-use signed link for this product).
-# Update if Nate regenerates the signed link.
-VALARA_IFRAME_URL = (
-    "https://app.valara.io/iframe/products/68dc7cb7-8028-4ee6-865a-4a0b32a3d62c"
-    "?sig=aHEvb2R4YmxYWEVnV0dMUmNqVnBKSDNRT1pSeW92WFI5c2JjTTZRL3F3d2VraUFvZzhpVXM4VU9BcWZxWGw2"
-    "d2xjVHJJaytIeENmWE9nNVVMTEg3djJrdTE0ZnJJSzVESW8yY1ZDRHowRXRQM29hUEdwM1BwMnRMUnRac2pkZ242"
-    "TW8xL2dkTHRmbXVBeTBCL28zU2xsZkdpOXZ0NFl3cUpZMW01RmJzYjNFYUtNZUFCVWFJTk0yMUhUNkYrR3U1Z0s2"
-    "ZGwzZGthUzd5VVJpczFLZFg2Z0NtdjNZQmlWU2xEMGZjMTRaTlhoaitLQ3J1RmZySmFFbWs5ZFBwRktCY29rc1Z2"
-    "Si9lNC96NlVkRUh4RE80V2FIYWtrM3cyM3E1b0JZUW1TUHE4S1k4Q1ZDNFhvND0tLWZ6aWp4TDQrbUlaS25iSlAt"
-    "LW11Y00wQjhPYXEwekNodmRMM1I4a2c9PQ"
-    "&text=Show+Availability&color=%23ff4d00&text_color=%23FFFFFF"
-    "&ref=https%3A%2F%2Fsupercarexp.lumenmarketing.co%2Fz51"
-)
+# Valara product page (top-level URL, NOT the embed widget).
+# The widget URL (/iframe/products/...) is meant to be embedded inside another
+# page; loading it as a full page or wrapping it in another iframe puts its
+# modal logic in a broken layout state. The /products/<id> URL is the actual
+# customer-facing booking page designed for full-page display.
+VALARA_PRODUCT_URL = "https://app.valara.io/products/68dc7cb7-8028-4ee6-865a-4a0b32a3d62c"
 
 # Duration menu — labels + price displayed in the picker.
 # Prices sourced from Valara bookings_calendar/available_slots, 2026-06-12.
@@ -149,7 +142,7 @@ def _format_boise_now():
 
 
 def _build_valara_url(*, email, name, phone):
-    """Append customer info to Valara iframe URL as a maybe-prefill attempt.
+    """Append customer info to Valara product URL as a maybe-prefill attempt.
 
     Valara may or may not honor these params — if they do, the customer
     skips re-entering their info at checkout. If they don't, the params
@@ -165,8 +158,9 @@ def _build_valara_url(*, email, name, phone):
     if phone:
         extras.append(f"customer_phone={requests.utils.quote(phone)}")
         extras.append(f"phone={requests.utils.quote(phone)}")
-    sep = "&" if "?" in VALARA_IFRAME_URL else "?"
-    return VALARA_IFRAME_URL + (sep + "&".join(extras) if extras else "")
+    if not extras:
+        return VALARA_PRODUCT_URL
+    return VALARA_PRODUCT_URL + "?" + "&".join(extras)
 
 
 # ─────────────────────── Lead email ───────────────────────
@@ -393,17 +387,12 @@ def optin():
         },
     )
 
-    # Render our own page with the Valara iframe embedded so mobile viewport
-    # sizing is correct. Loading the Valara iframe URL directly in the
-    # browser bypasses its intended container sizing and ends up zoomed/
-    # off-center on phones.
-    valara_url = _build_valara_url(email=email, name=name, phone=phone)
-    return render_template(
-        "sce_z51_book.html",
-        valara_url=valara_url,
-        duration=duration,
-        **_ctx(),
-    )
+    # Redirect directly to Valara's full-page product URL. The /products/<id>
+    # variant is designed for top-level display and handles its own mobile
+    # viewport correctly. (Earlier attempts to embed the /iframe/ widget URL
+    # broke the modal layout because that widget expects to overlay a host
+    # page, not be wrapped in another iframe.)
+    return redirect(_build_valara_url(email=email, name=name, phone=phone))
 
 
 @sce_z51_bp.route("/z51/track", methods=["POST", "OPTIONS"])
