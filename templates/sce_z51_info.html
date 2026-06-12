@@ -34,9 +34,12 @@
     padding-bottom: 96px;
     animation: page-fade-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
+  /* Opacity-only fade so body doesn't have a lingering transform — otherwise
+     it becomes the containing block for position: fixed and the sticky CTA
+     gets pinned to the document bottom instead of the viewport. */
   @keyframes page-fade-in {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
   img { max-width: 100%; display: block; }
   a { color: inherit; text-decoration: none; }
