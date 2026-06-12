@@ -393,8 +393,17 @@ def optin():
         },
     )
 
-    # Redirect to Valara iframe — append customer info as maybe-prefill
-    return redirect(_build_valara_url(email=email, name=name, phone=phone))
+    # Render our own page with the Valara iframe embedded so mobile viewport
+    # sizing is correct. Loading the Valara iframe URL directly in the
+    # browser bypasses its intended container sizing and ends up zoomed/
+    # off-center on phones.
+    valara_url = _build_valara_url(email=email, name=name, phone=phone)
+    return render_template(
+        "sce_z51_book.html",
+        valara_url=valara_url,
+        duration=duration,
+        **_ctx(),
+    )
 
 
 @sce_z51_bp.route("/z51/track", methods=["POST", "OPTIONS"])
