@@ -38,12 +38,22 @@ sce_z51_bp = Blueprint("sce_z51", __name__)
 
 BASE_URL = os.environ.get("Z51_BASE_URL", "https://supercarexp.lumenmarketing.co")
 
-# Valara product page (top-level URL, NOT the embed widget).
-# The widget URL (/iframe/products/...) is meant to be embedded inside another
-# page; loading it as a full page or wrapping it in another iframe puts its
-# modal logic in a broken layout state. The /products/<id> URL is the actual
-# customer-facing booking page designed for full-page display.
-VALARA_PRODUCT_URL = "https://app.valara.io/products/68dc7cb7-8028-4ee6-865a-4a0b32a3d62c"
+# Valara signed iframe URL (the `sig` token authorizes public access to this
+# product without needing a login). We previously tried the bare /products/<id>
+# URL — it returned 200 to curl but the SPA bounced unauth users to the Valara
+# login page and showed 404s. The /iframe/ URL with the sig token is the only
+# variant that works for public customers.
+VALARA_PRODUCT_URL = (
+    "https://app.valara.io/iframe/products/68dc7cb7-8028-4ee6-865a-4a0b32a3d62c"
+    "?sig=aHEvb2R4YmxYWEVnV0dMUmNqVnBKSDNRT1pSeW92WFI5c2JjTTZRL3F3d2VraUFvZzhpVXM4VU9BcWZxWGw2"
+    "d2xjVHJJaytIeENmWE9nNVVMTEg3djJrdTE0ZnJJSzVESW8yY1ZDRHowRXRQM29hUEdwM1BwMnRMUnRac2pkZ242"
+    "TW8xL2dkTHRmbXVBeTBCL28zU2xsZkdpOXZ0NFl3cUpZMW01RmJzYjNFYUtNZUFCVWFJTk0yMUhUNkYrR3U1Z0s2"
+    "ZGwzZGthUzd5VVJpczFLZFg2Z0NtdjNZQmlWU2xEMGZjMTRaTlhoaitLQ3J1RmZySmFFbWs5ZFBwRktCY29rc1Z2"
+    "Si9lNC96NlVkRUh4RE80V2FIYWtrM3cyM3E1b0JZUW1TUHE4S1k4Q1ZDNFhvND0tLWZ6aWp4TDQrbUlaS25iSlAt"
+    "LW11Y00wQjhPYXEwekNodmRMM1I4a2c9PQ"
+    "&text=Show+Availability&color=%23ff4d00&text_color=%23FFFFFF"
+    "&ref=https%3A%2F%2Fsupercarexp.lumenmarketing.co%2Fz51"
+)
 
 # Duration menu — labels + price displayed in the picker.
 # Prices sourced from Valara bookings_calendar/available_slots, 2026-06-12.
