@@ -224,8 +224,14 @@ fbq('track','InitiateCheckout', {value: {{ total }}, currency: 'USD'});
 
 <nav class="nav">
   <a class="back" href="{{ back_url }}">Back</a>
-  <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
-  <span class="step-pill">Step {{ step }} of {{ step_total }}</span>
+  <span class="wordmark">
+    <span class="wm-long">Supercar Experience<span class="dot"> · </span>Boise</span>
+    <span class="wm-short">SCE<span class="dot"> · </span>Boise</span>
+  </span>
+  <span class="step-pill">
+    <span class="sp-long">Step {{ step }} of {{ step_total }}</span>
+    <span class="sp-short">{{ step }} / {{ step_total }}</span>
+  </span>
 </nav>
 <div class="progress"><div class="progress-fill" style="width: {{ (step / step_total * 100) | round(0) }}%"></div></div>
 
