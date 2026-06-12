@@ -1,0 +1,587 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rent the Corvette C8 Z51 · SCE Boise</title>
+<meta name="description" content="The Corvette that changed what a Corvette is. 495hp Torch Red C8 Z51, now available in Boise.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FAF7F2; --surface: #FFFFFF;
+    --text: #1A1A1A; --muted: #5C5C5C;
+    --accent: #ff4d00; --accent-dark: #d94100;
+    --accent-soft: rgba(255, 77, 0, 0.08);
+    --accent-mid: rgba(255, 77, 0, 0.18);
+    --line: rgba(26, 26, 26, 0.08);
+    --line-strong: rgba(26, 26, 26, 0.18);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    padding-bottom: 96px;          /* room for sticky CTA */
+    animation: page-fade-in 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  @keyframes page-fade-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; }
+
+  /* ─── Topbar / Nav ─── */
+  .topbar {
+    background: #1A1A1A; color: #fff;
+    text-align: center; padding: 11px 24px;
+    font-size: 13px; letter-spacing: 0.04em;
+  }
+  .topbar strong { color: var(--accent); font-weight: 600; }
+
+  .nav {
+    padding: 12px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 10px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+  }
+  .wordmark {
+    font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+    font-weight: 700; white-space: nowrap;
+  }
+  .wordmark .dot { color: var(--accent); }
+  .nav-phone {
+    font-size: 12px; color: var(--muted); font-weight: 500;
+    white-space: nowrap;
+  }
+  .nav-phone a { color: var(--text); font-weight: 600; }
+  @media (max-width: 540px) {
+    .wordmark { font-size: 11px; letter-spacing: 0.1em; }
+  }
+  @media (max-width: 360px) {
+    .nav-phone { display: none; }
+  }
+
+  /* ─── Hero (full-width photo) ─── */
+  .hero-photo {
+    aspect-ratio: 16 / 10;
+    background: #1a1a1a;
+    overflow: hidden;
+    position: relative;
+  }
+  @media (min-width: 720px) {
+    .hero-photo { aspect-ratio: 21 / 9; max-height: 520px; }
+  }
+  .hero-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center;
+  }
+
+  .hero-meta {
+    max-width: 720px; margin: 0 auto;
+    padding: 24px 22px 8px;
+    text-align: center;
+  }
+  .hero-eyebrow {
+    color: var(--accent);
+    font-size: 11px; letter-spacing: 0.24em;
+    text-transform: uppercase; font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .hero-title {
+    font-size: clamp(28px, 6.5vw, 40px);
+    line-height: 1.1; letter-spacing: -0.02em;
+    font-weight: 800;
+    margin: 0 0 8px;
+  }
+  .hero-sub {
+    color: var(--muted);
+    font-size: clamp(14px, 3.4vw, 16px);
+    font-weight: 500;
+    margin: 0;
+  }
+
+  /* ─── Specs strip ─── */
+  .specs {
+    max-width: 720px; margin: 22px auto 0;
+    padding: 0 18px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .spec {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 8px;
+    text-align: center;
+    box-shadow: 0 1px 2px rgba(26,26,26,0.025);
+  }
+  .spec-label {
+    font-size: 9.5px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 3px;
+  }
+  .spec-val {
+    font-size: 14px; font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.005em;
+    line-height: 1.1;
+  }
+  @media (min-width: 540px) {
+    .spec { padding: 14px 10px; }
+    .spec-val { font-size: 17px; }
+    .spec-label { font-size: 10.5px; }
+  }
+
+  /* ─── Story / description ─── */
+  .story {
+    max-width: 640px; margin: 28px auto 0;
+    padding: 0 22px;
+  }
+  .story p {
+    color: var(--text);
+    font-size: clamp(15px, 3.4vw, 16.5px);
+    line-height: 1.65;
+    margin: 0 0 14px;
+  }
+  .story p:last-child { margin-bottom: 0; }
+
+  /* ─── Builder steps ─── */
+  .builder {
+    max-width: 640px; margin: 0 auto;
+    padding: 28px 18px 30px;
+  }
+  .step {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 22px 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 2px rgba(26,26,26,0.025), 0 6px 16px rgba(26,26,26,0.035);
+  }
+  .step-head {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 18px;
+  }
+  .step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-size: 13px; font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: 0 0 28px;
+  }
+  .step-title {
+    font-size: 17px; font-weight: 700; letter-spacing: -0.005em;
+    line-height: 1.2;
+  }
+
+  /* ─── Duration list ─── */
+  .duration-list { display: grid; gap: 10px; grid-template-columns: 1fr; }
+  .dur-card {
+    background: var(--surface);
+    border: 2px solid var(--line);
+    border-radius: 13px;
+    padding: 14px 16px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 14px;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.18s, background 0.15s;
+  }
+  .dur-card:active { transform: scale(0.992); }
+  .dur-card:hover { border-color: var(--line-strong); }
+  .dur-card input { display: none; }
+  .dur-card.selected {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    box-shadow: 0 4px 14px rgba(255, 77, 0, 0.16);
+  }
+  .dur-info { flex: 1; min-width: 0; }
+  .dur-label {
+    font-size: 16px; font-weight: 700;
+    letter-spacing: -0.005em;
+    line-height: 1.2;
+    margin-bottom: 2px;
+  }
+  .dur-sub {
+    font-size: 12.5px; color: var(--muted);
+    line-height: 1.35;
+  }
+  .dur-price {
+    flex: 0 0 auto;
+    font-size: 17px; font-weight: 800;
+    color: var(--accent);
+    font-feature-settings: "tnum" 1;
+    letter-spacing: -0.01em;
+  }
+
+  /* ─── Form fields ─── */
+  .form-grid { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 540px) {
+    .form-grid.row-two { grid-template-columns: 1fr 1fr; }
+  }
+  label { display: block; }
+  .lbl {
+    font-size: 12px; color: var(--muted);
+    margin-bottom: 6px; font-weight: 600; letter-spacing: 0.04em;
+  }
+  input[type=text], input[type=email], input[type=tel], textarea {
+    width: 100%; padding: 14px 14px;
+    border: 1px solid var(--line-strong);
+    border-radius: 11px;
+    background: var(--surface);
+    font-family: inherit; font-size: 16px; color: var(--text);
+    transition: border-color 0.18s, box-shadow 0.18s;
+    -webkit-appearance: none;
+    box-shadow: 0 1px 2px rgba(26, 26, 26, 0.025);
+  }
+  textarea { min-height: 76px; resize: vertical; line-height: 1.5; }
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft), 0 1px 2px rgba(26, 26, 26, 0.025);
+  }
+  .consent {
+    display: flex; gap: 10px; align-items: flex-start;
+    color: var(--muted); font-size: 12.5px;
+    margin-top: 6px; line-height: 1.55;
+  }
+  .consent input {
+    margin-top: 3px; flex: 0 0 18px; width: 18px; height: 18px;
+    accent-color: var(--accent);
+  }
+
+  /* ─── Reassurance row ─── */
+  .reassurance {
+    max-width: 640px; margin: 12px auto 0;
+    padding: 0 22px;
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    font-size: 12px; color: var(--muted);
+    text-align: center;
+  }
+  .reassurance .r {
+    background: rgba(26,26,26,0.025);
+    border-radius: 10px;
+    padding: 9px 6px;
+    line-height: 1.3;
+  }
+  .reassurance .r strong { color: var(--text); font-weight: 700; display: block; font-size: 13px; }
+  @media (max-width: 380px) {
+    .reassurance { grid-template-columns: 1fr; }
+  }
+
+  /* ─── Sticky CTA ─── */
+  .sticky-cta {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: rgba(255,255,255,0.98);
+    backdrop-filter: saturate(180%) blur(10px);
+    -webkit-backdrop-filter: saturate(180%) blur(10px);
+    border-top: 1px solid var(--line);
+    padding: 12px 18px calc(12px + env(safe-area-inset-bottom));
+    z-index: 50;
+    box-shadow: 0 -8px 24px rgba(0,0,0,0.06);
+  }
+  .sticky-inner {
+    max-width: 640px; margin: 0 auto;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .sticky-price {
+    flex: 0 0 auto; line-height: 1.1;
+  }
+  .sticky-price .lbl-p {
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600;
+  }
+  .sticky-price .v-p {
+    font-size: 22px; font-weight: 800; letter-spacing: -0.015em;
+    color: var(--text);
+    font-feature-settings: "tnum" 1;
+    margin-top: 2px;
+  }
+  .btn {
+    flex: 1 1 auto;
+    background: var(--accent); color: #fff;
+    padding: 16px 18px; border-radius: 12px;
+    font-weight: 700; font-size: 16px;
+    border: 0; cursor: pointer;
+    letter-spacing: 0.005em;
+    transition: background 0.15s, transform 0.18s;
+    box-shadow: 0 2px 4px rgba(255, 77, 0, 0.2), 0 8px 22px rgba(255, 77, 0, 0.24);
+  }
+  .btn:hover, .btn:focus { background: var(--accent-dark); }
+  .btn:active { transform: scale(0.985); }
+  .btn.disabled { background: #bbb; box-shadow: none; cursor: not-allowed; }
+
+  /* Notice / error */
+  .notice {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent-mid);
+    color: var(--accent-dark);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    margin: 16px auto 0;
+    max-width: 640px;
+    line-height: 1.5;
+  }
+
+  footer {
+    padding: 28px 22px;
+    text-align: center;
+    color: var(--muted); font-size: 12px;
+    margin-top: 22px;
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+  }
+  footer a { color: var(--muted); margin: 0 8px; }
+
+  .secured {
+    text-align: center; color: var(--muted);
+    font-size: 11px; margin-top: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .secured::before { content: '🔒'; margin-right: 6px; opacity: 0.6; }
+</style>
+{% if pixel_id %}
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','{{ pixel_id }}');
+fbq('track','PageView');
+fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'product', content_ids: ['Z51'], value: 599, currency: 'USD'});
+</script>
+{% endif %}
+</head>
+<body>
+
+<div class="topbar">Boise · <strong>New Arrival</strong></div>
+
+<nav class="nav">
+  <span class="wordmark">Supercar Experience<span class="dot"> · </span>Boise</span>
+  <span class="nav-phone">Call <a href="tel:{{ support_phone_tel }}">{{ support_phone }}</a></span>
+</nav>
+
+{% if request.args.get('err') == 'email' %}
+  <div class="notice">Add your email below and try again.</div>
+{% elif request.args.get('err') == 'duration' %}
+  <div class="notice">Pick how long you want it.</div>
+{% endif %}
+
+<!-- Hero photo -->
+<div class="hero-photo">
+  <img src="{{ url_for('static', filename='sce-z51/c8z51.jpg') }}" alt="Corvette C8 Z51 in Torch Red">
+</div>
+
+<header class="hero-meta">
+  <div class="hero-eyebrow">New to the fleet</div>
+  <h1 class="hero-title">Corvette C8 Z51</h1>
+  <p class="hero-sub">Torch Red. 495hp. 0–60 in under 3 seconds.</p>
+</header>
+
+<!-- Specs strip -->
+<section class="specs">
+  <div class="spec"><div class="spec-label">Engine</div><div class="spec-val">6.2L V8</div></div>
+  <div class="spec"><div class="spec-label">HP</div><div class="spec-val">495</div></div>
+  <div class="spec"><div class="spec-label">0–60</div><div class="spec-val">&lt; 3.0s</div></div>
+  <div class="spec"><div class="spec-label">Color</div><div class="spec-val">Torch Red</div></div>
+</section>
+
+<!-- Reassurance -->
+<section class="reassurance">
+  <div class="r"><strong>Real availability</strong>Live calendar</div>
+  <div class="r"><strong>Free delivery</strong>10 miles of Boise</div>
+  <div class="r"><strong>BYO insurance</strong>Full coverage</div>
+</section>
+
+<!-- Story / description -->
+<section class="story">
+  <p>The Corvette C8 Z51 proves America builds supercars. Finished in Torch Red, it packs a 6.2-liter V8 with 495 horsepower, launching you to 60 mph in under 3 seconds with a sound that turns heads from a block away.</p>
+  <p>The Z51 Performance Package brings upgraded exhaust, suspension, and enlarged Brembo brakes, making it as capable on a canyon road as it is jaw-dropping in a parking lot. This is the car that changed what a Corvette is, and once you drive it, you'll understand why.</p>
+</section>
+
+<!-- Reservation form -->
+<form id="resForm" method="post" action="{{ url_for('sce_z51.optin') }}" class="builder">
+  <input type="hidden" name="event_id" value="{{ event_id }}">
+  <input type="hidden" name="session_id" id="session_id">
+  <input type="hidden" name="utm_source"   id="utm_source">
+  <input type="hidden" name="utm_medium"   id="utm_medium">
+  <input type="hidden" name="utm_campaign" id="utm_campaign">
+  <input type="hidden" name="utm_content"  id="utm_content">
+  <input type="hidden" name="utm_term"     id="utm_term">
+
+  <!-- 1. Duration -->
+  <div class="step">
+    <div class="step-head">
+      <span class="step-num">1</span>
+      <span class="step-title">How long do you want it?</span>
+    </div>
+    <div class="duration-list">
+      {% for d in durations %}
+        <label class="dur-card" data-dur="{{ d.id }}" data-price="{{ d.price }}">
+          <input type="radio" name="duration" value="{{ d.id }}" required>
+          <div class="dur-info">
+            <div class="dur-label">{{ d.label }}</div>
+            <div class="dur-sub">{{ d.sub }}</div>
+          </div>
+          <div class="dur-price">${{ '{:,}'.format(d.price) }}</div>
+        </label>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- 2. Contact -->
+  <div class="step">
+    <div class="step-head">
+      <span class="step-num">2</span>
+      <span class="step-title">Your info</span>
+    </div>
+    <div class="form-grid">
+      <label>
+        <div class="lbl">Full name</div>
+        <input type="text" name="name" required autocomplete="name" placeholder="First and last">
+      </label>
+      <div class="form-grid row-two">
+        <label>
+          <div class="lbl">Phone</div>
+          <input type="tel" name="phone" required autocomplete="tel" inputmode="tel" placeholder="(208) 555-0123">
+        </label>
+        <label>
+          <div class="lbl">Email</div>
+          <input type="email" name="email" required autocomplete="email" inputmode="email" placeholder="you@example.com">
+        </label>
+      </div>
+      <label>
+        <div class="lbl">Anything we should know? (optional)</div>
+        <textarea name="special_notes" placeholder="Specific day in mind, pickup spot, etc."></textarea>
+      </label>
+      <label class="consent">
+        <input type="checkbox" required>
+        <span>I agree to be contacted by Supercar Experience Boise about this inquiry. Standard message and data rates may apply.</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="secured">Next step shows live availability via Valara</div>
+</form>
+
+<!-- Sticky CTA -->
+<div class="sticky-cta">
+  <div class="sticky-inner">
+    <div class="sticky-price">
+      <div class="lbl-p">Total</div>
+      <div class="v-p" id="stickyTotal">—</div>
+    </div>
+    <button type="submit" form="resForm" class="btn disabled" id="stickyBtn">Pick how long</button>
+  </div>
+</div>
+
+<footer>
+  <div>Questions? Call <a href="tel:{{ support_phone_tel }}" style="color:var(--text);font-weight:600;">{{ support_phone }}</a></div>
+  <div style="margin-top: 12px;">
+    <a href="/sce/sms-privacy">Privacy</a>·<a href="/sce/sms-terms">Terms</a>
+  </div>
+  <div style="margin-top: 12px;">© Supercar Experience Boise</div>
+</footer>
+
+<script>
+  // Persist UTM + session
+  (function() {
+    var qs = new URLSearchParams(window.location.search);
+    var keys = ['utm_source','utm_medium','utm_campaign','utm_content','utm_term'];
+    keys.forEach(function(k) {
+      var v = qs.get(k) || localStorage.getItem('sce_'+k) || '';
+      if (qs.get(k)) localStorage.setItem('sce_'+k, qs.get(k));
+      var el = document.getElementById(k);
+      if (el) el.value = v;
+    });
+    var sid = localStorage.getItem('sce_z51_sid') || (Date.now().toString(36) + Math.random().toString(36).slice(2,10));
+    localStorage.setItem('sce_z51_sid', sid);
+    var sidEl = document.getElementById('session_id');
+    if (sidEl) sidEl.value = sid;
+  })();
+
+  // Duration selection → update sticky CTA
+  var selectedPrice = null;
+  document.querySelectorAll('.dur-card').forEach(function(el) {
+    el.addEventListener('click', function() {
+      document.querySelectorAll('.dur-card').forEach(function(s) { s.classList.remove('selected'); });
+      el.classList.add('selected');
+      var input = el.querySelector('input');
+      if (input) input.checked = true;
+      selectedPrice = parseInt(el.getAttribute('data-price'), 10) || 0;
+
+      var fmt = '$' + selectedPrice.toLocaleString('en-US');
+      document.getElementById('stickyTotal').textContent = fmt;
+      var btn = document.getElementById('stickyBtn');
+      btn.classList.remove('disabled');
+      btn.textContent = 'See Availability · ' + fmt;
+
+      // AddToCart fbq event
+      try {
+        if (window.fbq) {
+          fbq('track','AddToCart', {
+            content_ids: ['Z51-' + el.getAttribute('data-dur').toUpperCase()],
+            content_type: 'product',
+            value: selectedPrice,
+            currency: 'USD'
+          });
+        }
+      } catch(e) {}
+    });
+  });
+
+  // Submit → fire Lead event with Advanced Matching
+  document.getElementById('resForm').addEventListener('submit', function(ev) {
+    if (selectedPrice == null) {
+      ev.preventDefault();
+      alert('Pick how long you want it first.');
+      return;
+    }
+    if (!window.fbq) return;
+    try {
+      var email = (ev.target.querySelector('[name=email]') || {}).value || '';
+      var phone = ((ev.target.querySelector('[name=phone]') || {}).value || '').replace(/\D/g,'');
+      var name  = ((ev.target.querySelector('[name=name]')  || {}).value || '').trim();
+      var parts = name.split(/\s+/);
+      var fn = (parts[0] || '').toLowerCase();
+      var ln = (parts.slice(1).join(' ') || '').toLowerCase();
+      fbq('init','{{ pixel_id }}', {em: email.toLowerCase(), ph: phone, fn: fn, ln: ln});
+      fbq('track','Lead', {
+        content_name: 'Corvette C8 Z51 inquiry',
+        content_ids: ['Z51'],
+        value: selectedPrice,
+        currency: 'USD'
+      }, {eventID: '{{ event_id }}'});
+    } catch(e) {}
+  });
+
+  // Visit tracking
+  (function() {
+    var sid = (document.getElementById('session_id') || {}).value || '';
+    if (!sid) return;
+    fetch('/z51/track', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ sid: sid, page: 'landing', kind: 'view', ref: document.referrer || '' })
+    }).catch(function(){});
+    var startedAt = Date.now();
+    window.addEventListener('beforeunload', function() {
+      var ms = Date.now() - startedAt;
+      navigator.sendBeacon && navigator.sendBeacon(
+        '/z51/track',
+        new Blob([JSON.stringify({sid: sid, page: 'landing', kind: 'time', ms: ms})], {type:'application/json'})
+      );
+    });
+  })();
+</script>
+
+</body>
+</html>

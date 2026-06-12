@@ -87,6 +87,10 @@ from sce_fathersday import sce_fd_bp, init_fd_db
 app.register_blueprint(sce_fd_bp)
 init_fd_db()
 
+from sce_z51 import sce_z51_bp, init_z51_db
+app.register_blueprint(sce_z51_bp)
+init_z51_db()
+
 from sce_admin import sce_admin_bp
 app.register_blueprint(sce_admin_bp)
 
@@ -1488,6 +1492,8 @@ def harker_contact():
     phone = (data.get("phone") or "").strip()
     interest = (data.get("interest") or "").strip()
     message = (data.get("message") or "").strip()
+    truck_make = (data.get("truckMake") or "").strip()
+    bed_size = (data.get("bedSize") or "").strip()
 
     # Light validation; if it's junk we still 200 so the form UX never breaks.
     if not name and not email and not message:
@@ -1507,6 +1513,8 @@ def harker_contact():
         '<table style="width:100%;border-collapse:collapse;font-size:14px;">'
         f'<tr><td style="padding:10px 0;color:#8b8ba0;width:140px;">Email</td><td style="padding:10px 0;color:#e8e8f0;font-weight:600;">{esc(email)}</td></tr>'
         f'<tr><td style="padding:10px 0;color:#8b8ba0;">Phone</td><td style="padding:10px 0;color:#e8e8f0;">{esc(phone)}</td></tr>'
+        f'<tr><td style="padding:10px 0;color:#8b8ba0;">Truck make</td><td style="padding:10px 0;color:#e8e8f0;">{esc(truck_make)}</td></tr>'
+        f'<tr><td style="padding:10px 0;color:#8b8ba0;">Bed size</td><td style="padding:10px 0;color:#e8e8f0;">{esc(bed_size)}</td></tr>'
         f'<tr><td style="padding:10px 0;color:#8b8ba0;">Inquiry about</td><td style="padding:10px 0;color:#e8e8f0;">{esc(interest)}</td></tr>'
         f'<tr><td style="padding:10px 0;color:#8b8ba0;vertical-align:top;">Message</td><td style="padding:10px 0;color:#e8e8f0;white-space:pre-wrap;">{esc(message)}</td></tr>'
         '</table>'
