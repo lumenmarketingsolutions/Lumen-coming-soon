@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Father's Day · Supercar Experience Boise</title>
+<meta name="description" content="The Father's Day gift he'll actually remember. A supercar experience plus bourbon and BBQ gift cards, hand-delivered before June 21.">
+<link rel="icon" href="data:,">
+{% include "_sce_fd_shell.html" %}
+<style>
+  /* ─── Landing-specific layout (no step pill, no progress bar) ─── */
+  .land-wrap {
+    flex: 1;
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 44px 22px 50px;
+  }
+
+  /* Hero */
+  .land-hero { text-align: center; margin-bottom: 38px; }
+  .land-hero .eyebrow {
+    color: var(--accent);
+    font-size: 11px; letter-spacing: 0.24em;
+    text-transform: uppercase; font-weight: 700;
+    margin-bottom: 14px;
+  }
+  .land-hero h1 {
+    font-size: clamp(30px, 7.6vw, 46px);
+    line-height: 1.04; letter-spacing: -0.025em;
+    font-weight: 800;
+    margin: 0 0 16px;
+  }
+  .land-hero h1 .accent { color: var(--accent); }
+  .land-hero p.lead {
+    color: var(--muted);
+    font-size: clamp(15px, 3.7vw, 17px);
+    line-height: 1.55;
+    margin: 0 auto 28px;
+    max-width: 480px;
+  }
+
+  /* Primary CTA */
+  .cta-primary {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700; font-size: 16px;
+    padding: 16px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 22px rgba(255, 77, 0, 0.28);
+    transition: transform 0.15s, box-shadow 0.18s;
+    letter-spacing: 0.01em;
+    border: 0;
+  }
+  .cta-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px rgba(255, 77, 0, 0.35);
+  }
+  .cta-primary:active { transform: scale(0.985); }
+
+  .reassure {
+    color: var(--muted);
+    font-size: 12.5px;
+    margin-top: 16px;
+    letter-spacing: 0.01em;
+  }
+  .reassure .sep { opacity: 0.4; margin: 0 6px; }
+
+  /* "What he gets" section */
+  .section-title {
+    text-align: center;
+    color: var(--text);
+    font-size: 11px; letter-spacing: 0.24em;
+    text-transform: uppercase; font-weight: 700;
+    margin: 6px 0 18px;
+    opacity: 0.78;
+  }
+
+  .included { display: grid; gap: 12px; }
+  .inc-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .inc-card:hover { border-color: var(--line-strong); }
+  .inc-num {
+    flex: 0 0 42px;
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800; letter-spacing: 0.04em;
+    font-feature-settings: "tnum" 1;
+  }
+  .inc-text { flex: 1; min-width: 0; }
+  .inc-text h3 {
+    margin: 0 0 3px;
+    font-size: 15.5px; font-weight: 700; letter-spacing: -0.005em;
+    line-height: 1.25;
+  }
+  .inc-text p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 13px; line-height: 1.5;
+  }
+
+  /* Bottom CTA card */
+  .land-cta-bottom {
+    text-align: center;
+    margin-top: 36px;
+    padding: 30px 24px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    box-shadow: 0 2px 10px rgba(26,26,26,0.04);
+  }
+  .land-cta-bottom .hook {
+    font-size: clamp(18px, 4.6vw, 22px);
+    font-weight: 800; letter-spacing: -0.015em;
+    color: var(--text);
+    margin: 0 0 10px;
+    line-height: 1.2;
+  }
+  .land-cta-bottom .hook .accent { color: var(--accent); }
+  .land-cta-bottom .sub {
+    font-size: 13.5px; color: var(--muted);
+    margin: 0 0 20px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 540px) {
+    .land-wrap { padding: 34px 18px 40px; }
+    .land-hero { margin-bottom: 30px; }
+    .land-cta-bottom { padding: 24px 20px; margin-top: 30px; }
+    .inc-card { padding: 16px 18px; gap: 14px; }
+    .inc-num { flex: 0 0 38px; width: 38px; height: 38px; font-size: 13px; }
+    .inc-text h3 { font-size: 15px; }
+    .inc-text p { font-size: 12.5px; }
+    .cta-primary { padding: 15px 26px; font-size: 15.5px; width: 100%; max-width: 320px; }
+  }
+</style>
+{% if pixel_id %}
+<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','{{ pixel_id }}');
+fbq('track','PageView');
+</script>
+{% endif %}
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <span class="topbar-label">Father's Day · <strong>June 21</strong></span>
+    <span class="topbar-countdown" id="fdCountdown">
+      <span class="cd-dot"></span>
+      <span class="cd-text">…</span>
+    </span>
+  </div>
+</div>
+
+<nav class="nav" style="justify-content: space-between;">
+  <span class="back-placeholder"></span>
+  <span class="wordmark">
+    <span class="wm-long">Supercar Experience<span class="dot"> · </span>Boise</span>
+    <span class="wm-short">SCE<span class="dot"> · </span>Boise</span>
+  </span>
+  <a class="back" href="tel:{{ support_phone_tel }}" style="color: var(--text); font-weight: 600;">Call</a>
+</nav>
+
+<main class="land-wrap">
+  <section class="land-hero">
+    <div class="eyebrow">Father's Day · June 21</div>
+    <h1>Skip the tie. <span class="accent">Hand him the keys.</span></h1>
+    <p class="lead">A supercar experience plus bourbon and BBQ gift cards on top — hand-delivered before Father's Day.</p>
+    <a class="cta-primary" href="{{ start_url }}">Start building his day &rarr;</a>
+    <div class="reassure">Takes 90 seconds<span class="sep">·</span>Free delivery in Boise</div>
+  </section>
+
+  <div class="section-title">What he gets</div>
+  <div class="included">
+    <div class="inc-card">
+      <div class="inc-num">01</div>
+      <div class="inc-text">
+        <h3>The supercar</h3>
+        <p>Pick from the fleet — Porsche GT3 RS, Corvette C8 Z06, Lambo Urus, AMG G63.</p>
+      </div>
+    </div>
+    <div class="inc-card">
+      <div class="inc-num">02</div>
+      <div class="inc-text">
+        <h3>Anderson Reserve bourbon card</h3>
+        <p>Boise's go-to bourbon spot. Pick the amount.</p>
+      </div>
+    </div>
+    <div class="inc-card">
+      <div class="inc-num">03</div>
+      <div class="inc-text">
+        <h3>Modern BBQ Supply card</h3>
+        <p>For the grill guy in him. Pick the amount.</p>
+      </div>
+    </div>
+  </div>
+
+  <section class="land-cta-bottom">
+    <p class="hook">Most dads start with the <span class="accent">GT3 RS</span>.</p>
+    <p class="sub">Build it in 90 seconds. We handle the delivery, the gift cards, the wow factor.</p>
+    <a class="cta-primary" href="{{ start_url }}">Pick the car &rarr;</a>
+  </section>
+</main>
+
+<footer>
+  <div class="phone-cta">Questions? Call <a href="tel:{{ support_phone_tel }}" style="color:var(--text);">{{ support_phone }}</a></div>
+  <div style="margin-top: 12px;"><a href="/sce/sms-privacy">Privacy</a>·<a href="/sce/sms-terms">Terms</a></div>
+  <div style="margin-top: 12px;">© Supercar Experience Boise</div>
+</footer>
+
+</body>
+</html>

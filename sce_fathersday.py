@@ -440,7 +440,17 @@ def _ctx():
 
 @sce_fd_bp.route("/fathersday")
 def landing():
-    """Step 1 — pick the car. Keep the URL clean; preserve any preset state via params."""
+    """Pre-funnel warm-up landing — hero + selling beats + CTAs to step_car."""
+    return render_template(
+        "sce_fd_landing.html",
+        start_url=url_for("sce_fd.step_car"),
+        **_ctx(),
+    )
+
+
+@sce_fd_bp.route("/fathersday/car")
+def step_car():
+    """Step 1 — pick the car. Preserve any preset state via params."""
     build = _read_build_from_request()
     return render_template(
         "sce_fd_step_car.html",
@@ -456,7 +466,7 @@ def step_duration():
     """Step 2 — pick duration. Requires `car`."""
     build = _read_build_from_request()
     if not build["car"]:
-        return redirect(url_for("sce_fd.landing"))
+        return redirect(url_for("sce_fd.step_car"))
     car = CAR_BY_ID[build["car"]]
     # Annotate each duration with the base price for this car so the chip shows it.
     durations_priced = [
@@ -467,7 +477,7 @@ def step_duration():
         "sce_fd_step_duration.html",
         car=car, durations=durations_priced, build=build,
         step=2, step_total=5,
-        back_url=_step_url("landing", {"car": build["car"]}),
+        back_url=_step_url("step_car", {"car": build["car"]}),
         next_url_base=url_for("sce_fd.step_bourbon"),
         **_ctx(),
     )
@@ -478,7 +488,7 @@ def step_bourbon():
     """Step 3 — pick Anderson Reserve bourbon gift card (or skip)."""
     build = _read_build_from_request()
     if not build["car"] or not build["duration"]:
-        return redirect(url_for("sce_fd.landing"))
+        return redirect(url_for("sce_fd.step_car"))
     car = CAR_BY_ID[build["car"]]
     duration = DURATION_BY_ID[build["duration"]]
     return render_template(
@@ -497,7 +507,7 @@ def step_bbq():
     """Step 4 — pick Modern BBQ Supply gift card (or skip)."""
     build = _read_build_from_request()
     if not build["car"] or not build["duration"]:
-        return redirect(url_for("sce_fd.landing"))
+        return redirect(url_for("sce_fd.step_car"))
     car = CAR_BY_ID[build["car"]]
     duration = DURATION_BY_ID[build["duration"]]
     return render_template(
@@ -516,7 +526,7 @@ def review():
     """Step 5 — review package + capture contact info."""
     build = _read_build_from_request()
     if not build["car"] or not build["duration"]:
-        return redirect(url_for("sce_fd.landing"))
+        return redirect(url_for("sce_fd.step_car"))
     car = CAR_BY_ID[build["car"]]
     duration = DURATION_BY_ID[build["duration"]]
     base_rental = RENTAL_PRICING.get((car["id"], duration["id"]), 0)
@@ -550,7 +560,7 @@ def optin():
     session_id = (request.form.get("session_id") or "").strip()[:64]
 
     if not car_id or not duration_id:
-        return redirect(url_for("sce_fd.landing"))
+        return redirect(url_for("sce_fd.step_car"))
     if not email or "@" not in email:
         return redirect(_step_url("review", build) + "&err=email")
 
