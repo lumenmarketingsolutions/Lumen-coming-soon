@@ -411,9 +411,9 @@ fbq('track','InitiateCheckout', {value: {{ total }}, currency: 'USD'});
   <div class="sticky-inner">
     <div class="sticky-price">
       <div class="lbl-p">Total</div>
-      <div class="v-p">${{ '{:,}'.format(total) }}</div>
+      <div class="v-p">${{ '{:,}'.format(final_total) }}</div>
     </div>
-    <button type="submit" form="fdForm" class="btn">Reserve · ${{ '{:,}'.format(total) }}</button>
+    <button type="submit" form="fdForm" class="btn">Reserve · ${{ '{:,}'.format(final_total) }}</button>
   </div>
 </div>
 
