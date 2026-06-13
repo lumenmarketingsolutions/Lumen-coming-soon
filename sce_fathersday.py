@@ -341,7 +341,14 @@ def _create_stripe_session(*, email, name, phone, event_id, car, duration, ar_va
         data=data, timeout=15,
     )
     if r.status_code >= 300:
-        raise RuntimeError(f"Stripe error {r.status_code}: {r.text[:600]}")
+        # Surface enough detail in the exception to debug from Railway logs.
+        # Most common failure with the new coupon flow: 'No such coupon: FD10'
+        # → coupon was created in test mode but secret key is live (or vice
+        # versa). Easy fix: recreate coupon in the matching mode.
+        coupon_dbg = f"coupon={STRIPE_FD_COUPON or '(none)'}"
+        raise RuntimeError(
+            f"Stripe error {r.status_code} ({coupon_dbg}): {r.text[:600]}"
+        )
     body = r.json()
     return body.get("url", ""), body.get("id", "")
 
@@ -384,7 +391,9 @@ def _build_lead_email_html(c):
 {ar_row}
 {mbs_row}
 <tr><td style="padding:6px 0;color:#5C5C5C;">SKU</td><td style="color:#1A1A1A;text-align:right;font-family:'SF Mono',Menlo,monospace;font-size:12px;">{c['sku']}</td></tr>
-<tr><td style="padding:6px 0;color:#5C5C5C;border-top:1px solid #eee;">Package price</td><td style="color:#1A1A1A;text-align:right;font-weight:700;border-top:1px solid #eee;">${c['price_str']}</td></tr>
+<tr><td style="padding:6px 0;color:#5C5C5C;border-top:1px solid #eee;">Subtotal</td><td style="color:#1A1A1A;text-align:right;border-top:1px solid #eee;">${c['subtotal_str']}</td></tr>
+<tr><td style="padding:6px 0;color:#ff4d00;font-weight:600;">Father's Day {c['discount_pct']}% off</td><td style="color:#ff4d00;text-align:right;font-weight:600;">-${c['discount_str']}</td></tr>
+<tr><td style="padding:6px 0;color:#5C5C5C;font-weight:700;">Total charged</td><td style="color:#1A1A1A;text-align:right;font-weight:800;font-size:16px;">${c['price_str']}</td></tr>
 <tr><td style="padding:6px 0;color:#5C5C5C;">Stripe status</td><td style="color:#1A1A1A;text-align:right;">{c['stripe_status']}</td></tr>
 </table></td></tr>
 <tr><td style="padding:28px 32px 0;">
@@ -601,7 +610,9 @@ def optin():
 
     car      = CAR_BY_ID[car_id]
     duration = DURATION_BY_ID[duration_id]
-    total_dollars = _calc_total(car_id, duration_id, ar_value, mbs_value)
+    total_dollars       = _calc_total(car_id, duration_id, ar_value, mbs_value)
+    discount_dollars    = int(round(total_dollars * FD_DISCOUNT_PCT / 100))
+    final_total_dollars = total_dollars - discount_dollars
     sku = _build_sku(car_id, duration_id, ar_value, mbs_value)
 
     now = datetime.datetime.utcnow().isoformat()
@@ -617,7 +628,7 @@ def optin():
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             event_id, session_id, name, email, phone,
-            car_id, duration_id, ar_value, mbs_value, sku, total_dollars * 100,
+            car_id, duration_id, ar_value, mbs_value, sku, final_total_dollars * 100,
             notes,
             request.headers.get("X-Forwarded-For", request.remote_addr or ""),
             request.headers.get("User-Agent", ""),
@@ -672,7 +683,11 @@ def optin():
         "car_name": car["name"], "car_short": car["short"],
         "duration_label": duration["label"],
         "ar_value": ar_value, "mbs_value": mbs_value, "sku": sku,
-        "price_str": "{:,}".format(total_dollars), "stripe_status": stripe_status,
+        "price_str": "{:,}".format(final_total_dollars),
+        "subtotal_str": "{:,}".format(total_dollars),
+        "discount_str": "{:,}".format(discount_dollars),
+        "discount_pct": FD_DISCOUNT_PCT,
+        "stripe_status": stripe_status,
         "utm_source":   request.form.get("utm_source", ""),
         "utm_medium":   request.form.get("utm_medium", ""),
         "utm_campaign": request.form.get("utm_campaign", ""),
@@ -695,7 +710,7 @@ def optin():
             "fbc": request.cookies.get("_fbc", ""),
         },
         custom_data={
-            "currency": "USD", "value": total_dollars,
+            "currency": "USD", "value": final_total_dollars,
             "content_ids": [sku],
             "content_name": f"{car['name']} · {duration['label']} · Father's Day",
             "content_type": "product",
