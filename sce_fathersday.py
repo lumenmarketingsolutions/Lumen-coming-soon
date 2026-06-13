@@ -2,7 +2,7 @@
 Supercar Experience Boise — Father's Day funnel.
 
 Multi-step build-your-own package:
-  Step 1 — Pick a car (C8 Z06, GT3RS, Urus S, G63)
+  Step 1 — Pick a car (C8 Z51, GT3RS, Urus S, G63)
   Step 2 — Pick a duration (4 hour, 8 hour, 24 hour)
   Step 3 — Add Anderson Ranch dinner gift card ($100 / $150 / $200) or skip
   Step 4 — Add Modern BBQ Supply gift card ($25 / $50 / $100) or skip
@@ -57,8 +57,8 @@ STRIPE_SECRET_KEY = (
 )
 
 CARS = [
-    {"id": "c8z06", "name": "Corvette C8 Z06",       "short": "C8 Z06",  "image": "c8z06.jpg",
-     "blurb": "Naturally aspirated V8. 670hp. Sounds like a Ferrari."},
+    {"id": "c8z51", "name": "Corvette C8 Z51",       "short": "C8 Z51",  "image": "c8z51.jpg",
+     "blurb": "Torch Red. 6.2L V8. 495hp. 0-60 under 3 seconds."},
     {"id": "gt3rs", "name": "Porsche 911 GT3RS",      "short": "GT3RS",   "image": "gt3rs.jpg",
      "blurb": "Track-focused flat-six. The sharpest car in the fleet."},
     {"id": "urus",  "name": "Lamborghini Urus S",     "short": "Urus S",  "image": "urus.jpg",
@@ -81,9 +81,9 @@ DURATION_BY_ID = {d["id"]: d for d in DURATIONS}
 # Base SCE rental pricing in whole dollars, per (car_id, duration_id).
 # Placeholder values from Valara base rates — update when Nate confirms final pricing.
 RENTAL_PRICING = {
-    ("c8z06", "4h"):  399,
-    ("c8z06", "8h"):  599,
-    ("c8z06", "24h"): 799,
+    ("c8z51", "4h"):  350,
+    ("c8z51", "8h"):  475,
+    ("c8z51", "24h"): 599,
     ("gt3rs", "4h"):  599,
     ("gt3rs", "8h"):  799,
     ("gt3rs", "24h"): 1099,
