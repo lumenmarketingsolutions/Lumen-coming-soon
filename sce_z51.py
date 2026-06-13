@@ -316,6 +316,23 @@ def _send_lead_email(ctx):
 
 # ─────────────────── Meta CAPI ───────────────────
 
+def _capi_pageview(event_id):
+    """Server-side PageView CAPI mirror. Browser Pixel also fires PageView with
+    the same event_id — Meta dedupes the pair, giving us PageView coverage even
+    when ad blockers nuke the client-side Pixel fire."""
+    _capi_fire(
+        event_name="PageView",
+        event_id=event_id,
+        source_url=f"{request.scheme}://{request.host}{request.path}",
+        user_data={
+            "client_ip_address": _client_ip(),
+            "client_user_agent": request.headers.get("User-Agent", ""),
+            "fbp": request.cookies.get("_fbp", ""),
+            "fbc": request.cookies.get("_fbc", ""),
+        },
+    )
+
+
 def _capi_fire(event_name, event_id, source_url, user_data, custom_data=None):
     if not META_CAPI_TOKEN or not META_PIXEL_ID:
         return
@@ -352,10 +369,13 @@ def _ctx():
 def landing():
     # Step 1 — pick duration. Preserve any preset choice via ?dur=...
     preset = (request.args.get("dur") or "").strip()
+    pv_event_id = uuid.uuid4().hex
+    _capi_pageview(pv_event_id)
     return render_template(
         "sce_z51_landing.html",
         durations=DURATIONS,
         preset_duration=preset if preset in DURATION_BY_ID else "",
+        pv_event_id=pv_event_id,
         **_ctx(),
     )
 
@@ -368,10 +388,13 @@ def info():
         return redirect(url_for("sce_z51.landing"))
     duration = DURATION_BY_ID[duration_id]
     event_id = uuid.uuid4().hex
+    pv_event_id = uuid.uuid4().hex
+    _capi_pageview(pv_event_id)
     return render_template(
         "sce_z51_info.html",
         duration=duration,
         event_id=event_id,
+        pv_event_id=pv_event_id,
         back_url=url_for("sce_z51.landing") + f"?dur={duration_id}",
         **_ctx(),
     )
