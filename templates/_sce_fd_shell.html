@@ -113,6 +113,14 @@
     gap: 12px;
     min-width: 0;
   }
+  /* Override the shell's wordmark flex-grow when it's nested inside the brand
+     row — otherwise the wordmark expands to fill all remaining horizontal
+     space, pushing the label flush-left and the wordmark text flush-right
+     with a lonely divider stranded in the middle. */
+  .fd-brand .wordmark {
+    flex: 0 0 auto;
+    text-align: left;
+  }
   .fd-label {
     font-size: 12px;
     letter-spacing: 0.14em;
