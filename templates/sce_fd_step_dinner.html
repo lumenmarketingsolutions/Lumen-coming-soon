@@ -8,22 +8,25 @@
 {% include "_sce_fd_shell.html" %}
 <style>
   .partner-card {
-    display: flex; align-items: center; gap: 14px;
+    display: flex; flex-direction: column;
     background: var(--surface);
     border: 1px solid var(--line);
     border-radius: 14px;
-    padding: 14px 16px;
+    overflow: hidden;
     margin-bottom: 22px;
     box-shadow: 0 1px 2px rgba(26,26,26,0.025), 0 4px 12px rgba(26,26,26,0.035);
   }
-  .partner-icon {
-    flex: 0 0 44px; width: 44px; height: 44px;
-    border-radius: 12px; background: #1a1a1a;
-    display: flex; align-items: center; justify-content: center;
-    color: #ff4d00; font-size: 18px; font-weight: 700;
-    letter-spacing: -0.02em;
+  .partner-photo {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #e8e1d6;
+    overflow: hidden;
   }
-  .partner-info { flex: 1; min-width: 0; }
+  .partner-photo img {
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .partner-info { padding: 14px 16px; }
   .partner-name {
     font-size: 15px; font-weight: 700; color: var(--text);
     margin-bottom: 2px;
@@ -70,14 +73,16 @@ fbq('track','PageView');
   <header class="hero">
     <div class="hero-eyebrow">Step 3 · Optional</div>
     <h1 class="hero-title">Add dinner?</h1>
-    <p class="hero-sub">A gift card to Anderson Ranch, so he gets a night out on top of the drive.</p>
+    <p class="hero-sub">A gift card to Anderson Reserve, so he gets a night out on top of the drive.</p>
   </header>
 
   <div class="partner-card">
-    <div class="partner-icon">AR</div>
+    <div class="partner-photo">
+      <img src="{{ url_for('static', filename='sce-fathersday/anderson-reserve.jpg') }}" alt="Anderson Reserve" loading="lazy">
+    </div>
     <div class="partner-info">
-      <div class="partner-name">Anderson Ranch</div>
-      <div class="partner-desc">Boise dinner spot. Gift card redeems at the restaurant.</div>
+      <div class="partner-name">Anderson Reserve</div>
+      <div class="partner-desc">Boise area distillery and tasting room. Gift card redeems on-site.</div>
     </div>
   </div>
 

@@ -4,14 +4,14 @@ Supercar Experience Boise — Father's Day funnel.
 Multi-step build-your-own package:
   Step 1 — Pick a car (C8 Z51, GT3RS, Urus S, G63)
   Step 2 — Pick a duration (4 hour, 8 hour, 24 hour)
-  Step 3 — Add Anderson Ranch dinner gift card ($100 / $150 / $200) or skip
+  Step 3 — Add Anderson Reserve dinner gift card ($100 / $150 / $200) or skip
   Step 4 — Add Modern BBQ Supply gift card ($25 / $50 / $100) or skip
   Step 5 — Review the package + capture contact info → Stripe Checkout
 
 State lives in URL query params (no sessions). Back button works naturally.
 Server is the source of truth on price. The `ar` query-param key dates
 from when step 3 was Anderson Reserve bourbon; the initials still fit
-Anderson Ranch dinner, so the internal key stays `ar` to avoid a wide
+Anderson Reserve dinner, so the internal key stays `ar` to avoid a wide
 rename across the leads table, Stripe metadata, and email templates.
 
 Routes:
@@ -25,7 +25,7 @@ Routes:
   GET  /fathersday/booked             → thank-you (after Stripe success)
   POST /fathersday/stripe-webhook     → Stripe event sink (Purchase CAPI)
 
-`ar=0` or absent → no Anderson Ranch dinner gift card. Same for `mbs=0`.
+`ar=0` or absent → no Anderson Reserve dinner gift card. Same for `mbs=0`.
 """
 
 import os
@@ -95,7 +95,7 @@ RENTAL_PRICING = {
     ("g63",   "24h"): 350,
 }
 
-ANDERSON_RANCH_VALUES     = [100, 150, 200]   # 0 (or absent) = skipped
+ANDERSON_RESERVE_VALUES     = [100, 150, 200]   # 0 (or absent) = skipped
 MODERN_BBQ_SUPPLY_VALUES  = [25, 50, 100]     # 0 (or absent) = skipped
 
 BUNDLE_PREMIUM = 0  # Set >0 if SCE wants a flat bundle markup
@@ -244,7 +244,7 @@ def _read_build_from_request():
     g = request.values  # works for both args + form
     car      = (g.get("car") or "").strip()
     duration = (g.get("dur") or g.get("duration") or "").strip()
-    ar       = _parse_int(g.get("ar"),  allowed=[0] + ANDERSON_RANCH_VALUES)
+    ar       = _parse_int(g.get("ar"),  allowed=[0] + ANDERSON_RESERVE_VALUES)
     mbs      = _parse_int(g.get("mbs"), allowed=[0] + MODERN_BBQ_SUPPLY_VALUES)
     return {
         "car": car if car in CAR_BY_ID else "",
@@ -287,7 +287,7 @@ def _create_stripe_session(*, email, name, phone, event_id, car, duration, ar_va
 
     line_items = [(f"{car['name']} · {duration['label']}", base_rental)]
     if int(ar_value) > 0:
-        line_items.append((f"Anderson Ranch Dinner · ${ar_value} gift card", int(ar_value)))
+        line_items.append((f"Anderson Reserve Dinner · ${ar_value} gift card", int(ar_value)))
     if int(mbs_value) > 0:
         line_items.append((f"Modern BBQ Supply · ${mbs_value} gift card", int(mbs_value)))
     if BUNDLE_PREMIUM > 0:
@@ -360,7 +360,7 @@ def _build_lead_email_html(c):
     ar_row = ""
     mbs_row = ""
     if c["ar_value"] > 0:
-        ar_row = f"<tr><td style='padding:6px 0;color:#5C5C5C;'>Anderson Ranch</td><td style='color:#1A1A1A;text-align:right;'>${c['ar_value']}</td></tr>"
+        ar_row = f"<tr><td style='padding:6px 0;color:#5C5C5C;'>Anderson Reserve</td><td style='color:#1A1A1A;text-align:right;'>${c['ar_value']}</td></tr>"
     if c["mbs_value"] > 0:
         mbs_row = f"<tr><td style='padding:6px 0;color:#5C5C5C;'>Modern BBQ Supply</td><td style='color:#1A1A1A;text-align:right;'>${c['mbs_value']}</td></tr>"
     return f"""<!DOCTYPE html>
@@ -525,7 +525,7 @@ def step_duration():
 
 @sce_fd_bp.route("/fathersday/dinner")
 def step_dinner():
-    """Step 3 — pick Anderson Ranch dinner gift card (or skip)."""
+    """Step 3 — pick Anderson Reserve dinner gift card (or skip)."""
     build = _read_build_from_request()
     if not build["car"] or not build["duration"]:
         return redirect(url_for("sce_fd.step_car"))
@@ -534,7 +534,7 @@ def step_dinner():
     return render_template(
         "sce_fd_step_dinner.html",
         car=car, duration=duration, build=build,
-        ar_values=ANDERSON_RANCH_VALUES,
+        ar_values=ANDERSON_RESERVE_VALUES,
         step=3, step_total=5,
         back_url=_step_url("step_duration", build),
         next_url_base=url_for("sce_fd.step_bbq"),

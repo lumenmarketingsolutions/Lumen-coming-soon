@@ -323,7 +323,7 @@ fbq('track','InitiateCheckout', {value: {{ total }}, currency: 'USD'});
     <div class="line">
       <div class="line-icon ar">AR</div>
       <div class="line-info">
-        <div class="line-name">Anderson Ranch Dinner</div>
+        <div class="line-name">Anderson Reserve Dinner</div>
         <div class="line-meta">${{ build.ar }} gift card
           · <a class="edit-link" style="background:transparent;color:var(--muted);padding:0;font-weight:500;font-size:12.5px;text-decoration:underline;"
               href="{{ url_for('sce_fd.step_dinner') }}?car={{ car.id }}&dur={{ duration.id }}&ar={{ build.ar }}&mbs={{ build.mbs }}">Change</a></div>
@@ -335,7 +335,7 @@ fbq('track','InitiateCheckout', {value: {{ total }}, currency: 'USD'});
       <div class="line-icon ar" style="background:#f3eee6;color:var(--muted);">AR</div>
       <div class="line-info">
         <div class="line-name" style="color:var(--muted);font-weight:600;">No dinner gift card</div>
-        <div class="line-meta"><a class="edit-link" href="{{ url_for('sce_fd.step_dinner') }}?car={{ car.id }}&dur={{ duration.id }}&ar=0&mbs={{ build.mbs }}">Add Anderson Ranch</a></div>
+        <div class="line-meta"><a class="edit-link" href="{{ url_for('sce_fd.step_dinner') }}?car={{ car.id }}&dur={{ duration.id }}&ar=0&mbs={{ build.mbs }}">Add Anderson Reserve</a></div>
       </div>
       <div class="line-price" style="color:var(--muted);">.</div>
     </div>
