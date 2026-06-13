@@ -241,17 +241,17 @@ def _post_to_manychat(*, name, phone, email, duration_label):
     `payload.values.*` for the lead fields — since that's what the Worker
     was built to parse. See SCE_NEW_FUNNEL_SOP.md for the contract.
     """
+    # Worker reads `payload.values` directly from request body (verified against
+    # current Worker source 2026-06-12) — NOT `payload.payload.values`. Keep flat.
     payload = {
         "funnelName": "SCE Z51 Inquiry",
-        "payload": {
-            "values": {
-                "name": name or "",
-                "phone": phone or "",
-                "email": email or "",
-                "question_Pick-Your-Supercar": Z51_CAR_INTEREST,
-                "LT_driven_before": "",
-                "duration_interest": duration_label or "",
-            },
+        "values": {
+            "name": name or "",
+            "phone": phone or "",
+            "email": email or "",
+            "question_Pick-Your-Supercar": Z51_CAR_INTEREST,
+            "LT_driven_before": "",
+            "duration_interest": duration_label or "",
         },
     }
     def _send():
