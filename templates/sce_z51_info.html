@@ -303,13 +303,15 @@ fbq('track','InitiateCheckout', {content_ids: ['Z51-{{ duration.id|upper }}'], c
 <main class="wrap">
   <header class="hero-meta">
     <div class="hero-eyebrow">Step 2 · Your info</div>
-    <h1 class="hero-title">Where do we send the receipt?</h1>
+    <h1 class="hero-title">Almost there. Just your info.</h1>
   </header>
 
   <!-- Summary of selected build -->
   <div class="summary">
     <div class="summary-thumb">
-      <img src="{{ url_for('static', filename='sce-z51/c8z51.jpg') }}" alt="Corvette C8 Z51">
+      <picture>
+        <source srcset="{{ url_for('static', filename='sce-z51/hero-cover.webp') }}" type="image/webp">
+        <img src="{{ url_for('static', filename='sce-z51/hero-cover.jpg') }}" alt="Corvette C8 Z51"></picture>
     </div>
     <div class="summary-info">
       <div class="summary-label">Your build</div>
