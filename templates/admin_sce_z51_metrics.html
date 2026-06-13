@@ -1,0 +1,182 @@
+{% extends "admin_base.html" %}
+{% block title %}Metrics · Corvette C8 Z51 · Lumen SCE{% endblock %}
+
+{% block content %}
+{% set m = metrics %}
+{% set max_count = (m.page_counts.values()|list|max) or 1 %}
+{% set max_time = (m.time_per_page.values()|list|max) or 1 %}
+
+<div class="topbar">
+  <div>
+    <h1 class="page-title">{{ offer_name }}</h1>
+    <div class="page-sub">supercarexp.lumenmarketing.co/z51</div>
+  </div>
+  <div class="right-tools">
+    <div class="range">
+      <a href="?range=7d"  class="{{ 'active' if range_key == '7d'  else '' }}">7 days</a>
+      <a href="?range=30d" class="{{ 'active' if range_key == '30d' else '' }}">30 days</a>
+      <a href="?range=all" class="{{ 'active' if range_key == 'all' else '' }}">All time</a>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <a class="tab active" href="{{ url_for('sce_admin.z51_metrics') }}?range={{ range_key }}">Metrics</a>
+  <a class="tab" href="{{ url_for('sce_admin.z51_contacts') }}?range={{ range_key }}">Leads · {{ m.leads }}</a>
+  <a class="tab" href="{{ url_for('sce_admin.z51_abandoned') }}?range={{ range_key }}">Abandoned</a>
+</div>
+
+<div class="kpis">
+  <div class="kpi">
+    <div class="kpi-label">Funnel visits</div>
+    <div class="kpi-value">{{ '{:,}'.format(m.total_visitors) }}</div>
+    <div class="kpi-meta">unique sessions in range</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Leads</div>
+    <div class="kpi-value">{{ '{:,}'.format(m.leads) }}</div>
+    <div class="kpi-meta">{% if m.leads %}form completions{% else %}awaiting first lead{% endif %}</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Conversion rate</div>
+    <div class="kpi-value">{{ m.conv_rate }}%</div>
+    <div class="kpi-meta">
+      {% if m.leads > m.leads_tracked %}
+        based on {{ m.leads_tracked }} tracked of {{ m.leads }}
+      {% else %}
+        visit → lead
+      {% endif %}
+    </div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Avg time on page</div>
+    <div class="kpi-value">{{ m.avg_time_s }}<span style="font-size:18px;color:var(--dim);"> s</span></div>
+    <div class="kpi-meta">across both pages</div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px;">
+  <h3>Funnel flow</h3>
+  {% if m.total_visitors %}
+  <div class="ptp">
+    {% set prev = None %}
+    {% for pid, plabel in funnel_pages %}
+      {% set count = m.page_counts.get(pid, 0) %}
+      {% set h = ((count / max_count) * 100) if max_count else 0 %}
+      <div class="col">
+        <div class="count">{{ '{:,}'.format(count) }}</div>
+        {% if count > 0 %}
+          <div class="bar" style="height: {{ h }}%; min-height: 8px;"></div>
+        {% else %}
+          <div class="bar-empty"></div>
+        {% endif %}
+        <div class="label">{{ plabel }}</div>
+        {% if prev is not none and prev > 0 %}
+          {% set drop = ((prev - count) / prev * 100) | round(0, 'floor') | int %}
+          {% if drop > 0 %}
+            <div class="drop">↓ {{ drop }}%</div>
+          {% endif %}
+        {% endif %}
+      </div>
+      {% set prev = count %}
+    {% endfor %}
+    {# Append the lead conversion as a final synthetic column #}
+    {% set lead_h = ((m.leads_tracked / max_count) * 100) if max_count else 0 %}
+    <div class="col">
+      <div class="count">{{ '{:,}'.format(m.leads_tracked) }}</div>
+      {% if m.leads_tracked > 0 %}
+        <div class="bar" style="height: {{ lead_h }}%; min-height: 8px; background: var(--accent-bright);"></div>
+      {% else %}
+        <div class="bar-empty"></div>
+      {% endif %}
+      <div class="label">Submitted</div>
+      {% if prev and prev > 0 %}
+        {% set drop = ((prev - m.leads_tracked) / prev * 100) | round(0, 'floor') | int %}
+        {% if drop > 0 %}
+          <div class="drop">↓ {{ drop }}%</div>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+  <div style="margin-top:16px;display:flex;gap:24px;color:var(--dim);font-size:13px;flex-wrap:wrap;">
+    <div><strong style="color:var(--text);">{{ m.landing_to_info }}%</strong> landing → info</div>
+    <div><strong style="color:var(--text);">{{ m.info_to_lead }}%</strong> info → submitted</div>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="ic">📊</div>
+    <h4>No traffic yet</h4>
+    <p>Funnel data will appear here as soon as visitors hit /z51.</p>
+  </div>
+  {% endif %}
+</div>
+
+<div class="card" style="margin-bottom:16px;">
+  <h3>Time on page</h3>
+  {% if m.total_visitors %}
+  <div class="top-bars">
+    {% for pid, plabel in funnel_pages %}
+      {% set t = m.time_per_page.get(pid, 0) %}
+      {% set h = ((t / max_time) * 100) if max_time else 0 %}
+      <div class="col">
+        <div class="count">{{ t }}s</div>
+        {% if t > 0 %}
+          <div class="bar" style="height: {{ h }}%; min-height: 6px;"></div>
+        {% else %}
+          <div class="bar-empty"></div>
+        {% endif %}
+        <div class="label">{{ plabel }}</div>
+      </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="info" style="text-align:center;padding:30px 0;">No time-on-page data yet.</p>
+  {% endif %}
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h3>Duration picked (leads)</h3>
+    {% set tot_d = m.leads_tracked %}
+    {% if tot_d %}
+    {% set max_d = (m.duration_split.values()|list|max) or 1 %}
+    <div class="hbars">
+      {% for d_id, d_label in durations %}
+        {% set count = m.duration_split.get(d_id, 0) %}
+        {% set pct = (count / max_d * 100) if max_d else 0 %}
+        <div class="hbar-row">
+          <div class="hbar-name">{{ d_label }}</div>
+          <div class="hbar-track"><div class="hbar-fill" style="width: {{ pct }}%;"></div></div>
+          <div class="hbar-num">{{ count }}</div>
+        </div>
+      {% endfor %}
+    </div>
+    <div style="margin-top:14px;color:var(--dim);font-size:12.5px;">
+      Intended package value (sum of picked durations): <strong style="color:var(--text);">${{ '{:,}'.format(m.intended_value) }}</strong>
+    </div>
+    {% else %}
+    <p class="info" style="padding:14px 0;">No leads yet to break out by duration.</p>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Lead source (UTM)</h3>
+    {% if m.utm_sources %}
+    {% set max_u = m.utm_sources[0][1] or 1 %}
+    <div class="hbars">
+      {% for src, count in m.utm_sources %}
+        {% set pct = (count / max_u * 100) if max_u else 0 %}
+        <div class="hbar-row">
+          <div class="hbar-name">{{ src }}</div>
+          <div class="hbar-track"><div class="hbar-fill" style="width: {{ pct }}%;"></div></div>
+          <div class="hbar-num">{{ count }}</div>
+        </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="info" style="padding:14px 0;">No tagged sources yet. Wire utm_source in ad links to populate this.</p>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

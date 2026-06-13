@@ -2251,7 +2251,7 @@ def mane_color_v2_submit():
     body = f"""
     <div style="font-family:-apple-system,Inter,sans-serif;background:#0a0a0f;padding:32px 20px;color:#e8e8f0;">
       <div style="max-width:560px;margin:0 auto;background:#111118;border:1px solid #1a1a25;border-radius:14px;padding:32px;">
-        <div style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#7c4dff;margin-bottom:10px;">New Color Lead · TEST-2 (simplified)</div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#7c4dff;margin-bottom:10px;">New Color Lead</div>
         <h2 style="font-size:22px;font-weight:700;margin:0 0 6px 0;color:#fff;">Mane Styling Studio</h2>
         <p style="font-size:14px;color:#e8e8f0;margin:0 0 20px 0;">{name}{' · ' + phone if phone else ''}</p>
         {_phorest_email_button(phorest_client_id)}
@@ -2260,7 +2260,7 @@ def mane_color_v2_submit():
     </div>
     """
     try:
-        send_email(MANE_LEAD_TO, f"Mane color lead [TEST-2]: {name}", body)
+        send_email(MANE_LEAD_TO, f"Mane color lead: {name}", body)
     except Exception:
         pass
 
@@ -2330,7 +2330,7 @@ def mane_extensions_v2_submit():
     body = f"""
     <div style="font-family:-apple-system,Inter,sans-serif;background:#0a0a0f;padding:32px 20px;color:#e8e8f0;">
       <div style="max-width:560px;margin:0 auto;background:#111118;border:1px solid #1a1a25;border-radius:14px;padding:32px;">
-        <div style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#7c4dff;margin-bottom:10px;">New Extensions Lead · TEST-2 (simplified)</div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#7c4dff;margin-bottom:10px;">New Extensions Lead</div>
         <h2 style="font-size:22px;font-weight:700;margin:0 0 6px 0;color:#fff;">Mane Styling Studio</h2>
         <p style="font-size:14px;color:#e8e8f0;margin:0 0 20px 0;">{name}{' · ' + phone if phone else ''}</p>
         {_phorest_email_button(phorest_client_id)}
@@ -2339,7 +2339,7 @@ def mane_extensions_v2_submit():
     </div>
     """
     try:
-        send_email(MANE_LEAD_TO, f"Mane extensions lead [TEST-2]: {name}", body)
+        send_email(MANE_LEAD_TO, f"Mane extensions lead: {name}", body)
     except Exception:
         pass
 

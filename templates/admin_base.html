@@ -413,6 +413,10 @@
 
     <div class="nav-section">
       <div class="nav-label">Offers</div>
+      <a class="nav-item {{ 'active' if offer_id == 'z51' else '' }}" href="{{ url_for('sce_admin.z51_metrics') }}">
+        <span class="dot"></span>
+        <span>Corvette C8 Z51</span>
+      </a>
       <a class="nav-item {{ 'active' if offer_id == 'mothersday' else '' }}" href="{{ url_for('sce_admin.md_metrics') }}">
         <span class="dot"></span>
         <span>Mother's Day</span>
