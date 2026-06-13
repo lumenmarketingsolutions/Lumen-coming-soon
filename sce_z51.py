@@ -75,6 +75,19 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAILS  = ["kendall@lumenmarketing.co", "n.wilkinson@launchpoint.dev"]
 NOTIFY_FROM    = "SCE Boise <kendall@lumenmarketing.co>"
 
+# ManyChat / SMS pipeline — same Cloudflare Worker that Perspective funnels fire.
+# Worker creates SMS subscriber, sets custom fields, applies `new-lead` tag,
+# ManyChat outreach flow then sends Nate's first SMS via Twilio +17252162895.
+# See sce-boise/SCE_NEW_FUNNEL_SOP.md for the payload contract.
+MANYCHAT_WORKER_URL = os.environ.get(
+    "MANYCHAT_WORKER_URL",
+    "https://sce-perspective-to-manychat.daconmgmt.workers.dev",
+)
+# Car label sent to ManyChat as `car_interest`. Shows up directly in Nate's
+# outreach SMS template (`{{car_interest}}`). MUST match the string the Worker's
+# Claude system prompt recognizes for fleet lookups — Z51 only as of 2026-06-12.
+Z51_CAR_INTEREST = "Corvette C8 Z51"
+
 # DB
 DATA_DIR = "/data" if os.path.isdir("/data") else os.path.dirname(__file__)
 DB_PATH  = os.path.join(DATA_DIR, "waitlist.db")
@@ -218,6 +231,39 @@ def _build_lead_email_html(c):
 </td></tr>
 </table></td></tr></table>
 </body></html>"""
+
+
+def _post_to_manychat(*, name, phone, email, duration_label):
+    """Fire-and-forget POST to the Cloudflare Worker that creates the ManyChat
+    SMS subscriber and triggers Nate's outreach flow.
+
+    Payload mimics Perspective's webhook shape — `funnelName` at root and
+    `payload.values.*` for the lead fields — since that's what the Worker
+    was built to parse. See SCE_NEW_FUNNEL_SOP.md for the contract.
+    """
+    payload = {
+        "funnelName": "SCE Z51 Inquiry",
+        "payload": {
+            "values": {
+                "name": name or "",
+                "phone": phone or "",
+                "email": email or "",
+                "question_Pick-Your-Supercar": Z51_CAR_INTEREST,
+                "LT_driven_before": "",
+                "duration_interest": duration_label or "",
+            },
+        },
+    }
+    def _send():
+        try:
+            r = requests.post(MANYCHAT_WORKER_URL, json=payload, timeout=8)
+            if r.status_code >= 300:
+                print(f"[Z51→ManyChat] {r.status_code}: {r.text[:300]}")
+            else:
+                print(f"[Z51→ManyChat] sent ok ({r.status_code}) for {email}")
+        except Exception as e:
+            print(f"[Z51→ManyChat] exception: {e}")
+    threading.Thread(target=_send, daemon=True).start()
 
 
 def _send_lead_email(ctx):
@@ -371,6 +417,13 @@ def optin():
         "submitted_at": _format_boise_now(),
         "notes": notes,
     })
+
+    # ManyChat outreach — fires the Cloudflare Worker → creates SMS subscriber →
+    # Nate's auto-reply flow texts the lead about the Corvette C8 Z51.
+    _post_to_manychat(
+        name=name, phone=phone, email=email,
+        duration_label=duration["label"],
+    )
 
     # Meta CAPI Lead — same event_id as browser fbq Lead so they dedupe
     name_parts = name.split()
