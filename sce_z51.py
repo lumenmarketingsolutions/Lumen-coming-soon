@@ -88,6 +88,31 @@ MANYCHAT_WORKER_URL = os.environ.get(
 # Claude system prompt recognizes for fleet lookups — Z51 only as of 2026-06-12.
 Z51_CAR_INTEREST = "Corvette C8 Z51"
 
+# ─────────────────── Booking link redirects ───────────────────
+# Short URLs the SMS bot drops in replies when a lead signals booking intent.
+# Final SMS link: supercarexp.lumenmarketing.co/b/<slug>
+#
+# Adding a new car later is a 2-line change:
+#   1. Add `"<slug>": "<Valara iframe URL>"` to BOOKING_LINKS below
+#   2. Add the same slug line to the Worker prompt's BOOKING LINKS section so
+#      the bot knows the link exists for that car
+#
+# Worker prompt rule: bot ONLY sends the link when car_interest matches a
+# car in BOOKING_LINKS. For cars not yet wired, bot falls back to the
+# standard hot-lead handoff phrase (no link).
+BOOKING_LINKS = {
+    "z51": VALARA_PRODUCT_URL,  # Corvette C8 Z51 — live 2026-06-12
+    # "artura":  "https://app.valara.io/iframe/products/...?sig=...",
+    # "gt3rs":   "https://app.valara.io/iframe/products/...?sig=...",
+    # "urus":    "https://app.valara.io/iframe/products/...?sig=...",
+    # "g63":     "https://app.valara.io/iframe/products/...?sig=...",
+    # "huracan": "https://app.valara.io/iframe/products/...?sig=...",
+    # "trackhawk": "https://app.valara.io/iframe/products/...?sig=...",
+    # "gt500":   "https://app.valara.io/iframe/products/...?sig=...",
+    # "296gtb":  "https://app.valara.io/iframe/products/...?sig=...",
+    # "296gts":  "https://app.valara.io/iframe/products/...?sig=...",
+}
+
 # DB
 DATA_DIR = "/data" if os.path.isdir("/data") else os.path.dirname(__file__)
 DB_PATH  = os.path.join(DATA_DIR, "waitlist.db")
@@ -506,3 +531,23 @@ def track():
     resp = jsonify({"ok": True})
     resp.headers["Access-Control-Allow-Origin"] = "*"
     return resp
+
+
+@sce_z51_bp.route("/b/<car_slug>")
+def book_redirect(car_slug):
+    """Short SMS link → Valara booking page for the requested car.
+
+    Used by Nate's auto-reply bot: when a lead signals booking intent and
+    their car is in BOOKING_LINKS, the bot drops `supercarexp.lumenmarketing.co/b/<slug>`
+    into the reply. Lead clicks → this route 302s to the Valara booking flow.
+
+    Unknown slugs fall back to the Z51 landing page rather than 404'ing —
+    safer if the bot ever mis-types or we drop a car from the map.
+    """
+    slug   = (car_slug or "").lower().strip()
+    target = BOOKING_LINKS.get(slug)
+    if not target:
+        print(f"[Z51 book] unknown slug={slug!r} ua={request.headers.get('User-Agent','')[:80]}")
+        return redirect(url_for("sce_z51.landing"))
+    print(f"[Z51 book] click slug={slug} ua={request.headers.get('User-Agent','')[:80]}")
+    return redirect(target)
