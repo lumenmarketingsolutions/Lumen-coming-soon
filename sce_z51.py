@@ -51,7 +51,7 @@ VALARA_PRODUCT_URL = (
     "ZGwzZGthUzd5VVJpczFLZFg2Z0NtdjNZQmlWU2xEMGZjMTRaTlhoaitLQ3J1RmZySmFFbWs5ZFBwRktCY29rc1Z2"
     "Si9lNC96NlVkRUh4RE80V2FIYWtrM3cyM3E1b0JZUW1TUHE4S1k4Q1ZDNFhvND0tLWZ6aWp4TDQrbUlaS25iSlAt"
     "LW11Y00wQjhPYXEwekNodmRMM1I4a2c9PQ"
-    "&text=Show+Availability&color=%23ff4d00&text_color=%23FFFFFF"
+    "&text=Show+Availability&color=%23ff4f16&text_color=%23FFFFFF"
     "&ref=https%3A%2F%2Fsupercarexp.lumenmarketing.co%2Fz51"
 )
 
