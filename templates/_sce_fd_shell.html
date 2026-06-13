@@ -100,33 +100,43 @@
   }
   .fd-spacer { flex: 0 0 36px; }
 
-  /* ─── Brand stack (eyebrow + wordmark, centered) ─── */
+  /* ─── Brand row (FD label and wordmark inline, centered together) ─── */
   .fd-brand {
     flex: 1 1 auto;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    gap: 4px;
+    gap: 12px;
     min-width: 0;
   }
   .fd-label {
-    font-size: 10px;
-    letter-spacing: 0.2em;
+    font-size: 12px;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--muted);
-    font-weight: 600;
+    font-weight: 700;
     white-space: nowrap;
   }
   .fd-label strong {
     color: var(--accent);
     font-weight: 700;
   }
+  .fd-divider {
+    color: var(--line-strong);
+    font-weight: 700;
+    font-size: 12px;
+    user-select: none;
+  }
   @media (max-width: 540px) {
     .fd-logo img { width: 30px; height: 30px; }
     .fd-spacer  { flex: 0 0 30px; }
-    .fd-label   { font-size: 9px; letter-spacing: 0.16em; }
+    .fd-brand   { gap: 9px; }
+    .fd-label   { font-size: 10px; letter-spacing: 0.1em; }
+  }
+  @media (max-width: 400px) {
+    /* On tight phones drop the FD label and keep just the wordmark to avoid wrap */
+    .fd-divider, .fd-label { display: none; }
   }
   .back {
     color: var(--muted); font-size: 13px; font-weight: 500;
