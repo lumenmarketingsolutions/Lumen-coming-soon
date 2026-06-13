@@ -97,6 +97,9 @@
     width: 36px; height: 36px;
     object-fit: contain;
     display: block;
+    /* Source logo is white-on-transparent (designed for dark backgrounds).
+       FD nav is white, so invert to black so the mark actually shows. */
+    filter: brightness(0);
   }
   .fd-spacer { flex: 0 0 36px; }
 
