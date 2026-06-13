@@ -590,6 +590,26 @@ def review():
 
 @sce_fd_bp.route("/fathersday/optin", methods=["POST"])
 def optin():
+    try:
+        return _optin_impl()
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        print(f"[SCE-FD optin] uncaught: {type(e).__name__}: {e}")
+        from urllib.parse import quote
+        err = quote(f"{type(e).__name__}: {str(e)[:300]}")
+        # Best-effort redirect back to review so the user sees the error inline
+        # without a generic 500 page. If build state is unreadable, send to top.
+        try:
+            build = _read_build_from_request()
+            if build.get("car") and build.get("duration"):
+                return redirect(_step_url("review", build) + "&err=server&err_msg=" + err)
+        except Exception:
+            pass
+        return redirect(f"/fathersday?err=server&err_msg={err}")
+
+
+def _optin_impl():
     build = _read_build_from_request()
     car_id      = build["car"]
     duration_id = build["duration"]
