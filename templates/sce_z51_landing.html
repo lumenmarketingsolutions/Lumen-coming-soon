@@ -427,10 +427,15 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
   <div class="notice">Pick how long you want it.</div>
 {% endif %}
 
-<!-- Hero photo (framed) -->
+<!-- Hero photo (framed) — Torch Red C8 Z51, drone-angle front-quarter -->
 <div class="hero-wrap">
   <div class="hero-photo">
-    <img src="{{ url_for('static', filename='sce-z51/c8z51.jpg') }}" alt="Corvette C8 Z51 in Torch Red">
+    <picture>
+      <source srcset="{{ url_for('static', filename='sce-z51/hero-cover.webp') }}" type="image/webp">
+      <img src="{{ url_for('static', filename='sce-z51/hero-cover.jpg') }}"
+           alt="Torch Red Corvette C8 Z51 in front of a modern Boise home"
+           loading="eager" fetchpriority="high">
+    </picture>
   </div>
 </div>
 
