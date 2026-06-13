@@ -142,6 +142,94 @@
     display: block;
   }
 
+  /* ─── Slideshow track + controls ─── */
+  .hero-track {
+    display: flex;
+    width: 100%; height: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .hero-track::-webkit-scrollbar { display: none; }
+  .hero-slide {
+    flex: 0 0 100%;
+    height: 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    position: relative;
+  }
+  .hero-slide picture { display: block; width: 100%; height: 100%; }
+  .hero-slide img {
+    width: 100%; height: 100%;
+    object-fit: cover; object-position: center;
+    display: block;
+  }
+
+  /* Arrows — desktop hover-reveal, always-on tap targets on touch */
+  .hero-arrow {
+    position: absolute;
+    top: 50%; transform: translateY(-50%);
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255,255,255,0.92);
+    color: #1a1a1a;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    transition: opacity 0.2s, transform 0.15s, background 0.15s;
+    opacity: 0;
+    z-index: 2;
+  }
+  .hero-photo:hover .hero-arrow,
+  .hero-arrow:focus-visible { opacity: 1; }
+  .hero-arrow:hover { background: #fff; transform: translateY(-50%) scale(1.04); }
+  .hero-arrow:active { transform: translateY(-50%) scale(0.96); }
+  .hero-arrow:disabled { opacity: 0 !important; cursor: default; pointer-events: none; }
+  .hero-arrow-prev { left: 14px; }
+  .hero-arrow-next { right: 14px; }
+  @media (hover: none) {
+    /* On touch devices, keep arrows always visible at lower opacity since
+       there's no hover state — users get swipe AND tap affordances. */
+    .hero-arrow { opacity: 0.85; }
+    .hero-arrow-prev { left: 10px; }
+    .hero-arrow-next { right: 10px; }
+  }
+
+  /* Dot indicators */
+  .hero-dots {
+    position: absolute;
+    bottom: 14px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 7px;
+    padding: 6px 10px;
+    background: rgba(26,26,26,0.32);
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 2;
+  }
+  .hero-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    border: 0;
+    background: rgba(255,255,255,0.55);
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.2s, width 0.2s;
+  }
+  .hero-dot.is-active {
+    background: #fff;
+    width: 18px;
+    border-radius: 4px;
+  }
+
   .hero-meta {
     max-width: 720px; margin: 0 auto;
     padding: 26px 22px 4px;
@@ -427,17 +515,94 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
   <div class="notice">Pick how long you want it.</div>
 {% endif %}
 
-<!-- Hero photo (framed) — Torch Red C8 Z51, drone-angle front-quarter -->
+<!-- Hero slideshow — Torch Red C8 Z51 in the wild -->
 <div class="hero-wrap">
   <div class="hero-photo">
-    <picture>
-      <source srcset="{{ url_for('static', filename='sce-z51/hero-cover.webp') }}" type="image/webp">
-      <img src="{{ url_for('static', filename='sce-z51/hero-cover.jpg') }}"
-           alt="Torch Red Corvette C8 Z51 in front of a modern Boise home"
-           loading="eager" fetchpriority="high">
-    </picture>
+    <div class="hero-track" id="heroTrack" role="region" aria-label="Corvette C8 Z51 photo gallery">
+      <div class="hero-slide">
+        <picture>
+          <source srcset="{{ url_for('static', filename='sce-z51/hero-cover.webp') }}" type="image/webp">
+          <img src="{{ url_for('static', filename='sce-z51/hero-cover.jpg') }}"
+               alt="Torch Red Corvette C8 Z51 drone shot in driveway"
+               loading="eager" fetchpriority="high">
+        </picture>
+      </div>
+      <div class="hero-slide">
+        <picture>
+          <source srcset="{{ url_for('static', filename='sce-z51/hero-02.webp') }}" type="image/webp">
+          <img src="{{ url_for('static', filename='sce-z51/hero-02.jpg') }}"
+               alt="Corvette C8 Z51 front-quarter in front of modern Boise home"
+               loading="lazy">
+        </picture>
+      </div>
+      <div class="hero-slide">
+        <picture>
+          <source srcset="{{ url_for('static', filename='sce-z51/hero-03.webp') }}" type="image/webp">
+          <img src="{{ url_for('static', filename='sce-z51/hero-03.jpg') }}"
+               alt="Corvette C8 Z51 rear view with sun flare"
+               loading="lazy">
+        </picture>
+      </div>
+      <div class="hero-slide">
+        <picture>
+          <source srcset="{{ url_for('static', filename='sce-z51/hero-04.webp') }}" type="image/webp">
+          <img src="{{ url_for('static', filename='sce-z51/hero-04.jpg') }}"
+               alt="Corvette C8 Z51 front-end and flag emblem close-up"
+               loading="lazy">
+        </picture>
+      </div>
+    </div>
+    <button class="hero-arrow hero-arrow-prev" id="heroPrev" aria-label="Previous photo">‹</button>
+    <button class="hero-arrow hero-arrow-next" id="heroNext" aria-label="Next photo">›</button>
+    <div class="hero-dots" id="heroDots" role="tablist">
+      <button class="hero-dot is-active" data-slide="0" role="tab" aria-label="Photo 1"></button>
+      <button class="hero-dot" data-slide="1" role="tab" aria-label="Photo 2"></button>
+      <button class="hero-dot" data-slide="2" role="tab" aria-label="Photo 3"></button>
+      <button class="hero-dot" data-slide="3" role="tab" aria-label="Photo 4"></button>
+    </div>
   </div>
 </div>
+
+<script>
+(function() {
+  var track = document.getElementById('heroTrack');
+  var prev  = document.getElementById('heroPrev');
+  var next  = document.getElementById('heroNext');
+  var dots  = Array.prototype.slice.call(document.querySelectorAll('#heroDots .hero-dot'));
+  if (!track) return;
+
+  function slideWidth() { return track.clientWidth; }
+  function currentIndex() { return Math.round(track.scrollLeft / slideWidth()); }
+  function maxIndex() { return dots.length - 1; }
+
+  function goTo(i) {
+    i = Math.max(0, Math.min(maxIndex(), i));
+    track.scrollTo({ left: i * slideWidth(), behavior: 'smooth' });
+  }
+  function syncDots() {
+    var i = currentIndex();
+    dots.forEach(function(d, idx) { d.classList.toggle('is-active', idx === i); });
+    prev.disabled = (i === 0);
+    next.disabled = (i === maxIndex());
+  }
+
+  prev.addEventListener('click', function() { goTo(currentIndex() - 1); });
+  next.addEventListener('click', function() { goTo(currentIndex() + 1); });
+  dots.forEach(function(d) {
+    d.addEventListener('click', function() { goTo(parseInt(d.dataset.slide, 10)); });
+  });
+
+  // Throttle scroll handler with rAF
+  var ticking = false;
+  track.addEventListener('scroll', function() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function() { syncDots(); ticking = false; });
+  });
+  window.addEventListener('resize', syncDots);
+  syncDots();
+})();
+</script>
 
 <header class="hero-meta">
   <div class="hero-eyebrow">New to the fleet</div>
