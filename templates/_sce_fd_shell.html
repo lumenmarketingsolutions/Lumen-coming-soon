@@ -44,20 +44,8 @@
   .topbar-inner {
     max-width: 1080px; margin: 0 auto;
     padding: 11px 22px;
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center; justify-content: center;
     gap: 16px;
-  }
-  .topbar-label {
-    font-size: 12.5px; letter-spacing: 0.05em;
-    color: rgba(255,255,255,0.78);
-    white-space: nowrap;
-    display: inline-flex; align-items: center; gap: 7px;
-  }
-  .topbar-label strong {
-    color: var(--accent);
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
   }
   .topbar-countdown {
     display: inline-flex; align-items: center; gap: 9px;
@@ -83,16 +71,11 @@
   .cd-text .cd-num { color: var(--accent); font-weight: 800; }
   @media (max-width: 640px) {
     .topbar-inner { padding: 10px 16px; gap: 10px; }
-    .topbar-label { font-size: 11.5px; letter-spacing: 0.04em; }
     .topbar-countdown { font-size: 11px; gap: 7px; letter-spacing: 0.04em; }
     .cd-dot { width: 6px; height: 6px; flex: 0 0 6px; }
   }
   @media (max-width: 420px) {
-    .topbar-label { font-size: 10.5px; }
     .topbar-countdown { font-size: 10.5px; }
-    /* On tight phones, just show the countdown — drop the static label */
-    .topbar-label { display: none; }
-    .topbar-inner { justify-content: center; }
   }
 
   .nav {
@@ -101,6 +84,49 @@
     border-bottom: 1px solid var(--line);
     gap: 10px;
     background: var(--surface);
+  }
+
+  /* ─── Logo (top-left brand mark, matches Z51 funnel pattern) ─── */
+  .fd-logo {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+  }
+  .fd-logo img {
+    width: 36px; height: 36px;
+    object-fit: contain;
+    display: block;
+  }
+  .fd-spacer { flex: 0 0 36px; }
+
+  /* ─── Brand stack (eyebrow + wordmark, centered) ─── */
+  .fd-brand {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 4px;
+    min-width: 0;
+  }
+  .fd-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .fd-label strong {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  @media (max-width: 540px) {
+    .fd-logo img { width: 30px; height: 30px; }
+    .fd-spacer  { flex: 0 0 30px; }
+    .fd-label   { font-size: 9px; letter-spacing: 0.16em; }
   }
   .back {
     color: var(--muted); font-size: 13px; font-weight: 500;

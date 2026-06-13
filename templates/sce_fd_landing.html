@@ -4,27 +4,47 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Father's Day · Supercar Experience Boise</title>
-<meta name="description" content="The Father's Day gift he actually wants. A supercar experience plus bourbon and BBQ gift cards, delivered before June 21.">
+<meta name="description" content="The Father's Day gift he actually wants. A supercar experience plus a dinner and BBQ gift card, delivered before June 21.">
 <link rel="icon" href="data:,">
 {% include "_sce_fd_shell.html" %}
 <style>
-  /* Landing layout: just a hero. No cards, no badges. */
+  /* Landing layout: framed hero photo + hero text. No cards, no badges. */
   .land-wrap {
     flex: 1;
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
     margin: 0 auto;
-    padding: 88px 24px 64px;
+    padding: 48px 24px 64px;
+  }
+
+  /* Framed hero photo */
+  .hero-photo {
+    width: 100%;
+    max-width: 560px;
+    aspect-ratio: 3 / 2;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 0 auto 38px;
+    box-shadow:
+      0 1px 2px rgba(26,26,26,0.05),
+      0 14px 36px rgba(26,26,26,0.14);
+    background: #1a1a1a;
+  }
+  .hero-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .land-hero { text-align: center; }
 
   .land-hero h1 {
-    font-size: clamp(34px, 8vw, 52px);
+    font-size: clamp(32px, 7.4vw, 48px);
     line-height: 1.05;
     letter-spacing: -0.022em;
     font-weight: 800;
-    margin: 0 0 22px;
+    margin: 0 0 20px;
     color: var(--text);
   }
 
@@ -58,7 +78,8 @@
   }
 
   @media (max-width: 540px) {
-    .land-wrap   { padding: 60px 22px 52px; }
+    .land-wrap   { padding: 32px 18px 52px; }
+    .hero-photo  { margin-bottom: 28px; border-radius: 16px; }
     .cta-primary { padding: 16px 34px; font-size: 15.5px; }
   }
 </style>
@@ -74,7 +95,6 @@ fbq('track','PageView');
 
 <div class="topbar">
   <div class="topbar-inner">
-    <span class="topbar-label">Father's Day · <strong>June 21</strong></span>
     <span class="topbar-countdown" id="fdCountdown">
       <span class="cd-dot"></span>
       <span class="cd-text">…</span>
@@ -82,17 +102,30 @@ fbq('track','PageView');
   </div>
 </div>
 
-<nav class="nav" style="justify-content: center;">
-  <span class="wordmark">
-    <span class="wm-long">Supercar Experience<span class="dot"> · </span>Boise</span>
-    <span class="wm-short">SCE<span class="dot"> · </span>Boise</span>
-  </span>
+<nav class="nav">
+  <a class="fd-logo" href="/fathersday">
+    <img src="{{ url_for('static', filename='sce-z51/logo.webp') }}" alt="SCE Boise" loading="eager">
+  </a>
+  <div class="fd-brand">
+    <span class="fd-label">Father's Day · <strong>June 21</strong></span>
+    <span class="wordmark">
+      <span class="wm-long">Supercar Experience<span class="dot"> · </span>Boise</span>
+      <span class="wm-short">SCE<span class="dot"> · </span>Boise</span>
+    </span>
+  </div>
+  <span class="fd-spacer"></span>
 </nav>
 
 <main class="land-wrap">
+  <div class="hero-photo">
+    <img src="{{ url_for('static', filename='sce-fathersday/landing-hero.webp') }}"
+         alt="Porsche 911 GT3 RS"
+         loading="eager" fetchpriority="high">
+  </div>
+
   <section class="land-hero">
     <h1>Give your dad the gift he actually wants.</h1>
-    <p class="lead">Pick the car. Add a bourbon and BBQ gift card. We deliver it before Father's Day.</p>
+    <p class="lead">Pick the car. Add a dinner and BBQ gift card. We deliver it before Father's Day.</p>
     <a class="cta-primary" href="{{ start_url }}">Build His Day</a>
     <p class="reassure">Takes 90 seconds. Free delivery in Boise.</p>
   </section>

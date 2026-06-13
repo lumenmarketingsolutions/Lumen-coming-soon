@@ -4,24 +4,28 @@ Supercar Experience Boise — Father's Day funnel.
 Multi-step build-your-own package:
   Step 1 — Pick a car (C8 Z06, GT3RS, Urus S, G63)
   Step 2 — Pick a duration (4 hour, 8 hour, 24 hour)
-  Step 3 — Add Anderson Reserve bourbon gift card ($100 / $150 / $200) or skip
+  Step 3 — Add Anderson Ranch dinner gift card ($100 / $150 / $200) or skip
   Step 4 — Add Modern BBQ Supply gift card ($25 / $50 / $100) or skip
   Step 5 — Review the package + capture contact info → Stripe Checkout
 
 State lives in URL query params (no sessions). Back button works naturally.
-Server is the source of truth on price.
+Server is the source of truth on price. The `ar` query-param key dates
+from when step 3 was Anderson Reserve bourbon; the initials still fit
+Anderson Ranch dinner, so the internal key stays `ar` to avoid a wide
+rename across the leads table, Stripe metadata, and email templates.
 
 Routes:
-  GET  /fathersday                    → step 1 (car)
+  GET  /fathersday                    → landing
+  GET  /fathersday/car                → step 1 (car)
   GET  /fathersday/duration           → step 2 (?car=…)
-  GET  /fathersday/bourbon            → step 3 (?car=…&dur=…)
+  GET  /fathersday/dinner             → step 3 (?car=…&dur=…)
   GET  /fathersday/bbq                → step 4 (?car=…&dur=…&ar=…)
   GET  /fathersday/review             → step 5 (?car=…&dur=…&ar=…&mbs=…)
   POST /fathersday/optin              → save lead → Stripe Checkout Session → redirect
   GET  /fathersday/booked             → thank-you (after Stripe success)
   POST /fathersday/stripe-webhook     → Stripe event sink (Purchase CAPI)
 
-`ar=0` or absent → no Anderson Reserve gift card. Same for `mbs=0`.
+`ar=0` or absent → no Anderson Ranch dinner gift card. Same for `mbs=0`.
 """
 
 import os
@@ -91,10 +95,23 @@ RENTAL_PRICING = {
     ("g63",   "24h"): 350,
 }
 
-ANDERSON_RESERVE_VALUES   = [100, 150, 200]   # 0 (or absent) = skipped
+ANDERSON_RANCH_VALUES     = [100, 150, 200]   # 0 (or absent) = skipped
 MODERN_BBQ_SUPPLY_VALUES  = [25, 50, 100]     # 0 (or absent) = skipped
 
 BUNDLE_PREMIUM = 0  # Set >0 if SCE wants a flat bundle markup
+
+# ─── 10% Father's Day discount ───
+# Discount displayed on the review page AND applied at Stripe Checkout. Two
+# wire-up paths and we support both:
+#   1) STRIPE_FD_COUPON env var set → attach that coupon ID to the Checkout
+#      Session so Stripe applies it server-side (cleanest — appears on the
+#      Stripe receipt as a discount line).
+#   2) STRIPE_FD_COUPON unset → fall back to reducing each line item by
+#      FD_DISCOUNT_PCT inline, so the funnel still ships the discount even
+#      without the coupon configured. Receipt won't show "10% off" in this
+#      mode, just the reduced prices.
+FD_DISCOUNT_PCT  = 10
+STRIPE_FD_COUPON = os.environ.get("STRIPE_FD_COUPON", "").strip()
 
 # Pixel + CAPI
 META_PIXEL_ID   = os.environ.get("META_PIXEL_ID_SCE", "1514374663034732")
@@ -227,7 +244,7 @@ def _read_build_from_request():
     g = request.values  # works for both args + form
     car      = (g.get("car") or "").strip()
     duration = (g.get("dur") or g.get("duration") or "").strip()
-    ar       = _parse_int(g.get("ar"),  allowed=[0] + ANDERSON_RESERVE_VALUES)
+    ar       = _parse_int(g.get("ar"),  allowed=[0] + ANDERSON_RANCH_VALUES)
     mbs      = _parse_int(g.get("mbs"), allowed=[0] + MODERN_BBQ_SUPPLY_VALUES)
     return {
         "car": car if car in CAR_BY_ID else "",
@@ -270,7 +287,7 @@ def _create_stripe_session(*, email, name, phone, event_id, car, duration, ar_va
 
     line_items = [(f"{car['name']} · {duration['label']}", base_rental)]
     if int(ar_value) > 0:
-        line_items.append((f"Anderson Reserve Bourbon · ${ar_value} gift card", int(ar_value)))
+        line_items.append((f"Anderson Ranch Dinner · ${ar_value} gift card", int(ar_value)))
     if int(mbs_value) > 0:
         line_items.append((f"Modern BBQ Supply · ${mbs_value} gift card", int(mbs_value)))
     if BUNDLE_PREMIUM > 0:
@@ -295,10 +312,24 @@ def _create_stripe_session(*, email, name, phone, event_id, car, duration, ar_va
         ("metadata[name]",     name[:100]),
         ("metadata[phone]",    phone[:32]),
         ("phone_number_collection[enabled]", "true"),
-        ("allow_promotion_codes", "true"),
     ]
+
+    # 10% Father's Day discount — applied via Stripe coupon when configured.
+    # If STRIPE_FD_COUPON is set we send full-price line items + a coupon ID,
+    # and Stripe applies the discount server-side (shows on receipt as a line
+    # item discount). If unset, we reduce each line item by 10% inline so the
+    # funnel still ships the right charged amount.
+    use_coupon = bool(STRIPE_FD_COUPON)
+    if use_coupon:
+        data.append(("discounts[0][coupon]", STRIPE_FD_COUPON))
+    else:
+        # Fall back to letting customers paste their own promotion codes too,
+        # so a manually-created promo code can ride this funnel if needed.
+        data.append(("allow_promotion_codes", "true"))
+
+    discount_factor = 1.0 if use_coupon else (1.0 - FD_DISCOUNT_PCT / 100.0)
     for i, (name_line, dollars) in enumerate(line_items):
-        cents = int(round(dollars * 100))
+        cents = int(round(dollars * 100 * discount_factor))
         data.append((f"line_items[{i}][quantity]", "1"))
         data.append((f"line_items[{i}][price_data][currency]", "usd"))
         data.append((f"line_items[{i}][price_data][unit_amount]", str(cents)))
@@ -322,7 +353,7 @@ def _build_lead_email_html(c):
     ar_row = ""
     mbs_row = ""
     if c["ar_value"] > 0:
-        ar_row = f"<tr><td style='padding:6px 0;color:#5C5C5C;'>Anderson Reserve</td><td style='color:#1A1A1A;text-align:right;'>${c['ar_value']}</td></tr>"
+        ar_row = f"<tr><td style='padding:6px 0;color:#5C5C5C;'>Anderson Ranch</td><td style='color:#1A1A1A;text-align:right;'>${c['ar_value']}</td></tr>"
     if c["mbs_value"] > 0:
         mbs_row = f"<tr><td style='padding:6px 0;color:#5C5C5C;'>Modern BBQ Supply</td><td style='color:#1A1A1A;text-align:right;'>${c['mbs_value']}</td></tr>"
     return f"""<!DOCTYPE html>
@@ -478,23 +509,23 @@ def step_duration():
         car=car, durations=durations_priced, build=build,
         step=2, step_total=5,
         back_url=_step_url("step_car", {"car": build["car"]}),
-        next_url_base=url_for("sce_fd.step_bourbon"),
+        next_url_base=url_for("sce_fd.step_dinner"),
         **_ctx(),
     )
 
 
-@sce_fd_bp.route("/fathersday/bourbon")
-def step_bourbon():
-    """Step 3 — pick Anderson Reserve bourbon gift card (or skip)."""
+@sce_fd_bp.route("/fathersday/dinner")
+def step_dinner():
+    """Step 3 — pick Anderson Ranch dinner gift card (or skip)."""
     build = _read_build_from_request()
     if not build["car"] or not build["duration"]:
         return redirect(url_for("sce_fd.step_car"))
     car = CAR_BY_ID[build["car"]]
     duration = DURATION_BY_ID[build["duration"]]
     return render_template(
-        "sce_fd_step_bourbon.html",
+        "sce_fd_step_dinner.html",
         car=car, duration=duration, build=build,
-        ar_values=ANDERSON_RESERVE_VALUES,
+        ar_values=ANDERSON_RANCH_VALUES,
         step=3, step_total=5,
         back_url=_step_url("step_duration", build),
         next_url_base=url_for("sce_fd.step_bbq"),
@@ -515,7 +546,7 @@ def step_bbq():
         car=car, duration=duration, build=build,
         mbs_values=MODERN_BBQ_SUPPLY_VALUES,
         step=4, step_total=5,
-        back_url=_step_url("step_bourbon", build),
+        back_url=_step_url("step_dinner", build),
         next_url_base=url_for("sce_fd.review"),
         **_ctx(),
     )
@@ -531,11 +562,15 @@ def review():
     duration = DURATION_BY_ID[build["duration"]]
     base_rental = RENTAL_PRICING.get((car["id"], duration["id"]), 0)
     total = _calc_total(build["car"], build["duration"], build["ar"], build["mbs"])
+    discount    = int(round(total * FD_DISCOUNT_PCT / 100))
+    final_total = total - discount
     event_id = uuid.uuid4().hex
     return render_template(
         "sce_fd_review.html",
         car=car, duration=duration, build=build,
-        base_rental=base_rental, bundle_premium=BUNDLE_PREMIUM, total=total,
+        base_rental=base_rental, bundle_premium=BUNDLE_PREMIUM,
+        total=total, discount=discount, final_total=final_total,
+        discount_pct=FD_DISCOUNT_PCT,
         event_id=event_id,
         step=5, step_total=5,
         back_url=_step_url("step_bbq", build),

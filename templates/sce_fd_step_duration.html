@@ -77,7 +77,6 @@ fbq('track','PageView');
 
 <div class="topbar">
   <div class="topbar-inner">
-    <span class="topbar-label">Father's Day · <strong>June 21</strong></span>
     <span class="topbar-countdown" id="fdCountdown">
       <span class="cd-dot"></span>
       <span class="cd-text">…</span>
@@ -86,7 +85,9 @@ fbq('track','PageView');
 </div>
 
 <nav class="nav">
-  <a class="back" href="{{ back_url }}">Back</a>
+  <a class="fd-logo" href="/fathersday">
+    <img src="{{ url_for('static', filename='sce-z51/logo.webp') }}" alt="SCE Boise" loading="eager">
+  </a>
   <span class="wordmark">
     <span class="wm-long">Supercar Experience<span class="dot"> · </span>Boise</span>
     <span class="wm-short">SCE<span class="dot"> · </span>Boise</span>

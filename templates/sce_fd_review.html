@@ -77,9 +77,23 @@
     padding: 16px 20px 18px;
     border-top: 1px solid var(--line-strong);
   }
+  .subtotal-row, .discount-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-feature-settings: "tnum" 1;
+  }
+  .discount-row .l {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .discount-row .a { color: var(--accent); font-weight: 700; }
   .total-row {
     display: flex; justify-content: space-between; align-items: baseline;
-    margin-top: 4px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
   }
   .total-row .l { color: var(--text); font-size: 14px; font-weight: 600; }
   .total-row .a {
@@ -222,7 +236,6 @@ fbq('track','InitiateCheckout', {value: {{ total }}, currency: 'USD'});
 
 <div class="topbar">
   <div class="topbar-inner">
-    <span class="topbar-label">Father's Day · <strong>June 21</strong></span>
     <span class="topbar-countdown" id="fdCountdown">
       <span class="cd-dot"></span>
       <span class="cd-text">…</span>
@@ -231,7 +244,9 @@ fbq('track','InitiateCheckout', {value: {{ total }}, currency: 'USD'});
 </div>
 
 <nav class="nav">
-  <a class="back" href="{{ back_url }}">Back</a>
+  <a class="fd-logo" href="/fathersday">
+    <img src="{{ url_for('static', filename='sce-z51/logo.webp') }}" alt="SCE Boise" loading="eager">
+  </a>
   <span class="wordmark">
     <span class="wm-long">Supercar Experience<span class="dot"> · </span>Boise</span>
     <span class="wm-short">SCE<span class="dot"> · </span>Boise</span>
@@ -278,10 +293,10 @@ fbq('track','InitiateCheckout', {value: {{ total }}, currency: 'USD'});
     <div class="line">
       <div class="line-icon ar">AR</div>
       <div class="line-info">
-        <div class="line-name">Anderson Reserve Bourbon</div>
+        <div class="line-name">Anderson Ranch Dinner</div>
         <div class="line-meta">${{ build.ar }} gift card
           · <a class="edit-link" style="background:transparent;color:var(--muted);padding:0;font-weight:500;font-size:12.5px;text-decoration:underline;"
-              href="{{ url_for('sce_fd.step_bourbon') }}?car={{ car.id }}&dur={{ duration.id }}&ar={{ build.ar }}&mbs={{ build.mbs }}">Change</a></div>
+              href="{{ url_for('sce_fd.step_dinner') }}?car={{ car.id }}&dur={{ duration.id }}&ar={{ build.ar }}&mbs={{ build.mbs }}">Change</a></div>
       </div>
       <div class="line-price">${{ '{:,}'.format(build.ar) }}</div>
     </div>
@@ -289,10 +304,10 @@ fbq('track','InitiateCheckout', {value: {{ total }}, currency: 'USD'});
     <div class="line">
       <div class="line-icon ar" style="background:#f3eee6;color:var(--muted);">AR</div>
       <div class="line-info">
-        <div class="line-name" style="color:var(--muted);font-weight:600;">No bourbon gift card</div>
-        <div class="line-meta"><a class="edit-link" href="{{ url_for('sce_fd.step_bourbon') }}?car={{ car.id }}&dur={{ duration.id }}&ar=0&mbs={{ build.mbs }}">Add Anderson Reserve</a></div>
+        <div class="line-name" style="color:var(--muted);font-weight:600;">No dinner gift card</div>
+        <div class="line-meta"><a class="edit-link" href="{{ url_for('sce_fd.step_dinner') }}?car={{ car.id }}&dur={{ duration.id }}&ar=0&mbs={{ build.mbs }}">Add Anderson Ranch</a></div>
       </div>
-      <div class="line-price" style="color:var(--muted);">—</div>
+      <div class="line-price" style="color:var(--muted);">.</div>
     </div>
     {% endif %}
 
@@ -329,9 +344,19 @@ fbq('track','InitiateCheckout', {value: {{ total }}, currency: 'USD'});
     {% endif %}
 
     <div class="package-totals">
+      <div class="subtotal-row">
+        <span class="l">Subtotal</span>
+        <span class="a">${{ '{:,}'.format(total) }}</span>
+      </div>
+      {% if discount > 0 %}
+      <div class="discount-row">
+        <span class="l">Father's Day {{ discount_pct }}% off</span>
+        <span class="a">-${{ '{:,}'.format(discount) }}</span>
+      </div>
+      {% endif %}
       <div class="total-row">
         <span class="l">Total</span>
-        <span class="a">${{ '{:,}'.format(total) }}</span>
+        <span class="a">${{ '{:,}'.format(final_total) }}</span>
       </div>
     </div>
   </div>

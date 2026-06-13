@@ -177,7 +177,6 @@ fbq('track','Purchase', { currency: 'USD', value: 0 }, { eventID: '{{ session_id
 
 <div class="topbar">
   <div class="topbar-inner">
-    <span class="topbar-label">You're all set · <strong>Father's Day</strong></span>
     <span class="topbar-countdown" id="fdCountdown">
       <span class="cd-dot"></span>
       <span class="cd-text">…</span>
@@ -186,11 +185,14 @@ fbq('track','Purchase', { currency: 'USD', value: 0 }, { eventID: '{{ session_id
 </div>
 
 <nav class="nav">
-  <a class="wordmark" href="/fathersday">
+  <a class="fd-logo" href="/fathersday">
+    <img src="{{ url_for('static', filename='sce-z51/logo.webp') }}" alt="SCE Boise" loading="eager">
+  </a>
+  <span class="wordmark">
     <span class="wm-long">Supercar Experience<span class="dot"> · </span>Boise</span>
     <span class="wm-short">SCE<span class="dot"> · </span>Boise</span>
-  </a>
-  <span class="nav-phone">Call <a href="tel:{{ support_phone_tel }}">{{ support_phone }}</a></span>
+  </span>
+  <span class="fd-spacer"></span>
 </nav>
 
 <main>
@@ -219,7 +221,7 @@ fbq('track','Purchase', { currency: 'USD', value: 0 }, { eventID: '{{ session_id
       <li>
         <div>
           <div class="what">Gift cards delivered before Father's Day</div>
-          <div class="when">Anderson Reserve + Modern BBQ Supply cards arrive in time to hand over.</div>
+          <div class="when">Anderson Ranch dinner card + Modern BBQ Supply card arrive in time to hand over.</div>
         </div>
       </li>
       <li>

@@ -3,35 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Add bourbon? · SCE Boise Father's Day</title>
+<title>Add dinner? · SCE Boise Father's Day</title>
 <link rel="icon" href="data:,">
 {% include "_sce_fd_shell.html" %}
-<style>
-  .partner-card {
-    display: flex; align-items: center; gap: 14px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 22px;
-    box-shadow: 0 1px 2px rgba(26,26,26,0.025), 0 4px 12px rgba(26,26,26,0.035);
-  }
-  .partner-icon {
-    flex: 0 0 44px; width: 44px; height: 44px;
-    border-radius: 12px; background: #2a1810;
-    display: flex; align-items: center; justify-content: center;
-    color: #d4a431; font-size: 22px; font-weight: 700;
-    letter-spacing: -0.02em;
-  }
-  .partner-info { flex: 1; min-width: 0; }
-  .partner-name {
-    font-size: 15px; font-weight: 700; color: var(--text);
-    margin-bottom: 2px;
-  }
-  .partner-desc {
-    font-size: 12.5px; color: var(--muted); line-height: 1.45;
-  }
-</style>
 {% if pixel_id %}
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
@@ -44,7 +18,6 @@ fbq('track','PageView');
 
 <div class="topbar">
   <div class="topbar-inner">
-    <span class="topbar-label">Father's Day · <strong>June 21</strong></span>
     <span class="topbar-countdown" id="fdCountdown">
       <span class="cd-dot"></span>
       <span class="cd-text">…</span>
@@ -53,7 +26,9 @@ fbq('track','PageView');
 </div>
 
 <nav class="nav">
-  <a class="back" href="{{ back_url }}">Back</a>
+  <a class="fd-logo" href="/fathersday">
+    <img src="{{ url_for('static', filename='sce-z51/logo.webp') }}" alt="SCE Boise" loading="eager">
+  </a>
   <span class="wordmark">
     <span class="wm-long">Supercar Experience<span class="dot"> · </span>Boise</span>
     <span class="wm-short">SCE<span class="dot"> · </span>Boise</span>
@@ -68,17 +43,9 @@ fbq('track','PageView');
 <main class="wrap">
   <header class="hero">
     <div class="hero-eyebrow">Step 3 · Optional</div>
-    <h1 class="hero-title">Add bourbon?</h1>
-    <p class="hero-sub">Tack on a gift card to Anderson Reserve, small-batch bourbon from right here in the area.</p>
+    <h1 class="hero-title">Add dinner?</h1>
+    <p class="hero-sub">A gift card to Anderson Ranch, so he gets a night out on top of the drive.</p>
   </header>
-
-  <div class="partner-card">
-    <div class="partner-icon">AR</div>
-    <div class="partner-info">
-      <div class="partner-name">Anderson Reserve Bourbon</div>
-      <div class="partner-desc">Gift card redeems at their tasting room or shop.</div>
-    </div>
-  </div>
 
   <div class="chips three">
     {% for v in ar_values %}
@@ -92,7 +59,7 @@ fbq('track','PageView');
   <div class="skip-row">
     <a class="skip-link"
        href="{{ next_url_base }}?car={{ car.id }}&dur={{ duration.id }}&ar=0&mbs={{ build.mbs or 0 }}">
-      Skip bourbon →
+      Skip dinner →
     </a>
   </div>
 </main>
