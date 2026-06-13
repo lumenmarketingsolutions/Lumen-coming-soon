@@ -6,6 +6,32 @@
 <title>Add dinner? · SCE Boise Father's Day</title>
 <link rel="icon" href="data:,">
 {% include "_sce_fd_shell.html" %}
+<style>
+  .partner-card {
+    display: flex; align-items: center; gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 22px;
+    box-shadow: 0 1px 2px rgba(26,26,26,0.025), 0 4px 12px rgba(26,26,26,0.035);
+  }
+  .partner-icon {
+    flex: 0 0 44px; width: 44px; height: 44px;
+    border-radius: 12px; background: #1a1a1a;
+    display: flex; align-items: center; justify-content: center;
+    color: #ff4d00; font-size: 18px; font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .partner-info { flex: 1; min-width: 0; }
+  .partner-name {
+    font-size: 15px; font-weight: 700; color: var(--text);
+    margin-bottom: 2px;
+  }
+  .partner-desc {
+    font-size: 12.5px; color: var(--muted); line-height: 1.45;
+  }
+</style>
 {% if pixel_id %}
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
@@ -46,6 +72,14 @@ fbq('track','PageView');
     <h1 class="hero-title">Add dinner?</h1>
     <p class="hero-sub">A gift card to Anderson Ranch, so he gets a night out on top of the drive.</p>
   </header>
+
+  <div class="partner-card">
+    <div class="partner-icon">AR</div>
+    <div class="partner-info">
+      <div class="partner-name">Anderson Ranch</div>
+      <div class="partner-desc">Boise dinner spot. Gift card redeems at the restaurant.</div>
+    </div>
+  </div>
 
   <div class="chips three">
     {% for v in ar_values %}
