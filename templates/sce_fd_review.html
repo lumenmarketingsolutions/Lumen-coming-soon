@@ -263,7 +263,12 @@ fbq('track','InitiateCheckout', {value: {{ total }}, currency: 'USD'});
 {% elif request.args.get('err') == 'email' %}
   <div class="notice">We need a real email to send the receipt. Try again below.</div>
 {% elif request.args.get('err') == 'stripe' %}
-  <div class="notice">Saved your info, checkout had a hiccup. We'll reach out within the hour to finish the booking.</div>
+  <div class="notice">
+    Saved your info, checkout had a hiccup. We'll reach out within the hour to finish the booking.
+    {% if request.args.get('err_msg') %}
+    <div style="margin-top:12px;padding:10px 12px;background:rgba(0,0,0,0.04);border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:11px;color:#1a1a1a;word-break:break-all;line-height:1.5;">{{ request.args.get('err_msg') }}</div>
+    {% endif %}
+  </div>
 {% endif %}
 
 <main class="wrap">

@@ -719,7 +719,17 @@ def optin():
 
     if stripe_url:
         return redirect(stripe_url)
-    return redirect(_step_url("review", build) + "&err=stripe&event_id=" + event_id)
+    # Surface the Stripe error in the redirect URL so it's visible without
+    # digging through Railway logs. The status string is built from
+    # _create_stripe_session's RuntimeError and already includes the coupon ID
+    # plus Stripe's response body.
+    from urllib.parse import quote
+    err_msg = quote(stripe_status.replace("failed: ", "")[:400])
+    return redirect(
+        _step_url("review", build)
+        + "&err=stripe&event_id=" + event_id
+        + "&err_msg=" + err_msg
+    )
 
 
 @sce_fd_bp.route("/fathersday/booked")
