@@ -127,6 +127,31 @@
   }
   .redeem-note strong { color: var(--text); font-weight: 700; }
 
+  /* What happens next — prominent expectation-setting block */
+  .next-steps {
+    background: var(--surface);
+    border: 2px solid var(--accent);
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.55;
+  }
+  .next-steps .ns-title {
+    color: var(--accent);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+  .next-steps .ns-body {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .next-steps .ns-body span { color: var(--accent); }
+
   /* Form */
   .form-card {
     background: var(--surface);
@@ -363,6 +388,13 @@ fbq('track','InitiateCheckout', {value: {{ total }}, currency: 'USD'});
         <span class="l">Total</span>
         <span class="a">${{ '{:,}'.format(final_total) }}</span>
       </div>
+    </div>
+  </div>
+
+  <div class="next-steps">
+    <div class="ns-title">What happens after you reserve</div>
+    <div class="ns-body">
+      SCE will <span>text or call you within a few hours</span> to confirm the pickup time and lock in every detail. Your spot is held the moment you reserve.
     </div>
   </div>
 
