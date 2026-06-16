@@ -117,6 +117,16 @@ STRIPE_FD_COUPON = os.environ.get("STRIPE_FD_COUPON", "").strip()
 META_PIXEL_ID   = os.environ.get("META_PIXEL_ID_SCE", "1514374663034732")
 META_CAPI_TOKEN = os.environ.get("META_CAPI_TOKEN_SCE", "")
 
+# Stripe webhook signing secret. Set this on Railway from Stripe Dashboard →
+# Developers → Webhooks → <endpoint> → "Signing secret". If unset, the webhook
+# still works but accepts any POST — a soft-fail mode for the initial wiring
+# before the secret is configured.
+STRIPE_WEBHOOK_SECRET = (
+    os.environ.get("STRIPE_FD_WEBHOOK_SECRET")
+    or os.environ.get("STRIPE_WEBHOOK_SECRET")
+    or ""
+)
+
 # Resend lead notification
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAILS  = ["kendall@lumenmarketing.co", "n.wilkinson@launchpoint.dev"]
@@ -444,6 +454,23 @@ def _send_lead_email(ctx):
 
 # ─────────────────────────── Meta CAPI ───────────────────────────
 
+def _capi_pageview(event_id):
+    """Server-side PageView CAPI mirror. Browser Pixel also fires PageView with
+    the same event_id — Meta dedupes the pair, so we keep coverage when an ad
+    blocker / Safari ITP nukes the client-side Pixel fire."""
+    _capi_fire(
+        event_name="PageView",
+        event_id=event_id,
+        source_url=f"{request.scheme}://{request.host}{request.path}",
+        user_data={
+            "client_ip_address": _client_ip(),
+            "client_user_agent": request.headers.get("User-Agent", ""),
+            "fbp": request.cookies.get("_fbp", ""),
+            "fbc": request.cookies.get("_fbc", ""),
+        },
+    )
+
+
 def _capi_fire(event_name, event_id, source_url, user_data, custom_data=None):
     if not META_CAPI_TOKEN or not META_PIXEL_ID:
         return
@@ -476,6 +503,15 @@ def _ctx():
     }
 
 
+def _ctx_with_pageview():
+    """Same as _ctx() but also fires server-side PageView CAPI and returns a
+    fresh pv_event_id. Templates pass that id into fbq('PageView', ..., {eventID:
+    pv_event_id}) so Meta dedupes the browser + server pair."""
+    pv_event_id = uuid.uuid4().hex
+    _capi_pageview(pv_event_id)
+    return {**_ctx(), "pv_event_id": pv_event_id}
+
+
 # ─────────────────────────── Routes ───────────────────────────
 
 @sce_fd_bp.route("/fathersday")
@@ -484,7 +520,7 @@ def landing():
     return render_template(
         "sce_fd_landing.html",
         start_url=url_for("sce_fd.step_car"),
-        **_ctx(),
+        **_ctx_with_pageview(),
     )
 
 
@@ -497,7 +533,7 @@ def step_car():
         cars=CARS, build=build,
         step=1, step_total=5,
         next_url_base=url_for("sce_fd.step_duration"),
-        **_ctx(),
+        **_ctx_with_pageview(),
     )
 
 
@@ -519,7 +555,7 @@ def step_duration():
         step=2, step_total=5,
         back_url=_step_url("step_car", {"car": build["car"]}),
         next_url_base=url_for("sce_fd.step_dinner"),
-        **_ctx(),
+        **_ctx_with_pageview(),
     )
 
 
@@ -538,7 +574,7 @@ def step_dinner():
         step=3, step_total=5,
         back_url=_step_url("step_duration", build),
         next_url_base=url_for("sce_fd.step_bbq"),
-        **_ctx(),
+        **_ctx_with_pageview(),
     )
 
 
@@ -557,7 +593,7 @@ def step_bbq():
         step=4, step_total=5,
         back_url=_step_url("step_dinner", build),
         next_url_base=url_for("sce_fd.review"),
-        **_ctx(),
+        **_ctx_with_pageview(),
     )
 
 
@@ -584,7 +620,7 @@ def review():
         step=5, step_total=5,
         back_url=_step_url("step_bbq", build),
         canceled=(request.args.get("canceled") == "1"),
-        **_ctx(),
+        **_ctx_with_pageview(),
     )
 
 
@@ -755,13 +791,55 @@ def _optin_impl():
 @sce_fd_bp.route("/fathersday/booked")
 def booked():
     sess_id = (request.args.get("session_id") or "").strip()
-    return render_template("sce_fd_booked.html", session_id=sess_id, **_ctx())
+    return render_template("sce_fd_booked.html", session_id=sess_id, **_ctx_with_pageview())
+
+
+def _verify_stripe_signature(payload, sig_header, secret, tolerance=300):
+    """Manual Stripe webhook signature verification — avoids the stripe SDK
+    dependency. Implements the same v1 HMAC-SHA256 scheme Stripe documents.
+    Returns True only on a valid + non-replayed signature."""
+    if not secret or not sig_header:
+        return False
+    try:
+        items = {}
+        for part in sig_header.split(","):
+            if "=" in part:
+                k, v = part.split("=", 1)
+                items[k.strip()] = v.strip()
+    except Exception:
+        return False
+    ts = items.get("t")
+    v1 = items.get("v1")
+    if not ts or not v1:
+        return False
+    try:
+        if abs(time.time() - int(ts)) > tolerance:
+            return False
+    except Exception:
+        return False
+    signed = f"{ts}.{payload}".encode("utf-8")
+    import hmac as _hmac
+    expected = _hmac.new(secret.encode("utf-8"), signed, hashlib.sha256).hexdigest()
+    return _hmac.compare_digest(expected, v1)
 
 
 @sce_fd_bp.route("/fathersday/stripe-webhook", methods=["POST"])
 def stripe_webhook():
+    payload = request.get_data(as_text=True)
+    sig_header = request.headers.get("Stripe-Signature", "")
+
+    # Signature verification — only enforced when STRIPE_WEBHOOK_SECRET is set
+    # so the funnel keeps working in the brief window between adding the Stripe
+    # webhook endpoint and getting the signing secret onto Railway. Logs both
+    # paths so we can spot unauthenticated traffic.
+    if STRIPE_WEBHOOK_SECRET:
+        if not _verify_stripe_signature(payload, sig_header, STRIPE_WEBHOOK_SECRET):
+            print(f"[SCE-FD webhook] REJECTED bad signature from {_client_ip()}")
+            return jsonify({"ok": False, "err": "bad_signature"}), 400
+    else:
+        print(f"[SCE-FD webhook] WARN — STRIPE_WEBHOOK_SECRET unset, signature not verified")
+
     try:
-        payload = request.get_data(as_text=True)
         evt = json.loads(payload) if payload else {}
     except Exception:
         return jsonify({"ok": False, "err": "bad_payload"}), 400
@@ -810,7 +888,12 @@ def stripe_webhook():
             finally:
                 con.close()
 
-        purchase_event_id = client_ref or sid or uuid.uuid4().hex
+        # Browser-side Purchase on /booked fires with eventID = Stripe session_id
+        # (`{{ session_id }}` in sce_fd_booked.html). For Meta to dedup the pair,
+        # the server-side fire must use the SAME id. Prefer Stripe's session id
+        # here; fall back to the lead event_id if Stripe somehow sent a webhook
+        # without a session id (shouldn't happen in practice).
+        purchase_event_id = sid or client_ref or uuid.uuid4().hex
         ud_email = (lead and lead["email"]) or email
         ud_phone = (lead and lead["phone"]) or ""
         name = (lead and lead["name"]) or ""
