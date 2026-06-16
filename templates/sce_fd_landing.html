@@ -119,9 +119,12 @@ fbq('track','PageView', {}, {eventID: '{{ pv_event_id }}'});
 
 <main class="land-wrap">
   <div class="hero-photo">
-    <img src="{{ url_for('static', filename='sce-fathersday/landing-hero.webp') }}"
-         alt="Porsche 911 GT3 RS"
-         loading="eager" fetchpriority="high">
+    <picture>
+      <source srcset="{{ url_for('static', filename='sce-fathersday/landing-hero.webp') }}" type="image/webp">
+      <img src="{{ url_for('static', filename='sce-fathersday/landing-hero.jpg') }}"
+           alt="Torch Red Corvette C8 Z51 in a Boise driveway"
+           loading="eager" fetchpriority="high">
+    </picture>
   </div>
 
   <section class="land-hero">
