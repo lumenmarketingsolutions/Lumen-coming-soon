@@ -2370,8 +2370,10 @@ MANE_PAGE_TOKEN = os.environ.get("MANE_PAGE_TOKEN", "")
 MANE_META_APP_SECRET = os.environ.get("MANE_META_APP_SECRET", "")
 # Map each instant form to its offer so routing/notes/email are correct.
 MANE_FORM_OFFER = {
-    "873544742065679": "extension",  # "Hair Extensions" form
-    "2449776272499400": "color",     # "Hair Color" form
+    "873544742065679": "extension",   # "Hair Extensions" form (name+phone)
+    "2449776272499400": "color",      # "Hair Color" form (name+phone)
+    "1487003163173502": "extension",  # "Hair Extensions — Qualified" (+ goal question)
+    "1641764653781029": "color",      # "Hair Color — Qualified" (+ goal question)
 }
 
 def _ingest_mane_lead(*, offer, name, email="", phone="", goal="", utm_campaign="", utm_content=""):
@@ -2454,9 +2456,12 @@ def _process_meta_leadgen(payload):
                     form_id = str(lead.get("form_id", "") or "")
                 fd = {f.get("name"): ((f.get("values") or [""])[0]) for f in (lead.get("field_data") or [])}
                 name = fd.get("full_name") or f"{fd.get('first_name','')} {fd.get('last_name','')}".strip()
+                # capture the qualifying answer (key 'goal'; fall back to any custom field)
+                _std = {"full_name", "first_name", "last_name", "email", "phone_number"}
+                goal = fd.get("goal") or next((v for k, v in fd.items() if k not in _std and v), "")
                 _ingest_mane_lead(
                     offer=MANE_FORM_OFFER.get(form_id, "color"),
-                    name=name, email=fd.get("email", ""), phone=fd.get("phone_number", ""),
+                    name=name, email=fd.get("email", ""), phone=fd.get("phone_number", ""), goal=goal,
                     utm_campaign=lead.get("campaign_name", ""), utm_content=lead.get("ad_name", ""),
                 )
             except Exception as e:
