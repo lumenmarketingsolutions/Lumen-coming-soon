@@ -2360,59 +2360,41 @@ def mane_extensions_v2_submit():
     return jsonify({"ok": True})
 
 # ── Meta Lead Form ads → SAME pipeline as the funnels (Phorest client + salon
-#    email). Fed by Zapier (Facebook Lead Ads trigger → Webhooks POST here),
-#    because our Meta token lacks `leads_retrieval` for a native webhook.
-#    `offer` is 'color' or 'extension'. variant='leadform' so these stay
-#    separable from funnel leads when we compare volume/quality.
+#    email). NATIVE Meta Lead Ads webhook (no Zapier): Meta posts a leadgen
+#    notification, we fetch the lead via the Graph API using a page/system-user
+#    token that has `leads_retrieval`, then run create_client + salon email.
+#    A plain JSON POST (manual/fallback) is also accepted. variant='leadform'
+#    so form leads stay separable from funnel leads when we compare volume.
 MANE_LEADFORM_SECRET = os.environ.get("MANE_LEADFORM_SECRET", "")
+MANE_PAGE_TOKEN = os.environ.get("MANE_PAGE_TOKEN", "")
+MANE_META_APP_SECRET = os.environ.get("MANE_META_APP_SECRET", "")
+# Map each instant form to its offer so routing/notes/email are correct.
+MANE_FORM_OFFER = {
+    "873544742065679": "extension",  # "Hair Extensions" form
+    "2449776272499400": "color",     # "Hair Color" form
+}
 
-@app.route("/manestyling/leadform", methods=["GET", "POST"])
-def mane_leadform_submit():
-    # Health check (and optional native Meta webhook verification, if ever used)
-    if request.method == "GET":
-        vt = os.environ.get("MANE_META_VERIFY_TOKEN", "")
-        if request.args.get("hub.mode") == "subscribe" and vt and request.args.get("hub.verify_token") == vt:
-            return request.args.get("hub.challenge", "")
-        return "ok", 200
-
-    # Shared-secret auth: set MANE_LEADFORM_SECRET on Railway, pass ?secret= from Zapier
-    secret = request.args.get("secret") or request.headers.get("X-Lumen-Secret", "")
-    if MANE_LEADFORM_SECRET and secret != MANE_LEADFORM_SECRET:
-        return jsonify({"ok": False, "error": "unauthorized"}), 401
-
-    data = request.get_json(silent=True) or request.form.to_dict() or {}
-    name = (data.get("name") or data.get("full_name")
-            or f"{data.get('first_name','')} {data.get('last_name','')}".strip()).strip() or "Anonymous"
-    email = (data.get("email") or "").strip()
-    phone = (data.get("phone") or data.get("phone_number") or "").strip()
-    goal = (data.get("goal") or data.get("custom_answer") or "").strip()
-
-    offer = (data.get("offer") or "").strip().lower()
-    if offer not in ("color", "extension"):
-        hint = (offer + " " + (data.get("form_name") or "") + " " + (data.get("campaign_name") or "")).lower()
-        offer = "extension" if ("ext" in hint or "extension" in hint) else "color"
-
+def _ingest_mane_lead(*, offer, name, email="", phone="", goal="", utm_campaign="", utm_content=""):
+    """Shared sink for a Mane lead-form lead: SQLite + Phorest client + salon
+    email. Returns the Phorest client_id (or None)."""
+    offer = "extension" if str(offer or "").lower().startswith("ext") else "color"
+    name = (name or "").strip() or "Anonymous"
+    email = (email or "").strip(); phone = (phone or "").strip(); goal = (goal or "").strip()
     now = datetime.datetime.utcnow().isoformat()
     lead_row_id = None
     try:
-        con = sqlite3.connect(DB_PATH)
-        cur = con.cursor()
+        con = sqlite3.connect(DB_PATH); cur = con.cursor()
         if offer == "extension":
             cur.execute("""INSERT INTO mane_extension_quiz
                 (name,email,phone,goal,timeline,budget,utm_source,utm_campaign,utm_content,fbclid,referrer,variant,created_at)
                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                (name, email, phone, goal, "", "",
-                 data.get("utm_source", ""), data.get("campaign_name", ""), data.get("ad_name", ""),
-                 "", "meta_lead_form", "leadform", now))
+                (name, email, phone, goal, "", "", "", utm_campaign, utm_content, "", "meta_lead_form", "leadform", now))
         else:
             cur.execute("""INSERT INTO mane_color_quiz
                 (name,email,phone,current_color,dream_look,recommendation,utm_source,utm_campaign,utm_content,fbclid,referrer,variant,created_at)
                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
-                (name, email, phone, "", goal, "",
-                 data.get("utm_source", ""), data.get("campaign_name", ""), data.get("ad_name", ""),
-                 "", "meta_lead_form", "leadform", now))
-        lead_row_id = cur.lastrowid
-        con.commit(); con.close()
+                (name, email, phone, "", goal, "", "", utm_campaign, utm_content, "", "meta_lead_form", "leadform", now))
+        lead_row_id = cur.lastrowid; con.commit(); con.close()
     except Exception as e:
         print(f"[mane-leadform] db insert failed: {e}")
 
@@ -2448,8 +2430,81 @@ def mane_leadform_submit():
         send_email(MANE_LEAD_TO, f"Mane {label.lower()} lead (form): {name}", body)
     except Exception:
         pass
+    return phorest_client_id
 
-    return jsonify({"ok": True, "offer": offer, "phorest_client_id": phorest_client_id})
+def _process_meta_leadgen(payload):
+    """Handle a native Meta Lead Ads webhook: fetch each lead's field data via
+    the Graph API (needs leads_retrieval) and route it through _ingest_mane_lead."""
+    for entry in (payload.get("entry") or []):
+        for ch in (entry.get("changes") or []):
+            if ch.get("field") != "leadgen":
+                continue
+            v = ch.get("value") or {}
+            leadgen_id = v.get("leadgen_id"); form_id = str(v.get("form_id", "") or "")
+            if not leadgen_id:
+                continue
+            try:
+                lead = requests.get(
+                    f"https://graph.facebook.com/v21.0/{leadgen_id}",
+                    params={"access_token": MANE_PAGE_TOKEN,
+                            "fields": "field_data,form_id,ad_name,campaign_name,created_time"},
+                    timeout=30,
+                ).json()
+                if not form_id:
+                    form_id = str(lead.get("form_id", "") or "")
+                fd = {f.get("name"): ((f.get("values") or [""])[0]) for f in (lead.get("field_data") or [])}
+                name = fd.get("full_name") or f"{fd.get('first_name','')} {fd.get('last_name','')}".strip()
+                _ingest_mane_lead(
+                    offer=MANE_FORM_OFFER.get(form_id, "color"),
+                    name=name, email=fd.get("email", ""), phone=fd.get("phone_number", ""),
+                    utm_campaign=lead.get("campaign_name", ""), utm_content=lead.get("ad_name", ""),
+                )
+            except Exception as e:
+                print(f"[mane-leadform] fetch/ingest lead {leadgen_id} failed: {e}")
+
+@app.route("/manestyling/leadform", methods=["GET", "POST"])
+def mane_leadform_submit():
+    # Meta webhook verification handshake (and a plain health check)
+    if request.method == "GET":
+        vt = os.environ.get("MANE_META_VERIFY_TOKEN", "")
+        if request.args.get("hub.mode") == "subscribe" and vt and request.args.get("hub.verify_token") == vt:
+            return request.args.get("hub.challenge", "")
+        return "ok", 200
+
+    raw = request.get_data()
+    payload = request.get_json(silent=True)
+
+    # Native Meta Lead Ads webhook
+    if isinstance(payload, dict) and payload.get("object") == "page":
+        if MANE_META_APP_SECRET:
+            import hmac, hashlib
+            sig = (request.headers.get("X-Hub-Signature-256") or "").split("sha256=")[-1]
+            expected = hmac.new(MANE_META_APP_SECRET.encode(), raw, hashlib.sha256).hexdigest()
+            if not hmac.compare_digest(sig, expected):
+                return "bad signature", 403
+        try:
+            _process_meta_leadgen(payload)
+        except Exception as e:
+            print(f"[mane-leadform] meta process error: {e}")
+        return "ok", 200  # always 200 so Meta keeps the subscription healthy
+
+    # Plain JSON fallback (manual test / other source) — shared-secret guarded
+    secret = request.args.get("secret") or request.headers.get("X-Lumen-Secret", "")
+    if MANE_LEADFORM_SECRET and secret != MANE_LEADFORM_SECRET:
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+    data = payload or request.form.to_dict() or {}
+    offer = (data.get("offer") or "").strip().lower()
+    if offer not in ("color", "extension"):
+        hint = (offer + " " + (data.get("form_name") or "") + " " + (data.get("campaign_name") or "")).lower()
+        offer = "extension" if ("ext" in hint or "extension" in hint) else "color"
+    cid = _ingest_mane_lead(
+        offer=offer,
+        name=(data.get("name") or data.get("full_name") or f"{data.get('first_name','')} {data.get('last_name','')}".strip()),
+        email=data.get("email", ""), phone=(data.get("phone") or data.get("phone_number") or ""),
+        goal=(data.get("goal") or data.get("custom_answer") or ""),
+        utm_campaign=data.get("campaign_name", ""), utm_content=data.get("ad_name", ""),
+    )
+    return jsonify({"ok": True, "offer": "extension" if offer == "extension" else "color", "phorest_client_id": cid})
 
 @app.route("/admin/mane-onboarding")
 def admin_mane_onboarding():
