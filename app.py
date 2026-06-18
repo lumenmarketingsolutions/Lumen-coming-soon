@@ -2359,6 +2359,98 @@ def mane_extensions_v2_submit():
 
     return jsonify({"ok": True})
 
+# ── Meta Lead Form ads → SAME pipeline as the funnels (Phorest client + salon
+#    email). Fed by Zapier (Facebook Lead Ads trigger → Webhooks POST here),
+#    because our Meta token lacks `leads_retrieval` for a native webhook.
+#    `offer` is 'color' or 'extension'. variant='leadform' so these stay
+#    separable from funnel leads when we compare volume/quality.
+MANE_LEADFORM_SECRET = os.environ.get("MANE_LEADFORM_SECRET", "")
+
+@app.route("/manestyling/leadform", methods=["GET", "POST"])
+def mane_leadform_submit():
+    # Health check (and optional native Meta webhook verification, if ever used)
+    if request.method == "GET":
+        vt = os.environ.get("MANE_META_VERIFY_TOKEN", "")
+        if request.args.get("hub.mode") == "subscribe" and vt and request.args.get("hub.verify_token") == vt:
+            return request.args.get("hub.challenge", "")
+        return "ok", 200
+
+    # Shared-secret auth: set MANE_LEADFORM_SECRET on Railway, pass ?secret= from Zapier
+    secret = request.args.get("secret") or request.headers.get("X-Lumen-Secret", "")
+    if MANE_LEADFORM_SECRET and secret != MANE_LEADFORM_SECRET:
+        return jsonify({"ok": False, "error": "unauthorized"}), 401
+
+    data = request.get_json(silent=True) or request.form.to_dict() or {}
+    name = (data.get("name") or data.get("full_name")
+            or f"{data.get('first_name','')} {data.get('last_name','')}".strip()).strip() or "Anonymous"
+    email = (data.get("email") or "").strip()
+    phone = (data.get("phone") or data.get("phone_number") or "").strip()
+    goal = (data.get("goal") or data.get("custom_answer") or "").strip()
+
+    offer = (data.get("offer") or "").strip().lower()
+    if offer not in ("color", "extension"):
+        hint = (offer + " " + (data.get("form_name") or "") + " " + (data.get("campaign_name") or "")).lower()
+        offer = "extension" if ("ext" in hint or "extension" in hint) else "color"
+
+    now = datetime.datetime.utcnow().isoformat()
+    lead_row_id = None
+    try:
+        con = sqlite3.connect(DB_PATH)
+        cur = con.cursor()
+        if offer == "extension":
+            cur.execute("""INSERT INTO mane_extension_quiz
+                (name,email,phone,goal,timeline,budget,utm_source,utm_campaign,utm_content,fbclid,referrer,variant,created_at)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (name, email, phone, goal, "", "",
+                 data.get("utm_source", ""), data.get("campaign_name", ""), data.get("ad_name", ""),
+                 "", "meta_lead_form", "leadform", now))
+        else:
+            cur.execute("""INSERT INTO mane_color_quiz
+                (name,email,phone,current_color,dream_look,recommendation,utm_source,utm_campaign,utm_content,fbclid,referrer,variant,created_at)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                (name, email, phone, "", goal, "",
+                 data.get("utm_source", ""), data.get("campaign_name", ""), data.get("ad_name", ""),
+                 "", "meta_lead_form", "leadform", now))
+        lead_row_id = cur.lastrowid
+        con.commit(); con.close()
+    except Exception as e:
+        print(f"[mane-leadform] db insert failed: {e}")
+
+    phorest_client_id = None
+    try:
+        phorest_client_id = mane_phorest.create_client(
+            name=name if name != "Anonymous" else "", email=email, phone=phone,
+            source=offer, notes=f"[Meta lead-form ad] {('Goal: ' + goal) if goal else ''}".strip(),
+            external_id=f"{offer}-lf-{lead_row_id}" if lead_row_id else "",
+        )
+        if phorest_client_id and lead_row_id:
+            tbl = "mane_extension_quiz" if offer == "extension" else "mane_color_quiz"
+            con = sqlite3.connect(DB_PATH)
+            con.execute(f"UPDATE {tbl} SET phorest_client_id = ? WHERE id = ?", (phorest_client_id, lead_row_id))
+            con.commit(); con.close()
+    except Exception as e:
+        print(f"[mane-leadform] phorest sync failed: {e}")
+
+    label = "Extensions" if offer == "extension" else "Color"
+    contact = " · ".join(x for x in [phone, email] if x)
+    body = f"""
+    <div style="font-family:-apple-system,Inter,sans-serif;background:#0a0a0f;padding:32px 20px;color:#e8e8f0;">
+      <div style="max-width:560px;margin:0 auto;background:#111118;border:1px solid #1a1a25;border-radius:14px;padding:32px;">
+        <div style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#7c4dff;margin-bottom:10px;">New {label} Lead · Instant Form</div>
+        <h2 style="font-size:22px;font-weight:700;margin:0 0 6px 0;color:#fff;">Mane Styling Studio</h2>
+        <p style="font-size:14px;color:#e8e8f0;margin:0 0 20px 0;">{name}{' · ' + contact if contact else ''}</p>
+        {_phorest_email_button(phorest_client_id)}
+        <p style="font-size:13px;color:#8b8ba0;margin:0;">{('Goal: ' + goal) if goal else 'From a Meta lead-form ad'}</p>
+      </div>
+    </div>
+    """
+    try:
+        send_email(MANE_LEAD_TO, f"Mane {label.lower()} lead (form): {name}", body)
+    except Exception:
+        pass
+
+    return jsonify({"ok": True, "offer": offer, "phorest_client_id": phorest_client_id})
+
 @app.route("/admin/mane-onboarding")
 def admin_mane_onboarding():
     if not session.get("wl_auth"):
