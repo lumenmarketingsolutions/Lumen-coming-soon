@@ -314,11 +314,10 @@ fbq('track','InitiateCheckout', {content_ids: ['Z51-{{ duration.id|upper }}'], c
         <img src="{{ url_for('static', filename='sce-z51/hero-cover.jpg') }}" alt="Corvette C8 Z51"></picture>
     </div>
     <div class="summary-info">
-      <div class="summary-label">Your build</div>
+      <div class="summary-label">Your selection</div>
       <div class="summary-car">Corvette C8 Z51</div>
       <div class="summary-dur">{{ duration.label }}</div>
     </div>
-    <div class="summary-price">${{ '{:,}'.format(duration.price) }}</div>
   </div>
 
   <!-- Contact form -->
@@ -364,11 +363,7 @@ fbq('track','InitiateCheckout', {content_ids: ['Z51-{{ duration.id|upper }}'], c
 <!-- Sticky CTA -->
 <div class="sticky-cta">
   <div class="sticky-inner">
-    <div class="sticky-price">
-      <div class="lbl-p">Total</div>
-      <div class="v-p">${{ '{:,}'.format(duration.price) }}</div>
-    </div>
-    <button type="submit" form="resForm" class="btn">See Availability · ${{ '{:,}'.format(duration.price) }}</button>
+    <button type="submit" form="resForm" class="btn">Check Availability</button>
   </div>
 </div>
 

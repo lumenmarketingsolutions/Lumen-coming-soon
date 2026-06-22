@@ -633,12 +633,10 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
       {% for d in durations %}
         <a class="dur-card{% if preset_duration == d.id %} selected{% endif %}"
            href="{{ url_for('sce_z51.info') }}?dur={{ d.id }}"
-           data-dur="{{ d.id }}" data-price="{{ d.price }}">
+           data-dur="{{ d.id }}" data-price="{{ d.price }}" data-label="{{ d.label }}">
           <div class="dur-info">
             <div class="dur-label">{{ d.label }}</div>
-            <div class="dur-sub">{{ d.sub }}</div>
           </div>
-          <div class="dur-price">${{ '{:,}'.format(d.price) }}</div>
         </a>
       {% endfor %}
     </div>
@@ -650,9 +648,9 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
 <!-- Sticky CTA -->
 <div class="sticky-cta">
   <div class="sticky-inner">
-    <div class="sticky-price">
-      <div class="lbl-p">Total</div>
-      <div class="v-p" id="stickyTotal">—</div>
+    <div class="sticky-price" id="stickyLabel" style="display:none;">
+      <div class="lbl-p">Selected</div>
+      <div class="v-p" id="stickyDurName" style="font-size:15px;"></div>
     </div>
     <a class="btn disabled" id="stickyBtn" role="button">Pick a duration</a>
   </div>
@@ -678,17 +676,16 @@ fbq('track','ViewContent', {content_name: 'Corvette C8 Z51', content_type: 'prod
     }
   })();
 
-  // Duration card hover-preview updates sticky CTA so the user sees pricing
-  // before they commit by clicking. AddToCart fires on click (via href nav).
   var btn = document.getElementById('stickyBtn');
-  var total = document.getElementById('stickyTotal');
+  var stickyLabel = document.getElementById('stickyLabel');
+  var stickyDurName = document.getElementById('stickyDurName');
   document.querySelectorAll('.dur-card').forEach(function(el) {
     function preview() {
-      var price = parseInt(el.getAttribute('data-price'), 10) || 0;
-      var fmt = '$' + price.toLocaleString('en-US');
-      total.textContent = fmt;
+      var label = el.getAttribute('data-label') || '';
+      if (stickyDurName) stickyDurName.textContent = label;
+      if (stickyLabel) stickyLabel.style.display = '';
       btn.classList.remove('disabled');
-      btn.textContent = 'Continue · ' + fmt;
+      btn.textContent = 'Check Availability';
       btn.setAttribute('href', el.getAttribute('href'));
     }
     el.addEventListener('mouseenter', preview);
