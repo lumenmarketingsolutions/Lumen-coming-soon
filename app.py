@@ -78,6 +78,8 @@ if os.environ.get("RAILWAY_PROJECT_ID") or os.environ.get("RAILWAY_ENVIRONMENT")
 
 from fathom_webhook import fathom_bp
 app.register_blueprint(fathom_bp)
+from meta_leads_webhook import meta_leads_bp
+app.register_blueprint(meta_leads_bp)
 
 from sce_mothersday import sce_md_bp, init_md_db
 app.register_blueprint(sce_md_bp)
