@@ -2447,6 +2447,8 @@ def _process_meta_leadgen(payload):
             leadgen_id = v.get("leadgen_id"); form_id = str(v.get("form_id", "") or "")
             if not leadgen_id:
                 continue
+            if form_id and form_id not in MANE_FORM_OFFER:
+                continue  # not a Mane form — skip silently
             try:
                 lead = requests.get(
                     f"https://graph.facebook.com/v21.0/{leadgen_id}",

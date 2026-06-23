@@ -23,6 +23,9 @@ NOTIFY_EMAIL  = "kendall@lumenmarketing.co"
 NOTIFY_FROM   = "Lumen Leads <kendall@lumenmarketing.co>"
 GRAPH_BASE    = "https://graph.facebook.com/v21.0"
 
+# Only process leads from the Lumen lead gen form — ignore all others
+LUMEN_FORM_ID = "1732856481398908"
+
 
 # ─── Webhook verification (Meta GET handshake) ───────────────────────────────
 
@@ -45,8 +48,9 @@ def receive():
         for change in entry.get("changes", []):
             if change.get("field") == "leadgen":
                 val = change.get("value", {})
+                form_id = str(val.get("form_id") or "")
                 leadgen_id = val.get("leadgen_id")
-                if leadgen_id:
+                if leadgen_id and form_id == LUMEN_FORM_ID:
                     threading.Thread(
                         target=_process_lead, args=(leadgen_id,), daemon=True
                     ).start()
