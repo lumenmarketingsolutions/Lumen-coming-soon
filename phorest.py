@@ -139,29 +139,50 @@ def list_appointments_since(updated_from: _dt.datetime, page_size: int = 100):
     """Yield AppointmentResponse dicts for appointments updated since
     `updated_from`. Paginates automatically. Stops on any error.
 
-    Caller is responsible for tracking the high-water-mark timestamp."""
+    Caller is responsible for tracking the high-water-mark timestamp.
+
+    Phorest changed this endpoint (verified live 2026-07-02): the old single
+    `updated_from` param now 400s. It requires from_date/to_date (appointment
+    DATE, max 31-day span) and accepts updated_after/updated_before alongside
+    as the updates filter. Bookings land weeks out, so we sweep three 31-day
+    appointment-date windows (a week back through ~12 weeks ahead), each
+    filtered to appointments updated since the cursor. Dedupe on
+    appointmentId in case a window boundary double-yields."""
     if not _configured():
         return
 
-    iso = updated_from.strftime("%Y-%m-%dT%H:%M:%SZ")
-    page = 0
-    while True:
-        url = (
-            f"{_BASE}/api/business/{_BUSINESS_ID}/branch/{_BRANCH_ID}/appointment"
-            f"?updated_from={iso}&size={page_size}&page={page}&fetch_canceled=false"
-        )
-        try:
-            r = requests.get(url, headers=_auth_header(), timeout=_TIMEOUT)
-        except Exception as e:
-            print(f"[phorest] list_appointments → exception: {e}")
-            return
-        if r.status_code != 200:
-            print(f"[phorest] list_appointments → HTTP {r.status_code}: {r.text[:240]}")
-            return
-        body = r.json() or {}
-        for appt in (body.get("_embedded") or {}).get("appointments", []):
-            yield appt
-        info = body.get("page") or {}
-        if page + 1 >= int(info.get("totalPages", 0) or 0):
-            return
-        page += 1
+    now = _dt.datetime.utcnow()
+    after_iso = updated_from.strftime("%Y-%m-%dT%H:%M:%SZ")
+    before_iso = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+    seen = set()
+    win_start = now - _dt.timedelta(days=7)
+    for _ in range(3):
+        win_end = win_start + _dt.timedelta(days=30)
+        page = 0
+        while True:
+            url = (
+                f"{_BASE}/api/business/{_BUSINESS_ID}/branch/{_BRANCH_ID}/appointment"
+                f"?from_date={win_start.strftime('%Y-%m-%d')}&to_date={win_end.strftime('%Y-%m-%d')}"
+                f"&updated_after={after_iso}&updated_before={before_iso}"
+                f"&size={page_size}&page={page}&fetch_canceled=false"
+            )
+            try:
+                r = requests.get(url, headers=_auth_header(), timeout=_TIMEOUT)
+            except Exception as e:
+                print(f"[phorest] list_appointments → exception: {e}")
+                return
+            if r.status_code != 200:
+                print(f"[phorest] list_appointments → HTTP {r.status_code}: {r.text[:240]}")
+                return
+            body = r.json() or {}
+            for appt in (body.get("_embedded") or {}).get("appointments", []):
+                aid = appt.get("appointmentId")
+                if aid in seen:
+                    continue
+                seen.add(aid)
+                yield appt
+            info = body.get("page") or {}
+            if page + 1 >= int(info.get("totalPages", 0) or 0):
+                break
+            page += 1
+        win_start = win_end + _dt.timedelta(days=1)
