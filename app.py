@@ -93,6 +93,11 @@ from sce_z51 import sce_z51_bp, init_z51_db
 app.register_blueprint(sce_z51_bp)
 init_z51_db()
 
+# Lumen contractor quiz funnel (Marketing Efficiency Score) — /score
+from lumen_quiz import lumen_quiz_bp, init_quiz_db
+app.register_blueprint(lumen_quiz_bp)
+init_quiz_db()
+
 from sce_admin import sce_admin_bp
 app.register_blueprint(sce_admin_bp)
 
