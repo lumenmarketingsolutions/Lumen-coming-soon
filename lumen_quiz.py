@@ -1,7 +1,7 @@
 """
 Lumen — Contractor Marketing Efficiency Score (MES) quiz funnel.
 
-Lead-gen quiz for US home-service contractors (Midwest focus):
+Lead-gen quiz for US home-service contractors (Northwest / Mountain West focus):
   GET  /score                → quiz landing (single-page funnel, JS-driven steps)
   GET  /marketing-score      → alias for ad links
   POST /score/submit         → validate answers, compute score server-side,
@@ -174,9 +174,8 @@ TRADES = {
 BENCH_SD = 14.0  # spread of the modeled benchmark curve
 
 STATES = {
-    "OH": "Ohio", "MI": "Michigan", "IN": "Indiana", "IL": "Illinois",
-    "WI": "Wisconsin", "MN": "Minnesota", "IA": "Iowa", "MO": "Missouri",
-    "KS": "Kansas", "NE": "Nebraska", "SD": "South Dakota", "ND": "North Dakota",
+    "ID": "Idaho", "WA": "Washington", "OR": "Oregon", "UT": "Utah",
+    "MT": "Montana", "WY": "Wyoming", "NV": "Nevada", "CO": "Colorado",
     "OTHER": "your area",
 }
 
@@ -227,7 +226,7 @@ PILLAR_DIAGNOSIS = {
         "title": "Your biggest leak: Reputation",
         "body": ("Before {cust} calls anyone, they compare Google profiles — review count, recency, and stars. "
                  "If a competitor has 150 reviews and you have 20, you lose the job before the phone ever rings, "
-                 "no matter how good your work is. Reviews are the Midwest handshake at internet scale, and "
+                 "no matter how good your work is. Reviews are a firm handshake at internet scale, and "
                  "right now yours is costing you jobs silently."),
         "stat": "9 in 10 homeowners read reviews before contacting a contractor — most won't call past the top 3 profiles.",
     },
