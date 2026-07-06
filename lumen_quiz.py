@@ -40,7 +40,7 @@ DB_PATH = os.path.join(DATA_DIR, "waitlist.db")
 
 
 # ─────────────────── Quiz definition ───────────────────
-# 5 pillars × 2 questions × 10 pts = 100 max.
+# 5 pillars × 1 question × 10 pts, normalized to a 0–100 score.
 # Option ids are what the frontend posts; points stay server-side.
 
 PILLARS = {
@@ -63,16 +63,6 @@ QUESTIONS = {
             "multi":    {"label": "Several channels, consistently",         "pts": 10},
         },
     },
-    "pipeline": {
-        "pillar": "leadgen",
-        "label": "How would you describe your job pipeline?",
-        "options": {
-            "famine":  {"label": "Feast or famine — big swings",                    "pts": 1},
-            "seasonal":{"label": "Mostly steady, but slow seasons hurt",            "pts": 5},
-            "booked":  {"label": "Booked out 2–4 weeks, consistently",              "pts": 8},
-            "control": {"label": "Booked out, and I can turn up volume on demand",  "pts": 10},
-        },
-    },
     "response": {
         "pillar": "speed",
         "label": "A new lead calls or fills out a form. How fast does someone respond?",
@@ -81,16 +71,6 @@ QUESTIONS = {
             "hour":   {"label": "Within the hour",              "pts": 7},
             "sameday":{"label": "Same day, usually",            "pts": 4},
             "later":  {"label": "When I get a chance",          "pts": 1},
-        },
-    },
-    "afterhours": {
-        "pillar": "speed",
-        "label": "What happens when someone calls after hours or while you're on a roof / under a sink?",
-        "options": {
-            "vm":      {"label": "Goes to voicemail",                          "pts": 2},
-            "callback":{"label": "Voicemail, I call back when I can",          "pts": 4},
-            "team":    {"label": "A team member or answering service picks up","pts": 7},
-            "auto":    {"label": "Automatic text-back / online booking",       "pts": 10},
         },
     },
     "quotes": {
@@ -103,16 +83,6 @@ QUESTIONS = {
             "auto":   {"label": "Automated follow-up does it for me",    "pts": 10},
         },
     },
-    "pastcust": {
-        "pillar": "followup",
-        "label": "Your past customers — what do you do with them?",
-        "options": {
-            "nothing": {"label": "Nothing, honestly",                                  "pts": 1},
-            "phone":   {"label": "Their numbers are in my phone somewhere",            "pts": 4},
-            "list":    {"label": "I keep a list / CRM but rarely use it",              "pts": 6},
-            "market":  {"label": "I actively work the list — repeat, referral, reviews","pts": 10},
-        },
-    },
     "reviews": {
         "pillar": "reputation",
         "label": "How many Google reviews does your business have?",
@@ -123,16 +93,6 @@ QUESTIONS = {
             "o100": {"label": "100+",       "pts": 10},
         },
     },
-    "askreview": {
-        "pillar": "reputation",
-        "label": "How do reviews actually get asked for?",
-        "options": {
-            "never":  {"label": "We don't really ask",                       "pts": 1},
-            "somet":  {"label": "When I remember to",                        "pts": 4},
-            "always": {"label": "We ask every happy customer",               "pts": 7},
-            "auto":   {"label": "Automated review requests after every job", "pts": 10},
-        },
-    },
     "cac": {
         "pillar": "tracking",
         "label": "Do you know what it costs you to land a new customer?",
@@ -141,16 +101,6 @@ QUESTIONS = {
             "rough":  {"label": "A rough guess",                  "pts": 5},
             "channel":{"label": "Roughly, per channel",           "pts": 8},
             "exact":  {"label": "Yes — I track it exactly",       "pts": 10},
-        },
-    },
-    "attribution": {
-        "pillar": "tracking",
-        "label": "Do you know where every job came from?",
-        "options": {
-            "no":   {"label": "Not really",                       "pts": 2},
-            "ask":  {"label": "I ask customers sometimes",        "pts": 5},
-            "most": {"label": "I track most of them",             "pts": 8},
-            "all":  {"label": "Every job is tagged to a source",  "pts": 10},
         },
     },
 }
@@ -293,7 +243,9 @@ def compute_results(answers, trade_id, state_id, revenue_id):
         if opt:
             pillar_pts[q["pillar"]] += opt["pts"]
 
-    score = sum(pillar_pts.values())  # max 100
+    # Normalize to 0–100 regardless of question count
+    max_total = sum(pillar_max.values())
+    score = round(100 * sum(pillar_pts.values()) / max_total) if max_total else 0
 
     for cutoff, letter, tier, blurb in GRADES:
         if score >= cutoff:
