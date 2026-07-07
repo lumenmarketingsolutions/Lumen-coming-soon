@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Funnel — Lumen Admin</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Inter',-apple-system,sans-serif; background:#0a0a0f; color:#e8e8f0; -webkit-font-smoothing:antialiased; }
+    a { color:inherit; }
+    .top {
+      display:flex; align-items:center; gap:14px; padding:16px 24px;
+      border-bottom:1px solid #1a1a25; position:sticky; top:0; background:rgba(10,10,15,0.97); z-index:10;
+    }
+    .back { font-size:20px; color:#6b6b80; text-decoration:none; padding:0 6px; }
+    .top h1 { font-size:16px; font-weight:700; }
+    .top .sub { font-size:12px; color:#6b6b80; margin-left:2px; }
+    .range { margin-left:auto; display:flex; gap:2px; background:#111118; border-radius:8px; padding:2px; }
+    .range a {
+      font-size:12px; font-weight:600; color:#6b6b80; text-decoration:none;
+      padding:6px 14px; border-radius:6px;
+    }
+    .range a.on { background:#1a1a25; color:#e8e8f0; }
+    .wrap { max-width:1060px; margin:0 auto; padding:24px 24px 80px; }
+
+    .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:24px; }
+    .kpi { background:#111118; border:1px solid #1a1a25; border-radius:12px; padding:16px 18px; }
+    .kpi .l { font-size:10.5px; font-weight:700; letter-spacing:1.6px; text-transform:uppercase; color:#44445a; margin-bottom:8px; }
+    .kpi .n { font-size:26px; font-weight:800; letter-spacing:-1px; }
+    .kpi .n.purple { color:#7c4dff; } .kpi .n.green { color:#22c55e; }
+
+    .card { background:#111118; border:1px solid #1a1a25; border-radius:12px; padding:20px 22px; margin-bottom:20px; }
+    .card h2 { font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#44445a; margin-bottom:16px; }
+
+    .f-row { display:flex; align-items:center; gap:12px; margin-bottom:9px; }
+    .f-label { width:170px; flex-shrink:0; font-size:12.5px; font-weight:600; color:#b8b8c8; }
+    .f-track { flex:1; background:rgba(255,255,255,0.04); border-radius:99px; height:22px; overflow:hidden; }
+    .f-fill { height:100%; background:linear-gradient(90deg,#6128DB,#7c4dff); border-radius:99px; min-width:2px; }
+    .f-n { width:56px; text-align:right; font-size:12.5px; font-weight:700; }
+    .f-drop { width:70px; text-align:right; font-size:11px; font-weight:600; color:#6b6b80; }
+    .f-drop.bad { color:#ef4444; }
+
+    table { width:100%; border-collapse:collapse; font-size:12.5px; }
+    th { text-align:left; font-size:10px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; color:#44445a; padding:8px 10px; border-bottom:1px solid #1a1a25; white-space:nowrap; }
+    td { padding:10px; border-bottom:1px solid #14141d; vertical-align:top; }
+    tr:hover td { background:#14141d; }
+    .score-chip { display:inline-block; min-width:34px; text-align:center; font-weight:800; border-radius:6px; padding:3px 7px; font-size:12px; }
+    .muted { color:#6b6b80; }
+    .tag { display:inline-block; background:#1a1a25; border-radius:99px; padding:2px 9px; font-size:11px; font-weight:600; color:#b8b8c8; white-space:nowrap; }
+    .tbl-scroll { overflow-x:auto; }
+    .empty { color:#44445a; font-size:13px; padding:14px 0; }
+    @media (max-width:640px){ .f-label{width:110px;font-size:11.5px;} .f-drop{display:none;} .wrap{padding:16px 14px 60px;} }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <a class="back" href="/admin">&lsaquo;</a>
+    <div>
+      <h1>Quiz Funnel <span class="sub">· Marketing Efficiency Score · /score</span></h1>
+    </div>
+    <div class="range">
+      <a href="?days=7" class="{{ 'on' if days == '7' else '' }}">7d</a>
+      <a href="?days=30" class="{{ 'on' if days == '30' else '' }}">30d</a>
+      <a href="?days=all" class="{{ 'on' if days not in ('7','30') else '' }}">All</a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="kpis">
+      <div class="kpi"><div class="l">Page Views</div><div class="n">{{ counts.view }}</div></div>
+      <div class="kpi"><div class="l">Quiz Starts</div><div class="n">{{ counts.start }}</div></div>
+      <div class="kpi"><div class="l">Hit Gate</div><div class="n">{{ counts.gate }}</div></div>
+      <div class="kpi"><div class="l">Leads</div><div class="n purple">{{ counts.lead }}</div></div>
+      <div class="kpi"><div class="l">View → Lead</div><div class="n green">{{ conv }}%</div></div>
+      <div class="kpi"><div class="l">Gate → Lead</div><div class="n">{{ gate_conv }}%</div></div>
+      <div class="kpi"><div class="l">Avg Score</div><div class="n">{{ avg_score or '—' }}</div></div>
+    </div>
+
+    <div class="card">
+      <h2>Step-by-step drop-off {{ '· last ' + days + ' days' if days in ('7','30') else '· all time' }}</h2>
+      {% if counts.view == 0 %}
+        <p class="empty">No traffic yet. Data appears here as soon as visitors hit /score.</p>
+      {% else %}
+        {% for row in funnel %}
+        <div class="f-row">
+          <div class="f-label">{{ row.label }}</div>
+          <div class="f-track"><div class="f-fill" style="width:{{ row.pct }}%"></div></div>
+          <div class="f-n">{{ row.n }}</div>
+          <div class="f-drop {{ 'bad' if row.drop >= 30 and not loop.first }}">{{ '' if loop.first else '−' ~ row.drop ~ '%' }}</div>
+        </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Traffic by campaign / ad</h2>
+      {% if sources %}
+      <div class="tbl-scroll">
+      <table>
+        <thead><tr><th>Campaign</th><th>Ad (utm_content)</th><th>Visitors</th></tr></thead>
+        <tbody>
+          {% for c, a, n in sources %}
+          <tr><td>{{ c }}</td><td class="muted">{{ a }}</td><td><strong>{{ n }}</strong></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% else %}<p class="empty">No tagged traffic yet. Use ?utm_campaign=…&utm_content=… on your ad links.</p>{% endif %}
+    </div>
+
+    <div class="card">
+      <h2>Leads ({{ leads|length }}{{ ', showing latest 200' if leads|length == 200 else '' }})</h2>
+      {% if leads %}
+      <div class="tbl-scroll">
+      <table>
+        <thead><tr>
+          <th>When</th><th>Name / Company</th><th>Contact</th><th>Trade · State</th>
+          <th>Revenue</th><th>Score</th><th>Weakest</th><th>Campaign</th>
+        </tr></thead>
+        <tbody>
+          {% for l in leads %}
+          <tr>
+            <td class="muted" style="white-space:nowrap;">{{ l[13][:10] }}<br>{{ l[13][11:16] }}</td>
+            <td><strong>{{ l[0] }}</strong><br><span class="muted">{{ l[1] }}</span></td>
+            <td>{{ l[3] }}<br><span class="muted">{{ l[2] }}</span></td>
+            <td><span class="tag">{{ l[4] }} · {{ l[5] }}</span></td>
+            <td class="muted" style="white-space:nowrap;">{{ l[6] }}</td>
+            <td>
+              {% set c = '#22c55e' if l[7] >= 70 else ('#eab308' if l[7] >= 55 else '#ef4444') %}
+              <span class="score-chip" style="background:{{ c }}22;color:{{ c }};">{{ l[7] }}</span>
+              <span class="muted">{{ l[8] }} · top {{ 100 - l[9] }}%</span>
+            </td>
+            <td><span class="tag">{{ pillars.get(l[10], l[10]) }}</span></td>
+            <td class="muted">{{ l[11] or '—' }}{% if l[12] %}<br>{{ l[12] }}{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% else %}<p class="empty">No leads yet.</p>{% endif %}
+    </div>
+  </div>
+</body>
+</html>

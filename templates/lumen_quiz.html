@@ -22,8 +22,8 @@
     n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
     t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
     document,'script','https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '1119566303064711');
-    fbq('track', 'PageView', {content_name: 'Lumen - Contractor MES Quiz'});
+    fbq('init', '{{ pixel_id }}');
+    fbq('track', 'PageView', {content_name: 'Lumen - Contractor MES Quiz'}, {eventID: '{{ pv_event_id }}'});
   </script>
 
   <style>
@@ -615,6 +615,27 @@
     let step = 0;
     let advancing = false;
 
+    // ── funnel tracking ──
+    const SID = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now());
+    const UTM = new URLSearchParams(location.search);
+    function track(event, stepNum) {
+      const body = JSON.stringify({
+        sid: SID, event, step: stepNum || 0,
+        utm_source: UTM.get('utm_source') || '',
+        utm_campaign: UTM.get('utm_campaign') || '',
+        utm_content: UTM.get('utm_content') || '',
+      });
+      try {
+        if (navigator.sendBeacon) navigator.sendBeacon('/score/track', new Blob([body], { type: 'application/json' }));
+        else fetch('/score/track', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true });
+      } catch (e) {}
+    }
+    function getCookie(n) {
+      const m = document.cookie.match('(^|;)\\s*' + n + '\\s*=\\s*([^;]+)');
+      return m ? m.pop() : '';
+    }
+    track('view');
+
     const $ = id => document.getElementById(id);
     const screens = ['s-hero','s-quiz','s-analyzing','s-gate','s-results'];
     function show(id) {
@@ -624,6 +645,7 @@
 
     function startQuiz() {
       fbq('track', 'ViewContent', { content_name: 'MES Quiz Started' });
+      track('start');
       step = 0;
       show('s-quiz');
       $('progressWrap').classList.add('on');
@@ -659,6 +681,7 @@
       if (advancing) return;
       advancing = true;
       answers[qid] = oid;
+      track('q', step + 1);
       btn.parentElement.querySelectorAll('.q-opt').forEach(x => x.classList.remove('picked'));
       btn.classList.add('picked');
       setTimeout(() => {
@@ -681,6 +704,8 @@
       setTimeout(() => {
         $('gateSub').textContent = `Tell us where to send it. You'll see your score, how you rank against ${tradeNoun} contractors in ${stateLabel}, and exactly where you're leaking jobs — instantly.`;
         $('gateBlur').textContent = 30 + Math.floor(Math.abs(hashStr(JSON.stringify(answers))) % 60);
+        track('gate');
+        fbq('trackCustom', 'QuizComplete', { content_name: 'MES Quiz Completed' });
         show('s-gate');
       }, 650 + 4*720 + 500);
     }
@@ -696,6 +721,7 @@
       btn.textContent = 'Calculating…';
 
       const params = new URLSearchParams(location.search);
+      const leadEventId = (crypto.randomUUID ? crypto.randomUUID().replace(/-/g, '') : String(Date.now()) + String(Math.random()).slice(2));
       const payload = {
         name: $('f-name').value.trim(),
         company: $('f-company').value.trim(),
@@ -704,6 +730,10 @@
         trade: answers.trade, state: answers.state, revenue: answers.revenue,
         answers,
         referrer: document.referrer || '',
+        page_url: location.href,
+        event_id: leadEventId,
+        fbp: getCookie('_fbp'),
+        fbc: getCookie('_fbc'),
         utm_source: params.get('utm_source') || '',
         utm_medium: params.get('utm_medium') || '',
         utm_campaign: params.get('utm_campaign') || '',
@@ -719,7 +749,8 @@
         });
         const j = await r.json();
         if (!j.ok) throw new Error(j.error || 'failed');
-        fbq('track', 'Lead', { content_name: 'MES Quiz Lead' });
+        fbq('track', 'Lead', { content_name: 'MES Quiz Lead' }, { eventID: leadEventId });
+        track('lead');
         renderResults(j.results);
       } catch (ex) {
         err.classList.add('on');

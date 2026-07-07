@@ -20,11 +20,15 @@ leaderboard.
 
 import os
 import math
+import time
+import uuid
+import json
+import hashlib
 import sqlite3
 import datetime
 import threading
 import requests
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, session, redirect
 
 lumen_quiz_bp = Blueprint("lumen_quiz", __name__)
 
@@ -34,6 +38,14 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 NOTIFY_EMAIL = "kendall@lumenmarketing.co"
 FROM_EMAIL = "Lumen <kendall@lumenmarketing.co>"
 CALENDLY_URL = "https://calendly.com/lumenmarketingco/lumen"
+
+# Meta pixel + Conversions API. Browser pixel fires Lead/PageView with an
+# eventID; the server mirrors the same event via CAPI so Meta still gets the
+# conversion when ad blockers kill the client pixel. Meta dedupes the pair.
+# Set META_CAPI_TOKEN_LUMEN in Railway (Events Manager → pixel → Settings →
+# Generate access token) — without it CAPI silently skips, pixel still works.
+META_PIXEL_ID   = os.environ.get("META_PIXEL_ID_LUMEN", "1119566303064711")
+META_CAPI_TOKEN = os.environ.get("META_CAPI_TOKEN_LUMEN", "")
 
 DATA_DIR = "/data" if os.path.isdir("/data") else os.path.dirname(__file__)
 DB_PATH = os.path.join(DATA_DIR, "waitlist.db")
@@ -223,8 +235,64 @@ def init_quiz_db():
         )
     """)
     con.execute("CREATE INDEX IF NOT EXISTS idx_quiz_leads_email ON quiz_leads(email)")
+    # Funnel step tracking — one row per (session, event). Events:
+    #   view (landed), start (clicked CTA), q (answered question at `step`),
+    #   gate (hit contact form), lead (submitted)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS quiz_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            session_id TEXT NOT NULL,
+            event TEXT NOT NULL,
+            step INTEGER DEFAULT 0,
+            utm_source TEXT DEFAULT '',
+            utm_campaign TEXT DEFAULT '',
+            utm_content TEXT DEFAULT '',
+            created_at TEXT NOT NULL
+        )
+    """)
+    con.execute("CREATE INDEX IF NOT EXISTS idx_quiz_events_session ON quiz_events(session_id)")
+    con.execute("CREATE INDEX IF NOT EXISTS idx_quiz_events_event ON quiz_events(event)")
     con.commit()
     con.close()
+
+
+# ─────────────────── Meta CAPI ───────────────────
+
+def _sha256(v):
+    if not v:
+        return ""
+    return hashlib.sha256(v.strip().lower().encode("utf-8")).hexdigest()
+
+
+def _capi_fire(event_name, event_id, source_url, user_data, custom_data=None):
+    """Server-side mirror of a browser pixel event. Meta dedupes on event_id."""
+    if not META_CAPI_TOKEN or not META_PIXEL_ID:
+        return
+    payload_event = {
+        "event_name": event_name, "event_time": int(time.time()),
+        "event_id": event_id, "action_source": "website",
+        "event_source_url": source_url,
+        "user_data": {k: v for k, v in user_data.items() if v},
+    }
+    if custom_data:
+        payload_event["custom_data"] = custom_data
+    body = {"data": [payload_event], "access_token": META_CAPI_TOKEN}
+
+    def _send():
+        try:
+            r = requests.post(
+                f"https://graph.facebook.com/v19.0/{META_PIXEL_ID}/events",
+                json=body, timeout=4,
+            )
+            if r.status_code != 200:
+                print(f"[Lumen quiz CAPI] {event_name} {r.status_code}: {r.text[:300]}")
+        except Exception as e:
+            print(f"[Lumen quiz CAPI] {event_name} exception: {e}")
+    threading.Thread(target=_send, daemon=True).start()
+
+
+def _client_ip():
+    return (request.headers.get("X-Forwarded-For", request.remote_addr or "").split(",")[0].strip())[:100]
 
 
 # ─────────────────── Scoring ───────────────────
@@ -423,6 +491,16 @@ def _notify_email_html(lead, results, answer_labels):
 @lumen_quiz_bp.route("/score")
 @lumen_quiz_bp.route("/marketing-score")
 def quiz_page():
+    # Browser pixel fires PageView with this eventID; CAPI mirrors it so the
+    # view is counted even when ad blockers eat the client pixel.
+    pv_event_id = uuid.uuid4().hex
+    _capi_fire(
+        "PageView", pv_event_id, request.url,
+        {"client_ip_address": _client_ip(),
+         "client_user_agent": request.headers.get("User-Agent", ""),
+         "fbp": request.cookies.get("_fbp", ""),
+         "fbc": request.cookies.get("_fbc", "")},
+    )
     return render_template(
         "lumen_quiz.html",
         questions=QUESTIONS,
@@ -430,7 +508,40 @@ def quiz_page():
         states=STATES,
         revenue_bands=REVENUE_BANDS,
         calendly_url=CALENDLY_URL,
+        pv_event_id=pv_event_id,
+        pixel_id=META_PIXEL_ID,
     )
+
+
+@lumen_quiz_bp.route("/score/track", methods=["POST"])
+def quiz_track():
+    """Step-level funnel tracking. Fire-and-forget beacon from the frontend."""
+    data = request.get_json(silent=True) or {}
+    sid = (data.get("sid") or "").strip()[:64]
+    event = (data.get("event") or "").strip()[:20]
+    if not sid or event not in ("view", "start", "q", "gate", "lead"):
+        return jsonify({"ok": False}), 400
+    try:
+        step = max(0, min(50, int(data.get("step") or 0)))
+    except (TypeError, ValueError):
+        step = 0
+    try:
+        con = sqlite3.connect(DB_PATH)
+        con.execute("""
+            INSERT INTO quiz_events (session_id, event, step, utm_source, utm_campaign, utm_content, created_at)
+            VALUES (?,?,?,?,?,?,?)
+        """, (
+            sid, event, step,
+            (data.get("utm_source") or "")[:100],
+            (data.get("utm_campaign") or "")[:150],
+            (data.get("utm_content") or "")[:150],
+            datetime.datetime.utcnow().isoformat(),
+        ))
+        con.commit()
+        con.close()
+    except Exception as e:
+        print(f"[Lumen quiz track] DB error: {e}")
+    return jsonify({"ok": True})
 
 
 @lumen_quiz_bp.route("/score/submit", methods=["POST"])
@@ -458,9 +569,25 @@ def quiz_submit():
     results = compute_results(answers, trade_id, state_id, revenue_id)
     revenue_label = REVENUE_BANDS.get(revenue_id, {}).get("label", "Not shared")
     now = datetime.datetime.utcnow().isoformat()
+    answers_json = json.dumps(answers)
 
-    import json as _json
-    answers_json = _json.dumps(answers)
+    # CAPI Lead mirror — same event_id the browser pixel fires, with hashed
+    # contact info + click ids for high match quality.
+    lead_event_id = (data.get("event_id") or "").strip()[:64] or uuid.uuid4().hex
+    name_parts = name.split(" ", 1)
+    _capi_fire(
+        "Lead", lead_event_id, data.get("page_url") or request.headers.get("Referer", ""),
+        {"em": _sha256(email),
+         "ph": _sha256("".join(c for c in phone if c.isdigit())),
+         "fn": _sha256(name_parts[0]),
+         "ln": _sha256(name_parts[1] if len(name_parts) > 1 else ""),
+         "client_ip_address": _client_ip(),
+         "client_user_agent": request.headers.get("User-Agent", ""),
+         "fbp": (data.get("fbp") or "")[:100],
+         "fbc": (data.get("fbc") or "")[:200]},
+        custom_data={"content_name": "MES Quiz Lead",
+                     "mes_score": results["score"], "trade": trade_id, "state": state_id},
+    )
 
     try:
         con = sqlite3.connect(DB_PATH)
@@ -531,3 +658,84 @@ def quiz_submit():
     )
 
     return jsonify({"ok": True, "results": results})
+
+
+# ─────────────────── Admin ───────────────────
+
+@lumen_quiz_bp.route("/admin/quiz")
+def quiz_admin():
+    """Funnel analytics + leads for the MES quiz. Uses the main admin session."""
+    if not session.get("wl_auth"):
+        return redirect("/admin")
+
+    days = request.args.get("days", "30")
+    where, params = "", []
+    if days in ("7", "30"):
+        cutoff = (datetime.datetime.utcnow() - datetime.timedelta(days=int(days))).isoformat()
+        where, params = " WHERE created_at >= ?", [cutoff]
+
+    con = sqlite3.connect(DB_PATH)
+
+    # Unique sessions per event type
+    counts = {e: 0 for e in ("view", "start", "gate", "lead")}
+    for event, n in con.execute(
+        f"SELECT event, COUNT(DISTINCT session_id) FROM quiz_events{where} GROUP BY event", params
+    ):
+        if event in counts:
+            counts[event] = n
+
+    # Sessions that reached each question step (answered question N)
+    steps = {}
+    for step, n in con.execute(
+        f"SELECT step, COUNT(DISTINCT session_id) FROM quiz_events{where}{' AND' if where else ' WHERE'} event='q' GROUP BY step",
+        params,
+    ):
+        steps[step] = n
+
+    # Traffic sources
+    sources = con.execute(
+        f"SELECT COALESCE(NULLIF(utm_campaign,''),'(direct)'), COALESCE(NULLIF(utm_content,''),'—'), COUNT(DISTINCT session_id) "
+        f"FROM quiz_events{where}{' AND' if where else ' WHERE'} event='view' "
+        f"GROUP BY 1,2 ORDER BY 3 DESC LIMIT 20", params
+    ).fetchall()
+
+    lead_where, lead_params = where.replace("created_at", "quiz_leads.created_at"), list(params)
+    leads = con.execute(
+        f"SELECT name, company, email, phone, trade, state, revenue, score, grade, percentile, "
+        f"weakest_pillar, utm_campaign, utm_content, created_at FROM quiz_leads{lead_where} "
+        f"ORDER BY id DESC LIMIT 200", lead_params
+    ).fetchall()
+    avg_score = con.execute(
+        f"SELECT ROUND(AVG(score),1) FROM quiz_leads{lead_where}", lead_params
+    ).fetchone()[0]
+    con.close()
+
+    # Ordered funnel: view → start → Q1..Qn → gate → lead
+    n_questions = 3 + len(QUESTIONS)  # trade + state + scored + revenue happens client-side; steps are 1-indexed
+    funnel = [("Page views", counts["view"]), ("Started quiz", counts["start"])]
+    for i in range(1, n_questions + 1):
+        funnel.append((f"Answered Q{i}", steps.get(i, 0)))
+    funnel.append(("Reached contact gate", counts["gate"]))
+    funnel.append(("Submitted (lead)", counts["lead"]))
+
+    base = counts["view"] or 0
+    funnel_rows = []
+    prev = base
+    for label, n in funnel:
+        pct_of_views = round(100 * n / base) if base else 0
+        drop = round(100 * (1 - n / prev)) if prev else 0
+        funnel_rows.append({"label": label, "n": n, "pct": pct_of_views, "drop": max(0, drop)})
+        prev = n if n else prev
+
+    return render_template(
+        "admin_quiz.html",
+        days=days,
+        funnel=funnel_rows,
+        counts=counts,
+        sources=sources,
+        leads=leads,
+        avg_score=avg_score,
+        pillars=PILLARS,
+        conv=round(100 * counts["lead"] / counts["view"], 1) if counts["view"] else 0,
+        gate_conv=round(100 * counts["lead"] / counts["gate"], 1) if counts["gate"] else 0,
+    )
