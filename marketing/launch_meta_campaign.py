@@ -53,7 +53,7 @@ ADS = [
     {
         "key": "secret",
         "name": "Ad — Secret",
-        "body": "Best work in town shouldn't mean best-kept secret in town. Score your marketing in 60 seconds — free.",
+        "body": "Best work in town shouldn't mean best-kept secret in town. Score your marketing in 60 seconds, free.",
     },
     {
         "key": "rival",
@@ -75,7 +75,8 @@ def die(msg):
 
 def call(method, path, **params):
     params["access_token"] = TOKEN
-    r = requests.request(method, f"{API}/{path}", data=params, timeout=60)
+    kw = {"params" if method.upper() == "GET" else "data": params}
+    r = requests.request(method, f"{API}/{path}", timeout=60, **kw)
     out = r.json()
     if r.status_code >= 300 or "error" in out:
         err = out.get("error", {})
@@ -84,7 +85,11 @@ def call(method, path, **params):
     return out
 
 
+IG_USER_ID = None  # resolved from the page in check_env()
+
+
 def check_env():
+    global IG_USER_ID
     missing = [n for n, v in [("META_ADS_TOKEN", TOKEN), ("META_AD_ACCOUNT", ACCOUNT), ("META_PAGE_ID", PAGE_ID)] if not v]
     if missing:
         die("Missing env vars: " + ", ".join(missing) + "  (see header of this script)")
@@ -94,8 +99,13 @@ def check_env():
     if acct.get("account_status") != 1:
         die(f"Ad account {acct.get('name')} status={acct.get('account_status')} — not active")
     print(f"✓ Ad account: {acct['name']} ({acct['currency']})")
-    page = call("GET", f"{PAGE_ID}?fields=name")
+    page = call("GET", f"{PAGE_ID}?fields=name,instagram_business_account")
     print(f"✓ Page: {page['name']}")
+    # ads with Instagram placements need an IG identity on the creative
+    # (error 1772103 "Instagram Account Is Missing" at ad creation otherwise);
+    # v19+ takes it as object_story_spec.instagram_user_id
+    IG_USER_ID = (page.get("instagram_business_account") or {}).get("id")
+    print(f"✓ Instagram identity: {IG_USER_ID or 'none linked — IG placements will fail'}")
 
 
 def region_keys():
@@ -143,7 +153,9 @@ def create_campaign():
 def create_adset(campaign_id, regions):
     targeting = {
         "geo_locations": {"regions": [{"key": k} for k in regions]},
-        "age_min": 25, "age_max": 60,
+        # Advantage+ audience requires age_max >= 65 as a hard control
+        # (Meta error 1870189); 25-65 matches our other lead-gen ad sets.
+        "age_min": 25, "age_max": 65,
         "targeting_automation": {"advantage_audience": 1},
     }
     res = call("POST", f"act_{ACCOUNT}/adsets",
@@ -153,6 +165,14 @@ def create_adset(campaign_id, regions):
                billing_event="IMPRESSIONS",
                optimization_goal="OFFSITE_CONVERSIONS",
                promoted_object=json.dumps({"pixel_id": PIXEL_ID, "custom_event_type": "LEAD"}),
+               # attribution is LOCKED after ad set creation (Meta error 1504040);
+               # omitting this defaults to 7d-click only, which hides every
+               # see-then-search lead. Set the full spec up front.
+               attribution_spec=json.dumps([
+                   {"event_type": "CLICK_THROUGH", "window_days": 7},
+                   {"event_type": "VIEW_THROUGH", "window_days": 1},
+                   {"event_type": "ENGAGED_VIDEO_VIEW", "window_days": 1},
+               ]),
                targeting=json.dumps(targeting))
     print(f"✓ Ad set created: {res['id']}")
     return res["id"]
@@ -163,6 +183,9 @@ def create_creative(ad, hashes):
     url = BASE_URL + ad["key"]
     labels = {s: f"{ad['key']}-{s}" for s in ("1080x1350", "1080x1080", "1080x1920")}
     asset_feed_spec = {
+        # required for asset_customization_rules; without it Meta rejects
+        # the spec (generic "Invalid parameter") and we lose placement sizing
+        "optimization_type": "PLACEMENT",
         "images": [
             {"hash": hashes[(ad["key"], s)], "adlabels": [{"name": labels[s]}]}
             for s in ("1080x1350", "1080x1080", "1080x1920")
@@ -198,10 +221,13 @@ def create_creative(ad, hashes):
             },
         ],
     }
+    story_spec = {"page_id": PAGE_ID}
+    if IG_USER_ID:
+        story_spec["instagram_user_id"] = IG_USER_ID
     try:
         res = call("POST", f"act_{ACCOUNT}/adcreatives",
                    name=f"MES {ad['name']}",
-                   object_story_spec=json.dumps({"page_id": PAGE_ID}),
+                   object_story_spec=json.dumps(story_spec),
                    asset_feed_spec=json.dumps(asset_feed_spec))
     except SystemExit:
         # Fallback: plain single-image creative with the 4:5 (Meta auto-crops others)
@@ -209,7 +235,7 @@ def create_creative(ad, hashes):
         res = call("POST", f"act_{ACCOUNT}/adcreatives",
                    name=f"MES {ad['name']} (single)",
                    object_story_spec=json.dumps({
-                       "page_id": PAGE_ID,
+                       **story_spec,
                        "link_data": {
                            "image_hash": hashes[(ad["key"], "1080x1350")],
                            "link": url,
