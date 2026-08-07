@@ -5058,6 +5058,28 @@ def mk_send_sms():
     return jsonify({"ok": True, "sent": len(lead_ids), "errors": 0, "queued": True})
 
 
+@app.route("/whatsapp-connect")
+def whatsapp_connect_landing():
+    """Landing page for Meta-hosted WhatsApp embedded-signup redirects
+    (redirect_uri on the tech-provider onboarding link). Shows whatever
+    Meta appends (query or #fragment) so the session/WABA info from a
+    completed coexistence flow is visible and copyable."""
+    return """<!DOCTYPE html><html><head><meta charset="utf-8"><title>WhatsApp Connected — Lumen</title>
+<style>body{font-family:-apple-system,'Helvetica Neue',Arial,sans-serif;max-width:680px;margin:60px auto;
+padding:0 24px;color:#1a1a1a;line-height:1.6}h1{font-size:22px}
+#out{background:#f5f5f5;border-radius:8px;padding:16px;font-family:Menlo,monospace;font-size:12px;
+white-space:pre-wrap;word-break:break-all}</style></head><body>
+<h1>WhatsApp signup flow finished</h1>
+<p>Send everything in the box below to Jarvis to finish the connection.</p>
+<div id="out"></div>
+<script>
+var out = [];
+if (location.search) out.push("QUERY: " + location.search);
+if (location.hash) out.push("HASH: " + location.hash);
+document.getElementById("out").textContent = out.join("\\n\\n") || "(no parameters received)";
+</script></body></html>"""
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
     app.run(host="0.0.0.0", port=port)
