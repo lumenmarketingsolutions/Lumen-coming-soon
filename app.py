@@ -317,9 +317,42 @@ def _phorest_poll_once():
         if _phorest_appt_already_fired(appt_id):
             continue
         lead = _phorest_lookup_lead(client_id)
-        if not lead:
-            continue  # walk-in or non-funnel client, ignore
-        table, email, phone, first_name, funnel_label = lead
+        if lead:
+            table, email, phone, first_name, funnel_label = lead
+        elif (appt.get("source") or "").upper() in ("ECOMM_WEB_APP", "ONLINE"):
+            # ECOMM_WEB_APP is what Phorest actually stamps on self-serve
+            # online bookings for this branch (verified against 202 real
+            # appointments Aug 2026); ONLINE kept as a belt-and-braces alias.
+            # Not a funnel lead, but they self-booked through Phorest online
+            # booking — i.e. the traffic the Booking Page Direct ads send.
+            # Pull their contact details off the client record so Meta can
+            # match the booking back to an ad click (email/phone match keys).
+            # INTERNAL (desk/phone) bookings stay excluded: we only claim
+            # bookings the person made themselves online.
+            client = mane_phorest.get_client(client_id)
+            if not client:
+                continue
+            email = client.get("email")
+            phone = client.get("mobile") or client.get("phone")
+            first_name = client.get("firstName")
+            funnel_label = "online_booking"
+            if not email and not phone:
+                continue  # nothing for Meta to match on
+        else:
+            continue  # walk-in / desk booking for a non-funnel client, ignore
+        custom_data = {
+            "content_category": funnel_label,
+            "phorest_appointment_id": appt_id,
+        }
+        # Carry the service value when Phorest exposes it — turns Schedule
+        # into a valued event in Events Manager (nice for ROAS reads).
+        try:
+            price = float(appt.get("price") or 0)
+            if price > 0:
+                custom_data["value"] = price
+                custom_data["currency"] = "USD"
+        except (TypeError, ValueError):
+            pass
         send_meta_capi_event(
             event_name="Schedule",
             event_id=f"phorest-schedule-{appt_id}",
@@ -328,10 +361,8 @@ def _phorest_poll_once():
                 "phone": phone,
                 "first_name": first_name if first_name and first_name != "Anonymous" else "",
             },
-            custom_data={
-                "content_category": funnel_label,
-                "phorest_appointment_id": appt_id,
-            },
+            custom_data=custom_data,
+            source_url="https://www.phorest.com/salon/manestylingstudio/book/service-selection",
         )
         _phorest_appt_mark_fired(appt_id)
         matched += 1

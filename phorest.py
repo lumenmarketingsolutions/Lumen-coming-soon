@@ -135,6 +135,24 @@ def create_client(
     return None
 
 
+def get_client(client_id: str):
+    """Fetch a single Phorest client record (email/mobile/firstName live on
+    it). Returns the client dict, or None on any failure. Used by the booking
+    poller to build CAPI match keys for ONLINE bookings that didn't come
+    through a funnel form."""
+    if not _configured() or not client_id:
+        return None
+    url = f"{_BASE}/api/business/{_BUSINESS_ID}/client/{client_id}"
+    try:
+        r = requests.get(url, headers=_auth_header(), timeout=_TIMEOUT)
+        if r.status_code == 200:
+            return r.json() or None
+        print(f"[phorest] get_client → HTTP {r.status_code}: {r.text[:240]}")
+    except Exception as e:
+        print(f"[phorest] get_client → exception: {e}")
+    return None
+
+
 def list_appointments_since(updated_from: _dt.datetime, page_size: int = 100):
     """Yield AppointmentResponse dicts for appointments updated since
     `updated_from`. Paginates automatically. Stops on any error.
