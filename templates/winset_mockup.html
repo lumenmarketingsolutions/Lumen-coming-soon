@@ -137,7 +137,7 @@ footer .links a{margin-right:18px;color:var(--muted)}
 /* sticky mobile cta */
 .sticky{display:none}
 @media(max-width:720px){
-  .sticky{display:block;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:12px 16px 18px;background:rgba(11,11,12,.96);border-top:1px solid #1c1a17}
+  .sticky{display:block;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:12px 16px 18px;background:rgba(11,11,12,.96);border-top:1px solid #1c1a17;transform:translateY(110%);transition:transform .3s ease}.sticky.show{transform:none}
   .sticky .btn{width:100%}
   body{padding-bottom:84px}
 }
@@ -319,6 +319,10 @@ footer .links a{margin-right:18px;color:var(--muted)}
   if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return}
   var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12,rootMargin:'0px 0px -40px 0px'});
   els.forEach(function(e){io.observe(e)});
+  var hero=document.getElementById('top'),bar=document.querySelector('.sticky'),book=document.getElementById('book');
+  if(hero&&bar){var ho=new IntersectionObserver(function(en){en.forEach(function(x){bar.classList.toggle('show',!x.isIntersecting)})},{threshold:0});ho.observe(hero);
+    if(book){var bo=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting)bar.classList.remove('show');else if(!heroVisible())bar.classList.add('show')})},{threshold:.2});bo.observe(book)}}
+  function heroVisible(){var r=hero.getBoundingClientRect();return r.bottom>0&&r.top<window.innerHeight}
 })();
 </script>
 </body>
