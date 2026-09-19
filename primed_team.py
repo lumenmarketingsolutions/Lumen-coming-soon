@@ -58,7 +58,7 @@ DEFAULT_RULES = {
     "autopilot_budget": "off",           # off = queue for Kendall, on = execute
     "autopilot_status": "off",           # pause / activate ads
     "autopilot_create_ads": "on",        # new ads are always created PAUSED
-    "kendall_notes": "RATE SHEET (from the funded book, 19.09.2026): repay factor 1.45 (client repays 1.45x), typical term 5 to 6 months, up to 12 to 18 months on larger files. Creatives show MONTHLY example figures on a 12 month term only, always labelled Example figures on a 12 month term, terms vary by file: $50,000 about $6,000 a month, $100,000 about $12,100 a month, $250,000 about $29,200 a month. Never $800,000, never a weekly figure, never a payment without the example label. Kendall decides all money moves until autopilot is on.",  # standing instructions from Kendall to the team
+    "kendall_notes": "RATE SHEET (from the funded book, 19.09.2026): repay factor 1.45 (client repays 1.45x), typical term 5 to 6 months, up to 12 to 18 months on larger files. Creatives show MONTHLY example figures on a 12 month term only, always labelled Example figures on a 12 month term, terms vary by file: $50,000 about $6,000 a month, $100,000 about $12,100 a month, $250,000 about $29,200 a month. The factor, the rate, any percentage, the total repaid and lender names are INTERNAL ONLY and never appear in any ad, image, headline or primary text. On the ad, only the monthly example figure with the example label. Never $800,000, never a weekly figure, never a payment without the example label. Kendall decides all money moves until autopilot is on.",  # standing instructions from Kendall to the team
 }
 
 # ---------------------------------------------------------------- db
@@ -346,6 +346,7 @@ HOUSE_RULES = """House rules for every role:
 - Primed Loans: Laval QC private lender, funds $10K to $300K (largest ever $300K, median about $20K), 24 to 72h, no collateral, weekly repayments 3 to 15 months, needs about $350K+ annual revenue. Meta lead-form ads only, Canada.
 - The goal is the highest quality clients for Ezio. Rank by qualified rate and cost per qualified lead (a lead that reached Sent Agreement, Awaiting Offer, Offer Presented or Funded), never by CPL alone. The revenue answer on the form predicts everything: under $250K revenue almost never qualifies.
 - Two ad accounts. MAIN is Ezio's and is READ ONLY: never propose a write to it, only observations. BACKUP is ours: writes are allowed only inside the writable ad sets in the rules.
+- Never put the repayment factor, a rate, a percentage, a total repayment amount or a lender name in any ad. Payment appears only as a monthly example figure with the label Example figures on a 12 month term, terms vary by file.
 - Never propose an ad that claims guaranteed approval, quotes a return, uses "no credit check" as the headline, says "cash advance", imitates a phone notification or checkbox UI, or carries $800,000. Revenue gates are phrased as eligibility about the business, not about the viewer.
 - Copy voice: direct, human, specific numbers, no em dashes or hyphens, no staccato fragments, no "not X, it's Y" flips, no emojis, no AI words.
 - Small samples: do not call a verdict on an ad with fewer than the minimum new contacts or minimum spend in the rules. Say "not enough data" instead.
