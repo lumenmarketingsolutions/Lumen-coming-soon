@@ -116,7 +116,10 @@ app.register_blueprint(outreach_bp)
 # MK7 WhatsApp Outreach Agent — Phase 1 foundation, mounted at /crm/whatsapp.
 # Send pipeline ports across from mk7media/agents/whatsapp_agent in Phase 2.
 from whatsapp_outreach import whatsapp_bp
+from primed_team import primed_bp, start_scheduler as _primed_start
 app.register_blueprint(whatsapp_bp)
+app.register_blueprint(primed_bp)
+_primed_start()
 
 ADMIN_PIN = "112501"
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
