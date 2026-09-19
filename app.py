@@ -1332,6 +1332,12 @@ def qualify_submit():
     return jsonify({"ok": True})
 
 
+
+# ── /winset-mockup — Winset (Rudin algorithm) landing page mockup, static, for client review
+@app.route("/winset-mockup")
+def winset_mockup():
+    return render_template("winset_mockup.html")
+
 # ── /lumenlb — MK7-style landing page on Lumen branding, used to test the WhatsApp
 #    nurture agent (+1 623 512 6504). Leads notify Kendall only. ──
 @app.route("/lumenlb")

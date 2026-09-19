@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Winset · Rudin Algorithm</title>
+<meta name="description" content="A rules based trading algorithm that runs on your own account. Live since September 2020, verified results, Winset earns only on profit. Book a 20 minute call.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0B0B0C; --bg2:#111113; --card:#151517; --line:#2A2520; --line2:#3A3128;
+  --gold:#E7B049; --gold2:#F2C766; --gold-dim:#8A6A2E;
+  --text:#F4F1EA; --muted:#B5B0A6; --muted2:#8A857C;
+  --radius:16px; --max:1120px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+html,body{overflow-x:hidden;max-width:100%}
+body{font-family:Inter,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+.grid>*{min-width:0}
+@media(max-width:720px){.statue .row{flex-direction:column;gap:2px;align-items:flex-start}.statue{min-height:0;padding:22px}.trust{gap:14px;padding:20px 16px}.trust div{font-size:13px}.card{padding:24px 20px}.cta-row .btn{width:100%}.rev .sample{position:static;display:inline-block;margin-bottom:10px}}
+img{max-width:100%;display:block}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:var(--max);margin:0 auto;padding:0 20px}
+section{padding:88px 0}
+@media(max-width:720px){section{padding:64px 0}}
+h1,h2,h3{line-height:1.12;letter-spacing:-.015em;font-weight:800}
+h1{font-size:clamp(38px,6.2vw,66px)}
+h2{font-size:clamp(28px,4.2vw,44px);margin-bottom:14px}
+h3{font-size:19px;font-weight:700;margin-bottom:8px}
+.gold{color:var(--gold)}
+.eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:16px}
+.lead{font-size:clamp(17px,2vw,20px);color:var(--muted);max-width:640px}
+.center{text-align:center}.center .lead{margin:0 auto}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:16px 28px;border-radius:999px;font-weight:700;font-size:16px;transition:transform .15s ease,background .15s ease;white-space:nowrap}
+.btn:active{transform:scale(.98)}
+.btn-gold{background:var(--gold);color:#141108}
+.btn-gold:hover{background:var(--gold2)}
+.btn-ghost{border:1px solid var(--line2);color:var(--text);background:rgba(255,255,255,.02)}
+.btn-ghost:hover{border-color:var(--gold-dim)}
+.btn-wa{background:#25D366;color:#062b16}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:30px 28px}
+.grid{display:grid;gap:20px}
+.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:900px){.g3,.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:600px){.g3,.g2,.g4{grid-template-columns:1fr}}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+/* nav */
+nav{position:sticky;top:0;z-index:20;background:rgba(11,11,12,.92);border-bottom:1px solid #1c1a17}
+nav .wrap{display:flex;align-items:center;justify-content:space-between;height:72px}
+.logo{display:flex;align-items:center;gap:12px;font-weight:800;letter-spacing:.02em;font-size:18px}
+.logo .w{width:34px;height:34px;border:1.5px solid var(--gold);border-radius:8px;display:grid;place-items:center;color:var(--gold);font-weight:800;font-size:15px}
+.logo small{display:block;font-size:10px;letter-spacing:.2em;color:var(--muted2);font-weight:500;text-transform:uppercase}
+nav .btn{padding:12px 20px;font-size:14px}
+/* hero */
+.hero{position:relative;padding:96px 0 72px;overflow:hidden}
+.hero .bg{position:absolute;inset:0;background:radial-gradient(ellipse at 78% 35%,rgba(231,176,73,.16),transparent 55%),radial-gradient(ellipse at 15% 90%,rgba(231,176,73,.07),transparent 50%)}
+.hero .wrap{position:relative;display:grid;grid-template-columns:1.15fr .85fr;gap:48px;align-items:center}
+@media(max-width:900px){.hero .wrap{grid-template-columns:1fr}.hero{padding:64px 0 56px}}
+.hero h1{margin:0 0 20px}
+.hero .lead{margin-bottom:32px}
+.cta-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.hero .note{font-size:13px;color:var(--muted2);margin-top:16px}
+.statue{position:relative;border:1px solid var(--line);border-radius:24px;background:linear-gradient(180deg,#151412,#0d0d0e);padding:28px;min-height:360px;display:flex;flex-direction:column;justify-content:flex-end;gap:12px}
+.statue .glyph{position:absolute;right:26px;top:22px;font-size:120px;line-height:1;color:rgba(231,176,73,.18);font-weight:800;letter-spacing:-.05em}
+.statue .row{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--line);padding-top:12px}
+.statue .row b{font-size:22px}
+.statue .row span{color:var(--muted2);font-size:13px}
+.trust{display:flex;gap:28px;flex-wrap:wrap;justify-content:center;padding:26px 0;border-top:1px solid #1c1a17;border-bottom:1px solid #1c1a17;background:var(--bg2)}
+.trust div{display:flex;align-items:center;gap:10px;font-size:13.5px;color:var(--muted);font-weight:500}
+.trust i{width:8px;height:8px;border-radius:50%;background:var(--gold);display:inline-block}
+/* stats */
+.stat b{display:block;font-size:40px;font-weight:800;color:var(--gold);letter-spacing:-.02em;line-height:1}
+.stat span{display:block;margin-top:10px;color:var(--muted);font-size:14.5px}
+/* steps */
+.step .n{width:44px;height:44px;border-radius:12px;background:rgba(231,176,73,.12);color:var(--gold);display:grid;place-items:center;font-weight:800;margin-bottom:18px;font-size:18px}
+.step p{color:var(--muted);font-size:15.5px}
+/* keep list */
+.keep{display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:start}
+@media(max-width:900px){.keep{grid-template-columns:1fr}}
+.list{list-style:none}
+.list li{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--line);font-size:16px;color:var(--text)}
+.list li:last-child{border-bottom:0}
+.list li::before{content:"";flex:none;width:22px;height:22px;border-radius:50%;background:rgba(231,176,73,.14);border:1px solid var(--gold-dim);margin-top:2px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E7B049' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E");background-size:12px;background-position:center;background-repeat:no-repeat}
+/* reviews */
+.rev{position:relative}
+.rev .stars{color:var(--gold);letter-spacing:2px;font-size:14px;margin-bottom:12px}
+.rev p{color:var(--text);font-size:15.5px;line-height:1.65;margin-bottom:18px}
+.rev .who{display:flex;align-items:center;gap:12px}
+.rev .av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#3a3128,#1d1a16);display:grid;place-items:center;color:var(--gold);font-weight:700;font-size:14px}
+.rev .who b{display:block;font-size:14px}
+.rev .who span{font-size:12.5px;color:var(--muted2)}
+.sample{position:absolute;top:14px;right:14px;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted2);border:1px dashed var(--line2);padding:3px 8px;border-radius:6px}
+.proofbar{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:28px}
+@media(max-width:900px){.proofbar{grid-template-columns:1fr}}
+.proofbar .card{display:flex;gap:16px;align-items:center;padding:22px}
+.proofbar .ic{flex:none;width:48px;height:48px;border-radius:12px;border:1px solid var(--gold-dim);display:grid;place-items:center;color:var(--gold);font-weight:800;font-size:13px;letter-spacing:.04em}
+.proofbar b{display:block;font-size:15px}
+.proofbar span{font-size:13px;color:var(--muted)}
+/* fees */
+.fee{background:linear-gradient(180deg,#171512,#111113);border:1px solid var(--line2)}
+.fee .big{font-size:clamp(30px,4vw,44px);font-weight:800;color:var(--gold);letter-spacing:-.02em;line-height:1.1}
+.fee .row{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:28px}
+@media(max-width:700px){.fee .row{grid-template-columns:1fr}}
+.fee .row div{border-top:1px solid var(--line2);padding-top:14px}
+.fee .row b{display:block;font-size:17px;margin-bottom:4px}
+.fee .row span{color:var(--muted);font-size:14.5px}
+/* faq */
+.faq{max-width:780px;margin:0 auto}
+details{border:1px solid var(--line);border-radius:14px;background:var(--card);margin-bottom:12px}
+summary{cursor:pointer;list-style:none;padding:20px 24px;font-weight:700;font-size:17px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--gold);font-size:24px;font-weight:400;flex:none}
+details[open] summary::after{content:"–"}
+details p{padding:0 24px 22px;color:var(--muted);font-size:15.5px}
+/* form */
+.book{background:var(--bg2);border-top:1px solid #1c1a17}
+.book .wrap{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+@media(max-width:900px){.book .wrap{grid-template-columns:1fr}}
+form{background:var(--card);border:1px solid var(--line2);border-radius:20px;padding:30px}
+label{display:block;font-size:13px;color:var(--muted);margin:0 0 6px;font-weight:600;letter-spacing:.02em}
+input,select{width:100%;background:#0f0f10;border:1px solid var(--line2);border-radius:10px;color:var(--text);padding:14px 14px;font:inherit;font-size:16px;margin-bottom:16px;-webkit-appearance:none}
+input:focus,select:focus{outline:none;border-color:var(--gold)}
+form .btn{width:100%;margin-top:4px}
+form small{display:block;color:var(--muted2);font-size:12.5px;margin-top:14px;line-height:1.5}
+.book ul{list-style:none;margin-top:26px}
+.book ul li{padding:12px 0;border-bottom:1px solid var(--line);color:var(--muted);font-size:15.5px}
+.book ul li b{color:var(--text)}
+/* footer */
+footer{padding:48px 0 40px;border-top:1px solid #1c1a17;color:var(--muted2);font-size:12.5px;line-height:1.7}
+footer .risk{color:var(--muted);font-size:13px;margin-bottom:22px;max-width:860px}
+footer .ents{margin-bottom:18px}
+footer .links a{margin-right:18px;color:var(--muted)}
+/* sticky mobile cta */
+.sticky{display:none}
+@media(max-width:720px){
+  .sticky{display:block;position:fixed;left:0;right:0;bottom:0;z-index:30;padding:12px 16px 18px;background:rgba(11,11,12,.96);border-top:1px solid #1c1a17}
+  .sticky .btn{width:100%}
+  body{padding-bottom:84px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="logo" href="#top"><span class="w">W</span><span>Winset<small>Est. January 2024</small></span></a>
+    <a class="btn btn-gold" href="#book">Book a call</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="bg"></div>
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Rudin · EUR/USD · Live since September 2020</div>
+      <h1>A trading algorithm that runs on <span class="gold">your own account.</span></h1>
+      <p class="lead">Your capital stays with you, in your name, at your broker. Rudin trades it by fixed mathematical rules with strict risk limits. Winset earns a share of the profit and nothing else.</p>
+      <div class="cta-row">
+        <a class="btn btn-gold" href="#book">Book a 20 minute call</a>
+        <a class="btn btn-ghost" href="#how">See how it works</a>
+      </div>
+      <p class="note">The call is a conversation about the method and the structure. Nobody asks you for money on it.</p>
+    </div>
+    <div class="statue reveal">
+      <div class="glyph">W</div>
+      <div class="row"><b>Sept 2020</b><span>Rudin live trading start</span></div>
+      <div class="row"><b>20 years</b><span>of market data behind the model</span></div>
+      <div class="row"><b>0</b><span>martingale or grid strategies, ever</span></div>
+      <div class="row"><b>Your account</b><span>capital never moves to Winset</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="trust">
+  <div><i></i>Verified track record on Myfxbook</div>
+  <div><i></i>World Business Outlook, Most Trusted Platform MENA 2024</div>
+  <div><i></i>Winset Investments FZCO, DIEZ Licence 76617, UAE</div>
+  <div><i></i>Established January 2024</div>
+</div>
+
+<section id="how">
+  <div class="wrap">
+    <div class="center reveal">
+      <div class="eyebrow">How it works</div>
+      <h2>Three steps. You keep the keys.</h2>
+      <p class="lead">Most people expect to hand money to someone. That is exactly what does not happen here.</p>
+    </div>
+    <div class="grid g3" style="margin-top:44px">
+      <div class="card step reveal"><div class="n">1</div><h3>You open your own broker account</h3><p>In your name, at a regulated broker, with your own login. You fund it, you can see it any time, and you can withdraw any time.</p></div>
+      <div class="card step reveal"><div class="n">2</div><h3>Rudin connects and trades by its rules</h3><p>The algorithm is linked to your account with trade only permission. It cannot withdraw. It follows a fixed rule set on EUR/USD with position size and loss limits defined in advance.</p></div>
+      <div class="card step reveal"><div class="n">3</div><h3>Winset earns only when you profit</h3><p>There is no monthly fee and no charge on losses. At the end of each period, Winset takes an agreed share of the profit, and only the profit. If there is none, you owe nothing.</p></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="grid g4">
+      <div class="card stat reveal"><b>2020</b><span>Rudin has traded live since September 2020, through every market condition since.</span></div>
+      <div class="card stat reveal"><b>~20 yrs</b><span>of EUR/USD data the model was built and tested on before it touched real capital.</span></div>
+      <div class="card stat reveal"><b>1 pair</b><span>EUR/USD only. The most liquid market in the world, and the one the research is built for.</span></div>
+      <div class="card stat reveal"><b>0</b><span>discretionary trades. No human overriding the model, no tips, no news trading.</span></div>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--bg2);border-top:1px solid #1c1a17;border-bottom:1px solid #1c1a17">
+  <div class="wrap keep">
+    <div class="reveal">
+      <div class="eyebrow">Your capital, your control</div>
+      <h2>What stays in your hands</h2>
+      <p class="lead">Winset is a research company, not a fund. That is the whole point of the structure, and it is what protects you.</p>
+    </div>
+    <ul class="list reveal">
+      <li>Your money sits at your broker, in an account under your name.</li>
+      <li>Winset never holds, receives or moves client capital.</li>
+      <li>You can pause the algorithm or withdraw at any moment. No notice period.</li>
+      <li>You see every trade in your own platform, in real time.</li>
+      <li>Fees are a share of profit, agreed in writing before anything starts.</li>
+      <li>Rudin never uses martingale, grid or averaging down. Risk per trade is capped.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="proof">
+  <div class="wrap">
+    <div class="center reveal">
+      <div class="eyebrow">Proof, not promises</div>
+      <h2>What clients say about working with Winset</h2>
+      <p class="lead">Nobody here quotes a return. Trading involves risk of loss and past results do not predict future results. What clients talk about is control, transparency and the people.</p>
+    </div>
+    <div class="grid g3" style="margin-top:44px">
+      <div class="card rev reveal"><span class="sample">Sample</span><div class="stars">★★★★★</div><p>"The first thing I asked was where my money would sit. The answer was: in your own account, we never touch it. That's why I said yes. I check my broker app every morning and every trade is there."</p><div class="who"><div class="av">K</div><div><b>Karim H.</b><span>Business owner, Dubai</span></div></div></div>
+      <div class="card rev reveal"><span class="sample">Sample</span><div class="stars">★★★★★</div><p>"I've been burned by signal groups before. This is a different thing. Fixed rules, capped risk, and they only get paid if I'm up. When I had questions, a real person from the team explained the model for an hour."</p><div class="who"><div class="av">R</div><div><b>Rami S.</b><span>Client since 2024, Abu Dhabi</span></div></div></div>
+      <div class="card rev reveal"><span class="sample">Sample</span><div class="stars">★★★★★</div><p>"What I appreciate is the honesty. They told me on the first call there are losing weeks and that the model doesn't chase them. It has done exactly what they said it would do."</p><div class="who"><div class="av">N</div><div><b>Nadine A.</b><span>Consultant, Dubai Marina</span></div></div></div>
+    </div>
+    <div class="proofbar">
+      <div class="card reveal"><div class="ic">MFX</div><div><b>Verified on Myfxbook</b><span>Live account results, independently tracked. Link shared on the call.</span></div></div>
+      <div class="card reveal"><div class="ic">WBO</div><div><b>Most Trusted Platform, MENA 2024</b><span>World Business Outlook award.</span></div></div>
+      <div class="card reveal"><div class="ic">TG</div><div><b>Private Telegram community</b><span>Clients see updates and ask questions directly to the team.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="card fee reveal">
+      <div class="eyebrow">Fees</div>
+      <div class="big">We earn when you earn. That is the whole fee model.</div>
+      <div class="row">
+        <div><b>No monthly fee</b><span>Nothing charged for access, software or the connection.</span></div>
+        <div><b>Profit share only</b><span>An agreed percentage of realised profit each period. On a losing period, nothing.</span></div>
+        <div><b>7 day trial</b><span>See the model run on your account before any fee applies.</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="center reveal"><div class="eyebrow">Questions</div><h2>The things people ask on the call</h2></div>
+    <div class="faq" style="margin-top:36px">
+      <details class="reveal"><summary>Does my money go to Winset?</summary><p>No. Your capital is deposited by you into a broker account that is in your name. Winset is connected with trade only permission, which means it can open and close trades but cannot withdraw or transfer anything. You keep full access.</p></details>
+      <details class="reveal"><summary>Is there risk?</summary><p>Yes. Trading involves risk of loss and past results do not predict future results. Rudin runs with a defined maximum risk per trade and does not use martingale or grid methods, which limits how bad a losing run can get, but it does not remove risk. Only use capital you can afford to put at risk.</p></details>
+      <details class="reveal"><summary>What does it cost?</summary><p>A share of profit, agreed in writing before you start. There is no subscription and no charge in a period with no profit. The exact percentage depends on the account size and is explained on the call.</p></details>
+      <details class="reveal"><summary>What is Rudin, exactly?</summary><p>Winset's flagship algorithm. It trades EUR/USD only, has run live since September 2020, and was built by mathematicians on about twenty years of market data using statistical methods rather than technical or fundamental analysis. Every rule and risk limit is fixed in advance.</p></details>
+      <details class="reveal"><summary>Can I stop whenever I want?</summary><p>Yes. Pause the connection or withdraw from your broker at any time. There is no notice period and no exit fee.</p></details>
+      <details class="reveal"><summary>Who is Winset?</summary><p>Winset LLC is registered in Saint Vincent and the Grenadines (No. 3408). Winset Investments FZCO holds DIEZ licence 76617 in the UAE as a consulting entity. The company was established in January 2024 and received the World Business Outlook award for Most Trusted Platform MENA in 2024.</p></details>
+      <details class="reveal"><summary>What happens on the call?</summary><p>Twenty minutes with someone from the team. They walk you through the method, the account structure and the fee, show you the verified track record and answer your questions. Nobody asks you for money on the call.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="book" id="book">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="eyebrow">Book a call</div>
+      <h2>Twenty minutes. Your questions, our answers.</h2>
+      <p class="lead">Leave your details and someone from the Winset team calls you on WhatsApp at the time you choose.</p>
+      <ul>
+        <li><b>You'll see</b> the live, verified track record.</li>
+        <li><b>You'll understand</b> exactly how your account stays yours.</li>
+        <li><b>You'll get</b> the fee in writing before you decide anything.</li>
+      </ul>
+      <div style="margin-top:26px"><a class="btn btn-wa" href="https://wa.me/971000000000?text=Hi%20Winset%2C%20I%27d%20like%20to%20book%20a%20call%20about%20Rudin." target="_blank" rel="noopener">Or message us on WhatsApp</a></div>
+    </div>
+    <form action="#" method="post" onsubmit="event.preventDefault();this.querySelector('button').textContent='Thank you, we will call you';">
+      <label for="name">Full name</label><input id="name" name="name" type="text" required autocomplete="name">
+      <label for="phone">WhatsApp number</label><input id="phone" name="phone" type="tel" required autocomplete="tel" placeholder="+971">
+      <label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email">
+      <label for="exp">Have you traded before?</label>
+      <select id="exp" name="experience"><option>I have an existing broker account</option><option>I have traded, no current account</option><option>New to trading</option></select>
+      <label for="time">Best time to call</label>
+      <select id="time" name="time"><option>Morning (9 to 12)</option><option>Afternoon (12 to 5)</option><option>Evening (5 to 9)</option></select>
+      <button class="btn btn-gold" type="submit">Book my call</button>
+      <small>By submitting you agree to be contacted by Winset. Nothing on this page is an offer, a solicitation, a recommendation or investment advice. Trading involves risk of loss. Past results do not predict future results.</small>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p class="risk">Trading involves risk of loss. Past results do not predict future results. Nothing on this page is an offer, a solicitation, a recommendation or investment advice. Winset does not hold client funds. Any figures shown describe documented past activity of the algorithm and are not a promise of future performance.</p>
+    <p class="ents">Winset LLC · Registered in Saint Vincent and the Grenadines, No. 3408<br>Winset Investments FZCO · Licence No. 76617 · DIEZ (UAE) · Consulting</p>
+    <p class="links"><a href="https://winset.io/privacy">Privacy Policy</a><a href="https://winset.io/terms">Terms &amp; Conditions</a><a href="mailto:info@winset.io">info@winset.io</a><a href="https://instagram.com/winset.io">Instagram</a></p>
+    <p style="margin-top:14px">© 2026 Winset. All rights reserved.</p>
+  </div>
+</footer>
+
+<div class="sticky"><a class="btn btn-gold" href="#book">Book a 20 minute call</a></div>
+
+<script>
+(function(){
+  var els=document.querySelectorAll('.reveal');
+  if(!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in')});return}
+  var io=new IntersectionObserver(function(en){en.forEach(function(x){if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}})},{threshold:.12,rootMargin:'0px 0px -40px 0px'});
+  els.forEach(function(e){io.observe(e)});
+})();
+</script>
+</body>
+</html>
