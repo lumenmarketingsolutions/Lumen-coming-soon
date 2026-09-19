@@ -1338,6 +1338,10 @@ def qualify_submit():
 def winset_mockup():
     return render_template("winset_mockup.html")
 
+@app.route("/winset-mockup-ar")
+def winset_mockup_ar():
+    return render_template("winset_mockup_ar.html")
+
 # ── /lumenlb — MK7-style landing page on Lumen branding, used to test the WhatsApp
 #    nurture agent (+1 623 512 6504). Leads notify Kendall only. ──
 @app.route("/lumenlb")
