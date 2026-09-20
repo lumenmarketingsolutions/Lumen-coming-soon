@@ -17,8 +17,9 @@ primed_bp = Blueprint("primed_team", __name__)
 
 # ---------------------------------------------------------------- config
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.environ.get("PRIMED_TEAM_DB", os.path.join(BASE_DIR, "primed_team.db"))
-CREATIVE_DIR = os.path.join(BASE_DIR, "static", "primed_creatives")
+DATA_DIR = "/data" if os.path.isdir("/data") else BASE_DIR   # Railway persistent volume; survives deploys
+DB_PATH = os.environ.get("PRIMED_TEAM_DB", os.path.join(DATA_DIR, "primed_team.db"))
+CREATIVE_DIR = os.path.join(DATA_DIR, "primed_creatives")
 FONT_DIR = os.path.join(BASE_DIR, "static", "fonts", "primed")
 os.makedirs(CREATIVE_DIR, exist_ok=True)
 
@@ -579,11 +580,11 @@ def run_meeting(trigger="scheduled"):
                     ad_id = create_paused_ad(png, f"PL-TEAM | {code} | {v.get('name','')}", v.get("primary_text", ""), v.get("headline", ""), writable[0], str(R["form_id"]))
                     status = "paused_in_meta"
                     with db() as c:
-                        c.execute("INSERT OR REPLACE INTO ads_registry VALUES(?,?,?,?,?,?,?,?)", (ad_id, f"PL-TEAM | {code} | {v.get('name','')}", "BACKUP", writable[0], json.dumps(v.get("attributes", {})), f"/static/primed_creatives/{code}.png", "creative_director", now_iso()))
+                        c.execute("INSERT OR REPLACE INTO ads_registry VALUES(?,?,?,?,?,?,?,?)", (ad_id, f"PL-TEAM | {code} | {v.get('name','')}", "BACKUP", writable[0], json.dumps(v.get("attributes", {})), f"/primed/creative/{code}.png", "creative_director", now_iso()))
                 except Exception as e:
                     status = f"upload failed: {e}"; log(status, "error")
             with db() as c:
-                c.execute("INSERT INTO creatives(run_id,code,name,spec,png,ad_id,status,ts) VALUES(?,?,?,?,?,?,?,?)", (run_id, code, v.get("name"), json.dumps(v), f"/static/primed_creatives/{code}.png", ad_id, status, now_iso()))
+                c.execute("INSERT INTO creatives(run_id,code,name,spec,png,ad_id,status,ts) VALUES(?,?,?,?,?,?,?,?)", (run_id, code, v.get("name"), json.dumps(v), f"/primed/creative/{code}.png", ad_id, status, now_iso()))
         brief = ceo.get("brief_markdown", "")
         with db() as c:
             c.execute("UPDATE runs SET status='done', brief=?, transcript=? WHERE id=?", (brief, json.dumps(T), run_id))
@@ -625,9 +626,10 @@ def _loop():
         try:
             n = _beirut_now()
             if n.hour == MEETING_HOUR and last_day != n.date():
+                # only skip if a meeting started in the last 2 hours (another worker, or a manual run just now)
                 with db() as c:
-                    done_today = c.execute("SELECT 1 FROM runs WHERE ts >= ? AND status IN ('done','running')", ((datetime.datetime.utcnow() - datetime.timedelta(hours=20)).strftime("%Y-%m-%dT%H:%M:%SZ"),)).fetchone()
-                if not done_today:
+                    recent = c.execute("SELECT 1 FROM runs WHERE ts >= ? AND status IN ('done','running')", ((datetime.datetime.utcnow() - datetime.timedelta(hours=2)).strftime("%Y-%m-%dT%H:%M:%SZ"),)).fetchone()
+                if not recent:
                     threading.Thread(target=run_meeting, args=("scheduled",), daemon=True).start()
                 last_day = n.date()
         except Exception as e: print(f"[primed-team] loop error {e}")
@@ -741,6 +743,11 @@ def primed_home():
     if ce.get("needs_kendall"):
         body += "<h2>Needs your hand</h2><div class=card><ul style='margin-left:18px'>" + "".join(f"<li>{x}</li>" for x in ce["needs_kendall"]) + "</ul></div>"
     return _page("home", body)
+
+@primed_bp.route("/primed/creative/<path:fn>")
+def primed_creative_file(fn):
+    if not _auth(): return redirect("/primed/admin/login")
+    return send_from_directory(CREATIVE_DIR, fn)
 
 @primed_bp.route("/primed/admin/run", methods=["POST"])
 def primed_run():
