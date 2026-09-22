@@ -323,14 +323,18 @@ def adset_summary(meta):
     return out
 
 # ---------------------------------------------------------------- llm
-def llm(system, user, max_tokens=4000, json_mode=False):
+def llm(system, user, max_tokens=8000, json_mode=False):
     import anthropic
     client = anthropic.Anthropic(api_key=ANTHROPIC_KEY)
     if json_mode: system += "\n\nRespond with a single JSON object and nothing else. No markdown fences."
-    for i in range(3):
+    for i in range(4):
         try:
             m = client.messages.create(model=MODEL, max_tokens=max_tokens, system=system, messages=[{"role": "user", "content": user}])
             txt = "".join(b.text for b in m.content if getattr(b, "type", "") == "text")
+            if m.stop_reason == "max_tokens":
+                log(f"llm hit max_tokens ({max_tokens}), retrying with more room", "error")
+                max_tokens = min(int(max_tokens * 2), 32000); user += "\n\nBe more concise: fewer proposals, shorter reason and expected fields. The response must be complete valid JSON."
+                continue
             if json_mode:
                 txt = txt.strip()
                 txt = re.sub(r"^```(?:json)?|```$", "", txt, flags=re.M).strip()
@@ -374,7 +378,7 @@ ADS (spend, leads, ctr, freq for yesterday d1 / 7d / 14d / since launch; ghl = G
 ATTRIBUTE ROLLUP (creative attributes across ads): {json.dumps(attr)}
 
 Return JSON: {{"headline": one sentence, "winners": [{{"ad_id","name","why","confidence":"high|medium|low"}}], "losers": [...same...], "not_enough_data": [ad names], "attribute_learnings": [{{"attribute","finding","confidence"}}], "risks": [strings: fatigue, unreachable spikes, re-submitters, low revenue mix, learning phase], "questions_for_team": [max 3], "narrative": 6 to 10 short paragraphs for Kendall}}"""
-    return llm(sysm, user, 5000, json_mode=True)
+    return llm(sysm, user, 12000, json_mode=True)
 
 def agent_finance(analysis, adsets, scorecard, R):
     sysm = HOUSE_RULES + "\n\nYou are FINANCE, the media buyer. You turn the analyst's read into concrete budget and status proposals inside the rules. Every proposal names the exact object, the exact change, the reason and the expected effect. You never touch the MAIN account. You never move an ad set budget by more than max_budget_move_pct in a day and never push the backup total above daily_cap_backup. Ads below the minimums get 'hold', not 'kill'."
@@ -387,7 +391,7 @@ ADS IN WRITABLE AD SETS: {json.dumps(ads_w)}
 ANALYST: {json.dumps(analysis)}
 
 Return JSON: {{"summary": 2 sentences, "proposals": [{{"kind":"budget|pause_ad|activate_ad|pause_adset|hold|observation","target_type":"adset|ad|none","target_id":"","target_name":"","change":{{"daily_budget": number}} or {{"status":"PAUSED|ACTIVE"}} or {{}},"reason":"","expected":"","priority":1-3}}], "budget_plan": [{{"adset_id","name","current","proposed","why"}}], "main_account_observations": [strings, read only]}}"""
-    return llm(sysm, user, 4000, json_mode=True)
+    return llm(sysm, user, 12000, json_mode=True)
 
 def agent_creative(analysis, scorecard, R, registry):
     sysm = HOUSE_RULES + """
@@ -410,7 +414,7 @@ Ads already in market (do not duplicate): {json.dumps(existing)}
 
 Design up to {n} new variations for today. For each, give the exact on-image lines for the template.
 Return JSON: {{"rationale": 3 sentences, "variations": [{{"code":"V{datetime.date.today().strftime('%m%d')}-1","name":"short name","skin":"purple|black|green|navy|cream","hypothesis":"what one variable this tests and against which ad","attributes":{{"skin","anchor_number","filter","hook","language","cta"}},"lines":[{{"text":"","size":"small|medium|large|huge","weight":"regular|bold"}}],"button":"label or empty","primary_text":"","headline":""}}]}}"""
-    return llm(sysm, user, 5000, json_mode=True)
+    return llm(sysm, user, 12000, json_mode=True)
 
 def agent_ceo(analysis, finance, creative, R, adsets):
     sysm = HOUSE_RULES + "\n\nYou are the CEO, Kendall's proxy in the morning meeting. You have read the analyst, finance and the creative director. Challenge weak reasoning, resolve conflicts against the goal, and decide. You do not execute anything yourself: you route each finance proposal to 'queue' (Kendall approves), 'auto' (only if the rules' autopilot for that kind is on), or 'reject', and you approve or cut creative variations. Then you write Kendall's morning brief: what happened yesterday, what the team decided, what needs his hand, in under 350 words, plain and specific."
@@ -421,7 +425,7 @@ FINANCE: {json.dumps(finance)}
 CREATIVE: {json.dumps(creative)}
 
 Return JSON: {{"challenges": [{{"to":"analyst|finance|creative","point":""}}], "decisions": [{{"proposal_index": int, "route":"queue|auto|reject", "note":""}}], "creative_decisions": [{{"code":"", "approve": true|false, "note":""}}], "brief_markdown": "", "needs_kendall": [strings], "tomorrow_focus": [strings]}}"""
-    return llm(sysm, user, 4500, json_mode=True)
+    return llm(sysm, user, 12000, json_mode=True)
 
 # ---------------------------------------------------------------- renderer (PIL)
 SKINS = {
