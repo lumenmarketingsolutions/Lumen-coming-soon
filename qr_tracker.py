@@ -25,11 +25,15 @@ BOT_RE = re.compile(r"bot|crawler|spider|preview|facebookexternalhit|whatsapp|sl
                     r"google-safety|bingpreview|curl|wget|python-requests|headless|monitor|uptime", re.I)
 DEDUPE_MINUTES = 60          # same fingerprint inside this window counts once
 
-# Meta: scans feed a retargetable audience. The pixel on the destination site does the heavy
-# lifting (it sets _fbp and, in the Instagram and Facebook in-app browsers, matches the logged-in
-# user, which is most of a QR audience). This server event is the backstop for people who scan
-# and close the page before the pixel loads. IP and user agent are weak match keys on their own,
-# so treat it as additive, never as the primary source.
+# Server-side events to a Meta pixel are OFF by default, per Kendall 24.09.2026: he does not
+# want this tool writing into the Feels Good Club pixel. A code only fires if a pixel is chosen
+# explicitly on it. Nothing writes to Meta otherwise.
+#
+# Note what this does and does not change. Scanners still land on the destination with the UTMs
+# attached, so whatever pixel is already on that site captures them as it would any visitor.
+# That is the site's own pixel doing its normal job, not this tool, and it is what actually
+# builds a usable audience, because pixel audiences live on the business and are shareable to
+# any ad account with access, including both Feels Good Club accounts.
 META_PIXEL_DEFAULT = os.environ.get("QR_META_PIXEL_ID", "1828086791348138")   # "feelsgoodclub"
 META_TOKEN = os.environ.get("LUMEN_META_CAPI_TOKEN") or os.environ.get("META_TOKEN_LUMEN") or ""
 META_EVENT = "QRScan"
@@ -358,7 +362,9 @@ def qr_admin():
   </div>
 </div></div>"""
         body += f'<div class="card">{rows}</div>'
-    opts = "".join(f'<option value="{p}"{" selected" if p==META_PIXEL_DEFAULT else ""}>{n} ({p})</option>' for p, n in PIXELS)
+    # Default is off. Feeding a pixel is a deliberate per-code choice.
+    opts = '<option value="" selected>Off, do not send anything to Meta</option>' + \
+           "".join(f'<option value="{p}">Also send a server event to {n} ({p})</option>' for p, n in PIXELS)
     body += f"""<h2>New code</h2><div class="card"><form method="post" action="/qr/admin/create">
 <label>Label (what and where, for example Counter card, Beirut store)</label><input name="label" required>
 <label>Destination URL</label><input name="destination" placeholder="https://feelsgoodclub.com/collections/all" required>
@@ -367,22 +373,23 @@ def qr_admin():
 <div><label>utm_medium</label><input name="utm_medium" value="print"></div>
 <div><label>utm_campaign</label><input name="utm_campaign" placeholder="fgc_flyer_oct"></div>
 <div><label>utm_content</label><input name="utm_content" placeholder="counter_card"></div></div>
-<label>Feed scans to this Meta pixel</label><select name="pixel_id">{opts}<option value="">Do not feed Meta</option></select>
+<label>Server events to Meta</label><select name="pixel_id">{opts}</select>
 <label>Custom short code (optional, letters, numbers and dashes)</label><input name="code" placeholder="leave blank for a random one">
 <div style="margin-top:16px"><button class="btn b-gold">Create code</button></div>
 <p class="small" style="margin-top:12px">Use one code per physical placement with the same destination and a different utm_content, so you can see which placement actually works. The QR encodes only the short URL, the UTMs are added at redirect, which keeps the code sparse and easy to scan.</p>
 </form></div>
 
-<h2>Turning scans into an audience</h2><div class="card">
-<p class="small">Two things happen on every scan, and the first one matters most.</p>
-<p style="margin-top:10px"><b>1. The pixel already on the destination site.</b> The scanner lands on feelsgoodclub.com with the UTMs attached, the site pixel fires, and they become retargetable. In the Instagram and Facebook in-app browsers, which is where most QR scans open, Meta matches the logged-in user, so this is high quality. Build it once in Ads Manager, Audiences, Create audience, Website:</p>
-<div class="card" style="background:#0f1012;margin:10px 0"><span class="mono">Source: feelsgoodclub ({META_PIXEL_DEFAULT})<br>
+<h2>Data and audiences</h2><div class="card">
+<p><b>Server events to Meta are off.</b> This tool sends nothing to any pixel unless a code is set to, one code at a time, in the form above. Default is off.</p>
+<p style="margin-top:14px"><b>Export.</b> Every scan, with code, placement, time, country, IP, device and referrer.</p>
+<p style="margin-top:10px"><a class="btn b-gold" href="/qr/admin/export.csv">Export all scans as CSV</a></p>
+<p class="small" style="margin-top:14px">Worth being straight about what the CSV can do. It is for counting and analysis, which placement pulled, which day, which city. It <b>cannot</b> be uploaded to Meta as a custom audience. A customer list audience matches on email, phone or name, and a QR scan gives none of those, only an IP and a device string, which Meta does not accept for list matching. No tool can get around that.</p>
+<p style="margin-top:14px"><b>If you do want to retarget scanners</b>, it already happens without this tool touching anything. They land on the site with <span class="mono">utm_source=qr</span> attached, and the pixel that is already on the site records the visit like any other. Build it in Ads Manager, Audiences, Create audience, Website:</p>
+<div class="card" style="background:#0f1012;margin:10px 0"><span class="mono">Source: the pixel on the destination site<br>
 Include people who: URL &nbsp;contains&nbsp; utm_source=qr<br>
-Retention: 180 days &nbsp; Name: FGC | QR scanners | all placements</span></div>
-<p class="small">For one placement only, use <span class="mono">utm_content</span> contains your placement value instead.</p>
-<p style="margin-top:14px"><b>2. A server event as backstop.</b> Every real scan also fires a <span class="mono">{META_EVENT}</span> event straight to the pixel from this server, before the page has loaded, so people who scan and close still register. Match keys are IP and user agent only, so it is additive, not a replacement. Same audience builder, choose Event, <span class="mono">{META_EVENT}</span>.</p>
-<p style="margin-top:14px"><b>Which ad account?</b> Audiences built from a pixel belong to the business, not to one ad account, so one audience is usable from any account with access to the pixel. You do not need to rebuild it if you move accounts. Export below is for records and analysis, not for building an audience, because a scan carries no email or phone to match on.</p>
-<p style="margin-top:14px"><a class="btn b-ghost" href="/qr/admin/export.csv">Export all scans as CSV</a></p>
+Retention: 180 days</span></div>
+<p class="small">Use <span class="mono">utm_content</span> contains a placement value for one code only. This does not apply to a code pointing at Instagram, since that is not your site and your pixel never runs there.</p>
+<p style="margin-top:14px"><b>Two ad accounts.</b> A pixel audience belongs to the business, not to one ad account, so a single audience can be used from Feels Good Club and Feels Good Club V2 both, with no rebuilding. V2 currently has no pixel attached to it, which has to be fixed before it can use one.</p>
 </div>"""
     return page(body)
 
