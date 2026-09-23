@@ -223,12 +223,31 @@ label{font-size:12px;color:var(--muted);display:block;margin:12px 0 4px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
 .kpi{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}.kpi b{font-size:24px;display:block}.kpi span{font-size:12px;color:var(--muted)}
 .small{font-size:12px;color:var(--muted)}.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
-.spark{display:flex;align-items:flex-end;gap:2px;height:34px}.spark i{background:var(--gold);width:7px;border-radius:1px;display:block;min-height:2px}
-img.qr{width:64px;height:64px;border-radius:6px;background:#fff;padding:3px}
-@media(max-width:700px){td,th{padding:8px 6px 8px 0;font-size:12px}}
+.spark{display:flex;align-items:flex-end;gap:3px;height:34px}.spark i{background:var(--gold);flex:1;max-width:9px;border-radius:1px;display:block;min-height:2px}
+img.qr{width:78px;height:78px;border-radius:8px;background:#fff;padding:4px;flex:none}
+/* One code = one card. Stacks cleanly on a phone, no sideways scrolling. */
+.qrow{display:flex;gap:16px;align-items:flex-start;padding:18px 0;border-bottom:1px solid var(--line)}
+.qrow:last-child{border-bottom:0;padding-bottom:0}.qrow:first-child{padding-top:0}
+.qmeta{flex:1;min-width:0}.qmeta b{font-size:15px}
+.qmeta .mono,.qmeta .small{overflow-wrap:anywhere}
+.qnums{display:flex;gap:22px;margin:12px 0 10px}.qnums div b{font-size:21px;display:block;line-height:1.2}
+.qacts{display:flex;gap:8px;flex-wrap:wrap}
+.copy{cursor:pointer;background:#0f1012;border:1px solid var(--line);border-radius:7px;padding:7px 10px;
+ display:inline-flex;align-items:center;gap:7px;font-size:12px;max-width:100%}
+.copy span{font-family:ui-monospace,Menlo,monospace;overflow-wrap:anywhere;text-align:left}
+@media(max-width:640px){
+ .wrap{padding:0 16px}.qrow{gap:12px}img.qr{width:60px;height:60px}
+ /* Two up, so the numbers do not push the codes off the first screen. */
+ .grid{grid-template-columns:1fr 1fr;gap:10px}.kpi b{font-size:20px}
+ .qnums{gap:16px}.qnums div b{font-size:19px}
+ .btn{padding:10px 13px}.qacts .btn{flex:1;text-align:center;min-width:88px}
+ td,th{padding:8px 6px 8px 0;font-size:12px}
+ h2{margin:22px 0 10px}.card{padding:16px}}
 </style></head><body>
 <header><div class="wrap"><b>QR Tracker</b><span class="small">{{ host }}/q/&lt;code&gt;</span></div></header>
-<div class="wrap">{{ body|safe }}</div></body></html>"""
+<div class="wrap">{{ body|safe }}</div>
+<script>function cp(el,t){navigator.clipboard.writeText(t).then(function(){var s=el.innerHTML;el.innerHTML='<span>copied</span>&nbsp;&#10003;';setTimeout(function(){el.innerHTML=s},1200)})}</script>
+</body></html>"""
 
 
 def page(body):
@@ -263,16 +282,27 @@ def qr_admin():
             d = by_day.get(k["code"], {}); mx = max(list(d.values()) + [1])
             spark = "".join(f'<i style="height:{max(2,int(30*d.get(x,0)/mx))}px" title="{x}: {d.get(x,0)}"></i>' for x in last14)
             utms = " ".join(f"{a.replace('utm_','')}={k[a]}" for a in ("utm_source","utm_medium","utm_campaign","utm_content") if k.get(a))
-            rows += f"""<tr>
-<td><img class="qr" src="/qr/img/{k['code']}.png?size=6"></td>
-<td><b>{k['label'] or k['code']}</b><br><span class="mono">{QR_HOST}/q/{k['code']}</span><br><span class="small">{(k['destination'] or '')[:58]}</span><br><span class="small">{utms}</span></td>
-<td><div class="spark">{spark}</div><span class="small">last 14 days</span></td>
-<td class="r"><b style="font-size:17px">{tot.get(k['code'],0):,}</b><br><span class="small">scans</span></td>
-<td class="r">{uni.get(k['code'],0):,}<br><span class="small">unique</span></td>
-<td class="r"><a class="btn b-ghost" href="/qr/img/{k['code']}.png?size=20&download=1">PNG</a>
-<a class="btn b-ghost" href="/qr/img/{k['code']}.svg?download=1">SVG</a>
-<form method="post" action="/qr/admin/archive/{k['code']}" style="display:inline"><button class="btn b-ghost">Archive</button></form></td></tr>"""
-        body += f'<div class="card" style="overflow:auto"><table><tr><th></th><th>Code and destination</th><th>Activity</th><th class="r">Scans</th><th class="r">Unique</th><th class="r">Download</th></tr>{rows}</table></div>'
+            link = f"{QR_HOST}/q/{k['code']}"
+            rows += f"""<div class="qrow">
+<img class="qr" src="/qr/img/{k['code']}.png?size=6" alt="">
+<div class="qmeta">
+  <b>{k['label'] or k['code']}</b>
+  <div class="copy" onclick="cp(this,'{link}')" style="margin:8px 0"><span>{link}</span>&nbsp;📋</div>
+  <div class="small">goes to {(k['destination'] or '')[:70]}</div>
+  <div class="small">{utms}</div>
+  <div class="qnums">
+    <div><b>{tot.get(k['code'],0):,}</b><span class="small">scans</span></div>
+    <div><b>{uni.get(k['code'],0):,}</b><span class="small">unique</span></div>
+    <div style="flex:1;min-width:90px"><div class="spark">{spark}</div><span class="small">last 14 days</span></div>
+  </div>
+  <div class="qacts">
+    <a class="btn b-ghost" href="/qr/img/{k['code']}.png?size=20&amp;download=1">PNG</a>
+    <a class="btn b-ghost" href="/qr/img/{k['code']}.svg?download=1">SVG</a>
+    <a class="btn b-ghost" href="/qr/admin/scans/{k['code']}">Scans</a>
+    <form method="post" action="/qr/admin/archive/{k['code']}" style="display:inline;flex:1;min-width:88px"><button class="btn b-ghost" style="width:100%">Archive</button></form>
+  </div>
+</div></div>"""
+        body += f'<div class="card">{rows}</div>'
     opts = "".join(f'<option value="{p}"{" selected" if p==META_PIXEL_DEFAULT else ""}>{n} ({p})</option>' for p, n in PIXELS)
     body += f"""<h2>New code</h2><div class="card"><form method="post" action="/qr/admin/create">
 <label>Label (what and where, for example Counter card, Beirut store)</label><input name="label" required>
