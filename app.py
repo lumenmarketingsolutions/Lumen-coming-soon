@@ -120,7 +120,7 @@ from primed_team import primed_bp, start_scheduler as _primed_start
 app.register_blueprint(whatsapp_bp)
 app.register_blueprint(primed_bp)
 
-from qr_tracker import qr_bp, init_db as init_qr_db
+from qr_tracker import qr_bp, init_db as init_qr_db, QR_DOMAIN
 app.register_blueprint(qr_bp)
 init_qr_db()
 _primed_start()
@@ -1225,6 +1225,9 @@ def index():
     host = (request.host or "").lower()
     if host.startswith("supercarexp."):
         return redirect(url_for("sce_fd.landing"))
+    # The QR subdomain has one job, so its root is the dashboard rather than the Lumen home page.
+    if host.split(":")[0] == QR_DOMAIN:
+        return redirect("/qr/admin")
     return render_template("home.html")
 
 @app.route("/qualify")

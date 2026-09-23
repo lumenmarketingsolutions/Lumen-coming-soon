@@ -9,7 +9,7 @@ from a distance.
 Dashboard at /qr/admin (behind the master admin session, same as the rest of the Mainframe).
 """
 import os, re, json, sqlite3, hashlib, datetime, secrets, io, threading, urllib.parse
-from flask import Blueprint, request, session, redirect, render_template_string, send_file, abort
+from flask import Blueprint, request, redirect, render_template_string, send_file, abort
 
 qr_bp = Blueprint("qr_tracker", __name__)
 
@@ -18,6 +18,8 @@ DATA_DIR = "/data" if os.path.isdir("/data") else BASE_DIR
 DB_PATH = os.environ.get("QR_DB_PATH", os.path.join(DATA_DIR, "qr_tracker.db"))
 # Public host the QR encodes. Short host = sparse QR = scans from further away.
 QR_HOST = os.environ.get("QR_HOST", "https://go.feelsgoodclub.com")
+# Bare hostname, so app.py can send this subdomain's root straight to the dashboard.
+QR_DOMAIN = os.environ.get("QR_DOMAIN", urllib.parse.urlsplit(QR_HOST).netloc.lower())
 
 # Link-preview fetchers and scanners that hit a URL without a human ever seeing it.
 BOT_RE = re.compile(r"bot|crawler|spider|preview|facebookexternalhit|whatsapp|slackbot|telegram|"
@@ -203,62 +205,35 @@ def qr_image(code, fmt):
 
 
 # ---------------------------------------------------------------- dashboard
-# No password to type. Opening the key link once signs this device in for the app's 60 day
-# session, so the dashboard is one tap from the home screen. The key stays in place of a
-# password rather than removing the gate entirely: anyone who could reach the create form
-# could point go.feelsgoodclub.com/q/<anything> at any site they liked, and a redirect from a
-# real shop domain is exactly what a phishing link wants to be. That would land on the domain
-# reputation the Shopify store shares.
-QR_KEY = os.environ.get("QR_KEY", "")
+# The dashboard is open, no login: go.feelsgoodclub.com and you are in.
+#
+# What made a login worth having was not the numbers, it was the create form. A code turns
+# go.feelsgoodclub.com/q/<anything> into a redirect, and an open redirect on a real shop domain
+# is what a phishing link wants to be, which would land on the domain reputation the Shopify
+# store shares. So the destination allowlist below replaces the password: a code can only ever
+# point somewhere that belongs to the brand, which makes the page safe to leave open.
+#
+# The other reason was the export, which carried scanners' raw IP addresses. That is other
+# people's personal data rather than Kendall's, so the export no longer includes it at all.
+# IPs are still stored, because the hourly repeat-scan dedupe needs them, and never shown.
+ALLOWED_DEST = [
+    "feelsgoodclub.com", "instagram.com", "facebook.com", "tiktok.com",
+    "youtube.com", "youtu.be", "wa.me", "api.whatsapp.com",
+    "lumenmarketing.co", "lumenmarketing.ai", "mk7media.com",
+]
 
 
-def _auth():
-    return session.get("qr_auth") is True or session.get("wl_auth") is True
+def dest_allowed(url):
+    """True if the destination is a brand domain (or a subdomain of one)."""
+    try:
+        h = urllib.parse.urlsplit(url if re.match(r"^https?://", url) else "https://" + url).netloc
+    except Exception:
+        return False
+    h = h.split("@")[-1].split(":")[0].lower().strip().lstrip(".")
+    if h.startswith("www."):
+        h = h[4:]
+    return any(h == d or h.endswith("." + d) for d in ALLOWED_DEST)
 
-
-QR_PW = os.environ.get("QR_PW", "")
-
-
-@qr_bp.route("/qr/k/<key>")
-def qr_key_login(key):
-    if QR_KEY and secrets.compare_digest(key, QR_KEY):
-        session.permanent = True
-        session["qr_auth"] = True
-    return redirect("/qr/admin")
-
-
-LOGIN_PAGE = """<!doctype html><html><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Feels Good Club QR</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"><style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Inter,Helvetica,Arial,sans-serif;background:#0f1012;color:#f2f1ee;
- min-height:100%;display:flex;align-items:center;justify-content:center;padding:40px 18px}
-.box{width:100%;max-width:360px;text-align:center}
-h1{font-size:19px;margin-bottom:6px}p{font-size:13px;color:#9a9ea6;margin-bottom:22px}
-input{width:100%;background:#17181b;border:1px solid #26282d;border-radius:10px;color:#f2f1ee;
- padding:14px;font:inherit;font-size:16px;text-align:center;margin-bottom:12px}
-button{width:100%;padding:14px;border:0;border-radius:10px;background:#c9a227;color:#141108;
- font:inherit;font-weight:600;font-size:15px;cursor:pointer}
-.err{color:#e2705f;font-size:13px;margin-bottom:12px}
-</style></head><body><div class="box">
-<h1>Feels Good Club</h1><p>QR scan tracking</p>
-{% if error %}<div class="err">Wrong password.</div>{% endif %}
-<form method="post"><input name="password" type="password" placeholder="Password" autofocus
- autocomplete="current-password" inputmode="numeric"><button>Open dashboard</button></form>
-</div></body></html>"""
-
-
-@qr_bp.route("/qr/login", methods=["GET", "POST"])
-def qr_login():
-    err = False
-    if request.method == "POST":
-        pw = (request.form.get("password") or "").strip()
-        if pw and ((QR_PW and secrets.compare_digest(pw, QR_PW)) or pw == QR_KEY):
-            session.permanent = True
-            session["qr_auth"] = True
-            return redirect("/qr/admin")
-        err = True
-    return render_template_string(LOGIN_PAGE, error=err)
 
 # Pixels offered in the create form. The first is the default.
 PIXELS = [("1828086791348138", "feelsgoodclub"),
@@ -315,7 +290,6 @@ def page(body):
 
 @qr_bp.route("/qr/admin")
 def qr_admin():
-    if not _auth(): return redirect("/qr/login")
     init_db()
     with db() as c:
         codes = [dict(r) for r in c.execute("SELECT * FROM qr_codes WHERE archived=0 ORDER BY created DESC")]
@@ -367,7 +341,7 @@ def qr_admin():
            "".join(f'<option value="{p}">Also send a server event to {n} ({p})</option>' for p, n in PIXELS)
     body += f"""<h2>New code</h2><div class="card"><form method="post" action="/qr/admin/create">
 <label>Label (what and where, for example Counter card, Beirut store)</label><input name="label" required>
-<label>Destination URL</label><input name="destination" placeholder="https://feelsgoodclub.com/collections/all" required>
+<label>Destination URL <span style="color:#6f737a">(Feels Good Club, Instagram, TikTok, YouTube, WhatsApp or Lumen)</span></label><input name="destination" placeholder="https://feelsgoodclub.com/collections/all" required>
 <div class="grid" style="margin-top:6px">
 <div><label>utm_source</label><input name="utm_source" value="qr"></div>
 <div><label>utm_medium</label><input name="utm_medium" value="print"></div>
@@ -381,8 +355,9 @@ def qr_admin():
 
 <h2>Data and audiences</h2><div class="card">
 <p><b>Server events to Meta are off.</b> This tool sends nothing to any pixel unless a code is set to, one code at a time, in the form above. Default is off.</p>
-<p style="margin-top:14px"><b>Export.</b> Every scan, with code, placement, time, country, IP, device and referrer.</p>
+<p style="margin-top:14px"><b>Export.</b> Every scan, with code, placement, time, country, device and referrer.</p>
 <p style="margin-top:10px"><a class="btn b-gold" href="/qr/admin/export.csv">Export all scans as CSV</a></p>
+<p class="small" style="margin-top:10px">This page has no password, so the export leaves out scanners' IP addresses, which are their personal data rather than yours. Codes can also only point at brand destinations, which is what stops the short links being turned into something they should not be.</p>
 <p class="small" style="margin-top:14px">Worth being straight about what the CSV can do. It is for counting and analysis, which placement pulled, which day, which city. It <b>cannot</b> be uploaded to Meta as a custom audience. A customer list audience matches on email, phone or name, and a QR scan gives none of those, only an IP and a device string, which Meta does not accept for list matching. No tool can get around that.</p>
 <p style="margin-top:14px"><b>If you do want to retarget scanners</b>, it already happens without this tool touching anything. They land on the site with <span class="mono">utm_source=qr</span> attached, and the pixel that is already on the site records the visit like any other. Build it in Ads Manager, Audiences, Create audience, Website:</p>
 <div class="card" style="background:#0f1012;margin:10px 0"><span class="mono">Source: the pixel on the destination site<br>
@@ -396,22 +371,26 @@ Retention: 180 days</span></div>
 
 @qr_bp.route("/qr/admin/export.csv")
 def qr_export():
-    if not _auth(): return redirect("/qr/login")
     init_db()
     import csv
     out = io.StringIO()
     w = csv.writer(out)
+    # No IP column. The page is open to anyone with the link, and a scanner's IP is their
+    # personal data, not Kendall's to publish. Device is reduced to a phone/tablet/desktop
+    # bucket for the same reason. Neither is needed to answer which placement worked.
     w.writerow(["code", "label", "campaign", "utm_content", "destination", "scanned_utc",
-                "country", "ip", "user_agent", "referrer", "type", "meta_event"])
+                "country", "device", "referrer", "type"])
     with db() as c:
         rows = c.execute("""SELECT s.*, k.label, k.utm_campaign, k.utm_content, k.destination
                             FROM qr_scans s LEFT JOIN qr_codes k ON k.code=s.code ORDER BY s.id""")
         for r in rows:
+            ua = r["user_agent"] or ""
+            dev = ("tablet" if re.search(r"iPad|Tablet", ua, re.I) else
+                   "phone" if re.search(r"Mobi|iPhone|Android", ua, re.I) else "desktop")
             w.writerow([r["code"], r["label"] or "", r["utm_campaign"] or "", r["utm_content"] or "",
-                        r["destination"] or "", r["ts"], r["country"] or "", r["ip"] or "",
-                        r["user_agent"] or "", r["referrer"] or "",
-                        "bot" if r["is_bot"] else ("unique" if r["is_unique"] else "repeat"),
-                        r["capi_status"] or ""])
+                        r["destination"] or "", r["ts"], r["country"] or "", dev,
+                        r["referrer"] or "",
+                        "bot" if r["is_bot"] else ("unique" if r["is_unique"] else "repeat")])
     buf = io.BytesIO(out.getvalue().encode("utf-8"))
     return send_file(buf, mimetype="text/csv", as_attachment=True,
                      download_name=f"qr-scans-{datetime.date.today().isoformat()}.csv")
@@ -419,16 +398,27 @@ def qr_export():
 
 @qr_bp.route("/qr/admin/create", methods=["POST"])
 def qr_create():
-    if not _auth(): return redirect("/qr/login")
     init_db()
     f = request.form
+    dest = (f.get("destination") or "").strip()
+    # The allowlist is what lets this page stay open. Anything off-brand is refused, so a code
+    # can never be turned into a redirect to somewhere it should not go.
+    if not dest_allowed(dest):
+        return page(f"""<h2>Destination not allowed</h2><div class="card">
+<p>A code can only point at a Feels Good Club or Lumen destination. That keeps
+<span class="mono">{QR_HOST}/q/…</span> from being pointed anywhere it should not go, which is what
+lets this dashboard stay open with no password.</p>
+<p style="margin-top:12px" class="small">You tried: <span class="mono">{dest[:120]}</span></p>
+<p style="margin-top:12px" class="small">Allowed: {", ".join(ALLOWED_DEST)} and their subdomains.
+To add one, ask Jarvis.</p>
+<p style="margin-top:16px"><a class="btn b-gold" href="/qr/admin">Back</a></p></div>"""), 400
     code = re.sub(r"[^a-zA-Z0-9-]", "", (f.get("code") or "").strip())[:32] or secrets.token_urlsafe(4).replace("_", "").replace("-", "")[:6].lower()
     with db() as c:
         if c.execute("SELECT 1 FROM qr_codes WHERE code=?", (code,)).fetchone():
             code = code + secrets.token_hex(2)
         px = (f.get("pixel_id") or "").strip()
         c.execute("INSERT INTO qr_codes(code,label,destination,utm_source,utm_medium,utm_campaign,utm_content,utm_term,created,archived,pixel_id,capi) VALUES(?,?,?,?,?,?,?,?,?,0,?,?)",
-                  (code, f.get("label", "").strip(), f.get("destination", "").strip(),
+                  (code, f.get("label", "").strip(), dest,
                    f.get("utm_source", "").strip(), f.get("utm_medium", "").strip(),
                    f.get("utm_campaign", "").strip(), f.get("utm_content", "").strip(), "", now(),
                    px, 1 if px else 0))
@@ -437,14 +427,12 @@ def qr_create():
 
 @qr_bp.route("/qr/admin/archive/<code>", methods=["POST"])
 def qr_archive(code):
-    if not _auth(): return redirect("/qr/login")
     with db() as c: c.execute("UPDATE qr_codes SET archived=1 WHERE code=?", (code,))
     return redirect("/qr/admin")
 
 
 @qr_bp.route("/qr/admin/scans/<code>")
 def qr_scans(code):
-    if not _auth(): return redirect("/qr/login")
     init_db()
     with db() as c:
         rows = [dict(r) for r in c.execute("SELECT * FROM qr_scans WHERE code=? ORDER BY id DESC LIMIT 500", (code,))]
