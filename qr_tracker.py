@@ -199,7 +199,62 @@ def qr_image(code, fmt):
 
 
 # ---------------------------------------------------------------- dashboard
-def _auth(): return session.get("wl_auth") is True
+# No password to type. Opening the key link once signs this device in for the app's 60 day
+# session, so the dashboard is one tap from the home screen. The key stays in place of a
+# password rather than removing the gate entirely: anyone who could reach the create form
+# could point go.feelsgoodclub.com/q/<anything> at any site they liked, and a redirect from a
+# real shop domain is exactly what a phishing link wants to be. That would land on the domain
+# reputation the Shopify store shares.
+QR_KEY = os.environ.get("QR_KEY", "")
+
+
+def _auth():
+    return session.get("qr_auth") is True or session.get("wl_auth") is True
+
+
+QR_PW = os.environ.get("QR_PW", "")
+
+
+@qr_bp.route("/qr/k/<key>")
+def qr_key_login(key):
+    if QR_KEY and secrets.compare_digest(key, QR_KEY):
+        session.permanent = True
+        session["qr_auth"] = True
+    return redirect("/qr/admin")
+
+
+LOGIN_PAGE = """<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Feels Good Club QR</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet"><style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,Helvetica,Arial,sans-serif;background:#0f1012;color:#f2f1ee;
+ min-height:100%;display:flex;align-items:center;justify-content:center;padding:40px 18px}
+.box{width:100%;max-width:360px;text-align:center}
+h1{font-size:19px;margin-bottom:6px}p{font-size:13px;color:#9a9ea6;margin-bottom:22px}
+input{width:100%;background:#17181b;border:1px solid #26282d;border-radius:10px;color:#f2f1ee;
+ padding:14px;font:inherit;font-size:16px;text-align:center;margin-bottom:12px}
+button{width:100%;padding:14px;border:0;border-radius:10px;background:#c9a227;color:#141108;
+ font:inherit;font-weight:600;font-size:15px;cursor:pointer}
+.err{color:#e2705f;font-size:13px;margin-bottom:12px}
+</style></head><body><div class="box">
+<h1>Feels Good Club</h1><p>QR scan tracking</p>
+{% if error %}<div class="err">Wrong password.</div>{% endif %}
+<form method="post"><input name="password" type="password" placeholder="Password" autofocus
+ autocomplete="current-password" inputmode="numeric"><button>Open dashboard</button></form>
+</div></body></html>"""
+
+
+@qr_bp.route("/qr/login", methods=["GET", "POST"])
+def qr_login():
+    err = False
+    if request.method == "POST":
+        pw = (request.form.get("password") or "").strip()
+        if pw and ((QR_PW and secrets.compare_digest(pw, QR_PW)) or pw == QR_KEY):
+            session.permanent = True
+            session["qr_auth"] = True
+            return redirect("/qr/admin")
+        err = True
+    return render_template_string(LOGIN_PAGE, error=err)
 
 # Pixels offered in the create form. The first is the default.
 PIXELS = [("1828086791348138", "feelsgoodclub"),
@@ -256,7 +311,7 @@ def page(body):
 
 @qr_bp.route("/qr/admin")
 def qr_admin():
-    if not _auth(): return redirect("/admin")
+    if not _auth(): return redirect("/qr/login")
     init_db()
     with db() as c:
         codes = [dict(r) for r in c.execute("SELECT * FROM qr_codes WHERE archived=0 ORDER BY created DESC")]
@@ -334,7 +389,7 @@ Retention: 180 days &nbsp; Name: FGC | QR scanners | all placements</span></div>
 
 @qr_bp.route("/qr/admin/export.csv")
 def qr_export():
-    if not _auth(): return redirect("/admin")
+    if not _auth(): return redirect("/qr/login")
     init_db()
     import csv
     out = io.StringIO()
@@ -357,7 +412,7 @@ def qr_export():
 
 @qr_bp.route("/qr/admin/create", methods=["POST"])
 def qr_create():
-    if not _auth(): return redirect("/admin")
+    if not _auth(): return redirect("/qr/login")
     init_db()
     f = request.form
     code = re.sub(r"[^a-zA-Z0-9-]", "", (f.get("code") or "").strip())[:32] or secrets.token_urlsafe(4).replace("_", "").replace("-", "")[:6].lower()
@@ -375,14 +430,14 @@ def qr_create():
 
 @qr_bp.route("/qr/admin/archive/<code>", methods=["POST"])
 def qr_archive(code):
-    if not _auth(): return redirect("/admin")
+    if not _auth(): return redirect("/qr/login")
     with db() as c: c.execute("UPDATE qr_codes SET archived=1 WHERE code=?", (code,))
     return redirect("/qr/admin")
 
 
 @qr_bp.route("/qr/admin/scans/<code>")
 def qr_scans(code):
-    if not _auth(): return redirect("/admin")
+    if not _auth(): return redirect("/qr/login")
     init_db()
     with db() as c:
         rows = [dict(r) for r in c.execute("SELECT * FROM qr_scans WHERE code=? ORDER BY id DESC LIMIT 500", (code,))]
