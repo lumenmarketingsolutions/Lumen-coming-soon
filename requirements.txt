@@ -9,3 +9,4 @@ openpyxl
 anthropic
 dnspython
 pillow
+qrcode[pil]

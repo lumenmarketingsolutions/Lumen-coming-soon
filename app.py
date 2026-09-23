@@ -119,6 +119,10 @@ from whatsapp_outreach import whatsapp_bp
 from primed_team import primed_bp, start_scheduler as _primed_start
 app.register_blueprint(whatsapp_bp)
 app.register_blueprint(primed_bp)
+
+from qr_tracker import qr_bp, init_db as init_qr_db
+app.register_blueprint(qr_bp)
+init_qr_db()
 _primed_start()
 
 ADMIN_PIN = "112501"
