@@ -120,10 +120,15 @@ from primed_team import primed_bp, start_scheduler as _primed_start
 app.register_blueprint(whatsapp_bp)
 app.register_blueprint(primed_bp)
 
+# Weekly client meetings: recurring invite + confirm/reschedule email the day before (client_meetings.py)
+from client_meetings import meetings_bp, start_scheduler as _meetings_start
+app.register_blueprint(meetings_bp)
+
 from qr_tracker import qr_bp, init_db as init_qr_db, QR_DOMAIN
 app.register_blueprint(qr_bp)
 init_qr_db()
 _primed_start()
+_meetings_start()
 
 ADMIN_PIN = "112501"
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")

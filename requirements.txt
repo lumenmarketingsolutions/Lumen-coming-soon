@@ -10,3 +10,4 @@ anthropic
 dnspython
 pillow
 qrcode[pil]
+tzdata
