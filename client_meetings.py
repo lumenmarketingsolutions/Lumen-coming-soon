@@ -93,8 +93,11 @@ def _tz(series):
 
 
 def recipients(series):
+    """Guests who get the confirm email. Kendall is the organizer, so he is skipped unless the series
+    is flagged allow_owner=1 (used for testing on his own inbox)."""
+    allow_owner = _props(series).get("allow_owner") == "1"
     return [a["email"] for a in series.get("attendees", [])
-            if a.get("email") and a["email"].lower() != OWNER_EMAIL and not a.get("resource")]
+            if a.get("email") and not a.get("resource") and (allow_owner or a["email"].lower() != OWNER_EMAIL)]
 
 
 def _meet_link(ev):
