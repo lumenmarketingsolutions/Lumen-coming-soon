@@ -1592,6 +1592,26 @@ def harker_contact():
     return resp
 
 
+# ── The Contractor OS landing page (React build from ~/contractor-os-site, Vite base /contractor-os/) ──
+CONTRACTOR_OS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contractor_os_site")
+
+@app.route("/contractor-os")
+def contractor_os_root():
+    return redirect("/contractor-os/", code=301)
+
+@app.route("/contractor-os/")
+@app.route("/contractor-os/<path:filename>")
+def contractor_os(filename="index.html"):
+    from flask import send_from_directory
+    full = os.path.join(CONTRACTOR_OS_DIR, filename)
+    if not os.path.isfile(full):
+        filename = "index.html"
+    resp = make_response(send_from_directory(CONTRACTOR_OS_DIR, filename))
+    if filename == "index.html":
+        resp.headers["Cache-Control"] = "no-cache"
+    return resp
+
+
 @app.route("/about")
 def about():
     return render_template("about.html")
