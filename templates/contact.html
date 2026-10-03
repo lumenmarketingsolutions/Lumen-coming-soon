@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us - Lumen Marketing Solutions</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+{% include "_legal_style.html" %}
+<style>
+  form { margin-top: 8px; }
+  label.f { display:block; font-size: 14px; font-weight: 600; color: #e8e8f0; margin: 18px 0 8px; }
+  input[type=text], input[type=email], input[type=tel], select { width: 100%; height: 50px; padding: 0 14px; border-radius: 10px; border: 1px solid #262636; background: #111118; color: #fff; font: inherit; font-size: 15px; }
+  input:focus, select:focus { outline: 2px solid #7c4dff; border-color: transparent; }
+  .consent { display:flex; gap: 12px; align-items:flex-start; margin-top: 18px; padding: 14px; border: 1px solid #1f1f2c; border-radius: 10px; background: #0e0e15; }
+  .consent input { margin-top: 3px; width: 18px; height: 18px; flex: 0 0 18px; accent-color: #7c4dff; }
+  .consent span { font-size: 13px; line-height: 1.6; color: #a0a0b0; }
+  button { margin-top: 24px; width: 100%; height: 52px; border: 0; border-radius: 999px; background: #7c4dff; color: #fff; font: inherit; font-size: 16px; font-weight: 700; cursor: pointer; }
+  button:disabled { opacity: .5; }
+  .note { font-size: 12.5px; color: #6b6b80; margin-top: 14px; line-height: 1.6; }
+  .ok { display:none; padding: 28px; border: 1px solid #2c2450; background: #15112a; border-radius: 14px; }
+  .err { color: #ff8a8a; font-size: 14px; margin-top: 12px; display:none; }
+</style>
+</head>
+<body>
+<div class="container">
+<a class="brand" href="/"><img src="/static/logo-white.png" alt="Lumen Marketing Solutions"></a>
+<h1>Contact Us</h1>
+<p>Tell us a little about your business and we'll get back to you within one business day.</p>
+
+<form id="cf" novalidate>
+  <label class="f" for="name">Name</label>
+  <input type="text" id="name" name="name" autocomplete="name" required>
+
+  <label class="f" for="email">Email</label>
+  <input type="email" id="email" name="email" autocomplete="email" required>
+
+  <label class="f" for="business">What kind of business do you run?</label>
+  <input type="text" id="business" name="business" placeholder="e.g. landscaping and snow removal">
+
+  <label class="f" for="phone">Mobile number</label>
+  <input type="tel" id="phone" name="phone" autocomplete="tel" inputmode="tel">
+
+  <label class="consent">
+    <input type="checkbox" name="consent_service" id="consent_service">
+    <span>I agree to receive text messages from Lumen Marketing Solutions about my inquiry, including replies to my questions, call scheduling and reminders, and service notifications, at the phone number provided. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help. Consent is not a condition of purchase.</span>
+  </label>
+
+  <label class="consent">
+    <input type="checkbox" name="consent_marketing" id="consent_marketing">
+    <span>I agree to receive marketing text messages from Lumen Marketing Solutions, including offers and updates about our services, at the phone number provided. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help. Consent is not a condition of purchase.</span>
+  </label>
+
+  <p class="note">Checking a box is optional. See our <a href="/privacy">Privacy Policy</a> and <a href="/terms">Terms of Service</a>. No mobile information will be shared with third parties or affiliates for marketing or promotional purposes.</p>
+
+  <button type="submit" id="btn">Send</button>
+  <p class="err" id="err"></p>
+</form>
+
+<div class="ok" id="ok"><h2 style="margin-top:0;">Thanks, we got it.</h2><p style="margin-bottom:0;">We'll be in touch within one business day.</p></div>
+
+<footer><a href="/">Home</a><a href="/privacy">Privacy Policy</a><a href="/terms">Terms of Service</a></footer>
+</div>
+<script>
+const f=document.getElementById('cf'),err=document.getElementById('err'),btn=document.getElementById('btn');
+const SERVICE=document.querySelector('#consent_service+span').textContent.trim();
+const MARKETING=document.querySelector('#consent_marketing+span').textContent.trim();
+f.addEventListener('submit',async e=>{
+  e.preventDefault(); err.style.display='none';
+  const d=Object.fromEntries(new FormData(f));
+  const svc=!!d.consent_service, mkt=!!d.consent_marketing;
+  if(!d.name?.trim()||!/\S+@\S+\.\S+/.test(d.email||'')){err.textContent='Please add your name and a valid email.';err.style.display='block';return;}
+  if((svc||mkt)&&(d.phone||'').replace(/\D/g,'').length<10){err.textContent='Add your mobile number to receive text messages.';err.style.display='block';return;}
+  btn.disabled=true;
+  try{
+    const r=await fetch('/contact/submit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:d.name,email:d.email,business:d.business,phone:d.phone,consent_service:svc,consent_marketing:mkt,consent_service_text:svc?SERVICE:'',consent_marketing_text:mkt?MARKETING:''})});
+    if(!r.ok) throw 0;
+    f.style.display='none'; document.getElementById('ok').style.display='block';
+  }catch(_){err.textContent='Something went wrong. Please email kendall@lumenmarketing.co.';err.style.display='block';btn.disabled=false;}
+});
+</script>
+</body>
+</html>

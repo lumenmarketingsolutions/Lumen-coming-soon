@@ -4570,6 +4570,54 @@ def admin_funnels():
     return render_template("admin_funnels.html", funnels=funnels, stats=stats)
 
 
+@app.route("/terms")
+@app.route("/sms-terms")
+def terms_of_service():
+    return render_template("sms_terms.html")
+
+
+@app.route("/contact")
+def contact_page():
+    return render_template("contact.html")
+
+
+@app.route("/contact/submit", methods=["POST"])
+def contact_submit():
+    """Contact form with optional, unticked SMS consent boxes. Stores consent proof (text, time, IP, UA)."""
+    data = request.get_json(silent=True) or {}
+    g = lambda k, n=300: (str(data.get(k) or "")).strip()[:n]
+    name, email = g("name"), g("email")
+    if not name or "@" not in email:
+        return jsonify({"ok": False, "error": "missing"}), 400
+    row = dict(name=name, email=email, business=g("business"), phone=g("phone", 40),
+               consent_service=1 if data.get("consent_service") else 0,
+               consent_marketing=1 if data.get("consent_marketing") else 0,
+               consent_service_text=g("consent_service_text", 1000), consent_marketing_text=g("consent_marketing_text", 1000),
+               ip=(request.headers.get("X-Forwarded-For") or request.remote_addr or "").split(",")[0].strip(),
+               user_agent=(request.headers.get("User-Agent") or "")[:300],
+               created_at=datetime.datetime.utcnow().isoformat())
+    try:
+        con = sqlite3.connect(DB_PATH)
+        con.execute("""CREATE TABLE IF NOT EXISTS contact_submissions (id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT, email TEXT, business TEXT, phone TEXT, consent_service INTEGER, consent_marketing INTEGER,
+            consent_service_text TEXT, consent_marketing_text TEXT, ip TEXT, user_agent TEXT, created_at TEXT)""")
+        con.execute(f"INSERT INTO contact_submissions ({','.join(row)}) VALUES ({','.join('?'*len(row))})", tuple(row.values()))
+        con.commit(); con.close()
+    except Exception as e:
+        print("[contact] store failed:", e)
+    import html as _h
+    lines = "".join(f"<p style='margin:6px 0;color:#c8c8d8;'><b style='color:#fff;'>{k}:</b> {_h.escape(str(v))}</p>"
+                    for k, v in [("Name", name), ("Email", email), ("Business", row["business"] or "—"), ("Phone", row["phone"] or "—"),
+                                 ("SMS service consent", "Yes" if row["consent_service"] else "No"),
+                                 ("SMS marketing consent", "Yes" if row["consent_marketing"] else "No")])
+    try:
+        send_email(NOTIFY_EMAIL, f"New contact form: {name}",
+                   f"<div style='font-family:Inter,sans-serif;background:#0a0a0f;padding:28px;'><div style='max-width:560px;margin:0 auto;background:#111118;border-radius:14px;padding:28px;'><p style='font-size:11px;letter-spacing:3px;text-transform:uppercase;color:#9b7bff;'>lumenmarketing.co/contact</p>{lines}</div></div>")
+    except Exception as e:
+        print("[contact] email failed:", e)
+    return jsonify({"ok": True})
+
+
 @app.route("/privacy")
 def privacy_policy():
     return render_template("privacy.html")
