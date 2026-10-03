@@ -1595,6 +1595,46 @@ def harker_contact():
 # ── The Contractor OS landing page (React build from ~/contractor-os-site, Vite base /contractor-os/) ──
 CONTRACTOR_OS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contractor_os_site")
 
+@app.route("/contractor-os/apply", methods=["POST"])
+def contractor_os_apply():
+    """Route Audit application from the Contractor OS landing page: store it, email Kendall."""
+    data = request.get_json(silent=True) or {}
+    fields = ["name", "phone", "trucks", "revenue", "area"]
+    vals = {k: (str(data.get(k) or "")).strip()[:300] for k in fields}
+    if not vals["name"] or not vals["phone"]:
+        return jsonify({"ok": False, "error": "missing"}), 400
+    page = (str(data.get("page") or ""))[:500]
+    now = datetime.datetime.utcnow().isoformat()
+    try:
+        con = sqlite3.connect(DB_PATH)
+        con.execute("""CREATE TABLE IF NOT EXISTS contractor_os_applications (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, phone TEXT, trucks TEXT, revenue TEXT,
+            area TEXT, page TEXT, created_at TEXT)""")
+        con.execute("INSERT INTO contractor_os_applications (name, phone, trucks, revenue, area, page, created_at) VALUES (?,?,?,?,?,?,?)",
+                    (vals["name"], vals["phone"], vals["trucks"], vals["revenue"], vals["area"], page, now))
+        con.commit()
+        con.close()
+    except Exception as e:
+        print("[contractor-os] store failed:", e)
+    import html as _html
+    rows = "".join(
+        f'<tr><td style="padding:8px 0;color:#8b8ba0;width:140px;">{label}</td><td style="padding:8px 0;color:#fff;font-weight:600;">{_html.escape(vals[k]) or "—"}</td></tr>'
+        for label, k in [("Name / business", "name"), ("Mobile", "phone"), ("Trucks on snow", "trucks"), ("Yearly revenue", "revenue"), ("Service area", "area")]
+    )
+    body = ('<div style="font-family:Inter,-apple-system,sans-serif;background:#0a0a0f;padding:32px 20px;">'
+            '<div style="max-width:560px;margin:0 auto;background:#111118;border:1px solid #1a1a25;border-radius:14px;padding:32px;">'
+            '<div style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#9b7bff;margin-bottom:10px;">New Route Audit application</div>'
+            f'<h2 style="font-size:22px;margin:0 0 18px;color:#fff;">{_html.escape(vals["name"])}</h2>'
+            f'<table style="width:100%;border-collapse:collapse;font-size:14px;">{rows}</table>'
+            '<p style="margin:22px 0 0;color:#8b8ba0;font-size:13px;">Text them today to set the Route Audit. From lumenmarketing.co/contractor-os</p>'
+            '</div></div>')
+    try:
+        send_email(NOTIFY_EMAIL, f"Route Audit application: {vals['name']}", body)
+    except Exception as e:
+        print("[contractor-os] email failed:", e)
+    return jsonify({"ok": True})
+
+
 @app.route("/contractor-os")
 def contractor_os_root():
     return redirect("/contractor-os/", code=301)
