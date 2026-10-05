@@ -163,7 +163,7 @@ def pull_meta():
         out[label] = d
     # form leads since launch (both forms + rules form) for the phone join
     pt = mget(PAGE_ID, fields="access_token").get("access_token")
-    forms = {"1506542010608184", "1548218153233288"}
+    forms = {"1506542010608184", "1548218153233288", "1776608493378151", "1980616509306823"}   # Ezio's, Facebook 2, filtered, 3Q
     if rules().get("form_id"): forms.add(str(rules()["form_id"]))
     leads = []
     for f in forms:
@@ -186,14 +186,23 @@ GH = lambda: {"Authorization": f"Bearer {GHL_TOKEN}", "Version": "2021-07-28", "
 def norm_phone(p):
     d = re.sub(r"\D", "", p or ""); return d[-10:] if len(d) >= 10 else d
 
-def ghl_contact_by_phone(phone):
-    for i in range(4):
-        r = requests.post(f"{GHL}/contacts/search", headers=GH(), json={"locationId": GHL_LOC, "pageLimit": 3,
-                          "filters": [{"field": "phone", "operator": "contains", "value": phone}]}, timeout=60)
-        if r.status_code == 200:
-            cs = r.json().get("contacts", [])
-            return cs[0] if cs else None
-        time.sleep(3)
+GHL_ERROR = "error"   # search failed: unknown, never the same as "not in GHL"
+
+def ghl_contact_by_phone(phone, email=None):
+    """Contact dict, None when GHL definitely has no match on phone or email, GHL_ERROR when the API never answered."""
+    for body in ([{"field": "phone", "operator": "contains", "value": phone}],) + (([{"field": "email", "operator": "eq", "value": email.strip().lower()}],) if email else ()):
+        for i in range(4):
+            try:
+                r = requests.post(f"{GHL}/contacts/search", headers=GH(), json={"locationId": GHL_LOC, "pageLimit": 3, "filters": body}, timeout=60)
+            except requests.RequestException:
+                r = None
+            if r is not None and r.status_code == 200:
+                cs = r.json().get("contacts", [])
+                if cs: return cs[0]
+                break
+            time.sleep(3)
+        else:
+            return GHL_ERROR
     return None
 
 def ghl_opps(contact_id):
@@ -229,34 +238,44 @@ def score_contact(c, ops):
             "stages": stages, "qualified": qual, "worked": worked, "nq": nq, "lost": lost, "terminal": terminal}
 
 def join_ghl(form_leads):
-    """Phone join of every form lead since launch to GHL, cached. Re-checks non terminal contacts each run."""
+    """Phone (then email) join of every form lead since launch to GHL, cached.
+    Leads never checked or last seen missing go first; non terminal contacts are re-checked with what budget is left.
+    A lead the budget did not reach is "unchecked", never "missing" (05.10: 110 false missing came from that)."""
     rows = []
     with db() as c:
         cache = {r["phone"]: (r["contact_id"], json.loads(r["data"]) if r["data"] else None, r["ts"]) for r in c.execute("SELECT * FROM ghl_cache")}
-    calls = 0
     for L in form_leads:
         fd = {x["name"]: (x.get("values") or [None])[0] for x in L.get("field_data", [])}
         ph = norm_phone(fd.get("phone_number"))
         if len(ph) < 10: continue
         rev = fd.get("what_was_your_business’s_total_revenue_last_year?") or fd.get("what_was_your_business’s_total_revenue_last_year?")
-        row = {"lead_id": L["id"], "t": L["created_time"], "ad_id": L.get("ad_id"), "form": L.get("form_id"), "phone": ph, "rev": rev,
-               "amt": fd.get("how_much_funding_are_you_looking_for?"), "soon": fd.get("how_soon_do_you_need_funding?")}
+        rows.append({"lead_id": L["id"], "t": L["created_time"], "ad_id": L.get("ad_id"), "form": L.get("form_id"), "phone": ph, "rev": rev,
+                     "email": fd.get("email"), "amt": fd.get("how_much_funding_are_you_looking_for?"), "soon": fd.get("how_soon_do_you_need_funding?")})
+    first = {}
+    for r in rows:   # one lookup per phone, keyed to its earliest lead for the existing-contact test
+        if r["phone"] not in first or r["t"] < first[r["phone"]]["t"]: first[r["phone"]] = r
+    def priority(ph):
         cid, data, ts = cache.get(ph, (None, None, None))
-        need = cid is None or data is None or (not data.get("terminal") and calls < 400)
-        if need and calls < 450:
-            calls += 1
-            c_ = ghl_contact_by_phone(ph); time.sleep(0.15)
-            if c_:
-                created_before = (c_.get("dateAdded") or "") < L["created_time"][:10]
-                ops = ghl_opps(c_["id"]); calls += 1; time.sleep(0.15)
-                data = score_contact(c_, ops); data["existing_contact"] = created_before; cid = c_["id"]
-            else:
-                data = {"missing": True, "terminal": False}; cid = ""
-            with db() as c:
-                c.execute("INSERT OR REPLACE INTO ghl_cache VALUES(?,?,?,?)", (ph, cid, json.dumps(data), now_iso()))
-        row["ghl"] = data or {"missing": True}
-        rows.append(row)
-    log(f"ghl join: {len(rows)} leads, {calls} api calls")
+        if data is None or data.get("missing") or data.get("unchecked"): return 0
+        return 1 if not data.get("terminal") else 2
+    calls, errors, fresh = 0, 0, {}
+    for ph in sorted(first, key=lambda p: (priority(p), (cache.get(p, (None, None, ""))[2] or ""))):
+        if priority(ph) == 2 or calls >= 900: continue
+        calls += 1
+        c_ = ghl_contact_by_phone(ph, first[ph].get("email")); time.sleep(0.15)
+        if c_ == GHL_ERROR: errors += 1; continue
+        if c_:
+            ops = ghl_opps(c_["id"]); calls += 1; time.sleep(0.15)
+            data = score_contact(c_, ops); data["existing_contact"] = (c_.get("dateAdded") or "") < first[ph]["t"][:10]; cid = c_["id"]
+        else:
+            data = {"missing": True, "terminal": False}; cid = ""
+        fresh[ph] = data
+        with db() as c:
+            c.execute("INSERT OR REPLACE INTO ghl_cache VALUES(?,?,?,?)", (ph, cid, json.dumps(data), now_iso()))
+    for r in rows:
+        r["ghl"] = fresh.get(r["phone"]) or cache.get(r["phone"], (None, None, None))[1] or {"unchecked": True}
+    log(f"ghl join: {len(rows)} leads, {len(first)} phones, {calls} api calls, {errors} errors, "
+        f"missing {sum(1 for r in rows if r['ghl'].get('missing'))}, unchecked {sum(1 for r in rows if r['ghl'].get('unchecked'))}")
     return rows
 
 # ---------------------------------------------------------------- scorecard
@@ -280,7 +299,7 @@ def build_scorecard(meta, joined):
                           "freq": float(r.get("frequency") or 0), "reach": int(r.get("reach") or 0), "impr": int(r.get("impressions") or 0)}
                 x[lab]["cpl"] = round(x[lab]["spend"] / x[lab]["leads"], 2) if x[lab]["leads"] else None
     # GHL join per ad since launch
-    for ad in ads.values(): ad["ghl"] = {"form_leads": 0, "existing": 0, "new": 0, "qualified": 0, "worked": 0, "nq": 0, "missing": 0, "low_rev": 0, "lost": {}, "rev": {}}
+    for ad in ads.values(): ad["ghl"] = {"form_leads": 0, "existing": 0, "new": 0, "qualified": 0, "worked": 0, "nq": 0, "missing": 0, "unchecked": 0, "low_rev": 0, "lost": {}, "rev": {}}
     for r in joined:
         ad = ads.get(r["ad_id"])
         if not ad: continue
@@ -288,6 +307,7 @@ def build_scorecard(meta, joined):
         if r["rev"] in LOW_REV: g["low_rev"] += 1
         g["rev"][r["rev"] or "?"] = g["rev"].get(r["rev"] or "?", 0) + 1
         gh = r["ghl"]
+        if gh.get("unchecked"): g["unchecked"] += 1; continue
         if gh.get("missing"): g["missing"] += 1; continue
         if gh.get("existing_contact"): g["existing"] += 1; continue
         g["new"] += 1; g["qualified"] += int(bool(gh.get("qualified"))); g["worked"] += int(bool(gh.get("worked"))); g["nq"] += int(bool(gh.get("nq")))
