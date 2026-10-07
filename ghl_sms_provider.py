@@ -5,10 +5,10 @@ The native SignalHouse GHL app kept binding to an empty SignalHouse account, so 
 replaces it: a private GHL Marketplace app whose conversation provider (type SMS,
 "custom provider" unticked, so it replaces the default SMS channel) points here.
 
-  GHL user/workflow sends SMS  -> POST /ghl-sms/outbound?k=KEY  -> SignalHouse /message/sms
-  SignalHouse delivery events  -> POST /ghl-sms/signalhouse?k=KEY -> GHL message status
-  Lead replies by text         -> POST /ghl-sms/signalhouse?k=KEY -> GHL inbound message
-  App install (OAuth)          -> GET  /ghl-sms/oauth/callback   -> tokens stored in ghl_sms.db
+  GHL user/workflow sends SMS  -> POST /lumen-sms/outbound?k=KEY  -> SignalHouse /message/sms
+  SignalHouse delivery events  -> POST /lumen-sms/signalhouse?k=KEY -> GHL message status
+  Lead replies by text         -> POST /lumen-sms/signalhouse?k=KEY -> GHL inbound message
+  App install (OAuth)          -> GET  /lumen-sms/oauth/callback   -> tokens stored in ghl_sms.db
 
 Env vars:
   GHL_SMS_CLIENT_ID, GHL_SMS_CLIENT_SECRET   Marketplace app credentials
@@ -30,7 +30,7 @@ import requests
 from flask import Blueprint, abort, request
 
 log = logging.getLogger(__name__)
-ghl_sms_bp = Blueprint("ghl_sms", __name__, url_prefix="/ghl-sms")
+ghl_sms_bp = Blueprint("ghl_sms", __name__, url_prefix="/lumen-sms")
 
 GHL = "https://services.leadconnectorhq.com"
 SH_BASE = os.environ.get("SIGNALHOUSE_BASE_URL", "https://v2.signalhouse.io")
