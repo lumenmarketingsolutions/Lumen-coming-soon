@@ -143,6 +143,8 @@ def _tag_sms_consent(leadgen_id):
                 first = (fields.get("full_name", "").split() or ["there"])[0].title()
                 text = FIRST_TEXT.get(fields.get("weakest_part"), FIRST_TEXT_DEFAULT).format(first=first)
                 # Sent through GHL so it shows in the conversation; GHL routes it to our SignalHouse provider
+                if os.environ.get("SERVER_FIRST_TEXT", "on").lower() == "off":
+                    return  # GHL workflow (trigger: tag sms-consent) owns the first text now
                 r = _ghl("POST", "/conversations/messages", loc, json={"type": "SMS", "contactId": contact["id"], "message": text})
                 print(f"[Meta Leads] first text to {contact['id']}: HTTP {r.status_code}")
                 return

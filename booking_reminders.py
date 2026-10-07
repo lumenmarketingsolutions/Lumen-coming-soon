@@ -64,6 +64,8 @@ def _contact(contact_id):
 
 
 def _send(contact_id, text):
+    if os.environ.get("SERVER_BOOKING_TEXTS", "on").lower() == "off":
+        return True  # GHL workflow owns the booking texts now; keep Call Booked + owner alerts only
     # Lumen SMS app token: proven path for sending through our SignalHouse provider
     r = _ghl("POST", "/conversations/messages", LOCATION, json={"type": "SMS", "contactId": contact_id, "message": text})
     if r.status_code >= 300:
