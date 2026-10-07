@@ -125,6 +125,9 @@ from client_meetings import meetings_bp, start_scheduler as _meetings_start
 app.register_blueprint(meetings_bp)
 
 from qr_tracker import qr_bp, init_db as init_qr_db, QR_DOMAIN
+from ecom_dfy import ecom_dfy_bp, init_ecom_dfy_db
+app.register_blueprint(ecom_dfy_bp)
+init_ecom_dfy_db()
 app.register_blueprint(qr_bp)
 init_qr_db()
 

@@ -6,3 +6,4 @@ whatsapp.db
 !.env.example
 __pycache__/
 *.pyc
+ecom_dfy.db
