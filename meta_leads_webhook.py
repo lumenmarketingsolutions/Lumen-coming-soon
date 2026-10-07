@@ -136,7 +136,7 @@ def _tag_sms_consent(leadgen_id):
                      params={"locationId": loc, "number": phone})
             contact = (r.json() if r.ok else {}).get("contact")
             if contact:
-                _ghl("POST", f"/contacts/{contact['id']}/tags", loc, version="2021-07-28", json={"tags": ["sms-consent"]})
+                _ghl("POST", f"/contacts/{contact['id']}/tags", loc, version="2021-07-28", json={"tags": ["sms-consent", "contractor-os-sms"]})
                 _ghl("PUT", f"/contacts/{contact['id']}", loc, version="2021-07-28",
                      json={"customFields": [{"id": SMS_CONSENT_FIELD, "value": "Yes"}]})
                 print(f"[Meta Leads] tagged sms-consent on GHL contact {contact['id']}")
