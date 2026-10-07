@@ -72,28 +72,61 @@ def _digits11(phone):
     return d if len(d) == 11 else None
 
 
-def _save_tokens(location_id, data):
+def _save_tokens(key, data):
     with _db() as con:
         con.execute("INSERT OR REPLACE INTO tokens VALUES (?,?,?,?)",
-                    (location_id, data["access_token"], data["refresh_token"],
+                    (key, data["access_token"], data.get("refresh_token", ""),
                      time.time() + int(data.get("expires_in", 86399)) - 300))
 
 
-def _token(location_id):
+def _row(key):
     with _db() as con:
-        row = con.execute("SELECT * FROM tokens WHERE location_id=?", (location_id,)).fetchone()
-    if not row:
-        raise RuntimeError(f"app not installed on location {location_id}")
-    if time.time() < row["expires_at"]:
-        return row["access_token"]
+        return con.execute("SELECT * FROM tokens WHERE location_id=?", (key,)).fetchone()
+
+
+def _refresh(row, user_type):
     r = requests.post(f"{GHL}/oauth/token", data={
         "client_id": _env("GHL_SMS_CLIENT_ID"), "client_secret": _env("GHL_SMS_CLIENT_SECRET"),
-        "grant_type": "refresh_token", "refresh_token": row["refresh_token"], "user_type": "Location",
+        "grant_type": "refresh_token", "refresh_token": row["refresh_token"], "user_type": user_type,
     }, timeout=15).json()
     if "access_token" not in r:
-        raise RuntimeError(f"token refresh failed: {r}")
+        log.error("GHL token refresh failed (%s): %s", user_type, r.get("error_description") or r.get("message"))
+        return None
+    _save_tokens(row["location_id"], r)
+    return r["access_token"]
+
+
+def _company():
+    """Agency-level token from a bulk (agency) install, stored under key company|<companyId>."""
+    with _db() as con:
+        row = con.execute("SELECT * FROM tokens WHERE location_id LIKE 'company|%'").fetchone()
+    if not row:
+        return None, None
+    tok = row["access_token"] if time.time() < row["expires_at"] else _refresh(row, "Company")
+    return row["location_id"].split("|", 1)[1], tok
+
+
+def _mint_location(location_id):
+    company_id, ctok = _company()
+    if not ctok:
+        raise RuntimeError(f"app not installed on location {location_id}")
+    r = requests.post(f"{GHL}/oauth/locationToken", data={"companyId": company_id, "locationId": location_id},
+                      headers={"Authorization": f"Bearer {ctok}", "Version": "2021-07-28"}, timeout=15).json()
+    if "access_token" not in r:
+        raise RuntimeError(f"location token failed: {r.get('message') or r.get('error')}")
     _save_tokens(location_id, r)
     return r["access_token"]
+
+
+def _token(location_id):
+    row = _row(location_id)
+    if row and time.time() < row["expires_at"]:
+        return row["access_token"]
+    if row and row["refresh_token"]:
+        tok = _refresh(row, "Location")
+        if tok:
+            return tok
+    return _mint_location(location_id)
 
 
 def _ghl(method, path, location_id, version="2021-04-15", **kw):
@@ -136,12 +169,23 @@ def oauth_callback():
         "client_id": _env("GHL_SMS_CLIENT_ID"), "client_secret": _env("GHL_SMS_CLIENT_SECRET"),
         "grant_type": "authorization_code", "code": code, "user_type": "Location",
     }, timeout=15).json()
-    if "access_token" not in r or not r.get("locationId"):
-        log.error("GHL SMS install failed: %s", r)
-        return f"Install failed: {r.get('error_description') or r.get('message') or r}", 400
-    _save_tokens(r["locationId"], r)
-    log.info("GHL SMS provider installed on location %s", r["locationId"])
-    return f"Lumen SMS installed on location {r['locationId']}. You can close this tab."
+    if "access_token" not in r:
+        log.error("GHL SMS install failed: %s", r.get("error_description") or r.get("message"))
+        return f"Install failed: {r.get('error_description') or r.get('message') or 'no token returned'}", 400
+    if r.get("userType") == "Company" or not r.get("locationId"):
+        # Agency (bulk) install: keep the agency token, then mint a token for our sub-account
+        _save_tokens(f"company|{r['companyId']}", r)
+        loc = _env("GHL_SMS_LOCATION_ID", "6b4I6ILHBVcWQYlmPj3i")
+        try:
+            _mint_location(loc)
+        except Exception as exc:
+            log.error("GHL SMS location token failed: %s", exc)
+            return f"Installed at agency level, but could not get access to sub-account {loc}: {exc}", 400
+    else:
+        loc = r["locationId"]
+        _save_tokens(loc, r)
+    log.info("GHL SMS provider installed on location %s", loc)
+    return f"Lumen SMS installed on location {loc}. You can close this tab."
 
 
 # ── GHL -> SignalHouse ────────────────────────────────────────────────────────
