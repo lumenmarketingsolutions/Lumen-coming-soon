@@ -210,6 +210,7 @@ def outbound():
 
 
 # ── SignalHouse -> GHL ────────────────────────────────────────────────────────
+OPT_OUT_WORDS = {"STOP", "STOPALL", "UNSUBSCRIBE", "CANCEL", "END", "QUIT", "OPTOUT", "OPT OUT", "REVOKE"}
 STATUS_EVENTS = {"MESSAGE_DELIVERED": "delivered", "SMS_FAILED": "failed",
                  "MMS_FAILED": "failed", "MESSAGE_FAILED": "failed"}
 
@@ -305,6 +306,11 @@ def _handle_signalhouse(data, delivery_id):
             msg["conversationProviderId"] = _env("GHL_SMS_PROVIDER_ID")
         r = _ghl("POST", "/conversations/messages/inbound", loc, json=msg)
         ghl_id = (r.json() if r.ok else {}).get("messageId")
+        if body.strip().upper().rstrip(".!") in OPT_OUT_WORDS:
+            # Carrier opt-out keyword: mark the contact do-not-text in GHL so no workflow or bulk send texts them again
+            _ghl("PUT", f"/contacts/{contact_id}", loc, version="2021-07-28",
+                 json={"dndSettings": {"SMS": {"status": "active", "message": f"Replied {body.strip()}", "code": "STOP"}}})
+            log.info("Contact %s replied %s, SMS DND set", contact_id, body.strip())
     except Exception as exc:
         log.exception("Inbound SMS to GHL failed: %s", exc)
         return
