@@ -25,6 +25,9 @@ GRAPH_BASE    = "https://graph.facebook.com/v21.0"
 
 # Only process leads from the Lumen lead gen form — ignore all others
 LUMEN_FORM_ID = "1732856481398908"
+# Contractor OS forms (v3, v4): GHL's Facebook sync drops the SMS consent checkbox, so we tag consent ourselves
+CONTRACTOR_OS_FORMS = {"1744568389931261", "1112695987957803"}
+SMS_CONSENT_FIELD = "aT1i67kZpyKP6HHe5ONA"   # GHL contact field "SMS Consent" (MK7 sub-account)
 
 
 # ─── Webhook verification (Meta GET handshake) ───────────────────────────────
@@ -50,9 +53,14 @@ def receive():
                 val = change.get("value", {})
                 form_id = str(val.get("form_id") or "")
                 leadgen_id = val.get("leadgen_id")
+                print(f"[Meta Leads] leadgen {leadgen_id} form {form_id}")
                 if leadgen_id and form_id == LUMEN_FORM_ID:
                     threading.Thread(
                         target=_process_lead, args=(leadgen_id,), daemon=True
+                    ).start()
+                elif leadgen_id and form_id in CONTRACTOR_OS_FORMS:
+                    threading.Thread(
+                        target=_tag_sms_consent, args=(leadgen_id,), daemon=True
                     ).start()
     return jsonify({"ok": True})
 
@@ -88,6 +96,41 @@ def _process_lead(leadgen_id):
 
     except Exception as e:
         print(f"[Meta Leads] exception processing {leadgen_id}: {e}")
+
+
+def _tag_sms_consent(leadgen_id):
+    """If the lead ticked the SMS consent box, tag their GHL contact sms-consent (the text workflow's trigger)."""
+    import time
+    from ghl_sms_provider import _ghl
+    try:
+        lead = requests.get(f"{GRAPH_BASE}/{leadgen_id}", params={
+            "access_token": ACCESS_TOKEN, "fields": "field_data,custom_disclaimer_responses"}, timeout=8).json()
+        if "error" in lead:
+            print(f"[Meta Leads] Graph error for {leadgen_id}: {lead['error']}")
+            return
+        consented = any(c.get("checkbox_key") == "sms_consent" and str(c.get("is_checked")) == "1"
+                        for c in lead.get("custom_disclaimer_responses") or [])
+        fields = {f["name"]: (f["values"][0] if f.get("values") else "") for f in lead.get("field_data", [])}
+        phone = fields.get("phone_number", "")
+        print(f"[Meta Leads] Contractor OS lead {leadgen_id} sms_consent={consented}")
+        if not consented or not phone:
+            return
+        loc = os.environ.get("GHL_SMS_LOCATION_ID", "6b4I6ILHBVcWQYlmPj3i")
+        # GHL's Facebook sync creates the contact a few seconds after the lead, so wait for it
+        for _ in range(18):
+            time.sleep(10)
+            r = _ghl("GET", "/contacts/search/duplicate", loc, version="2021-07-28",
+                     params={"locationId": loc, "number": phone})
+            contact = (r.json() if r.ok else {}).get("contact")
+            if contact:
+                _ghl("POST", f"/contacts/{contact['id']}/tags", loc, version="2021-07-28", json={"tags": ["sms-consent"]})
+                _ghl("PUT", f"/contacts/{contact['id']}", loc, version="2021-07-28",
+                     json={"customFields": [{"id": SMS_CONSENT_FIELD, "value": "Yes"}]})
+                print(f"[Meta Leads] tagged sms-consent on GHL contact {contact['id']}")
+                return
+        print(f"[Meta Leads] no GHL contact for {leadgen_id} after 3 min, consent not tagged")
+    except Exception as e:
+        print(f"[Meta Leads] consent tagging failed for {leadgen_id}: {e}")
 
 
 # ─── Email notification ───────────────────────────────────────────────────────
