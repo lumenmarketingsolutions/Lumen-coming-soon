@@ -35,9 +35,9 @@ STAGE_CALL_BOOKED = "3bdf427f-408b-442f-8cd3-c2fddbfdef6b"
 OWNER_TZ = ZoneInfo("Asia/Beirut")
 DEFAULT_LEAD_TZ = "America/Phoenix"
 
-CONFIRM = "Hey {first}, you're booked with Kendall for {when}. I'll call you at this number. If anything comes up, just text me here."
+CONFIRM = "Hey {first}, you're booked with Kendall for {when}. The Google Meet link is in your calendar invite email. If anything comes up, just text me here."
 DAY_BEFORE = "Hey {first}, quick reminder about our call tomorrow at {time}. If you have a website or Google page, send it over and I'll look at it before we talk."
-HOUR_BEFORE = "Hey {first}, talking in an hour. I'll call you from this number."
+HOUR_BEFORE = "Hey {first}, talking in an hour. The Google Meet link is in your calendar invite email, see you there."
 
 
 def _h(version="2021-04-15"):
