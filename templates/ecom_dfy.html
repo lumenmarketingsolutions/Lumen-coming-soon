@@ -199,7 +199,7 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
 {% macro cta() -%}
 <a class="cta" href="#order" data-cta><strong>{{ c.cta }}</strong><span>{{ c.cta_sub }}</span></a>
 {%- endmacro %}
-{% macro split(a, b) -%}{{ a }} <span class="hl">{{ b }}</span>{%- endmacro %}
+{% macro split(a, b, c='') -%}{{ a }} <span class="hl">{{ b }}</span>{% if c %}{% if c[0] not in '?!.,' %} {% endif %}{{ c }}{% endif %}{%- endmacro %}
 </head>
 <body>
 
@@ -267,7 +267,7 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
 <!-- ═══ HOW IT WORKS ═══ -->
 <section class="works">
   <div class="wrap">
-    <h2 class="sec-title fade">{{ split(c.works_title_a, c.works_title_b) }}</h2>
+    <h2 class="sec-title fade">{{ split(c.works_title_a, c.works_title_b, c.get('works_title_c', '')) }}</h2>
     <div class="zig">
       {% for s in c.steps %}
       <div class="zrow fade">
@@ -283,7 +283,7 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
 <!-- ═══ BIO ═══ -->
 <section class="bio">
   <div class="wrap">
-    <h2 class="fade">{{ split(c.bio_title_a, c.bio_title_b) }}</h2>
+    <h2 class="fade">{{ split(c.bio_title_a, c.bio_title_b, c.get('bio_title_c', '')) }}</h2>
     <div class="bio-grid">
       <div class="bio-img fade">{{ img(c.bio_img, 'Founder photo') }}</div>
       <div class="bio-copy fade">
@@ -312,7 +312,7 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
 <!-- ═══ GALLERY ═══ -->
 <section class="gallery-sec">
   <div class="wrap">
-    <h2 class="sec-title fade">{{ split(c.gallery_title_a, c.gallery_title_b) }}</h2>
+    <h2 class="sec-title fade">{{ split(c.gallery_title_a, c.gallery_title_b, c.get('gallery_title_c', '')) }}</h2>
     <hr>
     <div class="gallery fade">{% for g in c.gallery %}{{ img(g, 'Store screenshot ' ~ loop.index) }}{% endfor %}</div>
   </div>
@@ -339,7 +339,7 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
 <!-- ═══ FAQ ═══ -->
 <section class="faq">
   <div class="wrap">
-    <h2 class="fade">{{ split(c.faq_title_a, c.faq_title_b) }}</h2>
+    <h2 class="fade">{{ split(c.faq_title_a, c.faq_title_b, c.get('faq_title_c', '')) }}</h2>
     <div class="acc">
       {% for f in c.faq %}
       <details class="fade"><summary>{{ f.q }}</summary><div class="ans">{% for p in f.a %}<p>{{ p }}</p>{% endfor %}</div></details>
@@ -351,7 +351,7 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
 <!-- ═══ FINAL CTA ═══ -->
 <section class="final">
   <div class="wrap">
-    <h2 class="fade">{{ split(c.final_title_a, c.final_title_b) }}</h2>
+    <h2 class="fade">{{ split(c.final_title_a, c.final_title_b, c.get('final_title_c', '')) }}</h2>
     {{ cta() }}
   </div>
 </section>
