@@ -134,6 +134,8 @@ app.register_blueprint(ghl_sms_bp)
 init_ghl_sms_db()
 _primed_start()
 start_contractor_poller()  # after init_ghl_sms_db(); Contractor OS leads: tag consent + first text
+from booking_reminders import start_booking_reminders
+start_booking_reminders()  # GHL calendar "Lumen | Meta Ads": Call Booked + confirmation/reminder texts
 _meetings_start()
 
 ADMIN_PIN = "112501"
