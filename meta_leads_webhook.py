@@ -26,7 +26,7 @@ GRAPH_BASE    = "https://graph.facebook.com/v21.0"
 # Only process leads from the Lumen lead gen form — ignore all others
 LUMEN_FORM_ID = "1732856481398908"
 # Contractor OS forms (v3, v4): GHL's Facebook sync drops the SMS consent checkbox, so we tag consent ourselves
-CONTRACTOR_OS_FORMS = {"1744568389931261", "1112695987957803"}
+CONTRACTOR_OS_FORMS = {"1744568389931261", "1112695987957803", "1611807910677456"}
 SMS_CONSENT_FIELD = "aT1i67kZpyKP6HHe5ONA"   # GHL contact field "SMS Consent" (MK7 sub-account)
 # First text, matched to the "weakest part of your business" answer on the form (Kendall approved 07.10)
 FIRST_TEXT = {
