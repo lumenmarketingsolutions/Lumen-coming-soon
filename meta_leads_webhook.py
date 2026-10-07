@@ -66,7 +66,7 @@ def receive():
                     threading.Thread(
                         target=_process_lead, args=(leadgen_id,), daemon=True
                     ).start()
-                elif leadgen_id and form_id in CONTRACTOR_OS_FORMS:
+                elif leadgen_id and form_id in CONTRACTOR_OS_FORMS and _claim_lead(leadgen_id):
                     threading.Thread(
                         target=_tag_sms_consent, args=(leadgen_id,), daemon=True
                     ).start()
@@ -149,6 +149,53 @@ def _tag_sms_consent(leadgen_id):
         print(f"[Meta Leads] no GHL contact for {leadgen_id} after 3 min, consent not tagged")
     except Exception as e:
         print(f"[Meta Leads] consent tagging failed for {leadgen_id}: {e}")
+
+
+# ─── Contractor OS poller ────────────────────────────────────────────────────
+# Meta's leadgen webhook for this page is delivered to another app's endpoint, so it never reaches us.
+# Poll both forms instead; each lead is handled once (dedupe table in ghl_sms.db, shared with the webhook path).
+
+def _claim_lead(leadgen_id):
+    """True the first time a lead id is seen; False if it was already handled."""
+    from ghl_sms_provider import _db
+    with _db() as con:
+        con.execute("CREATE TABLE IF NOT EXISTS processed_leads (leadgen_id TEXT PRIMARY KEY, created_at REAL)")
+        cur = con.execute("INSERT OR IGNORE INTO processed_leads VALUES (?, strftime('%s','now'))", (leadgen_id,))
+        return cur.rowcount == 1
+
+
+def _poll_once(seed=False):
+    for form_id in CONTRACTOR_OS_FORMS:
+        r = requests.get(f"{GRAPH_BASE}/{form_id}/leads",
+                         params={"access_token": ACCESS_TOKEN, "fields": "id", "limit": 25}, timeout=10).json()
+        if "error" in r:
+            print(f"[Meta Leads] poll error on form {form_id}: {r['error'].get('message')}")
+            continue
+        for lead in r.get("data", []):
+            if _claim_lead(lead["id"]) and not seed:
+                print(f"[Meta Leads] poller picked up {lead['id']} on form {form_id}")
+                threading.Thread(target=_tag_sms_consent, args=(lead["id"],), daemon=True).start()
+
+
+def start_contractor_poller():
+    import time
+    from ghl_sms_provider import _db
+    with _db() as con:
+        con.execute("CREATE TABLE IF NOT EXISTS processed_leads (leadgen_id TEXT PRIMARY KEY, created_at REAL)")
+        first_run = con.execute("SELECT COUNT(*) FROM processed_leads").fetchone()[0] == 0
+
+    def loop():
+        seed = first_run  # first ever run: mark existing leads as handled so nobody gets a late text
+        while True:
+            try:
+                _poll_once(seed=seed)
+                seed = False
+            except Exception as e:
+                print(f"[Meta Leads] poller exception: {e}")
+            time.sleep(30)
+
+    threading.Thread(target=loop, daemon=True).start()
+    print(f"[Meta Leads] Contractor OS poller started (seed existing leads: {first_run})")
 
 
 # ─── Email notification ───────────────────────────────────────────────────────

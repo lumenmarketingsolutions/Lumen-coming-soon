@@ -78,7 +78,7 @@ if os.environ.get("RAILWAY_PROJECT_ID") or os.environ.get("RAILWAY_ENVIRONMENT")
 
 from fathom_webhook import fathom_bp
 app.register_blueprint(fathom_bp)
-from meta_leads_webhook import meta_leads_bp
+from meta_leads_webhook import meta_leads_bp, start_contractor_poller
 app.register_blueprint(meta_leads_bp)
 
 from sce_mothersday import sce_md_bp, init_md_db
@@ -133,6 +133,7 @@ from ghl_sms_provider import ghl_sms_bp, init_ghl_sms_db
 app.register_blueprint(ghl_sms_bp)
 init_ghl_sms_db()
 _primed_start()
+start_contractor_poller()  # after init_ghl_sms_db(); Contractor OS leads: tag consent + first text
 _meetings_start()
 
 ADMIN_PIN = "112501"
