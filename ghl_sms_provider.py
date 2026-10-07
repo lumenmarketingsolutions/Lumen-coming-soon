@@ -138,6 +138,10 @@ def _ghl(method, path, location_id, version="2021-04-15", **kw):
     return r
 
 
+def _pretty(d11):
+    return f"({d11[1:4]}) {d11[4:7]}-{d11[7:]}" if d11 and len(d11) == 11 else d11
+
+
 def _set_status(location_id, ghl_message_id, status, error=None):
     body = {"status": status}
     if error:
@@ -158,6 +162,16 @@ def _signalhouse_send(to_number, body, media=None):
     if r.status_code == 201:
         return (data.get("insertedMessages") or [{}])[0].get("_id"), None
     return None, data.get("message") or data.get("error") or f"HTTP {r.status_code}"
+
+
+def notify_owner(text):
+    """Text Kendall's own cell from the 208 number (lead alerts, forwarded replies)."""
+    to = _env("OWNER_ALERT_NUMBER", "12085910132")
+    if not to:
+        return
+    _, err = _signalhouse_send(to, text[:600])
+    if err:
+        log.error("Owner alert failed: %s", err)
 
 
 # ── OAuth install ─────────────────────────────────────────────────────────────
@@ -216,15 +230,17 @@ STATUS_EVENTS = {"MESSAGE_DELIVERED": "delivered", "SMS_FAILED": "failed",
 
 
 def _contact_for(location_id, phone):
+    """Returns (contact_id, display name)."""
     e164 = "+" + phone
     r = _ghl("GET", "/contacts/search/duplicate", location_id, version="2021-07-28",
              params={"locationId": location_id, "number": e164})
     contact = (r.json() if r.ok else {}).get("contact")
     if contact:
-        return contact["id"]
+        name = contact.get("contactName") or " ".join(filter(None, [contact.get("firstName"), contact.get("lastName")]))
+        return contact["id"], (name or "").title()
     r = _ghl("POST", "/contacts/", location_id, version="2021-07-28",
              json={"locationId": location_id, "phone": e164, "source": "Inbound SMS"})
-    return (r.json().get("contact") or {}).get("id") if r.ok else None
+    return ((r.json().get("contact") or {}).get("id") if r.ok else None), ""
 
 
 def _conversation_for(location_id, contact_id):
@@ -296,7 +312,7 @@ def _handle_signalhouse(data, delivery_id):
 
     loc = _env("GHL_SMS_LOCATION_ID", "6b4I6ILHBVcWQYlmPj3i")
     try:
-        contact_id = _contact_for(loc, sender)
+        contact_id, name = _contact_for(loc, sender)
         conv_id = _conversation_for(loc, contact_id) if contact_id else None
         if not conv_id:
             log.error("Inbound SMS from %s: no GHL contact/conversation", sender)
@@ -318,3 +334,6 @@ def _handle_signalhouse(data, delivery_id):
         con.execute("INSERT OR REPLACE INTO messages VALUES (?,?,?,?,?,?,?,?)",
                     (key or f"in-{time.time()}", ghl_id, loc, "inbound", sender, body, "received", time.time()))
     log.info("Inbound SMS from %s posted to GHL conversation %s", sender, conv_id)
+    if sender != _digits11(_env("OWNER_ALERT_NUMBER", "12085910132")):
+        who = f"{name}, {_pretty(sender)}" if name else _pretty(sender)
+        notify_owner(f"Reply from {who}: {body}")

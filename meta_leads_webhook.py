@@ -113,8 +113,13 @@ def _tag_sms_consent(leadgen_id):
         fields = {f["name"]: (f["values"][0] if f.get("values") else "") for f in lead.get("field_data", [])}
         phone = fields.get("phone_number", "")
         print(f"[Meta Leads] Contractor OS lead {leadgen_id} sms_consent={consented}")
+        from ghl_sms_provider import notify_owner
+        who = f"{fields.get('full_name', '').title()} {phone}".strip()
+        detail = ", ".join(v for v in (fields.get("business_type"), fields.get("monthly_revenue"), fields.get("weakest_part")) if v)
         if not consented or not phone:
+            notify_owner(f"New Contractor OS lead, NO text consent, call now: {who} ({detail})")
             return
+        notify_owner(f"New Contractor OS lead, texting them now: {who} ({detail})")
         loc = os.environ.get("GHL_SMS_LOCATION_ID", "6b4I6ILHBVcWQYlmPj3i")
         # GHL's Facebook sync creates the contact a few seconds after the lead, so wait for it
         for _ in range(18):
