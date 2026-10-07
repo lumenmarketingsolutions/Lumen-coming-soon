@@ -28,6 +28,14 @@ LUMEN_FORM_ID = "1732856481398908"
 # Contractor OS forms (v3, v4): GHL's Facebook sync drops the SMS consent checkbox, so we tag consent ourselves
 CONTRACTOR_OS_FORMS = {"1744568389931261", "1112695987957803"}
 SMS_CONSENT_FIELD = "aT1i67kZpyKP6HHe5ONA"   # GHL contact field "SMS Consent" (MK7 sub-account)
+# First text, matched to the "weakest part of your business" answer on the form (Kendall approved 07.10)
+FIRST_TEXT = {
+    "not_enough_leads": "Hey {first}, it's Kendall from Lumen Marketing Solutions. You said getting enough leads is the hardest part right now, and that's exactly what I fix for contractors. Got 10 minutes today for a quick call?",
+    "slow_reply": "Hey {first}, it's Kendall from Lumen Marketing Solutions. You said leads go cold before you can get back to them. This text hit your phone within a minute of you hitting submit, and that's what every one of your leads would get. Got 10 minutes today for a quick call?",
+    "no_follow_up": "Hey {first}, it's Kendall from Lumen Marketing Solutions. You said there's no time to follow up on quotes. My system does the follow up for you until they book. Got 10 minutes today for a quick call?",
+    "slow_season": "Hey {first}, it's Kendall from Lumen Marketing Solutions. You said the slow months hurt the most. I fill your calendar with booked estimates before the slow season hits. Got 10 minutes today for a quick call?",
+}
+FIRST_TEXT_DEFAULT = "Hey {first}, it's Kendall from Lumen Marketing Solutions. Just saw your form come through. I help contractors get more leads and reply to every one of them in under a minute. Got 10 minutes today for a quick call?"
 
 
 # ─── Webhook verification (Meta GET handshake) ───────────────────────────────
@@ -115,7 +123,7 @@ def _tag_sms_consent(leadgen_id):
         print(f"[Meta Leads] Contractor OS lead {leadgen_id} sms_consent={consented}")
         from ghl_sms_provider import notify_owner
         who = f"{fields.get('full_name', '').title()} {phone}".strip()
-        detail = ", ".join(v for v in (fields.get("business_type"), fields.get("monthly_revenue"), fields.get("weakest_part")) if v)
+        detail = ", ".join(v.replace("_", " ") for v in (fields.get("business_type"), fields.get("monthly_revenue"), fields.get("weakest_part")) if v)
         if not consented or not phone:
             notify_owner(f"New Contractor OS lead, NO text consent, call now: {who} ({detail})")
             return
@@ -132,6 +140,11 @@ def _tag_sms_consent(leadgen_id):
                 _ghl("PUT", f"/contacts/{contact['id']}", loc, version="2021-07-28",
                      json={"customFields": [{"id": SMS_CONSENT_FIELD, "value": "Yes"}]})
                 print(f"[Meta Leads] tagged sms-consent on GHL contact {contact['id']}")
+                first = (fields.get("full_name", "").split() or ["there"])[0].title()
+                text = FIRST_TEXT.get(fields.get("weakest_part"), FIRST_TEXT_DEFAULT).format(first=first)
+                # Sent through GHL so it shows in the conversation; GHL routes it to our SignalHouse provider
+                r = _ghl("POST", "/conversations/messages", loc, json={"type": "SMS", "contactId": contact["id"], "message": text})
+                print(f"[Meta Leads] first text to {contact['id']}: HTTP {r.status_code}")
                 return
         print(f"[Meta Leads] no GHL contact for {leadgen_id} after 3 min, consent not tagged")
     except Exception as e:
