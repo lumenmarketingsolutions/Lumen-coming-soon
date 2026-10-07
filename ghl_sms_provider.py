@@ -24,6 +24,7 @@ import logging
 import os
 import re
 import sqlite3
+import threading
 import time
 
 import requests
@@ -234,35 +235,63 @@ def _conversation_for(location_id, contact_id):
     return (r.json().get("conversation") or {}).get("id") if r.ok else None
 
 
+def _signature_ok():
+    """SignalHouse signs group webhooks: hex HMAC-SHA256 over "<timestamp>.<raw body>" (timestamp in ms)."""
+    secret = _env("LUMEN_SIGNALHOUSE_WEBHOOK_SECRET")
+    if not secret:
+        return True
+    sig = request.headers.get("X-SignalHouse-Signature", "")
+    ts = request.headers.get("X-SignalHouse-Timestamp", "")
+    if not sig or not ts or abs(time.time() * 1000 - int(ts or 0)) > 5 * 60 * 1000:
+        return False
+    expected = hmac.new(secret.encode(), f"{ts}.".encode() + request.get_data(), "sha256").hexdigest()
+    return hmac.compare_digest(sig, expected)
+
+
 @ghl_sms_bp.route("/signalhouse", methods=["POST"])
 def signalhouse_event():
     _check_key()
+    if not _signature_ok():
+        abort(403)
     data = request.get_json(silent=True) or {}
+    delivery_id = request.headers.get("X-SignalHouse-Delivery-Id", "")
+    # SignalHouse gives a receiver 3 seconds, so acknowledge now and do the GHL work afterwards
+    threading.Thread(target=_handle_signalhouse, args=(data, delivery_id), daemon=True).start()
+    return "", 200
+
+
+def _handle_signalhouse(data, delivery_id):
     event = (data.get("event") or data.get("type") or data.get("eventType") or "").upper()
     ident = data.get("identifier") or data.get("_id", "")
 
     if event in STATUS_EVENTS:
         with _db() as con:
             row = con.execute("SELECT ghl_message_id, location_id FROM messages WHERE sh_id=?", (ident,)).fetchone()
-        if row and row["ghl_message_id"]:
+        if row and row["ghl_message_id"]:  # only our own outbound texts are in this table
             _set_status(row["location_id"], row["ghl_message_id"], STATUS_EVENTS[event],
                         data.get("errorCode") or data.get("error") if STATUS_EVENTS[event] == "failed" else None)
-        return "", 200
+        return
     if event and event != "MESSAGE_RECEIVED":
-        return "", 200
+        return
 
     # v2 envelope nests the message under metaData.Message (same parsing as avalon-crm)
     src = (data.get("metaData") or {}).get("Message")
     if not isinstance(src, dict):
         src = data
+    to_raw = src.get("recipientPhoneNumber") or src.get("to") or data.get("phoneNumber") or ""
+    if isinstance(to_raw, list):
+        to_raw = to_raw[0] if to_raw else ""
+    # The SignalHouse group is shared with Avalon: only texts sent to our 208 number belong in GHL
+    if _digits11(to_raw) != _digits11(_env("GHL_SMS_FROM_NUMBER")):
+        return
     sender = _digits11(src.get("senderPhoneNumber") or src.get("from"))
     body = (src.get("messageBody") or src.get("body") or src.get("text") or "").strip()
-    ident = ident or src.get("_id", "")
+    key = ident or src.get("_id", "") or delivery_id
     if not sender or not body:
-        return "", 200
+        return
     with _db() as con:
-        if ident and con.execute("SELECT 1 FROM messages WHERE sh_id=?", (ident,)).fetchone():
-            return "", 200  # SignalHouse retry, already posted
+        if key and con.execute("SELECT 1 FROM messages WHERE sh_id=?", (key,)).fetchone():
+            return  # SignalHouse retry, already posted
 
     loc = _env("GHL_SMS_LOCATION_ID", "6b4I6ILHBVcWQYlmPj3i")
     try:
@@ -270,7 +299,7 @@ def signalhouse_event():
         conv_id = _conversation_for(loc, contact_id) if contact_id else None
         if not conv_id:
             log.error("Inbound SMS from %s: no GHL contact/conversation", sender)
-            return "", 200
+            return
         msg = {"type": "SMS", "conversationId": conv_id, "message": body}
         if _env("GHL_SMS_PROVIDER_ID"):
             msg["conversationProviderId"] = _env("GHL_SMS_PROVIDER_ID")
@@ -278,8 +307,8 @@ def signalhouse_event():
         ghl_id = (r.json() if r.ok else {}).get("messageId")
     except Exception as exc:
         log.exception("Inbound SMS to GHL failed: %s", exc)
-        return "", 500  # let SignalHouse retry
+        return
     with _db() as con:
         con.execute("INSERT OR REPLACE INTO messages VALUES (?,?,?,?,?,?,?,?)",
-                    (ident or f"in-{time.time()}", ghl_id, loc, "inbound", sender, body, "received", time.time()))
-    return "", 200
+                    (key or f"in-{time.time()}", ghl_id, loc, "inbound", sender, body, "received", time.time()))
+    log.info("Inbound SMS from %s posted to GHL conversation %s", sender, conv_id)
