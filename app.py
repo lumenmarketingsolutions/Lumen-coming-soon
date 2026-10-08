@@ -128,6 +128,11 @@ from qr_tracker import qr_bp, init_db as init_qr_db, QR_DOMAIN
 from ecom_dfy import ecom_dfy_bp, init_ecom_dfy_db
 app.register_blueprint(ecom_dfy_bp)
 init_ecom_dfy_db()
+
+# /FGCagenttraining — Mary trains the FGC Syria WhatsApp agent (interview chat, saved forever)
+from fgc_training import fgc_training_bp, init_fgc_training_db
+app.register_blueprint(fgc_training_bp)
+init_fgc_training_db()
 app.register_blueprint(qr_bp)
 init_qr_db()
 
