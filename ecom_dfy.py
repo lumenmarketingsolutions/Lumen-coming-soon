@@ -200,13 +200,16 @@ def _ghl_track(name, email, phone, stage, note=None):
                          params={"location_id": GHL_LOC, "pipeline_id": GHL_PIPELINE, "contact_id": cid})
         opps = r.json().get("opportunities", []) if r.ok else []
         target = STAGE_ID[stage]
+        paid = STAGE_RANK[target] >= STAGE_RANK[STAGE_ID["paid"]]
+        # Paid cards get a green marker in the name so they stand out on the pipeline board
+        card_name = ("\U0001F7E2 PAID | " if paid else "") + f"{name or email} | DFY Store"
         if not opps:
             requests.post(f"{GHL}/opportunities/", headers=h, timeout=15, json={
                 "pipelineId": GHL_PIPELINE, "locationId": GHL_LOC, "pipelineStageId": target, "status": "open",
-                "contactId": cid, "name": f"{name or email} | DFY Store", "monetaryValue": 20})
+                "contactId": cid, "name": card_name, "monetaryValue": 20})
         elif STAGE_RANK[target] > STAGE_RANK.get(opps[0]["pipelineStageId"], -1):
             requests.put(f"{GHL}/opportunities/{opps[0]['id']}", headers=h, timeout=15,
-                         json={"pipelineId": GHL_PIPELINE, "pipelineStageId": target})
+                         json={"pipelineId": GHL_PIPELINE, "pipelineStageId": target, "name": card_name})
         if note:
             requests.post(f"{GHL}/contacts/{cid}/notes", headers=h, timeout=15, json={"body": note})
     except Exception as e:
