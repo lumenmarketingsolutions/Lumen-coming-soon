@@ -149,6 +149,30 @@ def _set_status(location_id, ghl_message_id, status, error=None):
     _ghl("PUT", f"/conversations/messages/{ghl_message_id}/status", location_id, json=body)
 
 
+_last_balance_alert = 0.0
+
+
+def _balance_alert(err):
+    """SignalHouse is prepaid: when the balance hits zero every text fails. Email Kendall, at most every 3 hours."""
+    global _last_balance_alert
+    if "insufficient" not in str(err).lower() or time.time() - _last_balance_alert < 3 * 3600:
+        return
+    _last_balance_alert = time.time()
+    key = _env("RESEND_API_KEY")
+    if not key:
+        return
+    try:
+        requests.post("https://api.resend.com/emails", timeout=15, headers={"Authorization": f"Bearer {key}"}, json={
+            "from": "Lumen SMS <notifications@lumenmarketing.co>",
+            "to": ["kendall@lumenmarketing.co", "kendallwdavis11@gmail.com"],
+            "subject": "URGENT: SignalHouse balance is empty, texts are failing",
+            "html": f"<p>SignalHouse rejected a text with: <b>{err}</b></p><p>Every text from the 208 number (Contractor OS leads, "
+                    "booking confirmations, your alerts) and Avalon's CRM texts fail until the balance is topped up. "
+                    "Add funds and turn on auto-recharge in SignalHouse.</p>"})
+    except Exception as exc:
+        log.error("balance alert email failed: %s", exc)
+
+
 def _signalhouse_send(to_number, body, media=None):
     payload = {"senderPhoneNumber": _digits11(_env("GHL_SMS_FROM_NUMBER")),
                "recipientPhoneNumber": [_digits11(to_number)], "messageBody": body or ""}
@@ -161,7 +185,9 @@ def _signalhouse_send(to_number, body, media=None):
     data = r.json() if r.content else {}
     if r.status_code == 201:
         return (data.get("insertedMessages") or [{}])[0].get("_id"), None
-    return None, data.get("message") or data.get("error") or f"HTTP {r.status_code}"
+    err = data.get("message") or data.get("error") or f"HTTP {r.status_code}"
+    _balance_alert(err)
+    return None, err
 
 
 def notify_owner(text):
