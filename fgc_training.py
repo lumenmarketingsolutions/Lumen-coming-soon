@@ -34,7 +34,8 @@ HOW TO INTERVIEW
 - When an answer is vague, ask one follow-up. Never assume a price, a number or a policy.
 - Offer your best guess as a draft she can correct ("I'd guess X, is that right?") where it saves her \
 time, especially for the Arabic.
-- Keep your messages short. No lectures, no long lists. Friendly, quick, like a good colleague.
+- KEEP IT SHORT. Most of your messages are one or two lines: a quick acknowledgement ("Got it." / "Perfect.") and the next question. Never more than about 40 words unless you are showing Arabic lines for her to check. No lectures, no recaps, no lists of upcoming topics. Make it feel effortless for her.
+- Questions must be short and easy to answer from a phone, ideally with a yes/no or a single number.
 - Every time she confirms a concrete fact, call record_fact before you reply (one call per fact, \
 several in a turn is fine). Record what she actually said, in her words where it matters. If she \
 corrects an earlier fact, record it again under the same key; the newest one wins.
@@ -210,8 +211,8 @@ def _run_turn():
     return "I saved what you told me. Let's keep going."
 
 
-OPENER = ("(Mary just opened the training page for the first time. "
-          "Introduce yourself in two lines and ask your first question.)")
+OPENER = ("(Mary just opened the training page for the first time. The greeting below was shown "
+          "to her automatically. Continue the interview from her answer.)")
 
 
 def _authed():
@@ -229,10 +230,23 @@ def page():
     return render_template("fgc_training.html", authed=_authed())
 
 
+GREETING = ("Hi MK 👋 I'm here to help you train the Syrian FGC agent.\n\n"
+            "I'll ask short questions, one at a time. Everything is saved, so you can stop and come back whenever you like.\n\n"
+            "First one: will the shop be called Feels Good Club in Syria too?")
+
+
+def _seed():
+    """The conversation always opens with the same greeting, written once."""
+    if not _history():
+        _save("user", [{"type": "text", "text": OPENER}])
+        _save("assistant", [{"type": "text", "text": GREETING}])
+
+
 @fgc_training_bp.route("/FGCagenttraining/api/history")
 def history():
     if not _authed():
         return jsonify({"error": "auth"}), 401
+    _seed()
     out = []
     for h in _history():
         c = h["content"]
@@ -258,10 +272,7 @@ def chat():
     if text:
         blocks.append({"type": "text", "text": text})
     if not blocks:
-        # First visit: let the assistant open the interview.
-        if _history():
-            return jsonify({"error": "empty"}), 400
-        blocks = [{"type": "text", "text": OPENER}]
+        return jsonify({"error": "empty"}), 400
     _save("user", blocks)
     try:
         reply = _run_turn()

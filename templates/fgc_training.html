@@ -130,7 +130,6 @@ document.getElementById('bar').addEventListener('submit', e => {
   if (r.status === 401) { location.reload(); return; }
   const j = await r.json();
   j.messages.forEach(m => add(m.role, m.text));
-  if (!j.messages.length) post(new FormData());   // first visit: the trainer opens
 })();
 </script>
 {% endif %}
