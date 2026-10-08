@@ -2,7 +2,8 @@
 #    Layout + mechanics match the original. CONTENT below is placeholder until the
 #    client sends their copy, images, Wistia ID and Stripe payment links.
 #    Payment is never collected here: step 2 hands off to the client's Stripe links.
-import os, sqlite3, datetime
+import os, sqlite3, datetime, threading, html as html_lib
+import requests
 from flask import Blueprint, render_template, request, jsonify, redirect
 
 ecom_dfy_bp = Blueprint("ecom_dfy", __name__)
@@ -137,11 +138,105 @@ CONTENT = {
 }
 
 
+# ── Tracking: email to Kendall + GHL pipeline "Ecom DFY" (MK7 sub-account) ──
+NOTIFY_TO = os.environ.get("ECOM_DFY_NOTIFY", "kendall@lumenmarketing.co")
+GHL = "https://services.leadconnectorhq.com"
+GHL_LOC = "6b4I6ILHBVcWQYlmPj3i"
+GHL_PIPELINE = "QJ1glf6i0cGDOxHchLLN"
+GHL_STAGES = [  # pipeline order; leads only ever move forward
+    ("lead", "6295df55-a1e6-4832-b291-f2c9c5e668eb"),        # Form Filled (not paid)
+    ("paid", "c6d4db86-eab6-4812-9742-d6620dcbf79e"),        # Paid
+    ("onboarding", "e00912d2-46a9-47c1-add2-7428e96c685b"),  # Onboarding Received
+    ("building", "5ea32b23-35f1-419c-a20f-8aacdf469002"),
+    ("delivered", "1a7bd67e-a039-4c49-9ccb-9054203bee43"),
+    ("claimed", "50a7005f-9f60-47d2-9cf9-d62c3c22b26c"),
+]
+STAGE_ID = dict(GHL_STAGES)
+STAGE_RANK = {sid: i for i, (_, sid) in enumerate(GHL_STAGES)}
+
+
+def _bg(fn, *args):
+    threading.Thread(target=fn, args=args, daemon=True).start()
+
+
+def _email(subject, title, rows):
+    key = os.environ.get("RESEND_API_KEY", "")
+    if not key:
+        return
+    body = "".join(f'<tr><td style="padding:7px 0;color:#777;width:150px;vertical-align:top">{html_lib.escape(k)}</td>'
+                   f'<td style="padding:7px 0;font-weight:600">{html_lib.escape(v or "(left blank, we pick)")}</td></tr>'
+                   for k, v in rows)
+    html = (f'<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:24px;color:#1a1a1a">'
+            f'<div style="font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:#999">Ecom DFY funnel</div>'
+            f'<h2 style="margin:6px 0 18px">{html_lib.escape(title)}</h2><table style="width:100%;font-size:14px">{body}</table></div>')
+    try:
+        requests.post("https://api.resend.com/emails", timeout=15, headers={"Authorization": f"Bearer {key}"},
+                      json={"from": "Ecom DFY <notifications@lumenmarketing.co>", "to": [NOTIFY_TO],
+                            "subject": subject, "html": html})
+    except Exception as e:
+        print(f"[ecom-dfy] email failed: {e}")
+
+
+def _ghl_track(name, email, phone, stage, note=None):
+    pit = os.environ.get("GHL_MK7_PIT", "")
+    if not pit or not email:
+        return
+    h = {"Authorization": f"Bearer {pit}", "Version": "2021-07-28", "Accept": "application/json"}
+    try:
+        c = {"locationId": GHL_LOC, "email": email, "tags": ["ecom-dfy"], "source": "Ecom DFY funnel"}
+        if name:
+            c["name"] = name
+        if phone:
+            c["phone"] = phone
+        r = requests.post(f"{GHL}/contacts/upsert", headers=h, json=c, timeout=15)
+        cid = (r.json().get("contact") or {}).get("id") if r.ok else None
+        if not cid:
+            print(f"[ecom-dfy] GHL upsert failed: {r.status_code} {r.text[:200]}")
+            return
+        r = requests.get(f"{GHL}/opportunities/search", headers=h, timeout=15,
+                         params={"location_id": GHL_LOC, "pipeline_id": GHL_PIPELINE, "contact_id": cid})
+        opps = r.json().get("opportunities", []) if r.ok else []
+        target = STAGE_ID[stage]
+        if not opps:
+            requests.post(f"{GHL}/opportunities/", headers=h, timeout=15, json={
+                "pipelineId": GHL_PIPELINE, "locationId": GHL_LOC, "pipelineStageId": target, "status": "open",
+                "contactId": cid, "name": f"{name or email} | DFY Store", "monetaryValue": 20})
+        elif STAGE_RANK[target] > STAGE_RANK.get(opps[0]["pipelineStageId"], -1):
+            requests.put(f"{GHL}/opportunities/{opps[0]['id']}", headers=h, timeout=15,
+                         json={"pipelineId": GHL_PIPELINE, "pipelineStageId": target})
+        if note:
+            requests.post(f"{GHL}/contacts/{cid}/notes", headers=h, timeout=15, json={"body": note})
+    except Exception as e:
+        print(f"[ecom-dfy] GHL sync failed: {e}")
+
+
+def _lead_tracking(name, email, phone):
+    _email(f"New DFY lead: {name}", "Someone filled out the form", [("Name", name), ("Email", email), ("Phone", phone),
+           ("Status", "Form filled, not paid yet")])
+    _ghl_track(name, email, phone, "lead")
+
+
+def _paid_tracking(name, email, phone):
+    _email(f"DFY sale: {name or email} paid $20", "New $20 order", [("Name", name), ("Email", email), ("Phone", phone)])
+    _ghl_track(name, email, phone, "paid")
+
+
+def _onboarding_tracking(a):
+    rows = [("Name", a["name"]), ("Email", a["email"]), ("Store name", a["store_name"]), ("Niche", a["niche"]),
+            ("Style", a["style"]), ("Colors", a["colors"]), ("Anything else", a["notes"] or "(none)")]
+    _email(f"DFY onboarding: {a['name'] or a['email']}", "Store preferences submitted", rows)
+    note = "DFY store preferences\n" + "\n".join(f"{k}: {v or '(we pick)'}" for k, v in rows[2:])
+    _ghl_track(a["name"], a["email"], a.get("phone", ""), "onboarding", note)
+
+
 def init_ecom_dfy_db():
     con = sqlite3.connect(DB_PATH)
     con.execute("""CREATE TABLE IF NOT EXISTS ecom_dfy_leads (
         id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, phone TEXT,
         bump INTEGER DEFAULT 0, source TEXT, page_url TEXT, created_at TEXT)""")
+    con.execute("""CREATE TABLE IF NOT EXISTS ecom_dfy_onboarding (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, store_name TEXT, niche TEXT,
+        style TEXT, colors TEXT, notes TEXT, created_at TEXT)""")
     con.commit()
     con.close()
 
@@ -176,6 +271,33 @@ def ecom_dfy_lead():
                  datetime.datetime.utcnow().isoformat()))
     con.commit()
     con.close()
+    _bg(_lead_tracking, name, email, phone)
+    return jsonify({"ok": True})
+
+
+@ecom_dfy_bp.route("/ecom-DFY/paid", methods=["POST"])
+def ecom_dfy_paid():
+    # Called once by the thank-you page (Stripe only sends buyers there after a successful payment)
+    d = request.get_json(silent=True) or {}
+    email = (d.get("email") or "").strip()
+    if "@" in email:
+        _bg(_paid_tracking, (d.get("name") or "").strip(), email, (d.get("phone") or "").strip())
+    return jsonify({"ok": True})
+
+
+@ecom_dfy_bp.route("/ecom-DFY/onboarding", methods=["POST"])
+def ecom_dfy_onboarding():
+    d = request.get_json(silent=True) or {}
+    a = {k: (d.get(k) or "").strip()[:500] for k in ("name", "email", "phone", "store_name", "niche", "style", "colors", "notes")}
+    if "@" not in a["email"]:
+        return jsonify({"ok": False, "error": "Please enter the email you used at checkout."}), 400
+    con = sqlite3.connect(DB_PATH)
+    con.execute("INSERT INTO ecom_dfy_onboarding (name,email,store_name,niche,style,colors,notes,created_at) VALUES (?,?,?,?,?,?,?,?)",
+                (a["name"], a["email"], a["store_name"], a["niche"], a["style"], a["colors"], a["notes"],
+                 datetime.datetime.utcnow().isoformat()))
+    con.commit()
+    con.close()
+    _bg(_onboarding_tracking, a)
     return jsonify({"ok": True})
 
 

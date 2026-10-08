@@ -25,6 +25,20 @@ li:last-child{margin-bottom:0}
 li::before{content:counter(s);width:2.25rem;height:2.25rem;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font:700 1rem/1 Montserrat,sans-serif}
 li b{display:block}
 .help{text-align:center;font-size:.95rem}
+.ob h2{margin-bottom:.35rem}
+.ob .hint{color:#6b7280;font-size:.92rem;margin:0 0 1.5rem}
+.field{margin-bottom:1.25rem}
+.field label{display:block;font-weight:600;font-size:.95rem;margin-bottom:.4rem}
+.field small{display:block;color:#6b7280;font-size:.82rem;margin-top:.3rem}
+.field input,.field select,.field textarea{width:100%;font:inherit;font-size:1rem;padding:.75rem .85rem;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.field textarea{min-height:90px;resize:vertical}
+.row2{display:grid;gap:0 1rem}
+@media(min-width:560px){.row2{grid-template-columns:1fr 1fr}}
+.btn{display:block;width:100%;border:0;border-radius:8px;padding:1rem;font:700 1.05rem/1.2 Montserrat,sans-serif;color:#1a1a1a;background:linear-gradient(to right,#ffb347,#ffcc33 51%,#ffb347);cursor:pointer}
+.btn:disabled{opacity:.6}
+.err{color:#d32f2f;font-size:.9rem;min-height:1.2em;margin:.6rem 0 0}
+.done{text-align:center;padding:1rem 0}
+.done b{display:block;font:800 1.25rem/1.3 Montserrat,sans-serif;margin-bottom:.4rem}
 .help a{color:var(--blue)}
 </style>
 </head>
@@ -33,6 +47,36 @@ li b{display:block}
   <div class="check" aria-hidden="true">&#10003;</div>
   <h1>You're In! Your <span>Digital Franchise</span> Is Being Built</h1>
   <p class="lead">Thank you for your order. My team is building your store right now, and you'll receive it in less than 24 hours.</p>
+
+
+
+  <div class="card ob" id="ob">
+    <h2>Tell Us About Your Dream Store</h2>
+    <p class="hint">Every question is optional. Leave anything blank and our team will pick for you.</p>
+    <form id="obf" novalidate>
+      <div class="row2">
+        <div class="field"><label for="ob-name">Your name</label><input id="ob-name" name="name" autocomplete="name"></div>
+        <div class="field"><label for="ob-email">Email you used at checkout</label><input id="ob-email" name="email" type="email" autocomplete="email" required></div>
+      </div>
+      <div class="field"><label for="ob-store">1. Do you have a store name in mind?</label><input id="ob-store" name="store_name" placeholder="Leave blank and we'll create one for you"></div>
+      <div class="field"><label for="ob-niche">2. What would you like to sell?</label>
+        <select id="ob-niche" name="niche">
+          <option value="">Pick for me</option><option>Home &amp; Kitchen</option><option>Beauty &amp; Skincare</option>
+          <option>Health &amp; Fitness</option><option>Pets</option><option>Fashion &amp; Accessories</option>
+          <option>Baby &amp; Kids</option><option>Tech &amp; Gadgets</option><option>Outdoor &amp; Travel</option>
+          <option>Something else (tell us below)</option>
+        </select></div>
+      <div class="field"><label for="ob-style">3. What look and feel do you want?</label>
+        <select id="ob-style" name="style">
+          <option value="">Pick for me</option><option>Clean &amp; Minimal</option><option>Bold &amp; Bright</option>
+          <option>Luxury &amp; Premium</option><option>Natural &amp; Earthy</option><option>Fun &amp; Playful</option>
+        </select></div>
+      <div class="field"><label for="ob-colors">4. Any colors you love?</label><input id="ob-colors" name="colors" placeholder="For example: black and gold, or soft pastels"></div>
+      <div class="field"><label for="ob-notes">Anything else we should know?</label><textarea id="ob-notes" name="notes" placeholder="Optional"></textarea></div>
+      <button class="btn" type="submit">Send My Store Preferences</button>
+      <p class="err" data-err></p>
+    </form>
+  </div>
 
   <div class="card">
     <h2>What Happens Next</h2>
@@ -45,5 +89,26 @@ li b{display:block}
 
   <p class="help">Questions about your order? Contact us at <a href="mailto:dfy@ecommercescalingsecrets.com">dfy@ecommercescalingsecrets.com</a> or <a href="tel:+17864645483">+1 (786) 464-5483</a>.</p>
 </main>
+
+<script>
+(function(){
+  var lead=null; try{ lead=JSON.parse(localStorage.getItem('ecomdfy_lead')||'null'); }catch(e){}
+  var f=document.getElementById('obf');
+  if(lead){ f.name.value=lead.name||''; f.email.value=lead.email||''; }
+  function post(u,d){ return fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){return r.json();}); }
+  try{ if(lead && lead.email && !sessionStorage.getItem('ecomdfy_paid')){ sessionStorage.setItem('ecomdfy_paid','1'); post('/ecom-DFY/paid',lead); } }catch(e){}
+  f.addEventListener('submit',function(e){
+    e.preventDefault();
+    var err=f.querySelector('[data-err]'), btn=f.querySelector('button');
+    var d={name:f.name.value,email:f.email.value,phone:(lead&&lead.phone)||'',store_name:f.store_name.value,niche:f.niche.value,style:f.style.value,colors:f.colors.value,notes:f.notes.value};
+    if(d.email.indexOf('@')<1){ err.textContent='Please enter the email you used at checkout.'; return; }
+    btn.disabled=true; err.textContent='';
+    post('/ecom-DFY/onboarding',d).then(function(r){
+      if(!r.ok){ btn.disabled=false; err.textContent=r.error||'Something went wrong. Please try again.'; return; }
+      document.getElementById('ob').innerHTML='<div class="done"><b>Got it, thank you!</b>Our team will build your store around your answers. Watch for your store link within 24 hours.</div>';
+    }).catch(function(){ btn.disabled=false; err.textContent='Connection problem. Please try again.'; });
+  });
+})();
+</script>
 </body>
 </html>
