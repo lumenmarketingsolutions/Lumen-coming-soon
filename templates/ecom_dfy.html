@@ -76,6 +76,8 @@ section{padding-block:clamp(2.5rem,7vw,5rem)}
 .btn-go[disabled]{opacity:.55;cursor:default}
 .note{text-align:center;color:var(--muted);font-size:.8rem;margin-top:var(--s2)}
 .badges{display:flex;justify-content:center;gap:var(--s4);margin-top:var(--s3)}
+.badges img{width:44px;height:44px;object-fit:contain}
+.model-img{max-width:420px;margin:var(--s4) auto 0}
 .badges .ph{width:44px;height:44px;padding:0;font-size:.6rem}
 .err{color:#d32f2f;font-size:.85rem;margin-top:var(--s2);text-align:center;min-height:1.2em}
 .summary{width:100%;border-collapse:collapse;font-size:.9rem;margin-bottom:var(--s4)}
@@ -134,7 +136,7 @@ section{padding-block:clamp(2.5rem,7vw,5rem)}
 .gallery-sec hr{width:min(190px,50%);margin:var(--s4) auto 0;border:0;border-top:1px solid var(--line)}
 .gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--s3);margin-top:var(--s5)}
 .gallery .ph{aspect-ratio:9/16}
-@media (min-width:768px){.gallery{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (min-width:768px){.gallery{grid-template-columns:repeat(4,minmax(0,1fr))}}
 
 /* ── STACK ── */
 .stack-sec{text-align:center}
@@ -241,7 +243,7 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
         <button class="btn-go" type="submit">{{ c.step1_btn }}</button>
         <p class="err" data-err></p>
         <p class="note">{{ c.privacy_note }}</p>
-        <div class="badges"><div class="ph">badge</div><div class="ph">badge</div><div class="ph">badge</div></div>
+        <div class="badges">{% for b in ("badge-1.png","badge-2.png","badge-3.png") %}<img src="/static/ecom-dfy/{{ b }}" alt="" width="44" height="44" loading="lazy">{% endfor %}</div>
       </form>
       <form class="form" id="step2" hidden novalidate>
         <button type="button" class="back" data-back>‹ Edit contact info</button>
@@ -302,6 +304,7 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
   <div class="wrap narrow">
     <h2 class="u fade">{{ c.model_title }}</h2>
     <h2 class="fade">{{ c.model_sub }}</h2>
+    {% if c.model_img %}<div class="model-img fade">{{ img(c.model_img, 'Model image') }}</div>{% endif %}
     <div class="copy fade">
       {% for p in c.model_body %}<p{% if loop.index0 in c.model_bold %} class="b"{% endif %}>{{ p }}</p>{% endfor %}
     </div>

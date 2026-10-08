@@ -13,10 +13,12 @@ DB_PATH = os.path.join("/data" if os.path.isdir("/data") else os.path.dirname(__
 # Stripe Payment Links from the client's account (set in Railway).
 STRIPE_FE = os.environ.get("ECOM_DFY_STRIPE_FE", "")        # $20 front end
 STRIPE_FE_BUMP = os.environ.get("ECOM_DFY_STRIPE_BUMP", "")  # $20 + $49 order bump
-WISTIA_ID = os.environ.get("ECOM_DFY_WISTIA_ID", "")
+WISTIA_ID = os.environ.get("ECOM_DFY_WISTIA_ID", "iz6rkfk6a3")  # client VSL (from their original page)
 
 # Every string/image the page shows. Swap these when the client's files arrive.
 # img values are paths under /static/ecom-dfy/ ; empty = labelled placeholder box.
+FAQ_ANSWERS = [['Just one. The only account you’ll need is with an app called Shopify. Shopify is where we build your store and how you can edit it, control your products, and see your sales. It’s very user friendly, and we’ll help you figure things out if you have any questions.'], ['Because your store is built on Shopify, you’ll have to pay a monthly subscription fee. But don’t worry, it’s only $1 per month for the first three months. That means you have 90 days to test everything out and decide if this is something you want to keep investing in. After the first 90 days, you’ll be charged for their paid plan, which starts at $39 per month.', 'You can cancel at any time.'], ['Your success depends on a lot of factors, like how much work you put in, how much time and money you invest, and even how lucky you are. But we’re giving you everything we can to help.', 'With your digital franchise, you get a near-exact replica of my business, products that are proven to sell, and a free masterclass to help you get your first sales.', 'Even if you’ve never owned a business or done marketing before, this is a perfect foundation to get started.'], ['There are two paths you can take: free and paid. If you want to advertise your store for free, you can promote your products on social media, blogs, or online marketplaces. If you want to try paid advertising, you can get started with just $10 per day. We’ll cover everything in the bonus First Sale Masterclass that you get when you invest in your digital franchise.', 'You can also check out my YouTube channel for tons of free content that’ll help you grow your new business.'], ['Yes! Your digital franchise uses a model that my team and I call “Branded Dropshipping.” With Branded Dropshipping, you can sell to people around the world no matter where you live. That means you can live in Latin America and sell to the U.S. Or you can live in the Philippines and sell to Canada. Or you can live in Nigeria and sell to the U.K. As long as our suppliers can ship there, you can sell there.', '(That also means you earn in dollars, pounds, or euros!)'], ['Shopify makes payment processing easy! You just need to connect your bank account to your storefront, and you’ll receive payouts for all of the money you make.'], ['You own everything. After we deliver your store, you have full control and we’ll never ask you for any additional fees or payments. You become a real business owner, with a real asset.'], ['I genuinely believe that I could grow my own business to $100,000,000 if I wanted to. But I don’t. Think about all of the stress that comes with owning something so massive. I just want to relax, spend time with my wife and sons, and enjoy my life.'], ['It’s true that US$20 barely covers the costs I have for my team to build the stores, for us to advertise them, and for the other business expenses we have. But I’m okay with that. This stuff changed my life and helped me achieve the American dream. And I want to give you the same kind of opportunity.'], ['If you already have an online store and you’re not getting enough sales, it’s usually better to start over again from scratch. Let us build a new storefront for you based on my proven designs, with proven products, and proven suppliers.'], ['In 2026, online sales are predicted to reach $3.88T. By 2030, that number could reach $5T. I could sell one million digital franchises, and there would still be enough opportunity for all of us to earn our fair share.']]
+
 CONTENT = {
     # Client copy (transcribed from their live page 08.10). Still placeholder: order bump,
     # step 2 buttons, exit pop-up, FAQ answers and all images (not visible on the source screenshot).
@@ -27,7 +29,7 @@ CONTENT = {
     "subhead": "Includes 20 Proven Products, A Professional Online Storefront, And",
     "subhead_link": "A Free Masterclass To Show You How To Get Your First Sale",
     "video_bar": "Hit Play On The Video",
-    "social_proof_img": "",
+    "social_proof_img": "social-proof.png",
     "form_title": "Enter Your Information Below To Claim Your Digital Franchise",
     "consent": "I consent to receiving email and SMS messages from AF Media LLC related to building and scaling my ecommerce business.",
     "step1_btn": "Go To Step #2",
@@ -37,27 +39,27 @@ CONTENT = {
     "bump_text": "[Order bump description]",
     "complete_btn": "Complete My Order",
     "secure_note": "Secure checkout powered by Stripe. Your card details never touch this page.",
-    "terms_url": "#", "privacy_url": "#",
+    "terms_url": "https://www.alexfedotoff.com/terms-and-conditions/", "privacy_url": "https://www.ecommercescalingsecrets.com/privacy-policy",
     "works_title_a": "How Your", "works_title_b": "Digital Franchise", "works_title_c": "Works",
     "steps": [
-        {"img": "", "title": "1. We Build Your Store", "body": [
+        {"img": "step-1.png", "title": "1. We Build Your Store", "body": [
             "You don\u2019t have to do any website design, product research, or tech setup. Instead, you get a near-exact copy of my successful Branded Dropshipping business.",
             "This includes the online storefront, proven products, and the back-end systems. Plus a bonus masterclass to show you how to get your first sales.",
             "No need to figure anything out yourself."]},
-        {"img": "", "title": "2. Your Suppliers Ship Directly To Your Customers", "body": [
+        {"img": "step-2.png", "title": "2. Your Suppliers Ship Directly To Your Customers", "body": [
             "When someone buys from your store, your suppliers handle fulfillment. That means they receive the order, package it, and ship it.",
             "You don\u2019t have to do a thing."]},
-        {"img": "", "title": "3. You Keep The Profits", "body": [
+        {"img": "step-3.png", "title": "3. You Keep The Profits", "body": [
             "You set your own prices. Your suppliers charge you wholesale costs. You keep the difference.",
             "So if you sell a product for US$30 and your supplier charges you US$10, you keep US$20 from that sale!"]},
-        {"img": "", "title": "4. Grow At Your Pace, On Your Schedule", "body": [
+        {"img": "step-4.png", "title": "4. Grow At Your Pace, On Your Schedule", "body": [
             "Whether you work on this for an hour every night or a few hours on weekends, you decide how fast you grow. There\u2019s no boss. No clock to punch. No one telling you what to do.",
             "It\u2019s your business, and you make the rules."]},
     ],
     "cta": "Claim My Digital Franchise Now!",
     "cta_sub": "You\u2019re Protected By A 100% Money-Back Guarantee",
     "bio_title_a": "Why Trust Me To Build Your", "bio_title_b": "Digital Franchise", "bio_title_c": "?",
-    "bio_img": "",
+    "bio_img": "founder.png",
     "bio_intro": "Hi, I\u2019m Alex Fedotoff, founder of Brand Builders Academy and eCommerce Scaling Secrets.",
     "bio_body": ["I used to be a factory worker in Ukraine. No connections. No savings. No business background. Then, I discovered ecommerce and my life changed forever.",
                  "Since 2014, I\u2019ve\u2026"],
@@ -74,11 +76,12 @@ CONTENT = {
                    "Think of it like buying a McDonald\u2019s franchise instead of trying to start your own restaurant from scratch. You get the systems, the products, and the guidance of what already works. But unlike a McDonald\u2019s franchise, you don\u2019t owe me anything after you take ownership of your store.",
                    "Every dollar you make is yours to keep, forever."],
     "model_bold": [2, 4],
+    "model_img": "model.png",
     "gallery_title_a": "What Your", "gallery_title_b": "Digital Franchise", "gallery_title_c": "Could Look Like",
-    "gallery": ["", "", "", "", "", ""],
+    "gallery": [f"gallery-{i}.png" for i in range(1, 9)],
     "stack_kicker": "Ready To Claim Your Digital Franchise?",
     "stack_title": "Here\u2019s Everything You Get For Only US$20",
-    "stack_img": "",
+    "stack_img": "stack.png",
     "stack": [
         {"b": "A Beautiful Online Storefront", "t": "professionally designed by my team and optimized to convert website visitors into buyers"},
         {"b": "20 Proven Products", "t": "hand-picked, pre-loaded into your store, and ready to sell"},
@@ -89,16 +92,16 @@ CONTENT = {
     ],
     "today_price": "Today: Only $20!",
     "assurances": [
-        {"icon": "", "title": "You\u2019re Protected By A 100% Money-Back Guarantee", "body": [
+        {"icon": "icon-guarantee.png", "title": "You\u2019re Protected By A 100% Money-Back Guarantee", "body": [
             "If you aren\u2019t completely blown away by your digital franchise and the new opportunities it opens up for you to create an online income, you\u2019re protected by a 100% money-back guarantee.",
             "Just reach out to my team, and we\u2019ll refund your purchase. No surveys. No questions. No hidden conditions."]},
-        {"icon": "", "title": "Secure Payment Processing", "body": [
+        {"icon": "icon-secure.png", "title": "Secure Payment Processing", "body": [
             "This page is encrypted with the latest digital security technology so your information is 100% safe and secure."]},
-        {"icon": "", "title": "Need Help With Your Order?", "body": [
+        {"icon": "icon-help.png", "title": "Need Help With Your Order?", "body": [
             "If you need help with your order or if you have any questions before you invest, contact us at dfy@ecommercescalingsecrets.com or +1 (786) 464-5483."]},
     ],
     "faq_title_a": "Questions Others Asked Before Investing In Their", "faq_title_b": "Digital Franchise",
-    "faq": [{"q": q, "a": ["[Answer]"]} for q in [
+    "faq": [{"q": q, "a": a} for q, a in zip([
         "Do I need any special accounts before getting started?",
         "Are there any other costs after I invest US$20?",
         "Can I make this work even if I\u2019ve never owned a business or done marketing before?",
@@ -109,12 +112,15 @@ CONTENT = {
         "If these digital franchises are so good, why don\u2019t you just keep them for yourself?",
         "So if you\u2019re not making any money selling these digital franchises, why are you doing it?",
         "What if I already have an online store?",
-        "Isn\u2019t the market too saturated by now?"]],
+        "Isn\u2019t the market too saturated by now?"], FAQ_ANSWERS)],
     "final_title_a": "Ready To Claim Your", "final_title_b": "Digital Franchise", "final_title_c": "?",
-    "footer_logo": "",
+    "footer_logo": "final.png",
     "copyright": "This product is brought to you and copyrighted by Alex Fedotoff & Ecommerce Scaling Secrets, Copyright 2026",
-    "footer_links": [("Data Protection", "#"), ("Earnings Disclaimer", "#"), ("Privacy Policy", "#"),
-                     ("Terms & Conditions", "#"), ("GDPR", "#")],
+    "footer_links": [("Data Protection", "https://www.alexfedotoff.com/data-protection/"),
+                     ("Earnings Disclaimer", "https://www.alexfedotoff.com/earnings-disclaimer/"),
+                     ("Privacy Policy", "https://www.alexfedotoff.com/privacy-policy/"),
+                     ("Terms & Conditions", "https://www.alexfedotoff.com/terms-and-conditions/"),
+                     ("GDPR", "https://www.alexfedotoff.com/gdpr/")],
     "disclaimers": [
         "We can not and do not make any guarantees about your ability to get results or earn any money with our ideas, information, tools, or strategies. What we can guarantee is your satisfaction with our training. We give you a 30-day 100% satisfaction guarantee on the products we sell, so if you are not happy for any reason with the quality of our training after going through at least 50% of the material, just ask for your money back. You should know that all products and services by our company are for educational and informational purposes only. Nothing on this page, any of our websites, or any of our content or curriculum is a promise or guarantee of results or future earnings, and we do not offer any legal, medical, tax or other professional advice. Any financial numbers referenced here, or on any of our sites, are illustrative of concepts only and should not be considered average earnings, exact earnings, or promises for actual or future performance. Use caution and always consult your accountant, lawyer or professional advisor before acting on this or any information related to a lifestyle change or your business or finances. You alone are responsible and accountable for your decisions, actions and results in life, and by your registration here you agree not to attempt to hold us liable for your decisions, actions or results, at any time, under any circumstance.",
         "The success of our students in the Done For You Ecom Stores varies significantly. While we provide all the tools and strategies that have worked for others, your individual success depends on various factors, including your background, dedication, desire, and motivation. We do not guarantee that you will achieve similar results to any examples shown.",
