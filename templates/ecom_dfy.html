@@ -247,14 +247,14 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
         <button type="button" class="back" data-back>‹ Edit contact info</button>
         <table class="summary">
           <tr><td><b>Product</b></td><td><b>Price</b></td></tr>
-          <tr><td>[Front-end product]</td><td>$20.00</td></tr>
-          <tr data-bump-row hidden><td>[Order bump product]</td><td>$49.00</td></tr>
+          <tr><td>Digital Franchise: Done-For-You Store</td><td>$20.00</td></tr>
+          {% if bump_ready %}<tr data-bump-row hidden><td>[Order bump product]</td><td>$49.00</td></tr>{% endif %}
           <tr class="tot"><td>Total</td><td data-total>$20.00</td></tr>
         </table>
-        <div class="bump">
+        {% if bump_ready %}<div class="bump">
           <label class="chk"><input type="checkbox" name="bump" data-bump><span>{{ c.bump_title }}</span></label>
           <p><span class="tag">{{ c.bump_badge }}</span> {{ c.bump_text }}</p>
-        </div>
+        </div>{% endif %}
         <label class="chk"><input type="checkbox" name="terms" required><span>I agree to the <a href="{{ c.terms_url }}" target="_blank" rel="noopener">Terms &amp; Conditions</a> and <a href="{{ c.privacy_url }}" target="_blank" rel="noopener">Privacy Policy</a></span></label>
         <button class="btn-go" type="submit">{{ c.complete_btn }}</button>
         <p class="err" data-err></p>
@@ -337,6 +337,7 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
 </section>
 
 <!-- ═══ FAQ ═══ -->
+{% if c.faq and not c.faq[0].a[0].startswith('[') %}{# FAQ hidden until the client's answers are in #}
 <section class="faq">
   <div class="wrap">
     <h2 class="fade">{{ split(c.faq_title_a, c.faq_title_b, c.get('faq_title_c', '')) }}</h2>
@@ -348,6 +349,7 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
   </div>
 </section>
 
+{% endif %}
 <!-- ═══ FINAL CTA ═══ -->
 <section class="final">
   <div class="wrap">
@@ -460,7 +462,7 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
   });
 
   var bump=document.querySelector('[data-bump]');
-  bump.addEventListener('change',function(){
+  if(bump) bump.addEventListener('change',function(){
     document.querySelector('[data-bump-row]').hidden=!bump.checked;
     document.querySelector('[data-total]').textContent=bump.checked?'$69.00':'$20.00';
   });
@@ -471,7 +473,7 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
     if(!this.terms.checked){ err.textContent='Please agree to the Terms & Conditions.'; return; }
     if(!CHECKOUT_READY){ err.textContent="Checkout isn't connected yet."; return; }
     btn.disabled=true; err.textContent='';
-    post('/ecom-DFY/checkout',{bump:bump.checked,email:lead&&lead.email}).then(function(r){
+    post('/ecom-DFY/checkout',{bump:!!(bump&&bump.checked),email:lead&&lead.email}).then(function(r){
       if(r.ok&&r.url){ location.href=r.url; } else { btn.disabled=false; err.textContent=r.error||'Something went wrong.'; }
     }).catch(function(){ btn.disabled=false; err.textContent='Connection problem. Please try again.'; });
   });

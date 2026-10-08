@@ -35,8 +35,8 @@ CONTENT = {
     "bump_title": "[Order bump checkbox label]",
     "bump_badge": "[Bump badge]",
     "bump_text": "[Order bump description]",
-    "complete_btn": "[Complete order button]",
-    "secure_note": "[Secure payment note]",
+    "complete_btn": "Complete My Order",
+    "secure_note": "Secure checkout powered by Stripe. Your card details never touch this page.",
     "terms_url": "#", "privacy_url": "#",
     "works_title_a": "How Your", "works_title_b": "Digital Franchise", "works_title_c": "Works",
     "steps": [
@@ -126,8 +126,8 @@ CONTENT = {
                       "Phone: +1 (786) 464-5483 (Available Monday through Friday, 9 AM - 5 PM ET)",
                       "Mailing Address: 60 SW 13th St, Brickell, Miami, Florida",
                       "We strive to ensure all communication channels are open and readily available to you. Whether it\u2019s a question, comment, or concern, our team is ready to assist."],
-    "exit_title": "[Exit pop-up heading]",
-    "exit_proof": "[Exit pop-up social proof line]",
+    "exit_title": "Wait! Your Digital Franchise Is Still Reserved",
+    "exit_proof": "Join 77,254+ people who got started with Branded Dropshipping.",
 }
 
 
@@ -146,7 +146,14 @@ def ecom_dfy_page():
     if request.path == "/ecom-dfy":
         return redirect("/ecom-DFY" + (("?" + request.query_string.decode()) if request.query_string else ""), 301)
     return render_template("ecom_dfy.html", c=CONTENT, wistia_id=WISTIA_ID,
-                           checkout_ready=bool(STRIPE_FE))
+                           checkout_ready=bool(STRIPE_FE),
+                           bump_ready=bool(STRIPE_FE_BUMP))  # bump hidden until its own Payment Link exists
+
+
+@ecom_dfy_bp.route("/ecom-DFY/thank-you")
+def ecom_dfy_thanks():
+    # Stripe Payment Link redirects here after a successful payment
+    return render_template("ecom_dfy_thanks.html")
 
 
 @ecom_dfy_bp.route("/ecom-DFY/lead", methods=["POST"])
