@@ -183,7 +183,7 @@ def _ghl_track(name, email, phone, stage, note=None):
         return
     h = {"Authorization": f"Bearer {pit}", "Version": "2021-07-28", "Accept": "application/json"}
     try:
-        c = {"locationId": GHL_LOC, "email": email, "tags": ["ecom-dfy"], "source": "Ecom DFY funnel"}
+        c = {"locationId": GHL_LOC, "email": email, "source": "Ecom DFY funnel"}
         if name:
             c["name"] = name
         if phone:
@@ -193,6 +193,9 @@ def _ghl_track(name, email, phone, stage, note=None):
         if not cid:
             print(f"[ecom-dfy] GHL upsert failed: {r.status_code} {r.text[:200]}")
             return
+        # tags are added (never replaced); green "paid" tag from the Paid stage on, so it shows on the card
+        tags = ["ecom-dfy"] + (["paid"] if STAGE_RANK[STAGE_ID[stage]] >= STAGE_RANK[STAGE_ID["paid"]] else [])
+        requests.post(f"{GHL}/contacts/{cid}/tags", headers=h, json={"tags": tags}, timeout=15)
         r = requests.get(f"{GHL}/opportunities/search", headers=h, timeout=15,
                          params={"location_id": GHL_LOC, "pipeline_id": GHL_PIPELINE, "contact_id": cid})
         opps = r.json().get("opportunities", []) if r.ok else []
