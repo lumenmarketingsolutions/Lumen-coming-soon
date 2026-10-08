@@ -35,6 +35,28 @@ FIRST_TEXT = {
     "no_follow_up": "Hey {first}, it's Kendall from Lumen Marketing Solutions. You said there's no time to follow up on quotes. My system does the follow up for you until they book. Got 10 minutes today for a quick call?",
     "slow_season": "Hey {first}, it's Kendall from Lumen Marketing Solutions. You said the slow months hurt the most. I fill your calendar with booked estimates before the slow season hits. Got 10 minutes today for a quick call?",
 }
+# Leads arrive from Meta with no time zone, so GHL would print booking times in the sub-account's Boise time.
+# Set the contact's time zone from the phone area code (western states, where Contractor OS runs ads).
+_TZ_BY_AREA = {}
+for _tz, _codes in {
+    "America/Los_Angeles": "206 253 360 425 509 564 458 503 541 971 702 725 775 209 213 279 310 323 341 350 408 415 424 442 "
+                           "510 530 559 562 619 626 628 650 657 661 669 707 714 747 760 805 818 820 831 840 858 909 916 925 949 951",
+    "America/Phoenix": "480 520 602 623 928",
+    "America/Boise": "208 986",
+    "America/Denver": "303 719 720 970 983 385 435 801 406 505 575 307",
+    "America/Chicago": "210 214 254 281 325 346 361 409 430 432 469 512 682 713 726 737 806 817 830 832 903 915 936 940 945 956 972 979",
+}.items():
+    for _c in _codes.split():
+        _TZ_BY_AREA[_c] = _tz
+
+
+def _tz_for_phone(phone):
+    d = "".join(ch for ch in phone if ch.isdigit())
+    if len(d) == 11 and d.startswith("1"):
+        d = d[1:]
+    return _TZ_BY_AREA.get(d[:3]) if len(d) == 10 else None
+
+
 FIRST_TEXT_DEFAULT = "Hey {first}, it's Kendall from Lumen Marketing Solutions. Just saw your form come through. I help contractors get more leads and reply to every one of them in under a minute. Got 10 minutes today for a quick call?"
 
 
@@ -126,28 +148,37 @@ def _tag_sms_consent(leadgen_id):
         detail = ", ".join(v.replace("_", " ") for v in (fields.get("business_type"), fields.get("monthly_revenue"), fields.get("weakest_part")) if v)
         if not consented or not phone:
             notify_owner(f"New Contractor OS lead, NO text consent, call now: {who} ({detail})")
+        else:
+            notify_owner(f"New Contractor OS lead, texting them now: {who} ({detail})")
+        if not phone:
             return
-        notify_owner(f"New Contractor OS lead, texting them now: {who} ({detail})")
         loc = os.environ.get("GHL_SMS_LOCATION_ID", "6b4I6ILHBVcWQYlmPj3i")
+        tz = _tz_for_phone(phone)
         # GHL's Facebook sync creates the contact a few seconds after the lead, so wait for it
         for _ in range(18):
             time.sleep(10)
             r = _ghl("GET", "/contacts/search/duplicate", loc, version="2021-07-28",
                      params={"locationId": loc, "number": phone})
             contact = (r.json() if r.ok else {}).get("contact")
-            if contact:
-                _ghl("POST", f"/contacts/{contact['id']}/tags", loc, version="2021-07-28", json={"tags": ["sms-consent", "contractor-os-sms"]})
-                _ghl("PUT", f"/contacts/{contact['id']}", loc, version="2021-07-28",
-                     json={"customFields": [{"id": SMS_CONSENT_FIELD, "value": "Yes"}]})
-                print(f"[Meta Leads] tagged sms-consent on GHL contact {contact['id']}")
-                first = (fields.get("full_name", "").split() or ["there"])[0].title()
-                text = FIRST_TEXT.get(fields.get("weakest_part"), FIRST_TEXT_DEFAULT).format(first=first)
-                # Sent through GHL so it shows in the conversation; GHL routes it to our SignalHouse provider
-                if os.environ.get("SERVER_FIRST_TEXT", "on").lower() == "off":
-                    return  # GHL workflow (trigger: tag sms-consent) owns the first text now
-                r = _ghl("POST", "/conversations/messages", loc, json={"type": "SMS", "contactId": contact["id"], "message": text})
-                print(f"[Meta Leads] first text to {contact['id']}: HTTP {r.status_code}")
+            if not contact:
+                continue
+            update = {"timezone": tz} if tz else {}
+            if consented:
+                update["customFields"] = [{"id": SMS_CONSENT_FIELD, "value": "Yes"}]
+            if update:  # time zone first, so any booking text prints the lead's own local time
+                _ghl("PUT", f"/contacts/{contact['id']}", loc, version="2021-07-28", json=update)
+            if not consented:
                 return
+            _ghl("POST", f"/contacts/{contact['id']}/tags", loc, version="2021-07-28", json={"tags": ["sms-consent", "contractor-os-sms"]})
+            print(f"[Meta Leads] tagged sms-consent on GHL contact {contact['id']} (tz {tz})")
+            if os.environ.get("SERVER_FIRST_TEXT", "on").lower() == "off":
+                return  # GHL workflow (trigger: tag contractor-os-sms) owns the first text now
+            first = (fields.get("full_name", "").split() or ["there"])[0].title()
+            text = FIRST_TEXT.get(fields.get("weakest_part"), FIRST_TEXT_DEFAULT).format(first=first)
+            # Sent through GHL so it shows in the conversation; GHL routes it to our SignalHouse provider
+            r = _ghl("POST", "/conversations/messages", loc, json={"type": "SMS", "contactId": contact["id"], "message": text})
+            print(f"[Meta Leads] first text to {contact['id']}: HTTP {r.status_code}")
+            return
         print(f"[Meta Leads] no GHL contact for {leadgen_id} after 3 min, consent not tagged")
     except Exception as e:
         print(f"[Meta Leads] consent tagging failed for {leadgen_id}: {e}")
