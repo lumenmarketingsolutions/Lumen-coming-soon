@@ -289,3 +289,16 @@ def export():
         return "no", 403
     msgs = [{"role": h["role"], "ts": h["ts"], "text": _visible_text(h["content"])} for h in _history()]
     return jsonify({"brief": _brief(), "messages": [m for m in msgs if m["text"].strip()]})
+
+
+@fgc_training_bp.route("/FGCagenttraining/reset", methods=["POST"])
+def reset():
+    """Wipe the conversation and the brief so Mary starts fresh (used after Kendall's test)."""
+    if request.args.get("k") != EXPORT_KEY:
+        return "no", 403
+    con = _db()
+    con.execute("DELETE FROM messages")
+    con.execute("DELETE FROM facts")
+    con.commit()
+    con.close()
+    return jsonify({"ok": True})
