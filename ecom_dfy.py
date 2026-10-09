@@ -2,7 +2,7 @@
 #    Layout + mechanics match the original. CONTENT below is placeholder until the
 #    client sends their copy, images, Wistia ID and Stripe payment links.
 #    Payment is never collected here: step 2 hands off to the client's Stripe links.
-import os, sqlite3, datetime, threading, html as html_lib
+import os, sqlite3, datetime, threading, hashlib, time, html as html_lib
 import requests
 from flask import Blueprint, render_template, request, jsonify, redirect
 
@@ -155,6 +155,52 @@ STAGE_ID = dict(GHL_STAGES)
 STAGE_RANK = {sid: i for i, (_, sid) in enumerate(GHL_STAGES)}
 
 
+# ── Meta pixel + Conversions API (dormant until ECOM_DFY_PIXEL_ID and ECOM_DFY_CAPI_TOKEN are set) ──
+PIXEL_ID = os.environ.get("ECOM_DFY_PIXEL_ID", "")
+CAPI_TOKEN = os.environ.get("ECOM_DFY_CAPI_TOKEN", "")
+
+
+def _h256(v):
+    v = (v or "").strip().lower()
+    return hashlib.sha256(v.encode()).hexdigest() if v else None
+
+
+def _client_ctx():
+    """Request details CAPI needs; dfystores.com proxies with X-Forwarded-For + User-Agent."""
+    ip = (request.headers.get("X-Forwarded-For") or request.remote_addr or "").split(",")[0].strip()
+    return {"ip": ip, "ua": request.headers.get("User-Agent", "")}
+
+
+def _capi(event_name, d, ctx, value=None):
+    if not (PIXEL_ID and CAPI_TOKEN and d.get("event_id")):
+        return
+    name = (d.get("name") or "").split()
+    phone = "".join(ch for ch in (d.get("phone") or "") if ch.isdigit())
+    ud = {"em": [_h256(d.get("email"))], "external_id": [_h256(d.get("email"))],
+          "client_ip_address": ctx["ip"], "client_user_agent": ctx["ua"]}
+    if phone:
+        ud["ph"] = [_h256(phone)]
+    if name:
+        ud["fn"] = [_h256(name[0])]
+        if len(name) > 1:
+            ud["ln"] = [_h256(name[-1])]
+    for k in ("fbp", "fbc"):
+        if d.get(k):
+            ud[k] = d[k]
+    ev = {"event_name": event_name, "event_time": int(time.time()), "event_id": d["event_id"],
+          "action_source": "website", "event_source_url": d.get("page_url") or "https://dfystores.com/",
+          "user_data": {k: v for k, v in ud.items() if v and v != [None]}}
+    if value is not None:
+        ev["custom_data"] = {"value": value, "currency": "USD"}
+    try:
+        r = requests.post(f"https://graph.facebook.com/v21.0/{PIXEL_ID}/events", timeout=15,
+                          data={"data": __import__("json").dumps([ev]), "access_token": CAPI_TOKEN})
+        if r.status_code >= 300:
+            print(f"[ecom-dfy] CAPI {event_name} failed: {r.text[:300]}")
+    except Exception as e:
+        print(f"[ecom-dfy] CAPI {event_name} error: {e}")
+
+
 def _bg(fn, *args):
     threading.Thread(target=fn, args=args, daemon=True).start()
 
@@ -254,13 +300,13 @@ def ecom_dfy_page():
         return redirect("/ecom-DFY" + (("?" + request.query_string.decode()) if request.query_string else ""), 301)
     return render_template("ecom_dfy.html", c=CONTENT, wistia_id=WISTIA_ID,
                            checkout_ready=bool(STRIPE_FE),
-                           bump_ready=bool(STRIPE_FE_BUMP))  # bump hidden until its own Payment Link exists
+                           bump_ready=bool(STRIPE_FE_BUMP), pixel_id=PIXEL_ID)  # bump hidden until its own Payment Link exists
 
 
 @ecom_dfy_bp.route("/ecom-DFY/thank-you")
 def ecom_dfy_thanks():
     # Stripe Payment Link redirects here after a successful payment
-    return render_template("ecom_dfy_thanks.html")
+    return render_template("ecom_dfy_thanks.html", pixel_id=PIXEL_ID)
 
 
 @ecom_dfy_bp.route("/ecom-DFY/lead", methods=["POST"])
@@ -278,6 +324,7 @@ def ecom_dfy_lead():
     con.commit()
     con.close()
     _bg(_lead_tracking, name, email, phone)
+    _bg(_capi, "Lead", d, _client_ctx())
     return jsonify({"ok": True})
 
 
@@ -288,6 +335,7 @@ def ecom_dfy_paid():
     email = (d.get("email") or "").strip()
     if "@" in email:
         _bg(_paid_tracking, (d.get("name") or "").strip(), email, (d.get("phone") or "").strip())
+        _bg(_capi, "Purchase", d, _client_ctx(), 20.0)
     return jsonify({"ok": True})
 
 

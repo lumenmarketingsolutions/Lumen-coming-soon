@@ -202,6 +202,17 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
 <a class="cta" href="#order" data-cta><strong>{{ c.cta }}</strong><span>{{ c.cta_sub }}</span></a>
 {%- endmacro %}
 {% macro split(a, b, c='') -%}{{ a }} <span class="hl">{{ b }}</span>{% if c %}{% if c[0] not in '?!.,' %} {% endif %}{{ c }}{% endif %}{%- endmacro %}
+{% if pixel_id %}<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;
+s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','{{ pixel_id }}');fbq('track','PageView');
+</script>{% endif %}
+<script>
+function dfyCookie(n){var m=document.cookie.match('(?:^|; )'+n+'=([^;]*)');return m?decodeURIComponent(m[1]):'';}
+function dfyEventId(p){return p+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);}
+function dfyTrack(name,data,id){try{if(window.fbq)fbq('track',name,data||{},{eventID:id});}catch(e){}}
+</script>
 </head>
 <body>
 
@@ -451,9 +462,11 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
     var v=vals(form), m=check(v); err.textContent=m; if(m) return;
     btn.disabled=true;
     v.source=source; v.page_url=location.href;
+    v.event_id=dfyEventId('lead'); v.fbp=dfyCookie('_fbp'); v.fbc=dfyCookie('_fbc');
     post('/ecom-DFY/lead',v).then(function(r){
       btn.disabled=false;
       if(!r.ok){ err.textContent=r.error||'Something went wrong. Please try again.'; return; }
+      dfyTrack('Lead',{},v.event_id);
       lead=v; try{ localStorage.setItem('ecomdfy_lead', JSON.stringify({name:v.name,email:v.email,phone:v.phone})); }catch(e){}
       done();
     }).catch(function(){ btn.disabled=false; err.textContent='Connection problem. Please try again.'; });
@@ -477,6 +490,7 @@ footer{padding-block:clamp(2rem,5vw,3.5rem) clamp(2.5rem,6vw,4rem);text-align:ce
     if(!this.terms.checked){ err.textContent='Please agree to the Terms & Conditions.'; return; }
     if(!CHECKOUT_READY){ err.textContent="Checkout isn't connected yet."; return; }
     btn.disabled=true; err.textContent='';
+    dfyTrack('InitiateCheckout',{value:20,currency:'USD'},dfyEventId('ic'));
     post('/ecom-DFY/checkout',{bump:!!(bump&&bump.checked),email:lead&&lead.email}).then(function(r){
       if(r.ok&&r.url){ location.href=r.url; } else { btn.disabled=false; err.textContent=r.error||'Something went wrong.'; }
     }).catch(function(){ btn.disabled=false; err.textContent='Connection problem. Please try again.'; });

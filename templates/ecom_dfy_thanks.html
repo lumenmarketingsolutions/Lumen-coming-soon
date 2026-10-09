@@ -41,6 +41,17 @@ li b{display:block}
 .done b{display:block;font:800 1.25rem/1.3 Montserrat,sans-serif;margin-bottom:.4rem}
 .help a{color:var(--blue)}
 </style>
+{% if pixel_id %}<script>
+!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;
+s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+fbq('init','{{ pixel_id }}');fbq('track','PageView');
+</script>{% endif %}
+<script>
+function dfyCookie(n){var m=document.cookie.match('(?:^|; )'+n+'=([^;]*)');return m?decodeURIComponent(m[1]):'';}
+function dfyEventId(p){return p+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);}
+function dfyTrack(name,data,id){try{if(window.fbq)fbq('track',name,data||{},{eventID:id});}catch(e){}}
+</script>
 </head>
 <body>
 <main class="wrap">
@@ -96,7 +107,12 @@ li b{display:block}
   var f=document.getElementById('obf');
   if(lead){ f.name.value=lead.name||''; f.email.value=lead.email||''; }
   function post(u,d){ return fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){return r.json();}); }
-  try{ if(lead && lead.email && !sessionStorage.getItem('ecomdfy_paid')){ sessionStorage.setItem('ecomdfy_paid','1'); post('/ecom-DFY/paid',lead); } }catch(e){}
+  try{ if(lead && lead.email && !sessionStorage.getItem('ecomdfy_paid')){
+    sessionStorage.setItem('ecomdfy_paid','1');
+    var pid=dfyEventId('purchase');
+    dfyTrack('Purchase',{value:20,currency:'USD'},pid);
+    post('/ecom-DFY/paid',{name:lead.name,email:lead.email,phone:lead.phone,event_id:pid,fbp:dfyCookie('_fbp'),fbc:dfyCookie('_fbc'),page_url:location.href});
+  } }catch(e){}
   f.addEventListener('submit',function(e){
     e.preventDefault();
     var err=f.querySelector('[data-err]'), btn=f.querySelector('button');
