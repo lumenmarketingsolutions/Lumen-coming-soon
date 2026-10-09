@@ -193,10 +193,12 @@ def _capi(event_name, d, ctx, value=None):
     if value is not None:
         ev["custom_data"] = {"value": value, "currency": "USD"}
     try:
-        r = requests.post(f"https://graph.facebook.com/v21.0/{PIXEL_ID}/events", timeout=15,
-                          data={"data": __import__("json").dumps([ev]), "access_token": CAPI_TOKEN})
-        if r.status_code >= 300:
-            print(f"[ecom-dfy] CAPI {event_name} failed: {r.text[:300]}")
+        payload = {"data": __import__("json").dumps([ev]), "access_token": CAPI_TOKEN}
+        test_code = os.environ.get("ECOM_DFY_TEST_EVENT_CODE", "")
+        if test_code:  # temporary: makes server events show in Events Manager > Test Events
+            payload["test_event_code"] = test_code
+        r = requests.post(f"https://graph.facebook.com/v21.0/{PIXEL_ID}/events", timeout=15, data=payload)
+        print(f"[ecom-dfy] CAPI {event_name} -> {r.status_code} {r.text[:200]}")
     except Exception as e:
         print(f"[ecom-dfy] CAPI {event_name} error: {e}")
 
