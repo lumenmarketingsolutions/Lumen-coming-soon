@@ -107,12 +107,16 @@ function dfyTrack(name,data,id){try{if(window.fbq)fbq('track',name,data||{},{eve
   var f=document.getElementById('obf');
   if(lead){ f.name.value=lead.name||''; f.email.value=lead.email||''; }
   function post(u,d){ return fetch(u,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)}).then(function(r){return r.json();}); }
-  try{ if(lead && lead.email && !sessionStorage.getItem('ecomdfy_paid')){
-    sessionStorage.setItem('ecomdfy_paid','1');
-    var pid=dfyEventId('purchase');
-    dfyTrack('Purchase',{value:20,currency:'USD'},pid);
-    post('/ecom-DFY/paid',{name:lead.name,email:lead.email,phone:lead.phone,event_id:pid,fbp:dfyCookie('_fbp'),fbc:dfyCookie('_fbc'),page_url:location.href});
-  } }catch(e){}
+  try{
+    // Stripe redirects here with ?session_id=cs_... ; that ID is the shared event ID with the server-side Purchase
+    var sid=new URLSearchParams(location.search).get('session_id')||'';
+    var key='ecomdfy_paid_'+(sid||'nosession');
+    if(!sessionStorage.getItem(key)){
+      sessionStorage.setItem(key,'1');
+      if(sid) dfyTrack('Purchase',{value:20,currency:'USD'},sid);
+      if(lead && lead.email) post('/ecom-DFY/paid',{name:lead.name,email:lead.email,phone:lead.phone,page_url:location.href});
+    }
+  }catch(e){}
   f.addEventListener('submit',function(e){
     e.preventDefault();
     var err=f.querySelector('[data-err]'), btn=f.querySelector('button');

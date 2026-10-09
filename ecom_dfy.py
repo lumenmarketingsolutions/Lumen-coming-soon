@@ -2,7 +2,7 @@
 #    Layout + mechanics match the original. CONTENT below is placeholder until the
 #    client sends their copy, images, Wistia ID and Stripe payment links.
 #    Payment is never collected here: step 2 hands off to the client's Stripe links.
-import os, sqlite3, datetime, threading, hashlib, time, html as html_lib
+import os, sqlite3, datetime, threading, hashlib, hmac, json, time, html as html_lib
 import requests
 from flask import Blueprint, render_template, request, jsonify, redirect
 
@@ -291,6 +291,11 @@ def init_ecom_dfy_db():
     con.execute("""CREATE TABLE IF NOT EXISTS ecom_dfy_onboarding (
         id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, email TEXT, store_name TEXT, niche TEXT,
         style TEXT, colors TEXT, notes TEXT, created_at TEXT)""")
+    cols = {r[1] for r in con.execute("PRAGMA table_info(ecom_dfy_leads)")}
+    for col in ("ip", "ua", "fbp", "fbc"):
+        if col not in cols:
+            con.execute(f"ALTER TABLE ecom_dfy_leads ADD COLUMN {col} TEXT")
+    con.execute("CREATE TABLE IF NOT EXISTS ecom_dfy_payments (session_id TEXT PRIMARY KEY, email TEXT, amount REAL, created_at TEXT)")
     con.commit()
     con.close()
 
@@ -320,9 +325,10 @@ def ecom_dfy_lead():
     if not d.get("consent"):
         return jsonify({"ok": False, "error": "Please tick the consent box."}), 400
     con = sqlite3.connect(DB_PATH)
-    con.execute("INSERT INTO ecom_dfy_leads (name,email,phone,source,page_url,created_at) VALUES (?,?,?,?,?,?)",
+    ctx = _client_ctx()
+    con.execute("INSERT INTO ecom_dfy_leads (name,email,phone,source,page_url,created_at,ip,ua,fbp,fbc) VALUES (?,?,?,?,?,?,?,?,?,?)",
                 (name, email, phone, d.get("source", "step1"), d.get("page_url", ""),
-                 datetime.datetime.utcnow().isoformat()))
+                 datetime.datetime.utcnow().isoformat(), ctx["ip"], ctx["ua"], d.get("fbp", ""), d.get("fbc", "")))
     con.commit()
     con.close()
     _bg(_lead_tracking, name, email, phone)
@@ -337,8 +343,58 @@ def ecom_dfy_paid():
     email = (d.get("email") or "").strip()
     if "@" in email:
         _bg(_paid_tracking, (d.get("name") or "").strip(), email, (d.get("phone") or "").strip())
-        _bg(_capi, "Purchase", d, _client_ctx(), 20.0)
     return jsonify({"ok": True})
+
+
+def _stripe_sig_ok(payload, header, secret, tolerance=300):
+    try:
+        parts = dict(p.split("=", 1) for p in header.split(",") if "=" in p)
+        ts = int(parts.get("t", "0"))
+        sigs = [p.split("=", 1)[1] for p in header.split(",") if p.startswith("v1=")]
+    except Exception:
+        return False
+    if abs(time.time() - ts) > tolerance:
+        return False
+    expected = hmac.new(secret.encode(), f"{ts}.".encode() + payload, hashlib.sha256).hexdigest()
+    return any(hmac.compare_digest(expected, s) for s in sigs)
+
+
+def _stripe_purchase(sess):
+    """Source of truth for a sale: Stripe checkout.session.completed -> GHL Paid + email + CAPI Purchase."""
+    sid = sess.get("id")
+    cd = sess.get("customer_details") or {}
+    email = (cd.get("email") or sess.get("customer_email") or "").strip()
+    amount = (sess.get("amount_total") or 2000) / 100
+    con = sqlite3.connect(DB_PATH)
+    if con.execute("SELECT 1 FROM ecom_dfy_payments WHERE session_id=?", (sid,)).fetchone():
+        con.close()
+        return  # Stripe retry, already handled
+    con.execute("INSERT INTO ecom_dfy_payments VALUES (?,?,?,?)", (sid, email, amount, datetime.datetime.utcnow().isoformat()))
+    con.commit()
+    row = con.execute("SELECT name, phone, ip, ua, fbp, fbc FROM ecom_dfy_leads WHERE lower(email)=lower(?) ORDER BY id DESC LIMIT 1",
+                      (email,)).fetchone()
+    con.close()
+    name = (row[0] if row else "") or cd.get("name") or ""
+    phone = (row[1] if row else "") or cd.get("phone") or ""
+    _paid_tracking(name, email, phone)
+    _capi("Purchase", {"event_id": sid, "email": email, "phone": phone, "name": name,
+                       "fbp": row[4] if row else "", "fbc": row[5] if row else "",
+                       "page_url": "https://dfystores.com/thank-you"},
+          {"ip": (row[2] if row else "") or "", "ua": (row[3] if row else "") or "Mozilla/5.0"}, amount)
+
+
+@ecom_dfy_bp.route("/ecom-DFY/stripe-webhook", methods=["POST"])
+def ecom_dfy_stripe_webhook():
+    secret = os.environ.get("ECOM_DFY_STRIPE_WEBHOOK_SECRET", "")
+    payload = request.get_data()
+    if not secret or not _stripe_sig_ok(payload, request.headers.get("Stripe-Signature", ""), secret):
+        return "bad signature", 400
+    ev = json.loads(payload or b"{}")
+    if ev.get("type") == "checkout.session.completed":
+        sess = ev["data"]["object"]
+        if sess.get("payment_status") in ("paid", "no_payment_required"):
+            _bg(_stripe_purchase, sess)
+    return "", 200
 
 
 @ecom_dfy_bp.route("/ecom-DFY/onboarding", methods=["POST"])
