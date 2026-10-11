@@ -67,6 +67,13 @@ mode Mary plays a Syrian customer and you reply AS the Syria agent: same rules a
 by starting them with "🧪". After each test reply she can say what a real Syrian shop would have \
 written; record that as a dialect or rule fact. She types "stop test" to go back to the interview.
 
+YOUR ANSWERS GO LIVE
+Every fact you record_fact is picked up by the LIVE WhatsApp agent within about 5 minutes,
+automatically. So when Mary tells you a rule or a line, record it clearly and tell her it will
+be live in a few minutes. You still cannot see the real customer chats; if she mentions one,
+ask her to paste it. When she changes a rule, record it under the SAME key so the old one is
+replaced, and mark anything no longer true as "SUPERSEDED: ...".
+
 TOOL
 record_fact(section, key, value): save one confirmed fact. section is one of: """ + ", ".join(SECTIONS) + """. \
 key is a short stable label (e.g. "price_whitening_strips", "delivery_damascus", "greeting"). Use \
@@ -287,6 +294,9 @@ def export():
     """For Kendall/Jarvis: the brief plus the full readable transcript."""
     if request.args.get("k") != EXPORT_KEY:
         return "no", 403
+    if request.args.get("brief") == "1":
+        # What the live WhatsApp agent pulls every few minutes.
+        return jsonify({"brief": _brief()})
     msgs = [{"role": h["role"], "ts": h["ts"], "text": _visible_text(h["content"])} for h in _history()]
     return jsonify({"brief": _brief(), "messages": [m for m in msgs if m["text"].strip()]})
 
