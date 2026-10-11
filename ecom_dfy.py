@@ -295,6 +295,8 @@ def init_ecom_dfy_db():
     for col in ("ip", "ua", "fbp", "fbc"):
         if col not in cols:
             con.execute(f"ALTER TABLE ecom_dfy_leads ADD COLUMN {col} TEXT")
+    con.execute("""CREATE TABLE IF NOT EXISTS ecom_dfy_events (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, sid TEXT, event TEXT, utm TEXT, width INTEGER, ip TEXT, ua TEXT, created_at TEXT)""")
     con.execute("CREATE TABLE IF NOT EXISTS ecom_dfy_payments (session_id TEXT PRIMARY KEY, email TEXT, amount REAL, created_at TEXT)")
     con.commit()
     con.close()
@@ -334,6 +336,33 @@ def ecom_dfy_lead():
     _bg(_lead_tracking, name, email, phone)
     _bg(_capi, "Lead", d, _client_ctx())
     return jsonify({"ok": True})
+
+
+_EVENTS = {"page_view", "form_seen", "form_start", "popup_form_start", "form_submit_click", "cta_click",
+           "scroll_25", "scroll_50", "scroll_75", "scroll_90", "video_loaded", "video_unmute",
+           "video_10s", "video_30s", "video_60s", "video_120s", "video_50pct", "video_90pct"}
+
+
+@ecom_dfy_bp.route("/ecom-DFY/ev", methods=["POST"])
+def ecom_dfy_event():
+    # Drop-off tracking beacon from the page (form start, scroll depth, video watch)
+    d = request.get_json(silent=True, force=True) or {}
+    ev = str(d.get("e", ""))
+    if ev not in _EVENTS:
+        return ("", 204)
+    ctx = _client_ctx()
+    sid, utm = str(d.get("sid", ""))[:64], str(d.get("utm", ""))[:80]
+    try:
+        width = int(d.get("w") or 0)
+    except (TypeError, ValueError):
+        width = 0
+    con = sqlite3.connect(DB_PATH)
+    con.execute("INSERT INTO ecom_dfy_events (sid,event,utm,width,ip,ua,created_at) VALUES (?,?,?,?,?,?,?)",
+                (sid, ev, utm, width, ctx["ip"], ctx["ua"][:300], datetime.datetime.utcnow().isoformat()))
+    con.commit()
+    con.close()
+    print(f"[DFY-EV] {ev} sid={sid} utm={utm}", flush=True)
+    return ("", 204)
 
 
 @ecom_dfy_bp.route("/ecom-DFY/paid", methods=["POST"])

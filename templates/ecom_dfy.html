@@ -212,6 +212,13 @@ fbq('init','{{ pixel_id }}');fbq('track','PageView');
 function dfyCookie(n){var m=document.cookie.match('(?:^|; )'+n+'=([^;]*)');return m?decodeURIComponent(m[1]):'';}
 function dfyEventId(p){return p+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);}
 function dfyTrack(name,data,id){try{if(window.fbq)fbq('track',name,data||{},{eventID:id});}catch(e){}}
+// Drop-off tracking: each visitor event is beaconed once to the server (and key ones to the pixel as custom events)
+var dfySid=(function(){try{var v=sessionStorage.getItem('dfy_sid');if(!v){v=dfyEventId('s');sessionStorage.setItem('dfy_sid',v);}return v;}catch(e){return dfyEventId('s');}})();
+var dfySent={};
+function dfyEv(e,px){if(dfySent[e])return;dfySent[e]=1;
+  var b=JSON.stringify({e:e,sid:dfySid,utm:(location.search.match(/utm_content=([^&]*)/)||[])[1]||'',w:window.innerWidth});
+  try{if(!(navigator.sendBeacon&&navigator.sendBeacon('/ecom-DFY/ev',new Blob([b],{type:'application/json'}))))fetch('/ecom-DFY/ev',{method:'POST',headers:{'Content-Type':'application/json'},body:b,keepalive:true});}catch(x){}
+  if(px){try{if(window.fbq)fbq('trackCustom',px);}catch(x){}}}
 </script>
 </head>
 <body>
@@ -243,13 +250,13 @@ function dfyTrack(name,data,id){try{if(window.fbq)fbq('track',name,data||{},{eve
     <h2>{{ c.form_title }}</h2>
     <div class="card">
       <div class="steps">
-        <div class="stp on" data-stp="1"><b>1</b><span>Contact Info<small>Your shipping details</small></span></div>
+        <div class="stp on" data-stp="1"><b>1</b><span>Contact Info<small>Your details</small></span></div>
         <div class="stp" data-stp="2"><b>2</b><span>Payment Details<small>Your billing details</small></span></div>
       </div>
       <form class="form" id="step1" novalidate>
         <div class="f"><label for="fn">Full name<i>*</i></label><input id="fn" name="name" autocomplete="name" placeholder="Full name" required></div>
         <div class="f"><label for="em">Email<i>*</i></label><input id="em" name="email" type="email" autocomplete="email" inputmode="email" placeholder="Email Address" required></div>
-        <div class="f"><label for="ph">Phone number<i>*</i></label><input id="ph" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+1 555 123 4567" required></div>
+        <div class="f"><label for="ph">Phone number<i>*</i></label><input id="ph" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="+961 70 123 456" required></div>
         <label class="chk"><input type="checkbox" name="consent" required><span>{{ c.consent }}<i style="color:#e53935;font-style:normal">*</i></span></label>
         <button class="btn-go" type="submit">{{ c.step1_btn }}</button>
         <p class="err" data-err></p>
@@ -519,6 +526,30 @@ function dfyTrack(name,data,id){try{if(window.fbq)fbq('track',name,data||{},{eve
       document.getElementById('order').scrollIntoView({behavior:'smooth'});
     });
   });
+})();
+</script>
+<script>
+(function(){
+  dfyEv('page_view');
+  // scroll depth
+  function sc(){var h=document.documentElement,max=h.scrollHeight-h.clientHeight;if(max<=0)return;var p=(h.scrollTop||document.body.scrollTop)/max*100;
+    [25,50,75,90].forEach(function(n){if(p>=n)dfyEv('scroll_'+n);});}
+  window.addEventListener('scroll',sc,{passive:true});
+  // order form reached (visible on screen) and started (first tap into a field)
+  var ord=document.getElementById('order');
+  if(ord&&'IntersectionObserver' in window){new IntersectionObserver(function(es,o){es.forEach(function(x){if(x.isIntersecting){dfyEv('form_seen');o.disconnect();}});},{threshold:.3}).observe(ord);}
+  ['step1','popform'].forEach(function(id){var f=document.getElementById(id);if(!f)return;
+    f.addEventListener('focusin',function(){dfyEv(id==='step1'?'form_start':'popup_form_start','FormStart');});});
+  var s1=document.getElementById('step1');if(s1)s1.addEventListener('submit',function(){dfyEv('form_submit_click');},true);
+  document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('[data-cta]');if(a)dfyEv('cta_click');});
+  // video: autoplays muted, so track unmute and watch time
+  window._wq=window._wq||[];
+  _wq.push({id:'_all',onReady:function(v){
+    dfyEv('video_loaded');
+    v.bind('mutechange',function(m){if(!m)dfyEv('video_unmute','VideoUnmute');});
+    v.bind('secondchange',function(t){[10,30,60,120].forEach(function(n){if(t>=n)dfyEv('video_'+n+'s',n===30?'VideoWatch30s':null);});
+      var d=v.duration();if(d&&t>=d*.5)dfyEv('video_50pct');if(d&&t>=d*.9)dfyEv('video_90pct');});
+  }});
 })();
 </script>
 </body>
