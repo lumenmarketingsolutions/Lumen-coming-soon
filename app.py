@@ -144,6 +144,9 @@ _primed_start()
 start_contractor_poller()  # after init_ghl_sms_db(); Contractor OS leads: tag consent + first text
 from booking_reminders import start_booking_reminders
 start_booking_reminders()  # GHL calendar "Lumen | Meta Ads": Call Booked + confirmation/reminder texts
+from lumen_reminders import reminders_bp, start_reminders
+app.register_blueprint(reminders_bp)
+start_reminders()  # scheduled email + text reminders to Kendall (Kage day-5 check etc.)
 _meetings_start()
 
 ADMIN_PIN = "112501"
