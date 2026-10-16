@@ -1576,6 +1576,24 @@ def harker_contact():
     message = (data.get("message") or "").strip()
     truck_make = (data.get("truckMake") or "").strip()
     bed_size = (data.get("bedSize") or "").strip()
+    # Qualifying answers + hidden attribution fields (added to the form 02.10).
+    # Older form JS doesn't send these; missing values render as a dash.
+    extra = data.get("fields") if isinstance(data.get("fields"), dict) else {}
+    def field(key, *alts):
+        for k in (key,) + alts:
+            v = data.get(k) or extra.get(k)
+            if v:
+                return str(v).strip()
+        return ""
+    planning = field("planningToBuy", "Planning to buy")
+    truck_year = field("truckYear", "Truck year")
+    lead_source = field("leadSource", "Lead source")
+    campaign = field("campaign", "Campaign")
+    ad_set = field("adSet", "Ad set")
+    ad_name = field("ad", "Ad")
+    meta_ad_id = field("metaAdId", "Meta ad ID")
+    first_page = field("firstLandingPage", "First landing page")
+    first_visit = field("firstVisit", "First visit")
 
     # Light validation; if it's junk we still 200 so the form UX never breaks.
     if not name and not email and not message:
@@ -1595,15 +1613,29 @@ def harker_contact():
         '<table style="width:100%;border-collapse:collapse;font-size:14px;">'
         f'<tr><td style="padding:10px 0;color:#8b8ba0;width:140px;">Email</td><td style="padding:10px 0;color:#e8e8f0;font-weight:600;">{esc(email)}</td></tr>'
         f'<tr><td style="padding:10px 0;color:#8b8ba0;">Phone</td><td style="padding:10px 0;color:#e8e8f0;">{esc(phone)}</td></tr>'
-        f'<tr><td style="padding:10px 0;color:#8b8ba0;">Truck make</td><td style="padding:10px 0;color:#e8e8f0;">{esc(truck_make)}</td></tr>'
+        f'<tr><td style="padding:10px 0;color:#8b8ba0;">Planning to buy</td><td style="padding:10px 0;color:#fff;font-weight:600;">{esc(planning)}</td></tr>'
+        f'<tr><td style="padding:10px 0;color:#8b8ba0;">Truck</td><td style="padding:10px 0;color:#e8e8f0;">{esc(" ".join(x for x in (truck_year, truck_make) if x))}</td></tr>'
         f'<tr><td style="padding:10px 0;color:#8b8ba0;">Bed size</td><td style="padding:10px 0;color:#e8e8f0;">{esc(bed_size)}</td></tr>'
         f'<tr><td style="padding:10px 0;color:#8b8ba0;">Inquiry about</td><td style="padding:10px 0;color:#e8e8f0;">{esc(interest)}</td></tr>'
         f'<tr><td style="padding:10px 0;color:#8b8ba0;vertical-align:top;">Message</td><td style="padding:10px 0;color:#e8e8f0;white-space:pre-wrap;">{esc(message)}</td></tr>'
+        '</table>'
+        '<div style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#f75d44;margin:26px 0 6px;">Where they came from</div>'
+        '<table style="width:100%;border-collapse:collapse;font-size:14px;">'
+        f'<tr><td style="padding:8px 0;color:#8b8ba0;width:140px;">Lead source</td><td style="padding:8px 0;color:#e8e8f0;font-weight:600;">{esc(lead_source)}</td></tr>'
+        f'<tr><td style="padding:8px 0;color:#8b8ba0;">Campaign</td><td style="padding:8px 0;color:#e8e8f0;">{esc(campaign)}</td></tr>'
+        f'<tr><td style="padding:8px 0;color:#8b8ba0;">Ad set</td><td style="padding:8px 0;color:#e8e8f0;">{esc(ad_set)}</td></tr>'
+        f'<tr><td style="padding:8px 0;color:#8b8ba0;">Ad</td><td style="padding:8px 0;color:#e8e8f0;">{esc(ad_name)}</td></tr>'
+        f'<tr><td style="padding:8px 0;color:#8b8ba0;">Meta ad ID</td><td style="padding:8px 0;color:#e8e8f0;">{esc(meta_ad_id)}</td></tr>'
+        f'<tr><td style="padding:8px 0;color:#8b8ba0;">First landing page</td><td style="padding:8px 0;color:#e8e8f0;word-break:break-all;">{esc(first_page)}</td></tr>'
+        f'<tr><td style="padding:8px 0;color:#8b8ba0;">First visit</td><td style="padding:8px 0;color:#e8e8f0;">{esc(first_visit)}</td></tr>'
         '</table>'
         '<p style="margin:22px 0 0;color:#666;font-size:12px;">Sent from the harkeroutdoors.com contact form. The store inbox also received this via Shopify.</p>'
         '</div></div>'
     )
     subj = f"New Harker inquiry: {name or email or 'website contact'}"
+    tags = " · ".join(x for x in (planning, lead_source) if x)
+    if tags:
+        subj += f" · {tags}"
     send_email(NOTIFY_EMAIL, subj, body)
 
     resp = jsonify({"ok": True})
