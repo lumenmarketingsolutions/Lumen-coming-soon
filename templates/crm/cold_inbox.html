@@ -1,0 +1,104 @@
+{% extends "crm/base.html" %}
+{% block title %}Inbox | Cold Email{% endblock %}
+{% block content %}
+<style>
+  .ib { display: grid; grid-template-columns: 340px 1fr; gap: 16px; align-items: start; }
+  .ib-list { background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: 12px; overflow: hidden; }
+  .ib-item { display: block; padding: 14px 16px; border-bottom: 1px solid var(--dark-border); }
+  .ib-item:hover { background: var(--dark-hover); }
+  .ib-item.on { background: var(--teal-glow); }
+  .ib-item .who { font-weight: 600; font-size: 13px; display: flex; justify-content: space-between; gap: 8px; }
+  .ib-item .who .t { font-weight: 400; color: var(--text-muted); font-size: 11px; white-space: nowrap; }
+  .ib-item .pv { color: var(--text-dim); font-size: 12px; margin-top: 4px; overflow: hidden; display: -webkit-box;
+    -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.45; }
+  .ib-item.unread .who::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--teal);
+    display: inline-block; margin-right: 6px; flex-shrink: 0; align-self: center; }
+  .msg { border: 1px solid var(--dark-border); border-radius: 12px; padding: 16px 18px; margin-bottom: 12px; background: var(--dark-card); }
+  .msg.in { border-color: rgba(18,143,196,0.35); }
+  .msg .h { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--text-muted); margin-bottom: 8px; flex-wrap: wrap; }
+  .msg .b { white-space: pre-wrap; line-height: 1.6; font-size: 14px; word-break: break-word; }
+  .msg.faint { opacity: .6; }
+  @media (max-width: 900px) { .ib { grid-template-columns: 1fr; } {% if lead or other %}.ib-list { display: none; }{% endif %} }
+</style>
+<div class="page-header">
+  <div><div class="page-title">Inbox</div><div class="page-sub">Every reply from every sending inbox. Answers go out from the same mailbox, in the same thread.</div></div>
+  <div class="page-actions"><form method="post" action="/crm/email/check-now"><button class="btn btn-outline">Check for new mail</button></form></div>
+</div>
+{% set sub = 'inbox' %}{% set unread_badge = counts.unread %}
+{% include "crm/_cold_nav.html" %}
+
+<div class="cold-tabs" style="margin-top:-8px">
+  {% for k, label in [('unread','Unread'),('replies','All replies'),('interested','Interested'),('later','Later'),('other','Other mail')] %}
+    <a href="/crm/email/inbox?tab={{ k }}" class="{% if tab == k %}on{% endif %}">{{ label }}{% if counts[k] %} <span class="muted">{{ counts[k] }}</span>{% endif %}</a>
+  {% endfor %}
+</div>
+
+<div class="ib">
+  <div class="ib-list">
+    {% if tab == 'other' %}
+      {% for m in threads %}
+        <a class="ib-item {% if not m.is_read %}unread{% endif %} {% if other and other.id == m.id %}on{% endif %}" href="/crm/email/inbox?tab=other&m={{ m.id }}">
+          <div class="who"><span>{{ m.from_addr }}</span><span class="t">{{ m.created_at[5:16]|replace('T',' ') }}</span></div>
+          <div class="pv">{{ m.subject }} · to {{ m.inbox_email }}</div>
+        </a>
+      {% else %}<div class="ib-item muted">Nothing here. Mail from people who aren't in a campaign shows up here (your warmup conversations, for example).</div>{% endfor %}
+    {% else %}
+      {% for t in threads %}
+        <a class="ib-item {% if t.unread %}unread{% endif %} {% if lead and lead.id == t.id %}on{% endif %}" href="/crm/email/inbox/{{ t.id }}?tab={{ tab }}">
+          <div class="who"><span>{{ t.company or t.first_name or t.email }}</span><span class="t">{{ (t.last_at or '')[5:16]|replace('T',' ') }}</span></div>
+          <div class="pv">{{ strip_quoted(t.last_in or '')[:160] }}</div>
+          <div style="margin-top:6px">{% if t.interest %}<span class="pill {{ t.interest }}">{{ t.interest|replace('_',' ') }}</span>{% endif %} <span class="muted" style="font-size:11px">{{ t.campaign_name }}</span></div>
+        </a>
+      {% else %}<div class="ib-item muted" style="padding:22px">No replies yet.</div>{% endfor %}
+    {% endif %}
+  </div>
+
+  <div>
+    {% if lead %}
+      <div class="card" style="padding:18px 20px;margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;align-items:center">
+          <div>
+            <b style="font-size:16px">{{ lead.company or lead.email }}</b>
+            <div class="muted-note">{{ [lead.first_name, lead.last_name]|select|join(' ') }} · {{ lead.email }} · {{ lead.campaign_name }} · via {{ ibx.email if ibx else '?' }}</div>
+            <div style="margin-top:6px"><span class="pill {{ lead.status }}">{{ lead.status }}</span>{% if lead.interest %} <span class="pill {{ lead.interest }}">{{ lead.interest|replace('_',' ') }}</span>{% endif %}
+              {% if lead.ghl_contact_id %}<a class="muted-note" style="margin-left:8px;text-decoration:underline" target="_blank" href="https://app.gohighlevel.com/v2/location/6b4I6ILHBVcWQYlmPj3i/contacts/detail/{{ lead.ghl_contact_id }}">Open in GHL</a>{% endif %}</div>
+          </div>
+          <form method="post" style="display:flex;gap:6px;flex-wrap:wrap">
+            <input type="hidden" name="tab" value="{{ tab }}">
+            <button class="btn btn-primary btn-sm" name="action" value="interested">Interested → GHL</button>
+            <button class="btn btn-outline btn-sm" name="action" value="later">Later</button>
+            <button class="btn btn-outline btn-sm" name="action" value="not_interested">Not interested</button>
+            {% if lead.status == 'active' %}<button class="btn btn-outline btn-sm" name="action" value="stop">Stop sequence</button>{% endif %}
+            <button class="btn btn-danger btn-sm" name="action" value="unsubscribe" onclick="return confirm('Never email {{ lead.email }} again?')">Opt out</button>
+          </form>
+        </div>
+      </div>
+      {% for m in msgs %}
+        <div class="msg {{ m.direction }} {% if m.kind in ('auto','bounce') %}faint{% endif %}">
+          <div class="h"><span>{% if m.direction == 'out' %}You → {{ m.to_addr }}{% if m.kind == 'step' %} · step {{ m.step_no }}{% endif %}{% else %}{{ m.from_addr }}{% if m.kind != 'reply' %} · {{ m.kind }}{% endif %}{% endif %}</span><span>{{ m.created_at[:16]|replace('T',' ') }} UTC</span></div>
+          <div style="font-weight:600;font-size:13px;margin-bottom:6px">{{ m.subject }}</div>
+          <div class="b">{{ strip_quoted(m.body_text) if m.direction == 'in' else m.body_text }}</div>
+        </div>
+      {% endfor %}
+      {% if ibx %}
+      <form method="post" class="card" style="padding:18px 20px">
+        <input type="hidden" name="action" value="reply"><input type="hidden" name="tab" value="{{ tab }}">
+        <label class="form-label">Reply from {{ ibx.email }}</label>
+        <textarea class="form-textarea" name="body" style="min-height:160px;margin-top:6px" placeholder="Write your reply. Your signature is added."></textarea>
+        <div style="margin-top:10px;display:flex;gap:8px"><button class="btn btn-primary">Send reply</button>
+          <a class="btn btn-ghost" href="/crm/email/inbox?tab={{ tab }}">Back</a></div>
+      </form>
+      {% endif %}
+    {% elif other %}
+      <div class="msg in">
+        <div class="h"><span>{{ other.from_addr }} → {{ other.to_addr }}</span><span>{{ other.created_at[:16]|replace('T',' ') }} UTC</span></div>
+        <div style="font-weight:600;font-size:13px;margin-bottom:6px">{{ other.subject }}</div>
+        <div class="b">{{ other.body_text }}</div>
+      </div>
+      <p class="muted-note">This sender isn't in a campaign. Answer it from Gmail directly.</p>
+    {% else %}
+      <div class="card" style="padding:40px;text-align:center" class="muted">Pick a conversation.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "crm/base.html" %}
+{% block title %}{{ camp.name }} | Cold Email{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">{{ camp.name }} <span class="pill {{ camp.status }}" style="vertical-align:middle">{{ camp.status }}</span></div>
+    <div class="page-sub">{{ counts.values()|sum }} leads · {{ stats.sent }} sent · {{ stats.replied }} replied ({{ stats.reply_rate }}%) · {{ stats.interested }} interested · {{ stats.bounced }} bounced</div>
+  </div>
+  <div class="page-actions">
+    <form method="post" style="display:flex;gap:8px">
+      {% if camp.status == 'active' %}<button class="btn btn-outline" name="action" value="pause">Pause</button>
+      {% elif camp.status == 'paused' %}<button class="btn btn-primary" name="action" value="resume">Resume</button>{% endif %}
+      <button class="btn btn-danger" name="action" value="delete" onclick="return confirm('Delete this campaign and its leads?')">Delete</button>
+    </form>
+  </div>
+</div>
+{% set sub = '' %}
+{% include "crm/_cold_nav.html" %}
+
+<form method="post" id="campform">
+<div class="card" style="padding:24px;margin-bottom:20px">
+  <div class="section-h" style="margin-top:0">Setup</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
+    <div class="form-row"><label class="form-label">Name</label><input class="form-input" name="name" value="{{ camp.name }}"></div>
+    <div class="form-row"><label class="form-label">Lead list</label>
+      <select class="form-select" name="audience_id">
+        <option value="">Pick a list</option>
+        {% for a in audiences %}<option value="{{ a.id }}" {% if a.id == camp.audience_id %}selected{% endif %}>{{ a.name }} ({{ a.member_count }})</option>{% endfor %}
+      </select>
+      <span class="muted-note">Upload CSVs under <a href="/crm/outreach/audiences" style="text-decoration:underline">Lead lists</a>. Columns: email, first_name, company, plus any extras (use them as {{ '{{' }}column_name{{ '}}' }}).</span></div>
+    <div class="form-row"><label class="form-label">GHL tag (optional)</label><input class="form-input" name="ghl_tag" value="{{ camp.ghl_tag or '' }}" placeholder="cold-hardscape-oct"></div>
+    <div class="form-row"><label class="form-label">Max sends per day for this campaign (0 = no limit)</label><input class="form-input" name="daily_limit" value="{{ camp.daily_limit }}"></div>
+  </div>
+
+  <div class="form-row" style="margin-top:16px"><label class="form-label">Send from</label>
+    <div style="display:flex;flex-wrap:wrap;gap:14px">
+      {% for i in inboxes %}<label style="display:flex;gap:6px;align-items:center"><input type="checkbox" name="inbox_ids" value="{{ i.id }}" {% if i.id in sel_inboxes %}checked{% endif %}> {{ i.email }} <span class="pill {{ i.status }}">{{ i.status }}</span></label>
+      {% else %}<span class="muted-note">No inboxes yet. <a href="/crm/email/inboxes" style="text-decoration:underline">Add one</a>.</span>{% endfor %}
+    </div>
+    <span class="muted-note">Capacity today across these inboxes: {{ daily_capacity }} emails. Each lead stays on one inbox for the whole thread.</span>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:16px">
+    <div class="form-row"><label class="form-label">Send days</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">{% for d in days %}<label style="display:flex;gap:4px;align-items:center"><input type="checkbox" name="send_days" value="{{ loop.index0 }}" {% if loop.index0 in sel_days %}checked{% endif %}>{{ d }}</label>{% endfor %}</div></div>
+    <div class="form-row"><label class="form-label">Send hours (recipient time)</label>
+      <div style="display:flex;gap:8px;align-items:center"><input class="form-input" name="window_start" value="{{ camp.window_start }}" style="width:70px"> to <input class="form-input" name="window_end" value="{{ camp.window_end }}" style="width:70px"></div></div>
+    <div class="form-row"><label class="form-label">Time zone</label>
+      <select class="form-select" name="timezone">{% for t in timezones %}<option {% if t == camp.timezone %}selected{% endif %}>{{ t }}</option>{% endfor %}</select></div>
+  </div>
+</div>
+
+<div class="card" style="padding:24px;margin-bottom:20px">
+  <div class="section-h" style="margin-top:0">Sequence</div>
+  <p class="muted-note" style="margin-bottom:16px">
+    Plain text, one thread. Follow-ups with a blank subject go as "Re:" in the same thread. The sequence stops for anyone who replies, bounces or opts out.
+    Merge tags: {{ '{{first_name}}' }}, {{ '{{company}}' }}, {{ '{{last_name}}' }}, plus your CSV columns. Spintax: {Hey|Hi|Hello}.
+    The signature and opt-out line are added automatically.
+  </p>
+  {% for s in steps %}
+  <div style="border:1px solid var(--dark-border);border-radius:12px;padding:18px;margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <b>Step {{ s.step_no }} <span class="muted" style="font-weight:400">· day {{ timeline[loop.index0] }}</span></b>
+      {% if s.step_no > 1 %}<label class="muted-note">Wait <input class="form-input" name="step_delay" value="{{ s.delay_days }}" style="width:60px;display:inline-block;padding:6px 8px"> days after previous</label>
+      {% else %}<input type="hidden" name="step_delay" value="0">{% endif %}
+    </div>
+    <input class="form-input" name="step_subject" value="{{ s.subject or '' }}" placeholder="{% if s.step_no > 1 %}Blank = reply in the same thread{% else %}Subject{% endif %}" style="margin-bottom:8px">
+    <textarea class="form-textarea" name="step_body" style="min-height:150px">{{ s.body }}</textarea>
+    <details style="margin-top:8px"><summary class="muted-note" style="cursor:pointer">Preview for {{ sample.company or sample.email }}</summary>
+      <div style="background:#fff;color:#222;border-radius:8px;padding:16px;margin-top:8px;font-size:14px;white-space:pre-wrap;line-height:1.55"><b>{{ previews[loop.index0].subject }}</b>
+
+{{ previews[loop.index0].body }}</div></details>
+    <div class="muted-note" style="margin-top:6px">Clear the body and save to remove this step.</div>
+  </div>
+  {% endfor %}
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-outline" name="add_step" value="1">Add step</button>
+  </div>
+</div>
+
+<div class="card" style="padding:24px;margin-bottom:28px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+  <button class="btn btn-outline" name="action" value="save">Save</button>
+  <input class="form-input" name="test_to" placeholder="Send test to (default: you)" style="width:240px">
+  <button class="btn btn-outline" name="action" value="test">Save + send test of all steps</button>
+  <span style="flex:1"></span>
+  {% if camp.status in ('draft','paused','completed') %}
+  <button class="btn btn-primary" name="action" value="launch" onclick="return confirm('Launch? New leads from the list get queued and sending starts inside your window.')">{% if camp.status == 'draft' %}Launch{% else %}Add new list members + run{% endif %}</button>
+  {% endif %}
+</div>
+</form>
+
+<div class="section-h">Leads</div>
+<div class="cold-tabs" style="margin-bottom:12px">
+  <a href="?" class="{% if not status_filter %}on{% endif %}">All {{ counts.values()|sum }}</a>
+  {% for st in ['active','replied','completed','bounced','unsubscribed','stopped'] %}
+    {% if counts.get(st) %}<a href="?s={{ st }}" class="{% if status_filter == st %}on{% endif %}">{{ st }} {{ counts[st] }}</a>{% endif %}
+  {% endfor %}
+</div>
+<div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>Lead</th><th>Company</th><th>Status</th><th>Step</th><th>Next send (UTC)</th><th></th></tr></thead>
+    <tbody>
+    {% for l in leads %}
+      <tr>
+        <td>{{ l.email }}</td><td class="dim">{{ l.company or '' }}</td>
+        <td><span class="pill {{ l.status }}">{{ l.status }}</span>{% if l.interest %} <span class="pill {{ l.interest }}">{{ l.interest|replace('_',' ') }}</span>{% endif %}</td>
+        <td>{{ l.last_step }} / {{ steps|length }}</td>
+        <td class="dim">{{ (l.next_send_at or '')[:16]|replace('T',' ') }}</td>
+        <td>{% if l.replied_at or l.last_step %}<a href="/crm/email/inbox/{{ l.id }}" style="color:var(--teal)">Thread</a>{% endif %}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="muted" style="padding:22px">No leads yet. They're added when you launch.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

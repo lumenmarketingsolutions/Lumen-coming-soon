@@ -1,0 +1,35 @@
+<style>
+  .cold-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 0 0 24px; }
+  .cold-tabs a { padding: 8px 14px; border-radius: 9px; font-size: 13px; font-weight: 500; color: var(--text-dim);
+    border: 1px solid var(--dark-border); background: var(--dark-card); }
+  .cold-tabs a:hover { color: var(--text); }
+  .cold-tabs a.on { color: var(--teal); border-color: rgba(18,143,196,0.4); background: var(--teal-glow); }
+  .cold-tabs .dot { display: inline-block; min-width: 18px; padding: 0 6px; margin-left: 6px; border-radius: 9px;
+    background: var(--teal); color: #fff; font-size: 11px; text-align: center; }
+  .flash { padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-size: 13px; line-height: 1.5; }
+  .flash.ok { background: rgba(52,211,153,0.10); border: 1px solid rgba(52,211,153,0.3); color: var(--green); }
+  .flash.error { background: rgba(248,113,113,0.10); border: 1px solid rgba(248,113,113,0.3); color: var(--red); }
+  .cold-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .cold-stat { background: var(--dark-card); border: 1px solid var(--dark-border); border-radius: 12px; padding: 16px 18px; }
+  .cold-stat .v { font-size: 24px; font-weight: 700; letter-spacing: -0.4px; }
+  .cold-stat .l { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1.2px; margin-top: 4px; }
+  .cold-stat .s { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
+  .pill { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .pill.active, .pill.replied, .pill.interested { background: rgba(52,211,153,0.12); color: var(--green); }
+  .pill.paused, .pill.draft, .pill.later { background: rgba(245,158,11,0.12); color: var(--amber); }
+  .pill.error, .pill.bounced, .pill.unsubscribed, .pill.not_interested { background: rgba(248,113,113,0.12); color: var(--red); }
+  .pill.completed, .pill.stopped { background: rgba(255,255,255,0.06); color: var(--text-dim); }
+  .section-h { font-size: 15px; font-weight: 600; margin: 8px 0 12px; }
+  .muted-note { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+  .warn { padding: 14px 16px; border-radius: 10px; background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25);
+    color: var(--amber); font-size: 13px; line-height: 1.6; margin-bottom: 16px; }
+</style>
+<div class="cold-tabs">
+  <a href="/crm/email/" class="{% if sub == 'overview' %}on{% endif %}">Overview</a>
+  <a href="/crm/email/inbox" class="{% if sub == 'inbox' %}on{% endif %}">Inbox{% if unread_badge %}<span class="dot">{{ unread_badge }}</span>{% endif %}</a>
+  <a href="/crm/email/inboxes" class="{% if sub == 'inboxes' %}on{% endif %}">Sending inboxes</a>
+  <a href="/crm/outreach/audiences">Lead lists</a>
+</div>
+{% with msgs = get_flashed_messages(with_categories=true) %}
+  {% for cat, m in msgs %}<div class="flash {{ cat }}">{{ m }}</div>{% endfor %}
+{% endwith %}

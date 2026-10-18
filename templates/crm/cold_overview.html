@@ -1,0 +1,77 @@
+{% extends "crm/base.html" %}
+{% block title %}Cold Email | Lumen{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Cold Email</div>
+    <div class="page-sub">Send from your own inboxes, read and answer every reply here, push interested leads into GHL.</div>
+  </div>
+  <div class="page-actions">
+    <form method="post" action="/crm/email/campaigns/new" style="display:flex;gap:8px">
+      <input class="form-input" name="name" placeholder="Campaign name" style="width:220px">
+      <button class="btn btn-primary">New campaign</button>
+    </form>
+  </div>
+</div>
+{% set sub = 'overview' %}{% set unread_badge = unread %}
+{% include "crm/_cold_nav.html" %}
+
+{% if not inboxes %}
+  <div class="warn">No sending inboxes yet. Add your first Google Workspace inbox under <a href="/crm/email/inboxes" style="text-decoration:underline">Sending inboxes</a>, then build a campaign.</div>
+{% endif %}
+{% if not mailing_address %}
+  <div class="warn">OUTREACH_MAILING_ADDRESS isn't set. US law (CAN-SPAM) needs a postal address in every cold email. Set it on Railway before launching.</div>
+{% endif %}
+{% if not ghl_ready %}
+  <div class="warn">GHL_MK7_PIT isn't set, so "Interested" can't create GHL contacts yet.</div>
+{% endif %}
+
+<div class="cold-grid">
+  <div class="cold-stat"><div class="v">{{ today_sent }} <span style="font-size:14px;color:var(--text-muted)">/ {{ today_cap }}</span></div><div class="l">Sent today / capacity</div></div>
+  <div class="cold-stat"><div class="v">{{ week.sent }}</div><div class="l">Sent, last 7 days</div><div class="s">{{ week.contacted }} people</div></div>
+  <div class="cold-stat"><div class="v">{{ total.replied }}</div><div class="l">Replied</div><div class="s">{{ total.reply_rate }}% reply rate</div></div>
+  <div class="cold-stat"><div class="v">{{ total.interested }}</div><div class="l">Interested</div><div class="s">sent to GHL</div></div>
+  <div class="cold-stat"><div class="v" style="{% if total.bounce_rate > 2 %}color:var(--red){% endif %}">{{ total.bounce_rate }}%</div><div class="l">Bounce rate</div><div class="s">keep under 2%</div></div>
+  <div class="cold-stat"><div class="v">{{ unread }}</div><div class="l">Unread replies</div><div class="s"><a href="/crm/email/inbox?tab=unread" style="color:var(--teal)">Open inbox</a></div></div>
+</div>
+
+<div class="section-h">Campaigns</div>
+<div class="table-wrap" style="margin-bottom:28px">
+  <table class="data">
+    <thead><tr><th>Campaign</th><th>Status</th><th>Leads</th><th>Sent</th><th>Replies</th><th>Interested</th><th>Bounces</th></tr></thead>
+    <tbody>
+    {% for c in camps %}{% set s = camp_stats[c.id] %}
+      <tr onclick="location='/crm/email/campaigns/{{ c.id }}'" style="cursor:pointer">
+        <td><b>{{ c.name }}</b></td>
+        <td><span class="pill {{ c.status }}">{{ c.status }}</span></td>
+        <td>{{ c.n_leads }}</td><td>{{ s.sent }}</td>
+        <td>{{ s.replied }} <span class="muted">({{ s.reply_rate }}%)</span></td>
+        <td>{{ s.interested }}</td><td>{{ s.bounced }} <span class="muted">({{ s.bounce_rate }}%)</span></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="7" class="muted" style="padding:22px">No campaigns yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="section-h">Inbox health</div>
+<div class="table-wrap">
+  <table class="data">
+    <thead><tr><th>Inbox</th><th>Status</th><th>Today</th><th>Last checked</th><th>Note</th></tr></thead>
+    <tbody>
+    {% for r in inboxes %}
+      <tr>
+        <td>{{ r.i.email }}</td>
+        <td><span class="pill {{ r.i.status }}">{{ r.i.status }}</span></td>
+        <td>{{ r.sent }} / {{ r.cap }}{% if r.cap == 0 and r.i.cold_start_date %} <span class="muted">warming until {{ r.i.cold_start_date }}</span>{% endif %}</td>
+        <td class="dim">{{ (r.i.last_checked_at or '')[:16]|replace('T',' ') }}</td>
+        <td class="dim" style="max-width:320px">{{ r.i.last_error or '' }}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted" style="padding:22px">No inboxes yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

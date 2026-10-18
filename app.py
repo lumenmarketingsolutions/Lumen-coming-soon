@@ -113,6 +113,10 @@ from outreach import outreach_bp
 import outreach_scrapers  # noqa: F401  (registers /crm/outreach/scrapers/* routes)
 app.register_blueprint(outreach_bp)
 
+# Cold email from our own Workspace inboxes (SMTP send, IMAP replies, unified inbox, GHL push), /crm/email.
+from cold_email import cold_bp
+app.register_blueprint(cold_bp)
+
 # MK7 WhatsApp Outreach Agent — Phase 1 foundation, mounted at /crm/whatsapp.
 # Send pipeline ports across from mk7media/agents/whatsapp_agent in Phase 2.
 from whatsapp_outreach import whatsapp_bp

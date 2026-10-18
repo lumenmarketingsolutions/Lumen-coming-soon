@@ -1,0 +1,72 @@
+{% extends "crm/base.html" %}
+{% block title %}Sending inboxes | Cold Email{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Sending inboxes</div>
+    <div class="page-sub">The mailboxes cold email goes out from. Never add lumenmarketing.co or any main brand domain here.</div>
+  </div>
+</div>
+{% set sub = 'inboxes' %}
+{% include "crm/_cold_nav.html" %}
+
+<div class="card" style="padding:24px;margin-bottom:28px">
+  <div class="section-h" style="margin-top:0">Add an inbox</div>
+  <p class="muted-note" style="margin-bottom:18px">
+    Google Workspace: turn on 2-Step Verification for the mailbox, then create an app password at
+    myaccount.google.com/apppasswords and paste the 16 characters below. The password is stored encrypted.
+  </p>
+  <form method="post" action="/crm/email/inboxes" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+    <div class="form-row"><label class="form-label">Email</label><input class="form-input" name="email" placeholder="kendall@golumenmarketing.com" required></div>
+    <div class="form-row"><label class="form-label">App password</label><input class="form-input" name="password" type="password" placeholder="abcd efgh ijkl mnop" required></div>
+    <div class="form-row"><label class="form-label">From name</label><input class="form-input" name="from_name" value="Kendall Davis"></div>
+    <div class="form-row"><label class="form-label">Provider</label>
+      <select class="form-select" name="provider"><option value="google">Google Workspace</option><option value="microsoft">Microsoft 365</option></select></div>
+    <div class="form-row"><label class="form-label">Cold sends start on</label><input class="form-input" type="date" name="cold_start_date" value="{{ default_start }}">
+      <span class="muted-note">Warm it by hand until then (normal emails, get replies).</span></div>
+    <div class="form-row"><label class="form-label">First day / +per day / max per day</label>
+      <div style="display:flex;gap:8px"><input class="form-input" name="ramp_start" value="5"><input class="form-input" name="ramp_step" value="2"><input class="form-input" name="daily_cap" value="20"></div></div>
+    <div class="form-row"><label class="form-label">Minutes between sends</label><input class="form-input" name="min_gap_min" value="6"></div>
+    <div class="form-row" style="grid-column:1/-1"><label class="form-label">Signature (plain text)</label>
+      <textarea class="form-textarea" name="signature" style="min-height:70px">Kendall Davis
+Lumen Marketing</textarea></div>
+    <div><button class="btn btn-primary">Add and test connection</button></div>
+  </form>
+</div>
+
+{% for r in rows %}{% set i = r.i %}
+<div class="card" style="padding:22px;margin-bottom:16px">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+    <div>
+      <b style="font-size:15px">{{ i.email }}</b> <span class="pill {{ i.status }}">{{ i.status }}</span>
+      <div class="muted-note" style="margin-top:4px">
+        Today {{ r.sent }} / {{ r.cap }} cold sends · tomorrow {{ r.tomorrow }}
+        {% if i.cold_start_date %}· cold sending starts {{ i.cold_start_date }}{% endif %}
+        · checked {{ (i.last_checked_at or 'never')[:16]|replace('T',' ') }}
+      </div>
+      {% if i.last_error %}<div style="color:var(--red);font-size:12px;margin-top:6px">{{ i.last_error }}</div>{% endif %}
+    </div>
+    <form method="post" action="/crm/email/inboxes/{{ i.id }}" style="display:flex;gap:6px">
+      <button class="btn btn-outline btn-sm" name="action" value="test">Test</button>
+      {% if i.status == 'paused' %}<button class="btn btn-outline btn-sm" name="action" value="resume">Resume</button>
+      {% else %}<button class="btn btn-outline btn-sm" name="action" value="pause">Pause</button>{% endif %}
+      <button class="btn btn-danger btn-sm" name="action" value="delete" onclick="return confirm('Remove {{ i.email }}?')">Remove</button>
+    </form>
+  </div>
+  <details>
+    <summary class="muted-note" style="cursor:pointer">Edit settings</summary>
+    <form method="post" action="/crm/email/inboxes/{{ i.id }}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:14px">
+      <input type="hidden" name="action" value="save">
+      <div class="form-row"><label class="form-label">From name</label><input class="form-input" name="from_name" value="{{ i.from_name }}"></div>
+      <div class="form-row"><label class="form-label">Cold sends start on</label><input class="form-input" type="date" name="cold_start_date" value="{{ i.cold_start_date or '' }}"></div>
+      <div class="form-row"><label class="form-label">First / +per day / max</label>
+        <div style="display:flex;gap:8px"><input class="form-input" name="ramp_start" value="{{ i.ramp_start }}"><input class="form-input" name="ramp_step" value="{{ i.ramp_step }}"><input class="form-input" name="daily_cap" value="{{ i.daily_cap }}"></div></div>
+      <div class="form-row"><label class="form-label">Minutes between sends</label><input class="form-input" name="min_gap_min" value="{{ i.min_gap_min }}"></div>
+      <div class="form-row"><label class="form-label">New app password (optional)</label><input class="form-input" type="password" name="password"></div>
+      <div class="form-row" style="grid-column:1/-1"><label class="form-label">Signature</label><textarea class="form-textarea" name="signature" style="min-height:60px">{{ i.signature or '' }}</textarea></div>
+      <div><button class="btn btn-primary btn-sm">Save</button></div>
+    </form>
+  </details>
+</div>
+{% endfor %}
+{% endblock %}
