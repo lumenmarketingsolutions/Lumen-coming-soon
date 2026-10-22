@@ -457,6 +457,8 @@ def check_inbox(ibx_id):
 
 
 def _ingest(con, ibx, msg):
+    if msg.get("X-Lumen-W"):          # inbox-to-inbox warmup mail, handled by cold_warmup.py
+        return
     frm_name, frm = email.utils.parseaddr(msg.get("From", ""))
     frm = _norm(frm)
     if frm == _norm(ibx["email"]):
@@ -806,8 +808,11 @@ def overview():
 @admin_required
 def inboxes_page():
     con = db()
+    from cold_warmup import warmup_sent_today, warmup_target, WARM_TZ
+    local = _utcnow().astimezone(WARM_TZ)
     rows = [{"i": i, "cap": inbox_cap_today(i), "sent": _sent_today(con, i["id"]),
-             "tomorrow": inbox_cap_today(i, _utcnow().date() + datetime.timedelta(days=1))}
+             "tomorrow": inbox_cap_today(i, _utcnow().date() + datetime.timedelta(days=1)),
+             "warm": warmup_sent_today(con, i["id"]), "warm_target": warmup_target(i, local)}
             for i in con.execute("SELECT * FROM cold_inboxes ORDER BY id").fetchall()]
     con.close()
     return render_template("crm/cold_inboxes.html", active="cold", rows=rows,
@@ -872,6 +877,8 @@ def inbox_update(iid):
                     ((f.get("from_name") or ibx["from_name"]).strip(), (f.get("signature") or "").strip(),
                      int(f.get("daily_cap") or 20), int(f.get("ramp_start") or 5), int(f.get("ramp_step") or 2),
                      f.get("cold_start_date") or None, int(f.get("min_gap_min") or 6), iid))
+        con.execute("UPDATE cold_inboxes SET warmup_on=?, warmup_max=? WHERE id=?",
+                    (1 if f.get("warmup_on") else 0, int(f.get("warmup_max") or 8), iid))
         if pw:
             con.execute("UPDATE cold_inboxes SET password_enc=? WHERE id=?", (_enc(pw), iid))
         flash(f"{ibx['email']} saved.", "ok")
@@ -1209,3 +1216,7 @@ def unsubscribe(token):
 
 init_cold_db()
 start_cold_workers()
+
+from cold_warmup import init_warmup_db, start_warmup_worker
+init_warmup_db()
+start_warmup_worker()

@@ -23,7 +23,7 @@
     <div class="form-row"><label class="form-label">Provider</label>
       <select class="form-select" name="provider"><option value="google">Google Workspace</option><option value="microsoft">Microsoft 365</option></select></div>
     <div class="form-row"><label class="form-label">Cold sends start on</label><input class="form-input" type="date" name="cold_start_date" value="{{ default_start }}">
-      <span class="muted-note">Warm it by hand until then (normal emails, get replies).</span></div>
+      <span class="muted-note">Until then it only warms: automatic inbox to inbox emails plus your normal emails.</span></div>
     <div class="form-row"><label class="form-label">First day / +per day / max per day</label>
       <div style="display:flex;gap:8px"><input class="form-input" name="ramp_start" value="5"><input class="form-input" name="ramp_step" value="2"><input class="form-input" name="daily_cap" value="20"></div></div>
     <div class="form-row"><label class="form-label">Minutes between sends</label><input class="form-input" name="min_gap_min" value="6"></div>
@@ -41,6 +41,7 @@ Lumen Marketing</textarea></div>
       <b style="font-size:15px">{{ i.email }}</b> <span class="pill {{ i.status }}">{{ i.status }}</span>
       <div class="muted-note" style="margin-top:4px">
         Today {{ r.sent }} / {{ r.cap }} cold sends · tomorrow {{ r.tomorrow }}
+        · warmup {% if i.warmup_on %}{{ r.warm }} / {{ r.warm_target }} today{% else %}off{% endif %}
         {% if i.cold_start_date %}· cold sending starts {{ i.cold_start_date }}{% endif %}
         · checked {{ (i.last_checked_at or 'never')[:16]|replace('T',' ') }}
       </div>
@@ -62,6 +63,8 @@ Lumen Marketing</textarea></div>
       <div class="form-row"><label class="form-label">First / +per day / max</label>
         <div style="display:flex;gap:8px"><input class="form-input" name="ramp_start" value="{{ i.ramp_start }}"><input class="form-input" name="ramp_step" value="{{ i.ramp_step }}"><input class="form-input" name="daily_cap" value="{{ i.daily_cap }}"></div></div>
       <div class="form-row"><label class="form-label">Minutes between sends</label><input class="form-input" name="min_gap_min" value="{{ i.min_gap_min }}"></div>
+      <div class="form-row"><label class="form-label">Warmup (inbox to inbox, max per day)</label>
+        <div style="display:flex;gap:8px;align-items:center"><input type="checkbox" name="warmup_on" value="1" {% if i.warmup_on %}checked{% endif %}><input class="form-input" name="warmup_max" value="{{ i.warmup_max }}"></div></div>
       <div class="form-row"><label class="form-label">New app password (optional)</label><input class="form-input" type="password" name="password"></div>
       <div class="form-row" style="grid-column:1/-1"><label class="form-label">Signature</label><textarea class="form-textarea" name="signature" style="min-height:60px">{{ i.signature or '' }}</textarea></div>
       <div><button class="btn btn-primary btn-sm">Save</button></div>
