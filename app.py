@@ -105,6 +105,10 @@ app.register_blueprint(sce_admin_bp)
 from crm import crm_bp
 app.register_blueprint(crm_bp)
 
+# Med spa landing page + VSL watch tracking at /medspa, stats at /crm/vsl — see medspa_page.py
+from medspa_page import medspa_bp
+app.register_blueprint(medspa_bp)
+
 # MK7 Outreach Agent — admin-only cold-email blast tool, mounted at /crm/outreach.
 # Order matters: outreach_scrapers attaches routes to outreach_bp at import time,
 # so it must be imported BEFORE register_blueprint() — Flask freezes blueprints
