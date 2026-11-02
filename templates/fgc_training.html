@@ -97,9 +97,15 @@ async function post(fd) {
   busy = true; send.disabled = true; typing(true);
   try {
     const r = await fetch('/FGCagenttraining/api/chat', { method: 'POST', body: fd });
-    const j = await r.json().catch(() => ({}));
-    typing(false);
+    let j = await r.json().catch(() => ({}));
     if (r.status === 401) { location.reload(); return; }
+    // Slow answers come back later; check every 3 seconds for up to 4 minutes.
+    for (let i = 0; j.pending && i < 80; i++) {
+      await new Promise(ok => setTimeout(ok, 3000));
+      const s = await fetch('/FGCagenttraining/api/status');
+      j = await s.json().catch(() => ({ pending: true }));
+    }
+    typing(false);
     add('assistant', j.reply || j.error || 'Something went wrong. Your message is saved, try again in a minute.');
   } catch (e) {
     typing(false);

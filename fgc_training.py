@@ -3,7 +3,7 @@
 #    is kept in SQLite and the FULL history goes to the model on every turn, so nothing is
 #    ever lost between sessions. Facts she confirms are also saved to a structured "Syria
 #    brief" (record_fact tool) that Kendall/Jarvis read via the export endpoint.
-import os, sqlite3, datetime, json, base64
+import os, sqlite3, datetime, json, base64, threading
 from flask import Blueprint, render_template, request, jsonify, session, redirect
 
 fgc_training_bp = Blueprint("fgc_training", __name__)
@@ -39,6 +39,10 @@ time, especially for the Arabic.
 - Every time she confirms a concrete fact, call record_fact before you reply (one call per fact, \
 several in a turn is fine). Record what she actually said, in her words where it matters. If she \
 corrects an earlier fact, record it again under the same key; the newest one wins.
+- When she confirms a CHANGE (a new price, a rule that no longer holds), apply it in the same turn: \
+call record_fact again under the EXISTING key of every item it affects, so nothing live still says the \
+old thing. Open questions never reach the live agent, so never park a confirmed change there. Say \
+"live in about 5 minutes" once saved.
 - She may stop at any time and come back days later. When she returns, greet her briefly, say in one \
 line where you left off, and carry on. Never restart.
 
@@ -182,7 +186,8 @@ def _system():
 
 def _run_turn():
     import anthropic
-    client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
+    client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""),
+                                 timeout=150, max_retries=1)
     for _ in range(8):  # tool loop
         resp = client.beta.messages.create(
             model=MODEL, max_tokens=16000,
@@ -220,6 +225,39 @@ def _run_turn():
 
 OPENER = ("(Mary just opened the training page for the first time. The greeting below was shown "
           "to her automatically. Continue the interview from her answer.)")
+
+
+_turn = None
+_turn_lock = threading.Lock()
+
+
+def _start_turn():
+    """One model turn at a time. A message sent during a turn is picked up by the loop."""
+    global _turn
+    with _turn_lock:
+        if _turn is not None and _turn["thread"].is_alive():
+            return _turn
+        state = {"reply": None, "error": None}
+
+        def work():
+            try:
+                while True:
+                    state["reply"] = _run_turn()
+                    last = _history()[-1]
+                    # Stored by the turn itself? Then nothing new came in while it ran.
+                    if last["role"] == "assistant":
+                        break
+                    c = last["content"]
+                    if isinstance(c, list) and all(b.get("type") == "tool_result" for b in c):
+                        break
+            except Exception as e:
+                print(f"[fgc-training] model error: {e}")
+                state["error"] = "Something went wrong on my side. Your message is saved, try sending again in a minute."
+
+        state["thread"] = threading.Thread(target=work, daemon=True)
+        _turn = state
+        state["thread"].start()
+        return state
 
 
 def _authed():
@@ -281,12 +319,47 @@ def chat():
     if not blocks:
         return jsonify({"error": "empty"}), 400
     _save("user", blocks)
-    try:
-        reply = _run_turn()
-    except Exception as e:
-        print(f"[fgc-training] model error: {e}")
-        return jsonify({"error": "Something went wrong on my side. Your message is saved, try sending again in a minute."}), 502
-    return jsonify({"reply": reply})
+    # The model can take longer than gunicorn's 30s request limit, which killed the
+    # request and lost the reply (02.11.2026). The turn runs in the background; slow
+    # ones return "pending" and the page polls /api/status for the answer.
+    state = _start_turn()
+    state["thread"].join(22)
+    if state["thread"].is_alive():
+        return jsonify({"pending": True})
+    if state["error"]:
+        return jsonify({"error": state["error"]}), 502
+    return jsonify({"reply": state["reply"]})
+
+
+@fgc_training_bp.route("/FGCagenttraining/api/status")
+def status():
+    if not _authed():
+        return jsonify({"error": "auth"}), 401
+    state = _turn
+    if state is None or state["thread"].is_alive():
+        return jsonify({"pending": state is not None})
+    return jsonify({"pending": False, "reply": state["reply"], "error": state["error"]})
+
+
+@fgc_training_bp.route("/FGCagenttraining/facts", methods=["POST"])
+def facts():
+    """For Kendall/Jarvis: correct saved facts directly. Newest value per key wins, so this
+    replaces them. Body: {"facts": [{section, key, value}], "note": "shown in Mary's chat"}."""
+    if request.args.get("k") != EXPORT_KEY:
+        return "no", 403
+    body = request.get_json(force=True) or {}
+    con = _db()
+    n = 0
+    for f in body.get("facts") or []:
+        if f.get("section") in SECTIONS and f.get("key") and f.get("value"):
+            con.execute("INSERT INTO facts (ts, section, key, value) VALUES (?,?,?,?)",
+                        (_now(), f["section"], f["key"][:120], f["value"][:4000]))
+            n += 1
+    con.commit()
+    con.close()
+    if body.get("note"):
+        _save("assistant", [{"type": "text", "text": body["note"]}])
+    return jsonify({"ok": True, "saved": n})
 
 
 @fgc_training_bp.route("/FGCagenttraining/export")
