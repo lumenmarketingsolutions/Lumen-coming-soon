@@ -1264,7 +1264,8 @@ def index():
 
 @app.route("/qualify")
 def qualify():
-    return render_template("qualify.html")
+    # archived Nov 14 2026 (template was missing); the new site's /contact replaces it
+    return redirect("/", 302)
 
 LABEL_MAP = {
     "ad_spend": {
@@ -1723,12 +1724,14 @@ def about():
 
 @app.route("/funnel")
 def funnel():
-    return render_template("funnel.html")
+    # archived Nov 14 2026: old LumenFunnel beta page, template in templates/_archive/
+    return redirect("/", 302)
 
 
 @app.route("/story")
 def story():
-    return render_template("story.html")
+    # archived Nov 14 2026, template in templates/_archive/
+    return redirect("/", 302)
 
 @app.route("/jeremiah-newby")
 def jeremiah_newby():
@@ -3320,11 +3323,12 @@ def preview_about():
 
 @app.route("/preview/home/funnel")
 def preview_funnel():
-    return render_template("funnel.html")
+    return render_template("_archive/funnel.html")
 
 @app.route("/10daybuild")
 def ten_day_build():
-    return render_template("10daybuild.html")
+    # archived Nov 14 2026, template in templates/_archive/
+    return redirect("/", 302)
 
 @app.route("/robots.txt")
 def robots_txt():
