@@ -71,6 +71,11 @@ def site_page_or_none(path=""):
     for c in ([p, p + ".html", p + "/index.html"] if p else ["index.html"]):
         r = _site_file(c)
         if r is not None:
+            if c.endswith(".html") or c.endswith(".txt") or c.endswith(".xml"):
+                # pages must always be revalidated, or phones keep an old version (and the old/new site
+                # switch by cookie would be cached). Hashed assets under /_next stay cached forever.
+                r.headers["Cache-Control"] = "no-cache, must-revalidate"
+                r.headers["Vary"] = "Cookie"
             return r
     return None
 
