@@ -1,0 +1,140 @@
+1:"$Sreact.fragment"
+2:I[9766,[],""]
+3:I[8924,[],""]
+4:I[9668,["177","static/chunks/app/layout-2f28625ba20864a6.js"],"MetaPixel"]
+6:I[4431,[],"OutletBoundary"]
+8:I[5278,[],"AsyncMetadataOutlet"]
+a:I[4431,[],"ViewportBoundary"]
+c:I[4431,[],"MetadataBoundary"]
+d:"$Sreact.suspense"
+f:I[7150,[],""]
+:HL["/_next/static/media/7d4881bb7e1bf84d-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/media/e4af272ccee01ff0-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/css/7e80e87dc7c5484e.css","style"]
+0:{"P":null,"b":"VVwqLxzvzN9vWZ5p6FqwZ","p":"","c":["","blog","med-spa-marketing-booked-consults"],"i":false,"f":[[["",{"children":["blog",{"children":[["slug","med-spa-marketing-booked-consults","d"],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/7e80e87dc7c5484e.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","html",null,{"lang":"en","className":"dark","children":["$","body",null,{"className":"__variable_d8ebd1 __variable_8c25df antialiased","children":[["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}],["$","$L4",null,{}]]}]}]]}],{"children":["blog",["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["slug","med-spa-marketing-booked-consults","d"],["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":["__PAGE__",["$","$1","c",{"children":["$L5",null,["$","$L6",null,{"children":["$L7",["$","$L8",null,{"promise":"$@9"}]]}]]}],{},null,false]},null,false]},null,false]},null,false],["$","$1","h",{"children":[null,[["$","$La",null,{"children":"$Lb"}],["$","meta",null,{"name":"next-size-adjust","content":""}]],["$","$Lc",null,{"children":["$","div",null,{"hidden":true,"children":["$","$d",null,{"fallback":null,"children":"$Le"}]}]}]]}],false]],"m":"$undefined","G":["$f",[]],"s":false,"S":true}
+10:I[302,["375","static/chunks/375-da24d5a4662ac3f7.js","953","static/chunks/app/blog/%5Bslug%5D/page-488a9787ebf5f6ae.js"],"Nav"]
+11:I[2619,["375","static/chunks/375-da24d5a4662ac3f7.js","953","static/chunks/app/blog/%5Bslug%5D/page-488a9787ebf5f6ae.js"],""]
+12:T1df5,<p>The way to fill a med spa calendar is to measure and improve every step between the ad and the treatment chair, not just the number of leads. That means a clear first visit offer, ads that attract people who are ready to book, a reply within minutes, a booking flow that takes a deposit or card on file, reminders that cut no shows, and a rebooking plan so one visit turns into many. Most med spas that feel they have a &quot;lead problem&quot; actually have a follow up and show rate problem.</p>
+<h2>Why leads alone do not fill the calendar</h2>
+<p>A lead is someone who filled out a form or sent a message. A consult is someone who shows up. Between those two points, a lot can go wrong:</p>
+<ul>
+<li>Nobody replies for hours, and she books somewhere else.</li>
+<li>The front desk calls once, gets voicemail and moves on.</li>
+<li>She books, but nothing reminds her, and she forgets.</li>
+<li>She comes in, gets treated, and nobody asks her to come back.</li>
+</ul>
+<p>Every one of those gaps costs more than the ad that brought her in. Fixing them is usually cheaper than buying more leads.</p>
+<h2>Step 1: A first visit offer that attracts the right people</h2>
+<p>Your offer is the reason to book now. For med spas, offers that tend to attract real patients include:</p>
+<ul>
+<li>A complimentary consult with a specific provider.</li>
+<li>A first visit price on a core service like a neurotoxin treatment or a facial.</li>
+<li>A skin assessment that includes a personalized treatment plan.</li>
+<li>A package for a series treatment, explained clearly.</li>
+</ul>
+<p>Be careful with very deep discounts. They often attract bargain hunters who never return. An offer that introduces your best provider or your signature treatment tends to bring better long term patients.</p>
+<p>Make sure every offer and claim follows your state&#39;s rules for medical advertising and your medical director&#39;s guidance. Avoid promising specific results.</p>
+<h2>Step 2: Ads that bring in people ready to book</h2>
+<h3>Meta (Facebook and Instagram)</h3>
+<p>Meta is where most med spas find new patients, because aesthetics is visual and people discover treatments while scrolling.</p>
+<p>What tends to work:</p>
+<ul>
+<li><strong>Short videos of your providers</strong> explaining a treatment, what it feels like and who it is for.</li>
+<li><strong>Real client testimonials,</strong> with permission.</li>
+<li><strong>Behind the scenes</strong> of the clinic, so people know what to expect when they walk in.</li>
+<li><strong>Clear next steps,</strong> like &quot;Book your consult&quot; with a link to your calendar.</li>
+</ul>
+<p>Meta&#39;s advertising policies restrict some content about personal health and body image, including how before and after images are used. Read the current policies before you build creative, so ads are not rejected or your account flagged.</p>
+<h3>Google</h3>
+<p>People who search &quot;Botox near me&quot; or &quot;laser hair removal Boise&quot; are already shopping. Search ads that send them to a page for that specific treatment, with prices or price ranges, reviews and online booking, usually convert well. Your Google Business Profile matters here too. Reviews, photos and accurate services help you show up in the map results.</p>
+<h2>Step 3: Reply within minutes</h2>
+<p>When someone fills out a form at 9 p.m., she is still on her phone. Reply then.</p>
+<ul>
+<li><strong>Send an instant text</strong> that sounds like a person and asks one easy question.</li>
+<li><strong>Call during business hours</strong> within five minutes.</li>
+<li><strong>Follow up for several days</strong> with a mix of text, call and email until she books or says no.</li>
+</ul>
+<p>Sample first text:</p>
+<blockquote>
+<p>Hi Jessica, this is Maria at [Med Spa]. Thanks for your interest in lip filler! Have you had filler before, or would this be your first time? Reply STOP to opt out.</p>
+</blockquote>
+<p>An AI agent can handle the first reply after hours, answer basic questions about treatments and pricing that you approve, and offer real appointment times. Medical questions should always go to a licensed provider.</p>
+<h2>Step 4: Make booking easy and committed</h2>
+<ul>
+<li><strong>Online booking</strong> with real availability, linked from every ad, text and email.</li>
+<li><strong>A deposit or card on file</strong> for consults and first treatments, with a clear cancellation policy. People who commit something are more likely to show up.</li>
+<li><strong>Short intake forms</strong> sent before the visit, so the appointment starts on time.</li>
+</ul>
+<h2>Step 5: Reminders that cut no shows</h2>
+<p>A simple reminder schedule:</p>
+<table>
+<thead>
+<tr>
+<th>When</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Right after booking</td>
+<td>Confirmation with date, time, address, parking and what to expect</td>
+</tr>
+<tr>
+<td>2 days before</td>
+<td>Reminder with a link to confirm or reschedule</td>
+</tr>
+<tr>
+<td>Day before</td>
+<td>Short text reminder and prep instructions</td>
+</tr>
+<tr>
+<td>2 hours before</td>
+<td>&quot;See you soon&quot; with directions</td>
+</tr>
+</tbody></table>
+<p>Make rescheduling easy. A patient who can move her appointment in two taps will often reschedule instead of disappearing.</p>
+<h2>Step 6: Rebook and retain</h2>
+<p>The real value in a med spa is the repeat patient. Neurotoxins, fillers, facials and laser series all bring people back on a schedule.</p>
+<ul>
+<li><strong>Book the next visit before she leaves.</strong></li>
+<li><strong>Send a rebooking reminder</strong> around the time results usually wear off, based on your providers&#39; guidance.</li>
+<li><strong>Offer a membership</strong> for regular treatments if it fits your business.</li>
+<li><strong>Ask for a review</strong> a day or two after the visit, with a direct link.</li>
+<li><strong>Run a reactivation campaign</strong> for patients who have not visited in six months or more.</li>
+</ul>
+<h2>Step 7: Measure the full funnel</h2>
+<p>Track these numbers every week, by ad source:</p>
+<ol>
+<li><strong>Leads</strong></li>
+<li><strong>Contact rate:</strong> share of leads you spoke or texted with</li>
+<li><strong>Booked consults</strong></li>
+<li><strong>Show rate:</strong> share of booked consults who showed up</li>
+<li><strong>Treatment rate:</strong> share of consults who booked treatment</li>
+<li><strong>Revenue per new patient</strong> in the first 90 days</li>
+<li><strong>Cost per booked consult</strong> and <strong>cost per new patient</strong></li>
+</ol>
+<p><em>Illustrative numbers only.</em> Suppose you get 100 leads a month. You contact 70, book 35, and 25 show. Eighteen book treatment. If you improve contact from 70 to 85 with faster replies, and show rate from 25 of 35 to 30 of 40 with deposits and reminders, you end up with more treated patients from the same ad spend.</p>
+<p>When you send booked and completed appointments back to Meta and Google as conversions, the ad platforms learn to find more people like your real patients.</p>
+<h2>Common mistakes</h2>
+<ul>
+<li><strong>Reporting on leads only.</strong> Ask for booked, shown and treated.</li>
+<li><strong>Slow replies after hours,</strong> when many inquiries come in.</li>
+<li><strong>No deposit policy,</strong> which leads to more no shows.</li>
+<li><strong>Deep discounts</strong> that bring one time visitors.</li>
+<li><strong>No rebooking system,</strong> so every month starts from zero.</li>
+</ul>
+<p>At Lumen we build this full system for med spas: ads, follow up, booking and reporting in one place. If your calendar has gaps even though leads come in, <a href="/contact">let&#39;s look at where they&#39;re slipping</a>.</p>
+5:[["$","$L10",null,{}],["$","main",null,{"className":"relative z-10 bg-bg shadow-[0_40px_60px_-20px_rgba(0,0,0,0.9)]","children":[["$","article",null,{"className":"pt-32 pb-24 md:pt-44","children":[["$","header",null,{"className":"wrap max-w-[760px]","children":[["$","p",null,{"className":"eyebrow","children":[["$","$L11",null,{"href":"/blog","className":"transition-colors hover:text-text","children":"Blog"}],["$","span",null,{"className":"mx-2 text-faint","children":"/"}],["$","span",null,{"className":"text-brand","children":"Strategy"}]]}],["$","h1",null,{"className":"mt-5 text-[34px] leading-[1.08] font-bold tracking-[-0.04em] md:text-[52px]","children":"Med spa marketing: how to fill the calendar with booked consults, not just leads"}],["$","p",null,{"className":"mt-6 text-[14px] text-faint","children":["November 14, 2026"," · ",6," min read · Lumen Marketing"]}]]}],["$","div",null,{"className":"wrap mt-14 max-w-[760px] border-t border-line pt-12","children":["$","div",null,{"className":"prose-mk","dangerouslySetInnerHTML":{"__html":"$12"}}]}]]}],"$L13","$L14"]}],"$L15"]
+13:["$","section",null,{"className":"border-t border-line-soft py-20","children":["$","div",null,{"className":"wrap max-w-[760px]","children":[["$","p",null,{"className":"eyebrow","children":"Keep reading"}],["$","ul",null,{"className":"mt-6","children":[["$","li","how-to-choose-a-marketing-agency-in-boise",{"className":"border-b border-line","children":["$","$L11",null,{"href":"/blog/how-to-choose-a-marketing-agency-in-boise","className":"group flex items-center justify-between gap-6 py-6","children":[["$","span",null,{"className":"text-[17px] font-medium tracking-[-0.02em] transition-colors group-hover:text-brand","children":"How to choose a marketing agency in Boise: questions to ask and red flags"}],["$","span",null,{"className":"text-faint","children":"→"}]]}]}],["$","li","how-much-should-a-small-business-spend-on-marketing",{"className":"border-b border-line","children":["$","$L11",null,{"href":"/blog/how-much-should-a-small-business-spend-on-marketing","className":"group flex items-center justify-between gap-6 py-6","children":[["$","span",null,{"className":"text-[17px] font-medium tracking-[-0.02em] transition-colors group-hover:text-brand","children":"How much should a small service business spend on marketing? Set your budget from cost per job"}],["$","span",null,{"className":"text-faint","children":"→"}]]}]}],["$","li","track-leads-from-ad-click-to-closed-sale",{"className":"border-b border-line","children":["$","$L11",null,{"href":"/blog/track-leads-from-ad-click-to-closed-sale","className":"group flex items-center justify-between gap-6 py-6","children":[["$","span",null,{"className":"text-[17px] font-medium tracking-[-0.02em] transition-colors group-hover:text-brand","children":"How to track every lead from ad click to closed sale"}],["$","span",null,{"className":"text-faint","children":"→"}]]}]}]]}],["$","div",null,{"className":"mt-14 flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between","children":[["$","p",null,{"className":"text-[22px] font-semibold tracking-[-0.03em]","children":["Rather have us do it? ",["$","span",null,{"className":"text-brand","children":"Let's talk."}]]}],["$","$L11",null,{"href":"/contact","className":"relative isolate inline-flex shrink-0 items-center justify-center rounded-full font-medium tracking-[-0.01em] text-text transition-transform duration-300 hover:scale-[1.03] active:scale-[0.98] h-12 px-7 text-[15px]","children":[["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 -z-10 rounded-full","style":{"background":"linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)","backdropFilter":"blur(14px) saturate(150%)","WebkitBackdropFilter":"blur(14px) saturate(150%)"}}],["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 rounded-full","style":{"boxShadow":"inset 3px 3px 0.5px -3.5px rgba(255,255,255,0.09), inset -3px -3px 0.5px -3.5px rgba(255,255,255,0.85), inset 1px 1px 1px -0.5px rgba(255,255,255,0.6), inset -1px -1px 1px -0.5px rgba(255,255,255,0.6), inset 0 0 6px 6px rgba(255,255,255,0.06), inset 0 0 2px 2px rgba(255,255,255,0.05), 0 10px 30px -12px rgba(0,0,0,0.9)"}}],["$","span",null,{"className":"relative","children":"Book a free strategy call"}]]}]]}]]}]}]
+14:["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"BlogPosting\",\"headline\":\"Med spa marketing: how to fill the calendar with booked consults, not just leads\",\"description\":\"A practical med spa marketing system: offers, Meta and Google ads, fast follow up, deposits, reminders and rebooking, measured in booked and kept consults.\",\"datePublished\":\"2026-11-14\",\"dateModified\":\"2026-11-14\",\"author\":{\"@type\":\"Organization\",\"name\":\"Lumen Marketing\",\"url\":\"https://lumenmarketing.co\"},\"publisher\":{\"@id\":\"https://lumenmarketing.co/#org\"},\"mainEntityOfPage\":\"https://lumenmarketing.co/blog/med-spa-marketing-booked-consults\"}"}}]
+15:["$","footer",null,{"className":"relative z-0 border-t border-line-soft bg-bg md:sticky md:bottom-0","children":["$","div",null,{"className":"relative overflow-hidden","children":[["$","div",null,{"aria-hidden":true,"className":"grid-backdrop absolute inset-0"}],["$","p",null,{"aria-hidden":true,"className":"pointer-events-none absolute -bottom-[0.18em] left-1/2 -translate-x-1/2 text-[34vw] leading-none font-black tracking-[-0.06em] whitespace-nowrap select-none md:text-[22vw]","style":{"color":"transparent","WebkitTextStroke":"1px rgba(255,255,255,0.05)","background":"linear-gradient(180deg, rgba(255,255,255,0.07), transparent 65%)","WebkitBackgroundClip":"text","backgroundClip":"text"},"children":"lumen"}],["$","div",null,{"className":"wrap relative pt-28 pb-14 md:pt-36","children":[["$","div",null,{"className":"flex flex-col items-center gap-10 text-center md:flex-row md:items-end md:justify-between md:gap-8 md:text-left","children":[["$","h2",null,{"className":"h-section max-w-[14ch]","children":["Your next customers are ",["$","span",null,{"className":"text-brand","children":"out there."}]]}],["$","$L11",null,{"href":"/contact","className":"relative isolate inline-flex shrink-0 items-center justify-center rounded-full font-medium tracking-[-0.01em] text-text transition-transform duration-300 hover:scale-[1.03] active:scale-[0.98] px-8 h-[58px] w-full max-w-[340px] text-[16px] md:h-[52px] md:w-auto md:max-w-none md:text-[15px]","children":[["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 -z-10 rounded-full","style":{"background":"linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)","backdropFilter":"blur(14px) saturate(150%)","WebkitBackdropFilter":"blur(14px) saturate(150%)"}}],["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 rounded-full","style":{"boxShadow":"inset 3px 3px 0.5px -3.5px rgba(255,255,255,0.09), inset -3px -3px 0.5px -3.5px rgba(255,255,255,0.85), inset 1px 1px 1px -0.5px rgba(255,255,255,0.6), inset -1px -1px 1px -0.5px rgba(255,255,255,0.6), inset 0 0 6px 6px rgba(255,255,255,0.06), inset 0 0 2px 2px rgba(255,255,255,0.05), 0 10px 30px -12px rgba(0,0,0,0.9)"}}],["$","span",null,{"className":"relative","children":"Book a free strategy call"}]]}]]}],["$","div",null,{"className":"mt-24 grid grid-cols-2 gap-x-6 gap-y-12 border-t border-line pt-12 md:grid-cols-[1.3fr_1.1fr_1fr_0.8fr_0.8fr]","children":[["$","div",null,{"className":"col-span-2 md:col-span-1","children":[["$","img",null,{"src":"/brand/lumen-logo.png","alt":"Lumen","style":{"height":22,"width":"auto"},"className":"block opacity-95"}],["$","p",null,{"className":"mt-4 max-w-[30ch] text-[14px] leading-relaxed text-muted","children":"Ads, follow up and systems for service businesses that want to grow. Based in Boise, Idaho."}]]}],[["$","div","Services",{"children":[["$","p",null,{"className":"text-[13px] text-faint","children":"Services"}],["$","ul",null,{"className":"mt-4 space-y-3","children":[["$","li","Paid Ads",{"children":["$","$L11",null,{"href":"/services/paid-ads","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Paid Ads"}]}],["$","li","SEO & Google Business Profile",{"children":["$","$L11",null,{"href":"/services/seo","className":"text-[14px] text-muted transition-colors hover:text-text","children":"SEO & Google Business Profile"}]}],["$","li","SMS & Email Automation",{"children":["$","$L11",null,{"href":"/services/sms-email","className":"text-[14px] text-muted transition-colors hover:text-text","children":"SMS & Email Automation"}]}],["$","li","AI Agents",{"children":["$","$L11",null,{"href":"/services/ai-agents","className":"text-[14px] text-muted transition-colors hover:text-text","children":"AI Agents"}]}],["$","li","CRM & Pipeline",{"children":["$","$L11",null,{"href":"/services/crm","className":"text-[14px] text-muted transition-colors hover:text-text","children":"CRM & Pipeline"}]}],["$","li","Tracking & Attribution",{"children":"$L16"}],"$L17"]}]]}],"$L18","$L19","$L1a"]]}],"$L1b"]}]]}]}]
+16:["$","$L11",null,{"href":"/services/tracking","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Tracking & Attribution"}]
+17:["$","li","Websites & Landing Pages",{"children":["$","$L11",null,{"href":"/services/websites","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Websites & Landing Pages"}]}]
+18:["$","div","Industries",{"children":[["$","p",null,{"className":"text-[13px] text-faint","children":"Industries"}],["$","ul",null,{"className":"mt-4 space-y-3","children":[["$","li","Home Services",{"children":["$","$L11",null,{"href":"/industries/home-services","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Home Services"}]}],["$","li","Med Spas & Aesthetics",{"children":["$","$L11",null,{"href":"/industries/med-spas","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Med Spas & Aesthetics"}]}],["$","li","Finance & Professional",{"children":["$","$L11",null,{"href":"/industries/finance-professional","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Finance & Professional"}]}],["$","li","Experiences & Specialty",{"children":["$","$L11",null,{"href":"/industries/specialty","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Experiences & Specialty"}]}]]}]]}]
+19:["$","div","Company",{"children":[["$","p",null,{"className":"text-[13px] text-faint","children":"Company"}],["$","ul",null,{"className":"mt-4 space-y-3","children":[["$","li","About",{"children":["$","$L11",null,{"href":"/about","className":"text-[14px] text-muted transition-colors hover:text-text","children":"About"}]}],["$","li","Work",{"children":["$","$L11",null,{"href":"/work","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Work"}]}],["$","li","Blog",{"children":["$","$L11",null,{"href":"/blog","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Blog"}]}],["$","li","Contact",{"children":["$","$L11",null,{"href":"/contact","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Contact"}]}]]}]]}]
+1a:["$","div","Connect",{"children":[["$","p",null,{"className":"text-[13px] text-faint","children":"Connect"}],["$","ul",null,{"className":"mt-4 space-y-3","children":[["$","li","Email us",{"children":["$","$L11",null,{"href":"mailto:help@lumenmarketing.co","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Email us"}]}],["$","li","Instagram",{"children":["$","$L11",null,{"href":"https://www.instagram.com/lumenmarketing.co/","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Instagram"}]}],["$","li","Strategy call",{"children":["$","$L11",null,{"href":"/contact","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Strategy call"}]}]]}]]}]
+1b:["$","div",null,{"className":"mt-16 flex flex-col gap-3 text-[12px] text-faint md:flex-row md:justify-between","children":[["$","p",null,{"children":["© ",2026," ","Lumen Marketing Solutions"," · Boise, Idaho · ",["$","$L11",null,{"href":"/privacy","className":"hover:text-text","children":"Privacy"}]," · ",["$","$L11",null,{"href":"/terms","className":"hover:text-text","children":"Terms"}]]}],["$","p",null,{"children":"help@lumenmarketing.co"}]]}]
+b:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+7:null
+1c:I[622,[],"IconMark"]
+9:{"metadata":[["$","title","0",{"children":"Med spa marketing: how to fill the calendar with booked consults, not just leads | Lumen Marketing"}],["$","meta","1",{"name":"description","content":"A practical med spa marketing system: offers, Meta and Google ads, fast follow up, deposits, reminders and rebooking, measured in booked and kept consults."}],["$","link","2",{"rel":"canonical","href":"https://lumenmarketing.co/blog/med-spa-marketing-booked-consults"}],["$","meta","3",{"property":"og:title","content":"Med spa marketing: how to fill the calendar with booked consults, not just leads"}],["$","meta","4",{"property":"og:description","content":"A practical med spa marketing system: offers, Meta and Google ads, fast follow up, deposits, reminders and rebooking, measured in booked and kept consults."}],["$","meta","5",{"property":"og:url","content":"https://lumenmarketing.co/blog/med-spa-marketing-booked-consults"}],["$","meta","6",{"property":"og:type","content":"article"}],["$","meta","7",{"name":"twitter:card","content":"summary"}],["$","meta","8",{"name":"twitter:title","content":"Med spa marketing: how to fill the calendar with booked consults, not just leads"}],["$","meta","9",{"name":"twitter:description","content":"A practical med spa marketing system: offers, Meta and Google ads, fast follow up, deposits, reminders and rebooking, measured in booked and kept consults."}],["$","link","10",{"rel":"icon","href":"/icon.svg?c29db7989d74ece2","type":"image/svg+xml","sizes":"any"}],["$","$L1c","11",{}]],"error":null,"digest":"$undefined"}
+e:"$9:metadata"

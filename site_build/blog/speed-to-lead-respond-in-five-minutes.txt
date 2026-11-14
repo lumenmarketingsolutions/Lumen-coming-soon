@@ -1,0 +1,131 @@
+1:"$Sreact.fragment"
+2:I[9766,[],""]
+3:I[8924,[],""]
+4:I[9668,["177","static/chunks/app/layout-2f28625ba20864a6.js"],"MetaPixel"]
+6:I[4431,[],"OutletBoundary"]
+8:I[5278,[],"AsyncMetadataOutlet"]
+a:I[4431,[],"ViewportBoundary"]
+c:I[4431,[],"MetadataBoundary"]
+d:"$Sreact.suspense"
+f:I[7150,[],""]
+:HL["/_next/static/media/7d4881bb7e1bf84d-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/media/e4af272ccee01ff0-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/css/7e80e87dc7c5484e.css","style"]
+0:{"P":null,"b":"VVwqLxzvzN9vWZ5p6FqwZ","p":"","c":["","blog","speed-to-lead-respond-in-five-minutes"],"i":false,"f":[[["",{"children":["blog",{"children":[["slug","speed-to-lead-respond-in-five-minutes","d"],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/7e80e87dc7c5484e.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","html",null,{"lang":"en","className":"dark","children":["$","body",null,{"className":"__variable_d8ebd1 __variable_8c25df antialiased","children":[["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}],["$","$L4",null,{}]]}]}]]}],{"children":["blog",["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["slug","speed-to-lead-respond-in-five-minutes","d"],["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":["__PAGE__",["$","$1","c",{"children":["$L5",null,["$","$L6",null,{"children":["$L7",["$","$L8",null,{"promise":"$@9"}]]}]]}],{},null,false]},null,false]},null,false]},null,false],["$","$1","h",{"children":[null,[["$","$La",null,{"children":"$Lb"}],["$","meta",null,{"name":"next-size-adjust","content":""}]],["$","$Lc",null,{"children":["$","div",null,{"hidden":true,"children":["$","$d",null,{"fallback":null,"children":"$Le"}]}]}]]}],false]],"m":"$undefined","G":["$f",[]],"s":false,"S":true}
+10:I[302,["375","static/chunks/375-da24d5a4662ac3f7.js","953","static/chunks/app/blog/%5Bslug%5D/page-488a9787ebf5f6ae.js"],"Nav"]
+11:I[2619,["375","static/chunks/375-da24d5a4662ac3f7.js","953","static/chunks/app/blog/%5Bslug%5D/page-488a9787ebf5f6ae.js"],""]
+12:T1ca7,<p>Speed to lead means how fast you contact a new lead after they reach out. For service businesses it matters because people who fill out a form usually contact more than one company, and the first one to have a real conversation often gets the booking. The practical goal is a reply within five minutes, every time, including nights and weekends. You get there by sending an instant text, alerting your team at the same moment, and following up automatically until the lead answers or says no.</p>
+<h2>Why the first few minutes matter</h2>
+<p>A homeowner with a leaking water heater or a broken AC is not waiting politely by the phone. They submit your form, then the next company&#39;s form, then they call whoever shows up first on Google. The first business that talks to them has the best chance to book the visit.</p>
+<p>Research backs this up. A widely cited Harvard Business Review study, &quot;The Short Life of Online Sales Leads&quot; (2011), looked at more than a million leads across dozens of US companies and found that firms that tried to contact a lead within an hour were nearly seven times as likely to qualify that lead as firms that waited even one hour longer. The same research found many companies took far longer than an hour, and some never responded at all.</p>
+<p>That study was about qualifying leads, not closing sales, and it is more than a decade old. But nothing about how people shop for services has made speed less important since then. If anything, people expect faster replies now.</p>
+<h2>Where service businesses lose time</h2>
+<p>Most slow responses are not laziness. They come from how the work day is set up:</p>
+<ul>
+<li>The owner is on a roof or under a house and cannot answer.</li>
+<li>Form leads land in an inbox nobody checks until evening.</li>
+<li>Facebook lead form submissions sit inside Meta and never reach the office.</li>
+<li>Calls after 5 p.m. go to voicemail and get returned the next morning.</li>
+<li>The office calls once, gets no answer and moves on.</li>
+</ul>
+<p>Each of these can be fixed with a simple system.</p>
+<h2>The speed to lead system, step by step</h2>
+<h3>1. Send every lead into one place</h3>
+<p>Every source should drop leads into the same CRM: website forms, Facebook and Instagram lead forms, Google Local Services Ads, Google Business Profile messages, and calls to your tracking numbers. If leads live in five different inboxes, you cannot respond quickly to all of them.</p>
+<h3>2. Send an instant text reply</h3>
+<p>The moment a lead arrives, send a short, personal text. It should sound like a person, ask one easy question and give them a way to book.</p>
+<p>Example for an HVAC company:</p>
+<blockquote>
+<p>Hi Sarah, this is Jake with [Company Name]. Got your request about the AC. Is it not cooling at all, or just running weak? I can get you on the schedule today. Reply STOP to opt out.</p>
+</blockquote>
+<p>Example for a med spa:</p>
+<blockquote>
+<p>Hi Emily, thanks for reaching out to [Med Spa Name] about lip filler. Have you had filler before, or would this be your first time? Happy to help you pick a consult time. Reply STOP to opt out.</p>
+</blockquote>
+<p>You need the person&#39;s consent to text them for marketing. Put clear consent language on your forms. Our post on SMS rules for service businesses covers this.</p>
+<h3>3. Alert your team at the same time</h3>
+<p>When the text goes out, notify whoever handles leads: a push notification in the CRM app, a text to the office manager or a call that connects them to the lead. Some businesses set up a &quot;call connect&quot; where the system rings the salesperson&#39;s phone, plays a short whisper like &quot;New roofing lead from Google,&quot; and then dials the lead.</p>
+<h3>4. Call within five minutes</h3>
+<p>Texts start the conversation, but a phone call books most service jobs. Set a rule that a human calls every new lead within five minutes during business hours. Track it. Most CRMs, including HighLevel, can report time to first contact.</p>
+<h3>5. Missed call text back</h3>
+<p>If a call comes in and nobody answers, send an automatic text right away:</p>
+<blockquote>
+<p>Sorry we missed your call! This is [Company Name]. What can we help with? We&#39;ll get right back to you.</p>
+</blockquote>
+<p>This alone recovers many calls that would otherwise go to the next company on the list.</p>
+<h3>6. Cover nights and weekends</h3>
+<p>Leads keep coming after you close. Options include an answering service, an AI agent that replies by text and offers booking times, or simply an honest after hours message that tells the lead exactly when you will call. Anything is better than silence until Monday.</p>
+<h3>7. Follow up more than once</h3>
+<p>Many leads do not answer the first call. A simple follow up schedule for a new lead might look like this:</p>
+<table>
+<thead>
+<tr>
+<th>When</th>
+<th>What</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Minute 0</td>
+<td>Instant text</td>
+</tr>
+<tr>
+<td>Minute 1 to 5</td>
+<td>Phone call</td>
+</tr>
+<tr>
+<td>Minute 30</td>
+<td>Second call if no answer, then a short text</td>
+</tr>
+<tr>
+<td>End of day</td>
+<td>Text with a booking link</td>
+</tr>
+<tr>
+<td>Day 2</td>
+<td>Call and text</td>
+</tr>
+<tr>
+<td>Day 4</td>
+<td>Email with photos of recent work or reviews</td>
+</tr>
+<tr>
+<td>Day 7</td>
+<td>Final text: &quot;Should I close out your request?&quot;</td>
+</tr>
+</tbody></table>
+<p>Stop all automation the moment the lead replies or books. Nothing feels more robotic than getting a &quot;just checking in&quot; text after you already scheduled.</p>
+<h2>What to measure</h2>
+<ul>
+<li><strong>Time to first contact,</strong> average and worst case, by lead source.</li>
+<li><strong>Contact rate:</strong> the share of leads you actually spoke with.</li>
+<li><strong>Booking rate:</strong> the share of leads that became an appointment or estimate.</li>
+<li><strong>Show rate and close rate</strong> after booking.</li>
+</ul>
+<p>Look at these weekly. If contact rate is low, the fix is usually more call attempts and better texts, not more ad spend.</p>
+<h2>A quick example of the math</h2>
+<p><em>Illustrative numbers only.</em></p>
+<p>A cleaning company gets 100 leads a month from ads. With slow replies, they reach 50 and book 20. After setting up instant texts, missed call text back and a seven day follow up schedule, they reach 75 and book 30. Nothing changed in the ads. They booked ten more jobs from the same spend, which lowers the cost per booked job by a third.</p>
+<h2>Common mistakes</h2>
+<ul>
+<li><strong>Texts that sound like a robot.</strong> &quot;Thank you for your submission. A representative will contact you.&quot; Write like a person.</li>
+<li><strong>Asking too many questions up front.</strong> One easy question gets more replies than five.</li>
+<li><strong>No consent language on forms.</strong> Fix this before you turn on any texting.</li>
+<li><strong>Automation that never stops.</strong> Make sure replies and bookings end the sequence.</li>
+<li><strong>Measuring leads instead of bookings.</strong> Speed only matters if it turns into appointments.</li>
+</ul>
+<p>At Lumen we build speed to lead systems in HighLevel for service businesses, with text, call alerts and AI booking working together. If you want a second set of eyes on your current setup, <a href="/contact">send us a note</a>.</p>
+5:[["$","$L10",null,{}],["$","main",null,{"className":"relative z-10 bg-bg shadow-[0_40px_60px_-20px_rgba(0,0,0,0.9)]","children":[["$","article",null,{"className":"pt-32 pb-24 md:pt-44","children":[["$","header",null,{"className":"wrap max-w-[760px]","children":[["$","p",null,{"className":"eyebrow","children":[["$","$L11",null,{"href":"/blog","className":"transition-colors hover:text-text","children":"Blog"}],["$","span",null,{"className":"mx-2 text-faint","children":"/"}],["$","span",null,{"className":"text-brand","children":"Automation"}]]}],["$","h1",null,{"className":"mt-5 text-[34px] leading-[1.08] font-bold tracking-[-0.04em] md:text-[52px]","children":"Speed to lead: why responding in the first five minutes wins the job (and how to automate it)"}],["$","p",null,{"className":"mt-6 text-[14px] text-faint","children":["November 14, 2026"," · ",6," min read · Lumen Marketing"]}]]}],["$","div",null,{"className":"wrap mt-14 max-w-[760px] border-t border-line pt-12","children":["$","div",null,{"className":"prose-mk","dangerouslySetInnerHTML":{"__html":"$12"}}]}]]}],"$L13","$L14"]}],"$L15"]
+13:["$","section",null,{"className":"border-t border-line-soft py-20","children":["$","div",null,{"className":"wrap max-w-[760px]","children":[["$","p",null,{"className":"eyebrow","children":"Keep reading"}],["$","ul",null,{"className":"mt-6","children":[["$","li","sms-marketing-for-service-businesses",{"className":"border-b border-line","children":["$","$L11",null,{"href":"/blog/sms-marketing-for-service-businesses","className":"group flex items-center justify-between gap-6 py-6","children":[["$","span",null,{"className":"text-[17px] font-medium tracking-[-0.02em] transition-colors group-hover:text-brand","children":"SMS marketing for service businesses: A2P 10DLC registration, TCPA consent and what to text"}],["$","span",null,{"className":"text-faint","children":"→"}]]}]}],["$","li","email-nurture-sequence-for-service-businesses",{"className":"border-b border-line","children":["$","$L11",null,{"href":"/blog/email-nurture-sequence-for-service-businesses","className":"group flex items-center justify-between gap-6 py-6","children":[["$","span",null,{"className":"text-[17px] font-medium tracking-[-0.02em] transition-colors group-hover:text-brand","children":"Email nurture sequences that turn leads into booked appointments"}],["$","span",null,{"className":"text-faint","children":"→"}]]}]}],["$","li","database-reactivation-campaign",{"className":"border-b border-line","children":["$","$L11",null,{"href":"/blog/database-reactivation-campaign","className":"group flex items-center justify-between gap-6 py-6","children":[["$","span",null,{"className":"text-[17px] font-medium tracking-[-0.02em] transition-colors group-hover:text-brand","children":"Database reactivation: how to turn old leads and past customers into booked jobs"}],["$","span",null,{"className":"text-faint","children":"→"}]]}]}]]}],["$","div",null,{"className":"mt-14 flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between","children":[["$","p",null,{"className":"text-[22px] font-semibold tracking-[-0.03em]","children":["Rather have us do it? ",["$","span",null,{"className":"text-brand","children":"Let's talk."}]]}],["$","$L11",null,{"href":"/contact","className":"relative isolate inline-flex shrink-0 items-center justify-center rounded-full font-medium tracking-[-0.01em] text-text transition-transform duration-300 hover:scale-[1.03] active:scale-[0.98] h-12 px-7 text-[15px]","children":[["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 -z-10 rounded-full","style":{"background":"linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)","backdropFilter":"blur(14px) saturate(150%)","WebkitBackdropFilter":"blur(14px) saturate(150%)"}}],["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 rounded-full","style":{"boxShadow":"inset 3px 3px 0.5px -3.5px rgba(255,255,255,0.09), inset -3px -3px 0.5px -3.5px rgba(255,255,255,0.85), inset 1px 1px 1px -0.5px rgba(255,255,255,0.6), inset -1px -1px 1px -0.5px rgba(255,255,255,0.6), inset 0 0 6px 6px rgba(255,255,255,0.06), inset 0 0 2px 2px rgba(255,255,255,0.05), 0 10px 30px -12px rgba(0,0,0,0.9)"}}],["$","span",null,{"className":"relative","children":"Book a free strategy call"}]]}]]}]]}]}]
+14:["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"BlogPosting\",\"headline\":\"Speed to lead: why responding in the first five minutes wins the job (and how to automate it)\",\"description\":\"Why fast lead response wins more booked jobs for service businesses, and a step by step setup to reply to every lead within minutes, day or night.\",\"datePublished\":\"2026-11-14\",\"dateModified\":\"2026-11-14\",\"author\":{\"@type\":\"Organization\",\"name\":\"Lumen Marketing\",\"url\":\"https://lumenmarketing.co\"},\"publisher\":{\"@id\":\"https://lumenmarketing.co/#org\"},\"mainEntityOfPage\":\"https://lumenmarketing.co/blog/speed-to-lead-respond-in-five-minutes\"}"}}]
+15:["$","footer",null,{"className":"relative z-0 border-t border-line-soft bg-bg md:sticky md:bottom-0","children":["$","div",null,{"className":"relative overflow-hidden","children":[["$","div",null,{"aria-hidden":true,"className":"grid-backdrop absolute inset-0"}],["$","p",null,{"aria-hidden":true,"className":"pointer-events-none absolute -bottom-[0.18em] left-1/2 -translate-x-1/2 text-[34vw] leading-none font-black tracking-[-0.06em] whitespace-nowrap select-none md:text-[22vw]","style":{"color":"transparent","WebkitTextStroke":"1px rgba(255,255,255,0.05)","background":"linear-gradient(180deg, rgba(255,255,255,0.07), transparent 65%)","WebkitBackgroundClip":"text","backgroundClip":"text"},"children":"lumen"}],["$","div",null,{"className":"wrap relative pt-28 pb-14 md:pt-36","children":[["$","div",null,{"className":"flex flex-col items-center gap-10 text-center md:flex-row md:items-end md:justify-between md:gap-8 md:text-left","children":[["$","h2",null,{"className":"h-section max-w-[14ch]","children":["Your next customers are ",["$","span",null,{"className":"text-brand","children":"out there."}]]}],["$","$L11",null,{"href":"/contact","className":"relative isolate inline-flex shrink-0 items-center justify-center rounded-full font-medium tracking-[-0.01em] text-text transition-transform duration-300 hover:scale-[1.03] active:scale-[0.98] px-8 h-[58px] w-full max-w-[340px] text-[16px] md:h-[52px] md:w-auto md:max-w-none md:text-[15px]","children":[["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 -z-10 rounded-full","style":{"background":"linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)","backdropFilter":"blur(14px) saturate(150%)","WebkitBackdropFilter":"blur(14px) saturate(150%)"}}],["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 rounded-full","style":{"boxShadow":"inset 3px 3px 0.5px -3.5px rgba(255,255,255,0.09), inset -3px -3px 0.5px -3.5px rgba(255,255,255,0.85), inset 1px 1px 1px -0.5px rgba(255,255,255,0.6), inset -1px -1px 1px -0.5px rgba(255,255,255,0.6), inset 0 0 6px 6px rgba(255,255,255,0.06), inset 0 0 2px 2px rgba(255,255,255,0.05), 0 10px 30px -12px rgba(0,0,0,0.9)"}}],["$","span",null,{"className":"relative","children":"Book a free strategy call"}]]}]]}],["$","div",null,{"className":"mt-24 grid grid-cols-2 gap-x-6 gap-y-12 border-t border-line pt-12 md:grid-cols-[1.3fr_1.1fr_1fr_0.8fr_0.8fr]","children":[["$","div",null,{"className":"col-span-2 md:col-span-1","children":[["$","img",null,{"src":"/brand/lumen-logo.png","alt":"Lumen","style":{"height":22,"width":"auto"},"className":"block opacity-95"}],["$","p",null,{"className":"mt-4 max-w-[30ch] text-[14px] leading-relaxed text-muted","children":"Ads, follow up and systems for service businesses that want to grow. Based in Boise, Idaho."}]]}],[["$","div","Services",{"children":[["$","p",null,{"className":"text-[13px] text-faint","children":"Services"}],["$","ul",null,{"className":"mt-4 space-y-3","children":[["$","li","Paid Ads",{"children":["$","$L11",null,{"href":"/services/paid-ads","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Paid Ads"}]}],["$","li","SEO & Google Business Profile",{"children":["$","$L11",null,{"href":"/services/seo","className":"text-[14px] text-muted transition-colors hover:text-text","children":"SEO & Google Business Profile"}]}],["$","li","SMS & Email Automation",{"children":["$","$L11",null,{"href":"/services/sms-email","className":"text-[14px] text-muted transition-colors hover:text-text","children":"SMS & Email Automation"}]}],["$","li","AI Agents",{"children":["$","$L11",null,{"href":"/services/ai-agents","className":"text-[14px] text-muted transition-colors hover:text-text","children":"AI Agents"}]}],["$","li","CRM & Pipeline",{"children":["$","$L11",null,{"href":"/services/crm","className":"text-[14px] text-muted transition-colors hover:text-text","children":"CRM & Pipeline"}]}],["$","li","Tracking & Attribution",{"children":"$L16"}],"$L17"]}]]}],"$L18","$L19","$L1a"]]}],"$L1b"]}]]}]}]
+16:["$","$L11",null,{"href":"/services/tracking","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Tracking & Attribution"}]
+17:["$","li","Websites & Landing Pages",{"children":["$","$L11",null,{"href":"/services/websites","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Websites & Landing Pages"}]}]
+18:["$","div","Industries",{"children":[["$","p",null,{"className":"text-[13px] text-faint","children":"Industries"}],["$","ul",null,{"className":"mt-4 space-y-3","children":[["$","li","Home Services",{"children":["$","$L11",null,{"href":"/industries/home-services","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Home Services"}]}],["$","li","Med Spas & Aesthetics",{"children":["$","$L11",null,{"href":"/industries/med-spas","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Med Spas & Aesthetics"}]}],["$","li","Finance & Professional",{"children":["$","$L11",null,{"href":"/industries/finance-professional","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Finance & Professional"}]}],["$","li","Experiences & Specialty",{"children":["$","$L11",null,{"href":"/industries/specialty","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Experiences & Specialty"}]}]]}]]}]
+19:["$","div","Company",{"children":[["$","p",null,{"className":"text-[13px] text-faint","children":"Company"}],["$","ul",null,{"className":"mt-4 space-y-3","children":[["$","li","About",{"children":["$","$L11",null,{"href":"/about","className":"text-[14px] text-muted transition-colors hover:text-text","children":"About"}]}],["$","li","Work",{"children":["$","$L11",null,{"href":"/work","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Work"}]}],["$","li","Blog",{"children":["$","$L11",null,{"href":"/blog","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Blog"}]}],["$","li","Contact",{"children":["$","$L11",null,{"href":"/contact","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Contact"}]}]]}]]}]
+1a:["$","div","Connect",{"children":[["$","p",null,{"className":"text-[13px] text-faint","children":"Connect"}],["$","ul",null,{"className":"mt-4 space-y-3","children":[["$","li","Email us",{"children":["$","$L11",null,{"href":"mailto:help@lumenmarketing.co","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Email us"}]}],["$","li","Instagram",{"children":["$","$L11",null,{"href":"https://www.instagram.com/lumenmarketing.co/","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Instagram"}]}],["$","li","Strategy call",{"children":["$","$L11",null,{"href":"/contact","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Strategy call"}]}]]}]]}]
+1b:["$","div",null,{"className":"mt-16 flex flex-col gap-3 text-[12px] text-faint md:flex-row md:justify-between","children":[["$","p",null,{"children":["© ",2026," ","Lumen Marketing Solutions"," · Boise, Idaho · ",["$","$L11",null,{"href":"/privacy","className":"hover:text-text","children":"Privacy"}]," · ",["$","$L11",null,{"href":"/terms","className":"hover:text-text","children":"Terms"}]]}],["$","p",null,{"children":"help@lumenmarketing.co"}]]}]
+b:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+7:null
+1c:I[622,[],"IconMark"]
+9:{"metadata":[["$","title","0",{"children":"Speed to lead: why responding in the first five minutes wins the job (and how to automate it) | Lumen Marketing"}],["$","meta","1",{"name":"description","content":"Why fast lead response wins more booked jobs for service businesses, and a step by step setup to reply to every lead within minutes, day or night."}],["$","link","2",{"rel":"canonical","href":"https://lumenmarketing.co/blog/speed-to-lead-respond-in-five-minutes"}],["$","meta","3",{"property":"og:title","content":"Speed to lead: why responding in the first five minutes wins the job (and how to automate it)"}],["$","meta","4",{"property":"og:description","content":"Why fast lead response wins more booked jobs for service businesses, and a step by step setup to reply to every lead within minutes, day or night."}],["$","meta","5",{"property":"og:url","content":"https://lumenmarketing.co/blog/speed-to-lead-respond-in-five-minutes"}],["$","meta","6",{"property":"og:type","content":"article"}],["$","meta","7",{"name":"twitter:card","content":"summary"}],["$","meta","8",{"name":"twitter:title","content":"Speed to lead: why responding in the first five minutes wins the job (and how to automate it)"}],["$","meta","9",{"name":"twitter:description","content":"Why fast lead response wins more booked jobs for service businesses, and a step by step setup to reply to every lead within minutes, day or night."}],["$","link","10",{"rel":"icon","href":"/icon.svg?c29db7989d74ece2","type":"image/svg+xml","sizes":"any"}],["$","$L1c","11",{}]],"error":null,"digest":"$undefined"}
+e:"$9:metadata"

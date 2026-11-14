@@ -1260,7 +1260,7 @@ def index():
     # The QR subdomain has one job, so its root is the dashboard rather than the Lumen home page.
     if host.split(":")[0] == QR_DOMAIN:
         return redirect("/qr/admin")
-    return render_template("home.html")
+    return site_page_or_none("") or render_template("home.html")
 
 @app.route("/qualify")
 def qualify():
@@ -1469,6 +1469,12 @@ def _send_lumen_lead_capi(event_id, name, phone, fbp, fbc, client_ip, client_ua,
             print(f"[capi-lumen-lead] sent event_id={event['event_id']}")
     except Exception as e:
         print(f"[capi-lumen-lead] exception: {e}")
+
+
+# New lumenmarketing.co site (site_build/) + its lead flow. Catch-all route is lowest priority.
+from lumen_site import init_lumen_site, site_page_or_none  # noqa: E402
+init_lumen_site(app, send_email, NOTIFY_EMAIL, DB_PATH,
+                lambda eid, name, phone, fbp, fbc, ip, ua, page: _send_lumen_lead_capi(eid, name, phone, fbp, fbc, ip, ua, page))
 
 
 @app.route("/lumenlb/inquiry", methods=["POST"])
@@ -1713,7 +1719,7 @@ def contractor_os(filename="index.html"):
 
 @app.route("/about")
 def about():
-    return render_template("about.html")
+    return site_page_or_none("about") or render_template("about.html")
 
 @app.route("/funnel")
 def funnel():
@@ -1750,7 +1756,7 @@ def rochelle_onboarding():
 
 @app.route("/services")
 def services():
-    return render_template("services.html")
+    return site_page_or_none("services") or render_template("services.html")
 
 @app.route("/avaloncrm")
 def avalon_crm():
@@ -3322,7 +3328,8 @@ def ten_day_build():
 
 @app.route("/robots.txt")
 def robots_txt():
-    return "User-agent: *\nDisallow: /audit/\nDisallow: /admin/\nDisallow: /jaredcasados\n", 200, {"Content-Type": "text/plain"}
+    return ("User-agent: *\nDisallow: /audit/\nDisallow: /admin/\nDisallow: /jaredcasados\nDisallow: /logos\n\n"
+            "Sitemap: https://lumenmarketing.co/sitemap.xml\n"), 200, {"Content-Type": "text/plain"}
 
 @app.route("/audit/sublime")
 def sublime_audit():
@@ -4637,6 +4644,12 @@ def terms_of_service():
 
 @app.route("/contact")
 def contact_page():
+    return site_page_or_none("contact") or render_template("contact.html")
+
+
+@app.route("/contact-form")
+def contact_page_legacy():
+    """The original A2P consent form, kept reachable as a fallback."""
     return render_template("contact.html")
 
 

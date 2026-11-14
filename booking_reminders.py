@@ -74,11 +74,20 @@ def _send(contact_id, text):
 
 
 def _move_to_call_booked(contact_id):
-    r = requests.get(f"{GHL}/opportunities/search", headers=_h("2021-07-28"), timeout=15,
-                     params={"location_id": LOCATION, "pipeline_id": PIPELINE_ID, "contact_id": contact_id})
-    for opp in (r.json() if r.ok else {}).get("opportunities", []):
-        requests.put(f"{GHL}/opportunities/{opp['id']}", headers=_h("2021-07-28"), timeout=15,
-                     json={"pipelineId": PIPELINE_ID, "pipelineStageId": STAGE_CALL_BOOKED})
+    targets = [(PIPELINE_ID, STAGE_CALL_BOOKED)]
+    try:  # website leads: "Lumen Website" pipeline, stage with "book" in its name (lumen_site.py)
+        from lumen_site import lumen_pipeline
+        lp = lumen_pipeline()
+        if lp.get("id") and lp.get("booked"):
+            targets.append((lp["id"], lp["booked"]))
+    except Exception as e:
+        log.error("lumen pipeline lookup failed: %s", e)
+    for pipeline_id, stage_id in targets:
+        r = requests.get(f"{GHL}/opportunities/search", headers=_h("2021-07-28"), timeout=15,
+                         params={"location_id": LOCATION, "pipeline_id": pipeline_id, "contact_id": contact_id})
+        for opp in (r.json() if r.ok else {}).get("opportunities", []):
+            requests.put(f"{GHL}/opportunities/{opp['id']}", headers=_h("2021-07-28"), timeout=15,
+                         json={"pipelineId": pipeline_id, "pipelineStageId": stage_id})
 
 
 def _fmt(ts, tz, with_day=True):

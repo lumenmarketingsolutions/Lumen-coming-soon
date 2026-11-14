@@ -1,0 +1,138 @@
+1:"$Sreact.fragment"
+2:I[9766,[],""]
+3:I[8924,[],""]
+4:I[9668,["177","static/chunks/app/layout-2f28625ba20864a6.js"],"MetaPixel"]
+6:I[4431,[],"OutletBoundary"]
+8:I[5278,[],"AsyncMetadataOutlet"]
+a:I[4431,[],"ViewportBoundary"]
+c:I[4431,[],"MetadataBoundary"]
+d:"$Sreact.suspense"
+f:I[7150,[],""]
+:HL["/_next/static/media/7d4881bb7e1bf84d-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/media/e4af272ccee01ff0-s.p.woff2","font",{"crossOrigin":"","type":"font/woff2"}]
+:HL["/_next/static/css/7e80e87dc7c5484e.css","style"]
+0:{"P":null,"b":"VVwqLxzvzN9vWZ5p6FqwZ","p":"","c":["","blog","track-leads-from-ad-click-to-closed-sale"],"i":false,"f":[[["",{"children":["blog",{"children":[["slug","track-leads-from-ad-click-to-closed-sale","d"],{"children":["__PAGE__",{}]}]}]},"$undefined","$undefined",true],["",["$","$1","c",{"children":[[["$","link","0",{"rel":"stylesheet","href":"/_next/static/css/7e80e87dc7c5484e.css","precedence":"next","crossOrigin":"$undefined","nonce":"$undefined"}]],["$","html",null,{"lang":"en","className":"dark","children":["$","body",null,{"className":"__variable_d8ebd1 __variable_8c25df antialiased","children":[["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":[[["$","title",null,{"children":"404: This page could not be found."}],["$","div",null,{"style":{"fontFamily":"system-ui,\"Segoe UI\",Roboto,Helvetica,Arial,sans-serif,\"Apple Color Emoji\",\"Segoe UI Emoji\"","height":"100vh","textAlign":"center","display":"flex","flexDirection":"column","alignItems":"center","justifyContent":"center"},"children":["$","div",null,{"children":[["$","style",null,{"dangerouslySetInnerHTML":{"__html":"body{color:#000;background:#fff;margin:0}.next-error-h1{border-right:1px solid rgba(0,0,0,.3)}@media (prefers-color-scheme:dark){body{color:#fff;background:#000}.next-error-h1{border-right:1px solid rgba(255,255,255,.3)}}"}}],["$","h1",null,{"className":"next-error-h1","style":{"display":"inline-block","margin":"0 20px 0 0","padding":"0 23px 0 0","fontSize":24,"fontWeight":500,"verticalAlign":"top","lineHeight":"49px"},"children":404}],["$","div",null,{"style":{"display":"inline-block"},"children":["$","h2",null,{"style":{"fontSize":14,"fontWeight":400,"lineHeight":"49px","margin":0},"children":"This page could not be found."}]}]]}]}]],[]],"forbidden":"$undefined","unauthorized":"$undefined"}],["$","$L4",null,{}]]}]}]]}],{"children":["blog",["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":[["slug","track-leads-from-ad-click-to-closed-sale","d"],["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","error":"$undefined","errorStyles":"$undefined","errorScripts":"$undefined","template":["$","$L3",null,{}],"templateStyles":"$undefined","templateScripts":"$undefined","notFound":"$undefined","forbidden":"$undefined","unauthorized":"$undefined"}]]}],{"children":["__PAGE__",["$","$1","c",{"children":["$L5",null,["$","$L6",null,{"children":["$L7",["$","$L8",null,{"promise":"$@9"}]]}]]}],{},null,false]},null,false]},null,false]},null,false],["$","$1","h",{"children":[null,[["$","$La",null,{"children":"$Lb"}],["$","meta",null,{"name":"next-size-adjust","content":""}]],["$","$Lc",null,{"children":["$","div",null,{"hidden":true,"children":["$","$d",null,{"fallback":null,"children":"$Le"}]}]}]]}],false]],"m":"$undefined","G":["$f",[]],"s":false,"S":true}
+10:I[302,["375","static/chunks/375-da24d5a4662ac3f7.js","953","static/chunks/app/blog/%5Bslug%5D/page-488a9787ebf5f6ae.js"],"Nav"]
+11:I[2619,["375","static/chunks/375-da24d5a4662ac3f7.js","953","static/chunks/app/blog/%5Bslug%5D/page-488a9787ebf5f6ae.js"],""]
+12:T21b5,<p>To track every lead from ad click to closed sale, you need four pieces working together. Capture where each lead came from (UTM parameters and click IDs on forms, tracking numbers on calls). Store that source on the contact record in your CRM. Move each lead through clear pipeline stages until it is won or lost, with the sale value. Then send those outcomes back to Google and Meta as offline conversions so their bidding learns which clicks become customers. Once this is in place, you can see cost per booked job and revenue by campaign instead of guessing.</p>
+<h2>Why this matters</h2>
+<p>Without tracking, ad platforms only see clicks and form fills. They will happily find you more people who click and fill out forms, including spam, tire kickers and people outside your area. And you will judge your marketing on cost per lead, which tells you little about whether it is making money.</p>
+<p>With full tracking, you can answer the questions that matter:</p>
+<ul>
+<li>Which campaign produced the jobs we actually sold last month?</li>
+<li>What did each booked estimate cost?</li>
+<li>Are Google leads or Meta leads closing at a higher rate?</li>
+<li>Which keywords bring calls that never turn into work?</li>
+</ul>
+<h2>Step 1: Tag every link with UTM parameters</h2>
+<p>UTM parameters are labels added to the end of a URL that tell your analytics and CRM where a visitor came from. The five standard ones are:</p>
+<ul>
+<li><code>utm_source</code>: the platform, such as google or facebook</li>
+<li><code>utm_medium</code>: the type, such as cpc or paid_social</li>
+<li><code>utm_campaign</code>: the campaign name</li>
+<li><code>utm_content</code>: the specific ad or creative</li>
+<li><code>utm_term</code>: the keyword, for search ads</li>
+</ul>
+<p>Example:</p>
+<pre><code>https://example.com/garage-floors?utm_source=facebook&amp;utm_medium=paid_social&amp;utm_campaign=epoxy_spring&amp;utm_content=before_after_video
+</code></pre>
+<p>Both Google Ads and Meta let you set URL parameters at the account or ad level, using dynamic values so each click is tagged automatically. Pick a naming convention and stick to it. Inconsistent names make reports messy.</p>
+<h2>Step 2: Capture click IDs</h2>
+<p>Ad platforms add their own click identifiers to the URL:</p>
+<ul>
+<li><strong>gclid</strong> (plus gbraid and wbraid) from Google Ads, when auto tagging is on</li>
+<li><strong>fbclid</strong> from Meta</li>
+</ul>
+<p>Your website should store these, along with the UTMs, in hidden form fields or a first party cookie, so they are saved with the lead when the form is submitted. The click ID is what lets you match a sale weeks later back to the exact ad click.</p>
+<p>Many CRMs, including HighLevel, capture UTMs and click IDs automatically on their own forms and calendars. If you use another form tool, check that these values actually reach the contact record.</p>
+<h2>Step 3: Track phone calls</h2>
+<p>Many service businesses get more calls than forms. Call tracking works by showing different phone numbers to people from different sources.</p>
+<ul>
+<li><strong>Static tracking numbers:</strong> one number per source, such as your Google Business Profile, a print ad or a truck wrap.</li>
+<li><strong>Dynamic number insertion:</strong> a script on your website swaps the phone number based on how the visitor arrived, so a caller from a Google ad sees a different number than a caller from Facebook. Combined with the click ID, this ties the call to the ad.</li>
+<li><strong>Google Ads call conversions:</strong> Google can track calls from call assets and from your website, with a minimum call length you choose.</li>
+</ul>
+<p>Record calls (with the right disclosures for your state, since some states require consent from everyone on the call) and review a sample each week. You will learn more from twenty recorded calls than from any dashboard.</p>
+<h2>Step 4: Use clear CRM pipeline stages</h2>
+<p>Every lead should move through the same stages. A typical home service pipeline:</p>
+<ol>
+<li><strong>New lead</strong></li>
+<li><strong>Contacted</strong></li>
+<li><strong>Appointment or estimate booked</strong></li>
+<li><strong>Estimate completed</strong></li>
+<li><strong>Won</strong> (with sale value)</li>
+<li><strong>Lost</strong> (with reason)</li>
+</ol>
+<p>A med spa might use: New lead, Contacted, Consult booked, Showed, Treatment booked, Treated.</p>
+<p>Rules that keep data clean:</p>
+<ul>
+<li>Every lead enters the pipeline automatically. Nobody types them in by hand.</li>
+<li>Stages update when something happens, ideally automatically (a booking moves the lead to &quot;booked&quot;).</li>
+<li>Sale value is entered when a job is won.</li>
+<li>Lost reasons come from a short dropdown: price, timing, chose competitor, not qualified, no response.</li>
+</ul>
+<h2>Step 5: Send outcomes back to Google</h2>
+<p>Google Ads can import conversions that happen offline. There are two common ways:</p>
+<ul>
+<li><strong>Offline conversion import</strong> using the gclid saved on the lead. When the lead becomes &quot;booked&quot; or &quot;won,&quot; your CRM or a connector uploads that conversion with its value.</li>
+<li><strong>Enhanced conversions for leads,</strong> which matches using hashed email or phone number from the lead form. This helps when click IDs are missing.</li>
+</ul>
+<p>Once Google receives these, you can bid toward booked appointments or sales value instead of form fills.</p>
+<h2>Step 6: Send outcomes back to Meta</h2>
+<p>Meta retired its old Offline Conversions API in 2025. Today, CRM events go to Meta through the Conversions API. You send events such as &quot;Lead,&quot; &quot;Appointment booked&quot; and &quot;Purchase&quot; with the lead&#39;s details (hashed) and, for lead form leads, the Meta lead ID.</p>
+<p>This lets you:</p>
+<ul>
+<li>See which campaigns and ads produce booked appointments.</li>
+<li>Use lead optimization that targets people likely to become customers, once you send enough quality events.</li>
+</ul>
+<p>HighLevel and several other CRMs offer built in connections to the Conversions API. Test that events actually arrive in Meta&#39;s Events Manager.</p>
+<h2>Step 7: Build one simple report</h2>
+<p>You do not need a complicated dashboard. A weekly report with these columns, broken down by source and campaign, tells you nearly everything:</p>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Spend</th>
+<th>Leads</th>
+<th>Booked</th>
+<th>Won</th>
+<th>Revenue</th>
+<th>Cost per booked</th>
+<th>Cost per won</th>
+</tr>
+</thead>
+</table>
+<p>Look for campaigns with cheap leads but few booked jobs, and campaigns with expensive leads that close well. Those insights are where budget decisions come from.</p>
+<h2>A short example</h2>
+<p><em>Illustrative numbers only.</em></p>
+<p>A roofing company spends $3,000 on Google Search and $3,000 on Meta in a month. Meta brings in 120 leads, Google brings 50. On cost per lead, Meta looks far better.</p>
+<p>With full tracking they see that the Meta leads produced 12 inspections and 3 sold roofs, while Google produced 20 inspections and 6 sold roofs. Google brought twice as many sold roofs for the same spend. Without tracking to the sale, they would have moved budget the wrong way.</p>
+<h2>Privacy and consent</h2>
+<p>Tell visitors what you collect in your privacy policy, and follow the consent rules that apply in the states where you operate. Send only hashed personal data to ad platforms, and only what is needed. Some states have consumer privacy laws that cover this kind of data sharing, so check with counsel if you serve customers in those states.</p>
+<h2>A setup checklist</h2>
+<ul>
+<li><input disabled="" type="checkbox"> UTMs on every ad link, with a naming convention</li>
+<li><input disabled="" type="checkbox"> Google auto tagging turned on</li>
+<li><input disabled="" type="checkbox"> UTMs and click IDs saved to every lead in the CRM</li>
+<li><input disabled="" type="checkbox"> Tracking numbers on website, Google Business Profile and offline ads</li>
+<li><input disabled="" type="checkbox"> Pipeline stages defined with won values and lost reasons</li>
+<li><input disabled="" type="checkbox"> Booked and won events sent to Google Ads</li>
+<li><input disabled="" type="checkbox"> Booked and won events sent to Meta via the Conversions API</li>
+<li><input disabled="" type="checkbox"> Weekly report by source and campaign</li>
+</ul>
+<p>At Lumen this kind of click to closed sale tracking is part of every system we build, because it is how we know what is working. If you are not sure your current tracking is telling you the truth, <a href="/contact">we can check it with you</a>.</p>
+5:[["$","$L10",null,{}],["$","main",null,{"className":"relative z-10 bg-bg shadow-[0_40px_60px_-20px_rgba(0,0,0,0.9)]","children":[["$","article",null,{"className":"pt-32 pb-24 md:pt-44","children":[["$","header",null,{"className":"wrap max-w-[760px]","children":[["$","p",null,{"className":"eyebrow","children":[["$","$L11",null,{"href":"/blog","className":"transition-colors hover:text-text","children":"Blog"}],["$","span",null,{"className":"mx-2 text-faint","children":"/"}],["$","span",null,{"className":"text-brand","children":"Tracking"}]]}],["$","h1",null,{"className":"mt-5 text-[34px] leading-[1.08] font-bold tracking-[-0.04em] md:text-[52px]","children":"How to track every lead from ad click to closed sale"}],["$","p",null,{"className":"mt-6 text-[14px] text-faint","children":["November 14, 2026"," · ",7," min read · Lumen Marketing"]}]]}],["$","div",null,{"className":"wrap mt-14 max-w-[760px] border-t border-line pt-12","children":["$","div",null,{"className":"prose-mk","dangerouslySetInnerHTML":{"__html":"$12"}}]}]]}],"$L13","$L14"]}],"$L15"]
+13:["$","section",null,{"className":"border-t border-line-soft py-20","children":["$","div",null,{"className":"wrap max-w-[760px]","children":[["$","p",null,{"className":"eyebrow","children":"Keep reading"}],["$","ul",null,{"className":"mt-6","children":[["$","li","speed-to-lead-respond-in-five-minutes",{"className":"border-b border-line","children":["$","$L11",null,{"href":"/blog/speed-to-lead-respond-in-five-minutes","className":"group flex items-center justify-between gap-6 py-6","children":[["$","span",null,{"className":"text-[17px] font-medium tracking-[-0.02em] transition-colors group-hover:text-brand","children":"Speed to lead: why responding in the first five minutes wins the job (and how to automate it)"}],["$","span",null,{"className":"text-faint","children":"→"}]]}]}],["$","li","sms-marketing-for-service-businesses",{"className":"border-b border-line","children":["$","$L11",null,{"href":"/blog/sms-marketing-for-service-businesses","className":"group flex items-center justify-between gap-6 py-6","children":[["$","span",null,{"className":"text-[17px] font-medium tracking-[-0.02em] transition-colors group-hover:text-brand","children":"SMS marketing for service businesses: A2P 10DLC registration, TCPA consent and what to text"}],["$","span",null,{"className":"text-faint","children":"→"}]]}]}],["$","li","med-spa-marketing-booked-consults",{"className":"border-b border-line","children":["$","$L11",null,{"href":"/blog/med-spa-marketing-booked-consults","className":"group flex items-center justify-between gap-6 py-6","children":[["$","span",null,{"className":"text-[17px] font-medium tracking-[-0.02em] transition-colors group-hover:text-brand","children":"Med spa marketing: how to fill the calendar with booked consults, not just leads"}],["$","span",null,{"className":"text-faint","children":"→"}]]}]}]]}],["$","div",null,{"className":"mt-14 flex flex-col items-start gap-6 md:flex-row md:items-center md:justify-between","children":[["$","p",null,{"className":"text-[22px] font-semibold tracking-[-0.03em]","children":["Rather have us do it? ",["$","span",null,{"className":"text-brand","children":"Let's talk."}]]}],["$","$L11",null,{"href":"/contact","className":"relative isolate inline-flex shrink-0 items-center justify-center rounded-full font-medium tracking-[-0.01em] text-text transition-transform duration-300 hover:scale-[1.03] active:scale-[0.98] h-12 px-7 text-[15px]","children":[["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 -z-10 rounded-full","style":{"background":"linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)","backdropFilter":"blur(14px) saturate(150%)","WebkitBackdropFilter":"blur(14px) saturate(150%)"}}],["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 rounded-full","style":{"boxShadow":"inset 3px 3px 0.5px -3.5px rgba(255,255,255,0.09), inset -3px -3px 0.5px -3.5px rgba(255,255,255,0.85), inset 1px 1px 1px -0.5px rgba(255,255,255,0.6), inset -1px -1px 1px -0.5px rgba(255,255,255,0.6), inset 0 0 6px 6px rgba(255,255,255,0.06), inset 0 0 2px 2px rgba(255,255,255,0.05), 0 10px 30px -12px rgba(0,0,0,0.9)"}}],["$","span",null,{"className":"relative","children":"Book a free strategy call"}]]}]]}]]}]}]
+14:["$","script",null,{"type":"application/ld+json","dangerouslySetInnerHTML":{"__html":"{\"@context\":\"https://schema.org\",\"@type\":\"BlogPosting\",\"headline\":\"How to track every lead from ad click to closed sale\",\"description\":\"A step by step guide for service businesses to track leads from ad click to closed sale with UTMs, call tracking, CRM stages and offline conversions.\",\"datePublished\":\"2026-11-14\",\"dateModified\":\"2026-11-14\",\"author\":{\"@type\":\"Organization\",\"name\":\"Lumen Marketing\",\"url\":\"https://lumenmarketing.co\"},\"publisher\":{\"@id\":\"https://lumenmarketing.co/#org\"},\"mainEntityOfPage\":\"https://lumenmarketing.co/blog/track-leads-from-ad-click-to-closed-sale\"}"}}]
+15:["$","footer",null,{"className":"relative z-0 border-t border-line-soft bg-bg md:sticky md:bottom-0","children":["$","div",null,{"className":"relative overflow-hidden","children":[["$","div",null,{"aria-hidden":true,"className":"grid-backdrop absolute inset-0"}],["$","p",null,{"aria-hidden":true,"className":"pointer-events-none absolute -bottom-[0.18em] left-1/2 -translate-x-1/2 text-[34vw] leading-none font-black tracking-[-0.06em] whitespace-nowrap select-none md:text-[22vw]","style":{"color":"transparent","WebkitTextStroke":"1px rgba(255,255,255,0.05)","background":"linear-gradient(180deg, rgba(255,255,255,0.07), transparent 65%)","WebkitBackgroundClip":"text","backgroundClip":"text"},"children":"lumen"}],["$","div",null,{"className":"wrap relative pt-28 pb-14 md:pt-36","children":[["$","div",null,{"className":"flex flex-col items-center gap-10 text-center md:flex-row md:items-end md:justify-between md:gap-8 md:text-left","children":[["$","h2",null,{"className":"h-section max-w-[14ch]","children":["Your next customers are ",["$","span",null,{"className":"text-brand","children":"out there."}]]}],["$","$L11",null,{"href":"/contact","className":"relative isolate inline-flex shrink-0 items-center justify-center rounded-full font-medium tracking-[-0.01em] text-text transition-transform duration-300 hover:scale-[1.03] active:scale-[0.98] px-8 h-[58px] w-full max-w-[340px] text-[16px] md:h-[52px] md:w-auto md:max-w-none md:text-[15px]","children":[["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 -z-10 rounded-full","style":{"background":"linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)","backdropFilter":"blur(14px) saturate(150%)","WebkitBackdropFilter":"blur(14px) saturate(150%)"}}],["$","span",null,{"aria-hidden":true,"className":"absolute inset-0 rounded-full","style":{"boxShadow":"inset 3px 3px 0.5px -3.5px rgba(255,255,255,0.09), inset -3px -3px 0.5px -3.5px rgba(255,255,255,0.85), inset 1px 1px 1px -0.5px rgba(255,255,255,0.6), inset -1px -1px 1px -0.5px rgba(255,255,255,0.6), inset 0 0 6px 6px rgba(255,255,255,0.06), inset 0 0 2px 2px rgba(255,255,255,0.05), 0 10px 30px -12px rgba(0,0,0,0.9)"}}],["$","span",null,{"className":"relative","children":"Book a free strategy call"}]]}]]}],["$","div",null,{"className":"mt-24 grid grid-cols-2 gap-x-6 gap-y-12 border-t border-line pt-12 md:grid-cols-[1.3fr_1.1fr_1fr_0.8fr_0.8fr]","children":[["$","div",null,{"className":"col-span-2 md:col-span-1","children":[["$","img",null,{"src":"/brand/lumen-logo.png","alt":"Lumen","style":{"height":22,"width":"auto"},"className":"block opacity-95"}],["$","p",null,{"className":"mt-4 max-w-[30ch] text-[14px] leading-relaxed text-muted","children":"Ads, follow up and systems for service businesses that want to grow. Based in Boise, Idaho."}]]}],[["$","div","Services",{"children":[["$","p",null,{"className":"text-[13px] text-faint","children":"Services"}],["$","ul",null,{"className":"mt-4 space-y-3","children":[["$","li","Paid Ads",{"children":["$","$L11",null,{"href":"/services/paid-ads","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Paid Ads"}]}],["$","li","SEO & Google Business Profile",{"children":["$","$L11",null,{"href":"/services/seo","className":"text-[14px] text-muted transition-colors hover:text-text","children":"SEO & Google Business Profile"}]}],["$","li","SMS & Email Automation",{"children":["$","$L11",null,{"href":"/services/sms-email","className":"text-[14px] text-muted transition-colors hover:text-text","children":"SMS & Email Automation"}]}],["$","li","AI Agents",{"children":["$","$L11",null,{"href":"/services/ai-agents","className":"text-[14px] text-muted transition-colors hover:text-text","children":"AI Agents"}]}],["$","li","CRM & Pipeline",{"children":["$","$L11",null,{"href":"/services/crm","className":"text-[14px] text-muted transition-colors hover:text-text","children":"CRM & Pipeline"}]}],["$","li","Tracking & Attribution",{"children":"$L16"}],"$L17"]}]]}],"$L18","$L19","$L1a"]]}],"$L1b"]}]]}]}]
+16:["$","$L11",null,{"href":"/services/tracking","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Tracking & Attribution"}]
+17:["$","li","Websites & Landing Pages",{"children":["$","$L11",null,{"href":"/services/websites","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Websites & Landing Pages"}]}]
+18:["$","div","Industries",{"children":[["$","p",null,{"className":"text-[13px] text-faint","children":"Industries"}],["$","ul",null,{"className":"mt-4 space-y-3","children":[["$","li","Home Services",{"children":["$","$L11",null,{"href":"/industries/home-services","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Home Services"}]}],["$","li","Med Spas & Aesthetics",{"children":["$","$L11",null,{"href":"/industries/med-spas","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Med Spas & Aesthetics"}]}],["$","li","Finance & Professional",{"children":["$","$L11",null,{"href":"/industries/finance-professional","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Finance & Professional"}]}],["$","li","Experiences & Specialty",{"children":["$","$L11",null,{"href":"/industries/specialty","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Experiences & Specialty"}]}]]}]]}]
+19:["$","div","Company",{"children":[["$","p",null,{"className":"text-[13px] text-faint","children":"Company"}],["$","ul",null,{"className":"mt-4 space-y-3","children":[["$","li","About",{"children":["$","$L11",null,{"href":"/about","className":"text-[14px] text-muted transition-colors hover:text-text","children":"About"}]}],["$","li","Work",{"children":["$","$L11",null,{"href":"/work","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Work"}]}],["$","li","Blog",{"children":["$","$L11",null,{"href":"/blog","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Blog"}]}],["$","li","Contact",{"children":["$","$L11",null,{"href":"/contact","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Contact"}]}]]}]]}]
+1a:["$","div","Connect",{"children":[["$","p",null,{"className":"text-[13px] text-faint","children":"Connect"}],["$","ul",null,{"className":"mt-4 space-y-3","children":[["$","li","Email us",{"children":["$","$L11",null,{"href":"mailto:help@lumenmarketing.co","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Email us"}]}],["$","li","Instagram",{"children":["$","$L11",null,{"href":"https://www.instagram.com/lumenmarketing.co/","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Instagram"}]}],["$","li","Strategy call",{"children":["$","$L11",null,{"href":"/contact","className":"text-[14px] text-muted transition-colors hover:text-text","children":"Strategy call"}]}]]}]]}]
+1b:["$","div",null,{"className":"mt-16 flex flex-col gap-3 text-[12px] text-faint md:flex-row md:justify-between","children":[["$","p",null,{"children":["© ",2026," ","Lumen Marketing Solutions"," · Boise, Idaho · ",["$","$L11",null,{"href":"/privacy","className":"hover:text-text","children":"Privacy"}]," · ",["$","$L11",null,{"href":"/terms","className":"hover:text-text","children":"Terms"}]]}],["$","p",null,{"children":"help@lumenmarketing.co"}]]}]
+b:[["$","meta","0",{"charSet":"utf-8"}],["$","meta","1",{"name":"viewport","content":"width=device-width, initial-scale=1"}]]
+7:null
+1c:I[622,[],"IconMark"]
+9:{"metadata":[["$","title","0",{"children":"How to track every lead from ad click to closed sale | Lumen Marketing"}],["$","meta","1",{"name":"description","content":"A step by step guide for service businesses to track leads from ad click to closed sale with UTMs, call tracking, CRM stages and offline conversions."}],["$","link","2",{"rel":"canonical","href":"https://lumenmarketing.co/blog/track-leads-from-ad-click-to-closed-sale"}],["$","meta","3",{"property":"og:title","content":"How to track every lead from ad click to closed sale"}],["$","meta","4",{"property":"og:description","content":"A step by step guide for service businesses to track leads from ad click to closed sale with UTMs, call tracking, CRM stages and offline conversions."}],["$","meta","5",{"property":"og:url","content":"https://lumenmarketing.co/blog/track-leads-from-ad-click-to-closed-sale"}],["$","meta","6",{"property":"og:type","content":"article"}],["$","meta","7",{"name":"twitter:card","content":"summary"}],["$","meta","8",{"name":"twitter:title","content":"How to track every lead from ad click to closed sale"}],["$","meta","9",{"name":"twitter:description","content":"A step by step guide for service businesses to track leads from ad click to closed sale with UTMs, call tracking, CRM stages and offline conversions."}],["$","link","10",{"rel":"icon","href":"/icon.svg?c29db7989d74ece2","type":"image/svg+xml","sizes":"any"}],["$","$L1c","11",{}]],"error":null,"digest":"$undefined"}
+e:"$9:metadata"
