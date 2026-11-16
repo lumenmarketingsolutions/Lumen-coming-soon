@@ -52,6 +52,9 @@ def _preview_cookie(resp):
         resp.set_cookie("lumen_preview", PREVIEW_KEY, max_age=60 * 86400, httponly=True, samesite="Lax", secure=request.is_secure)
     if not site_live() and (request.cookies.get("lumen_preview") == PREVIEW_KEY or request.args.get("preview") == PREVIEW_KEY):
         resp.headers["X-Robots-Tag"] = "noindex, nofollow"
+    # Private client pages (WhatsApp onboarding links we send by hand): never indexed.
+    if request.path.startswith(("/connect/", "/whatsapp-connect")):
+        resp.headers["X-Robots-Tag"] = "noindex, nofollow"
     return resp
 _cfg = {}  # filled by init_lumen_site(): send_email, notify, db_path, capi
 

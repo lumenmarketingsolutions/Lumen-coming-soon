@@ -4382,6 +4382,15 @@ def mk_campaign_detail(campaign_id):
 
 @app.route("/whatsapp-connect")
 def whatsapp_connect_page():
+    """Where Meta returns clients after the WhatsApp signup (redirect_uri of the onboarding
+    link). A plain "you are connected" page from the site; the old SDK page is at /sdk."""
+    from lumen_site import site_page_or_none
+    r = site_page_or_none("whatsapp-connected")
+    return r if r is not None else render_template("whatsapp_connect.html")
+
+
+@app.route("/whatsapp-connect/sdk")
+def whatsapp_connect_sdk_page():
     return render_template("whatsapp_connect.html")
 
 
