@@ -1609,6 +1609,7 @@ def harker_contact():
     meta_ad_id = field("metaAdId", "Meta ad ID")
     first_page = field("firstLandingPage", "First landing page")
     first_visit = field("firstVisit", "First visit")
+    offer = field("offer", "Offer")  # set by special-offer pages, e.g. the winter page
 
     # Light validation; if it's junk we still 200 so the form UX never breaks.
     if not name and not email and not message:
@@ -1625,7 +1626,8 @@ def harker_contact():
         '<div style="max-width:560px;margin:0 auto;background:#111118;border:1px solid #1a1a25;border-radius:14px;padding:32px;">'
         '<div style="font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#f75d44;margin-bottom:10px;">New Harker Outdoors Inquiry</div>'
         f'<h2 style="font-size:22px;font-weight:700;margin:0 0 22px;color:#fff;">{esc(name)}</h2>'
-        '<table style="width:100%;border-collapse:collapse;font-size:14px;">'
+        + (f'<div style="margin:-8px 0 20px;padding:12px 14px;border:1px solid #f75d44;border-radius:10px;color:#fff;font-size:14px;"><span style="color:#f75d44;font-weight:700;">Offer:</span> {esc(offer)}</div>' if offer else '')
+        +         '<table style="width:100%;border-collapse:collapse;font-size:14px;">'
         f'<tr><td style="padding:10px 0;color:#8b8ba0;width:140px;">Email</td><td style="padding:10px 0;color:#e8e8f0;font-weight:600;">{esc(email)}</td></tr>'
         f'<tr><td style="padding:10px 0;color:#8b8ba0;">Phone</td><td style="padding:10px 0;color:#e8e8f0;">{esc(phone)}</td></tr>'
         f'<tr><td style="padding:10px 0;color:#8b8ba0;">Planning to buy</td><td style="padding:10px 0;color:#fff;font-weight:600;">{esc(planning)}</td></tr>'
@@ -1647,7 +1649,7 @@ def harker_contact():
         '<p style="margin:22px 0 0;color:#666;font-size:12px;">Sent from the harkeroutdoors.com contact form. The store inbox also received this via Shopify.</p>'
         '</div></div>'
     )
-    subj = f"New Harker inquiry: {name or email or 'website contact'}"
+    subj = ("Winter offer: " if "winter" in offer.lower() else ("Offer: " if offer else "")) + f"New Harker inquiry: {name or email or 'website contact'}"
     tags = " · ".join(x for x in (planning, lead_source) if x)
     if tags:
         subj += f" · {tags}"
